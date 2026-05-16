@@ -1,0 +1,541 @@
+
+struct CsThreadInitData
+{
+	// podium position
+	// X Y Z and ?
+	short podiumPos[4];
+	
+	// character position
+	// X Y Z and ?
+	short characterPos[4];
+	
+	// rotation (for both)
+	// X Y Z and ?
+	short rot[4];
+
+	// matrix
+	u_int local_30;
+	u_int local_2c;
+	u_int local_28;
+	u_int local_24;
+	u_int local_20;
+};
+
+struct Prize
+{
+	// 0x0
+	short posStart[4];
+	
+	// 0x8
+	short rot[4];
+	
+	// 0x10
+	short posEnd[4];
+	
+	// 0x18
+	short unk[4];
+	
+	// 0x20
+	short vel[3];
+	
+	// 0x26
+	short frameMax; // set in ThTick1
+	
+	// 0x28
+	short frameMax2;
+	
+	// 0x2a
+	short frameCurr;
+	
+	// 0x2c -- size of struct
+};
+
+struct unknown233
+{
+	void* unknown1;
+	int unknown2;
+	int unknown3;
+};
+
+union CsOpcodeArg
+{
+	int i;
+	u_int u;
+	char* ptr;
+};
+
+struct CsOpcodeMeta
+{
+	short opcode;
+	short animIndex;
+	short frameStart;
+	short frameEnd;
+	union CsOpcodeArg arg0; // shorts 4/5
+	union CsOpcodeArg arg1; // shorts 6/7
+	short rotStart;
+	short rotEnd;
+};
+
+struct CutsceneObj
+{
+	// 0x0
+	struct IconGroup* ptrIcons;
+	// 0x4
+	short unk4;
+	// 0x6
+	short unk6;
+
+	/* 0x8
+	jittery number? color?
+	usually has value of 0x2e808080 */
+	int unk8;
+
+	// 0xC
+	short unk_C;
+	// 0xE
+	short unk_E;
+
+	// 0x10
+	int* metadata;
+
+	// 0x14
+	short unk14;	
+
+	// 0x16
+	// determines time or frame animation
+	unsigned short flags;
+
+	int unk18;
+
+	short unk1c;
+	short unk1e;
+	short unk20;
+	short unk22;
+	short unk24;
+	short unk26;
+	short unk28;
+
+	// 0x2a
+	short scaleSpeed;
+	// 0x2c 
+	short desiredScale;
+
+	struct
+	{
+		// 0x2e
+		short textPos[2];
+
+		// 0x32
+		// index to subtitle text in LNG
+		// -1 to disable
+		short lngIndex;
+
+		// 0x34
+		short font;
+
+		// 0x36
+		short colors;
+
+	} Subtitles;
+
+
+	// 0x38
+	char* currOpcode[2];
+	// 0x40
+	char* prevOpcode;
+
+	// 0x44
+	char particleID;
+	// 0x45
+	char unk45;
+	// 0x46
+	char unk46;
+	// 0x47
+	char animIndex;
+
+	// 0x48
+	int* frameOverrideRoot;
+
+	// 0x4c
+	struct CsOpcodeMeta decodedOpcode;
+};
+
+#ifndef REBUILD_PC
+_Static_assert(sizeof(struct CsOpcodeMeta) == 0x14);
+_Static_assert(OFFSETOF(struct CutsceneObj, frameOverrideRoot) == 0x48);
+_Static_assert(OFFSETOF(struct CutsceneObj, decodedOpcode) == 0x4c);
+_Static_assert(sizeof(struct CutsceneObj) == 0x60);
+#endif
+
+enum BOSS_CUTSCENE_ORDER
+{
+	// Gemstone
+	OXIDE_TROPHIES,
+	PINSTRIPE_BEAT,
+	
+	// Beach
+	ROO_START,
+	ROO_BEAT,
+	
+	// ruins
+	PAPU_START,
+	PAPU_BEAT,
+	
+	// glacier
+	KJOE_START,
+	KJOE_BEAT,
+	
+	// citadel
+	PINSTRIPE_START,
+	
+	// 0x9
+	OXIDE_RELICS_GEMSTONE,
+	OXIDE_RELICS_BEACH,
+	OXIDE_RELICS_RUINS,
+	OXIDE_RELICS_GLACIER,
+	OXIDE_RELICS_CITADEL,
+	
+	// 0xE
+	BOSS_CUTSCENE_COUNT,
+};
+
+struct BossCutsceneData
+{	
+	// 0x0
+	int vrmFile_UNUSED;
+	int headFile;
+	int bodyFile;
+	
+	// Unused, cause it does model->id
+	// to get the model index anyway
+	int modelIndex_unused;
+
+	// 0x10
+	int opcode;
+	
+	// 0x14
+	short camPos[4];
+	short camRot[4];
+	
+	// 0x24
+	short bossPos[4];
+	short bossRot[4];
+	
+	// 0x34
+	
+};
+
+extern struct
+{
+	char fill_beginning[4];
+
+	char s_spawn[8];
+	char s_g_dancer[16];
+
+	char fill_strings[0x290];
+
+	// CS_Podium_FullScene_Init
+	char s_podium[8];
+	// 0x800abca4
+	char s_third[8];
+	char s_second[8];
+	char s_first[8];
+	char s_tawna[8];
+	char s_prize[8];
+	char s_victorycam[16];
+
+	char fill_strings2[0x3c];
+
+	// CS_Thread_LInB
+	char s_introguy[12];
+	char s_introcam[12];
+
+	// Naughty Dog crate intro thread strings
+	char s_box1[8];
+	char s_box2[8];
+	char s_box2_bottom[16];
+	char s_box2_front[16];
+	char s_box2_A[8];
+	char s_box3[8];
+	char s_code[8];
+	char s_glow[8];
+	char s_lid[4];
+	char s_lidb[8];
+	char s_lidc[8];
+	char s_lidd[8];
+	char s_lid2[8];
+	char s_kart0[8];
+	char s_kart1[8];
+	char s_kart2[8];
+	char s_kart3[8];
+	char s_kart6[8];
+	char s_kart7[8];
+
+
+	// TODO: Divide OVR_233 into 'real' sections
+	char fill1[0x4DA8];
+
+
+	// 800b0b7c
+	u_short VertSplitLine;
+	u_short VertSplit_unknown;
+	
+	// 800b0b80
+	int boolLoadNextSwap;
+	
+	// 800b0b84
+	int boolStartToSkip;
+	
+	// 800b0b88
+	int bossCutsceneIndex;
+
+	// 800b0b8c
+	int CutsceneManipulatesAudio;
+	
+	// 800b0b90
+	// 120 bytes
+	struct unknown233 whateverThisMeans[10];
+
+
+
+	// TODO: Divide OVR_233 into 'real' sections
+	char fill2[0x864];
+
+
+
+	// 800b146c
+	struct unknown233* pointerToWhateverThisMeans[10];
+
+
+
+
+	// TODO: Divide OVR_233 into 'real' sections
+	char fill3_beforeCutsceneOpcodes[0x3128];
+
+	// 800b45bc
+	char* introCutsceneOpcodes[0x47];
+
+	// 800b46d8
+	char introCutsceneOpcodeData[0x74];
+
+	// 800b474c
+	char* creditsCutsceneOpcodes[0x77];
+
+	// 800b4928
+	char fill3_afterCreditsOpcodes_beforeAdvCharSelectOpcodes[0x6bc];
+
+	// 800b4fe4
+	char* advCharSelectSelectOpcodes[8];
+
+	// 800b5004
+	char fill3_afterAdvCharSelectSelectOpcodes[0x20];
+
+	// 800b5024
+	char* advCharSelectDeselectOpcodes[8];
+
+	// 800b5044
+	char fill3_afterAdvCharSelectDeselectOpcodes_beforeClearBox[0x2430];
+
+	// 800b7474
+	Color introClearBoxColor;
+
+	// 800b7478
+	RECT introClearBoxRect;
+
+	// 800b7480
+	short creditsDancerRotOffset[4];
+	
+	
+	
+	// 800B7488
+	struct BossCutsceneData bossCS[0xE];
+
+	// 800b7760
+	int isCutsceneOver;
+	// 800b7764
+	int PodiumInitUnk2;
+	// 800b7768
+	short FXVolumeBackup;
+	// 800b776a
+	short MusicVolumeBackup;
+	// 800b776c
+	short VoiceVolumeBackup;
+
+	short volumeunknown;
+
+	// 800b7770
+	int PodiumInitUnk3;
+	// 800b7774
+	int cutsceneState;
+	
+	// 800b7778
+	struct Model* ptrModelBossHead;
+	struct Model* ptrModelBossBody;
+	
+	// 800b7780
+
+} OVR_233;
+
+// starts at 800b8598,
+// last byte of Garage Functions
+struct OVR233_Garage
+{	
+	// 800b8598
+	struct RectMenu menuGarage;
+	
+	// 800b85c4
+	int numFramesMax_GarageMove;
+	int padding1;
+	
+	// 800b85cc
+	int numFramesMax_Zoom;
+	
+	// 800b85d0
+	int fovMin;
+	
+	// 800b85d4
+	int fovMax;
+	
+	// 800b85d8
+	short unusedArr_garageChars[8];
+	
+	// 800b85e8
+	short barLen[3];
+	
+	// 800b85ee
+	short unusedFrameCount;
+	
+	// 800b85f0
+	short unusedArr_lngIndex[4];
+	
+	// 800b85f8
+	short barStat[3 * 4];
+
+	// 800b8610
+	int unusedArr_Colors[3];
+	
+	// 800b861c
+	int barColors[7];
+
+	// 800b8638
+	short numFramesCurr_GarageMove;
+	
+	// 800b863a
+	short numFramesCurr_ZoomIn;
+	
+	// 800b863c
+	short numFramesCurr_ZoomOut;
+
+	// 800b863e
+	short delayOneSecond;
+
+	// 800b8640
+	int boolSelected;
+
+	// === End of Garage Data ===
+	// Credits RDATA starts next byte
+};
+
+#if 0
+800b8644 - CREDITS RDATA
+800b8668 - first byte of credits func (CREDITS TEXT)
+#endif
+
+// === Credits Functions Here ===
+
+// 800b9488 - first byte after last func (CREDITS BSS)
+
+struct CreditsLevHeader
+{
+	int size;
+	int numStrings;
+	
+	//char* ptrStrings[0];
+};
+
+#define CREDITSHEADER_GETSTRINGS(x) \
+	((unsigned int)x + sizeof(struct CreditsLevHeader))
+	
+struct CreditsObj
+{
+	// 800b94bc (000) 
+	struct Model* creditGhostModel[5]; // duplicates
+	
+	// 800b94d0 (014) 
+	struct Instance* creditGhostInst[5];
+	
+	// 800b94e4 (028) 
+	struct
+	{
+		char data[0x80];
+	} data_0x80_0x5[5];
+	
+	// 800b9764 (2a8)
+	struct
+	{
+		char data[0x18];
+	} data_0x18_0x5[5];
+	
+	// 800b97dc (320) 
+	int countdown;
+	
+	// 800b97e0 (324) 
+	int unk;
+	
+	// 800b97e4 (328) 
+	struct Instance* creditDanceInst; // base for copies
+	
+	// 800b97e8 (32c) 
+	int credits_posY;
+	
+	// 800b97ec (330) 
+	char* credits_topString;
+	
+	// 800b97f0 (334) 
+	char* epilogue_topString;
+	
+	// 800b97f4 (338) 
+	char* epilogue_nextString;
+	
+	// 800b97f8 (33c) 
+	short epilogueCount200;
+	
+	// 800b97fa (33e)
+	short epiloguePosX; // unused
+};
+
+struct Ovr233_Credits_BSS
+{	
+	// 800b9488
+	short creditGhost_Pos[4];
+	
+	// 800b9490
+	short unused_Pos[4];
+	
+	// 800b9498
+	int creditText_PosX;
+	
+	// 800b949c
+	struct Thread* CreditThread;
+	
+	// 800b94a0
+	struct Thread* DancerThread;
+	
+	// 800b94a4
+	struct Instance* dancerInst_invisible;
+	
+	// 800b94a8
+	int numStrings;
+	
+	// 800b94ac
+	char** ptrStrings;
+	
+	// 800b94b0
+	int boolAllBlue;
+	
+	// 800b94b4
+	int unused[2];
+	
+	// 800b94bc - CreditsObj (0x340 large)
+	struct CreditsObj creditsObj;
+};

@@ -1,0 +1,17 @@
+build/
+assets/
+*.exe
+*.o
+*.a
+*.obj
+*.pdb
+*.ilk
+*.d
+*.depend
+*.map
+compile_commands.json
+.venv/
+.cache/
+.vs/
+*.swp
+*~
