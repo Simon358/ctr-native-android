@@ -1,16 +1,106 @@
 #include <common.h>
 
+// TODO(aalhendi): still WIP. should polish more
 #define PSX_OVR233_BASE          0x800AB9F0U
 #define OVR233_PTR(psx_addr)     ((char *)((uintptr_t)&OVR_233 + ((psx_addr) - PSX_OVR233_BASE)))
 #define OVR233_PTR_INT(psx_addr) ((int *)((uintptr_t)&OVR_233 + ((psx_addr) - PSX_OVR233_BASE)))
 
+void DECOMP_CS_Thread_MoveOnPath(struct Thread *t);
+void DECOMP_CS_Thread_Particles(struct Thread *t);
+void DECOMP_CS_Thread_InterpolateFramesMS(struct Thread *t);
+
+extern struct OVR233_Garage gGarage;
+
 void DECOMP_CS_Thread_ThTick(struct Thread *t)
 {
+	short pos[3];
 	struct CutsceneObj *cs = t->object;
 	struct Instance *inst = t->inst;
+	struct Instance *parentInst;
+	struct Thread *parentThread;
 
 	if (DECOMP_CS_Thread_UseOpcode(inst, cs))
-		t->flags |= 0x800; // FIX(aalhendi): was 0x400, ASM shows 0x800 (ori v0,v0,0x800 at 0x800ae58c)
+		t->flags |= 0x800;
+
+	DECOMP_CS_Thread_MoveOnPath(t);
+	DECOMP_CS_Thread_AnimateScale(t);
+	DECOMP_CS_Thread_Particles(t);
+
+	if ((cs->flags & 0x40) != 0)
+		DECOMP_CS_Thread_InterpolateFramesMS(t);
+
+	// ASM: 0x800ae5dc - parent-thread frameOverrideRoot processing
+	if (inst != 0)
+	{
+		parentThread = t->parentThread;
+
+		if (parentThread != 0)
+		{
+			if ((cs->flags & 0x4) == 0)
+			{
+				parentInst = parentThread->inst;
+
+				DECOMP_CS_Instance_GetFrameData(parentInst, parentInst->animIndex, parentInst->animFrame, (u_short *)pos, 0, 0);
+
+				inst->matrix.t[0] = parentInst->matrix.t[0] + pos[0];
+				inst->matrix.t[1] = parentInst->matrix.t[1] + pos[1];
+				inst->matrix.t[2] = parentInst->matrix.t[2] + pos[2];
+
+				if ((cs->flags & 0x10) == 0)
+				{
+					ConvertRotToMatrix(&inst->matrix, &pos[0]);
+				}
+			}
+		}
+
+		// ASM: 0x800ae6b4 - flag 0x8: write bone Y to OVR_233 global
+		if ((cs->flags & 0x8) != 0)
+		{
+			DECOMP_CS_Instance_GetFrameData(inst, inst->animIndex, inst->animFrame, (u_short *)pos, 0, 0);
+
+			*OVR233_PTR_INT(0x800b0b7c) = pos[1];
+
+			inst = t->inst;
+			if (inst == 0)
+				goto thTick_epilogue;
+		}
+
+		// ASM: 0x800ae6fc - flag 0x2: random alphaScale for fade effect
+		if ((cs->flags & 0x2) != 0)
+		{
+			inst->alphaScale = 0;
+
+			if ((sdata->gGT->gameMode2 & 0x1) != 0)
+			{
+				inst->alphaScale = (DECOMP_MixRNG_Scramble() & 0x7ff) + 1024;
+			}
+		}
+	}
+
+	// ASM: 0x800ae744 - subtitle rendering
+	if (cs->Subtitles.lngIndex > 0)
+	{
+		struct GameTracker *gGT = sdata->gGT;
+		u_short textRect[6];
+
+		textRect[0] = cs->Subtitles.textPos[1] - 236;
+		textRect[1] = cs->Subtitles.colors - 4;
+		textRect[2] = 472;
+		textRect[3] = (cs->Subtitles.font << 0x10) >> 0x10;
+		textRect[4] = cs->Subtitles.textPos[0] + 8;
+		textRect[5] = 460;
+
+		DECOMP_DecalFont_DrawMultiLine(sdata->lngStrings[cs->Subtitles.lngIndex], textRect[0], textRect[1], textRect[2], textRect[3], textRect[5]);
+
+		DECOMP_RECTMENU_DrawInnerRect((u_short *)&textRect, 4, gGT->pushBuffer[0].ptrOT);
+	}
+
+thTick_epilogue:
+	// ASM: 0x800ae7dc - check isCutsceneOver, re-apply death flag
+	if (OVR_233.isCutsceneOver != 0)
+	{
+		t->flags |= 0x800;
+	}
 }
 
 struct Thread *DECOMP_CS_Thread_Init(short modelID, char *name, short *param_3, short param_4, struct Thread *parent)

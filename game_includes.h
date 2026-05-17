@@ -556,6 +556,8 @@
 #include "game/233/233_12_CS_Instance_BoolPlaySound.c"
 #include "game/233/233_13_CS_DestroyPodium_StartDriving.c"
 #include "game/233/233_14_CS_Thread_UseOpcode.c"
+#include "game/233/233_15_CS_Thread_AnimateScale.c"
+#include "game/233/233_stubs.c"
 #include "game/233/233_24_CS_Thread_Init.c"
 #include "game/233/233_25_CS_Instance_InitMatrix.c"
 #include "game/233/233_29_CS_Podium_Prize_ThDestroy.c"
@@ -574,6 +576,5 @@
 #include "game/233/233_37_40_CS_Garage.c"
 #include "game/233/D233.c"
 #include "game/233/233_zGlobal_gGarage.c"
-#include "game/233/233_stubs.c"
 
 #endif

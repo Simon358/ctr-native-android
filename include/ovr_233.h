@@ -329,7 +329,20 @@ extern struct
 	char *advCharSelectDeselectOpcodes[8];
 
 	// 800b5044
-	char fill3_afterAdvCharSelectDeselectOpcodes_beforeClearBox[0x2430];
+	char fill3_afterAdvCharSelectDeselectOpcodes_beforeInitMatrix[0x22EC];
+
+	// 800b7330
+	struct
+	{
+		void *data;
+		int count;
+	} cs_initMatrixTable[4];
+
+	// 800b7350
+	char cs_initMatrixBool;
+
+	// 800b7351
+	char fill3_afterInitMatrix_beforeClearBox[0x123];
 
 	// 800b7474
 	Color introClearBoxColor;
