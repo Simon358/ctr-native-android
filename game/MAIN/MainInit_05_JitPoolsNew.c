@@ -99,20 +99,16 @@ void DECOMP_MainInit_JitPoolsNew(struct GameTracker *gGT)
 #endif
 
 
-	// normally maxed at 32
+	// FIX(aalhendi): removed numMedium > 20 cap, not in SCUS ASM
 	int numMedium = uVar7 >> 7;
-	if (numMedium > 20)
-		numMedium = 20;
 
 	// MediumStackPool
-	// OG game was 0x80+8,
-	// now changed to 0x60+8 (optimized WarpPad)
-	// WarpPad is the largest struct that uses MedStackPool
-	DECOMP_JitPool_Init(&gGT->JitPools.mediumStack, numMedium, sizeof(struct Item) + sizeof(struct WarpPad),
-	                    /*"MediumStackPool"*/ 0);
+	// ASM: li a2, 136 (0x88) at 0x8003b544
+	// FIX: was sizeof(Item)+sizeof(WarpPad)=104, ASM uses 136 (+32/item)
+	DECOMP_JitPool_Init(&gGT->JitPools.mediumStack, numMedium, 136, 0);
 
 #ifdef CTR_INTERNAL
-	fprintf(stderr, "  mediumStack:  %3d items x 0x%X bytes\n", numMedium, (unsigned)(sizeof(struct Item) + sizeof(struct WarpPad)));
+	fprintf(stderr, "  mediumStack:  %3d items x 0x%X bytes\n", numMedium, 136);
 #endif
 
 
@@ -139,14 +135,12 @@ void DECOMP_MainInit_JitPoolsNew(struct GameTracker *gGT)
 	int numSmall = uVar7 * 0x19 >> 10;
 
 	// SmallStackPool
-	// OG game was 0x40+8,
-	// changed now to 0x38+8 (og UiElement3D)
-	// UiElement3D is the largest struct that uses SmallStackPool
-	DECOMP_JitPool_Init(&gGT->JitPools.smallStack, numSmall, sizeof(struct Item) + sizeof(struct UiElement3D),
-	                    /*"SmallStackPool"*/ 0);
+	// ASM: li a2, 72 (0x48) at 0x8003b52c
+	// FIX: was sizeof(Item)+sizeof(UiElement3D)=64, ASM uses 72 (+8/item)
+	DECOMP_JitPool_Init(&gGT->JitPools.smallStack, numSmall, 72, 0);
 
 #ifdef CTR_INTERNAL
-	fprintf(stderr, "  smallStack:   %3d items x 0x%X bytes\n", numSmall, (unsigned)(sizeof(struct Item) + sizeof(struct UiElement3D)));
+	fprintf(stderr, "  smallStack:   %3d items x 0x%X bytes\n", numSmall, 72);
 #endif
 
 
@@ -240,17 +234,14 @@ void DECOMP_MainInit_JitPoolsNew(struct GameTracker *gGT)
 	numDriver = 8;
 #endif
 
-	// OG game used 0x670 for driver, should be 0x640,
-	// maybe intended to mix RainPool into Driver struct?
-	DECOMP_JitPool_Init(&gGT->JitPools.largeStack, numDriver, sizeof(struct Item) + sizeof(struct Driver), /*"LargeStackPool"*/ 0);
+	// ASM: li a2, 1648 (0x670) at 0x8003b574
+	// FIX: was sizeof(Item)+sizeof(Driver)=1600, ASM uses 1648 (+48/item)
+	DECOMP_JitPool_Init(&gGT->JitPools.largeStack, numDriver, 1648, 0);
 	DECOMP_JitPool_Init(&gGT->JitPools.rain, numDriver, sizeof(struct RainLocal), /*"RainPool"*/ 0);
 
 
-	// Must be 64 in adventure arena,
-	// normally maxed at 128
+	// FIX(aalhendi): removed numParticle > 120 cap, not in SCUS ASM
 	int numParticle = uVar7 >> 5;
-	if (numParticle > 120)
-		numParticle = 120;
 
 #ifdef USE_ONLINE
 	// fix mystery caves with 8 players,
@@ -279,14 +270,19 @@ void DECOMP_MainInit_JitPoolsNew(struct GameTracker *gGT)
 	// ===========================================
 
 
+	// FIX(aalhendi): load pool.free.first (the first ITEM), not the pool struct itself.
+	// Old code started from the pool struct, which corrupted free.count on the first iter
+	// by writing a ptr val into it.
+
 	// small, medium, large
 	for (int i = 0; i < 3; i++)
 	{
-		// this goes to JitPool[SMALL+i].free.first
-		pointer = (int *)((char *)&gGT->JitPools.smallStack + (sizeof(struct JitPool) * i));
+		struct JitPool *pool = (struct JitPool *)((char *)&gGT->JitPools.smallStack + (sizeof(struct JitPool) * i));
 
-		// loop through all objects, increment 8 bytes,
-		// encapsulate the pointers to "next" and "prev"
+		// start from first item in free list, NOT the pool struct
+		pointer = (int *)pool->free.first;
+
+		// loop through all items, write self-pointer at data offset
 		while (pointer != (int *)0x0)
 		{
 			*(int **)(pointer + 2) = pointer + 2;

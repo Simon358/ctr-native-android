@@ -2,6 +2,12 @@
 
 struct Item *DECOMP_LIST_RemoveMember(struct LinkedList *L, struct Item *I)
 {
+#ifdef CTR_INTERNAL
+	if (I != 0 && I->next == 0 && I->prev == 0 && L->count > 1)
+	{
+		fprintf(stderr, "LIST_RemoveMember: item %p has next=0 prev=0 but list count=%d (corrupt?)\n", (void *)I, L->count);
+	}
+#endif
 	// probably waste of time, but leave it for now
 	// TheUbMunster: looking at the ghidra decomp, it seems like this line is necessary bc L->count should not be decrimented if L->first == NULL
 	if (L->first == 0)

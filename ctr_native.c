@@ -209,11 +209,23 @@ void Platform_InitFilesystem(const char *disc_image)
 	PsyX_CDFS_Init(disc_image, 0, 0);
 }
 
-// NOTE(aalhendi): stubs to make compile work for now
+// NOTE(aalhendi): stub to make compile work for now
 int NikoGetEnterKey(void)
 {
 	return 0;
 }
 void NikoCalcFPS(void)
 {
+	static int frameCount = 0;
+	static Uint32 lastTime = 0;
+
+	frameCount++;
+	Uint32 now = SDL_GetTicks();
+
+	if (now - lastTime >= 1000)
+	{
+		fprintf(stderr, "[FPS] %d fps, gGT->timer=%d, vsyncTillFlip=%d\n", frameCount * 1000 / (now - lastTime), (int)sdata->gGT->timer, sdata->vsyncTillFlip);
+		frameCount = 0;
+		lastTime = now;
+	}
 }

@@ -5,6 +5,10 @@ void DECOMP_JitPool_Clear(struct JitPool *AP)
 	int loopIndex;
 	unsigned int currSlot;
 
+#ifdef CTR_INTERNAL
+	fprintf(stderr, "JitPool_Clear: free=%d taken=%d max=%d itemSize=%d\n", AP->free.count, AP->taken.count, AP->maxItems, AP->itemSize);
+#endif
+
 	currSlot = (int)AP->ptrPoolData;
 
 	// clear list of free and taken
