@@ -68,7 +68,6 @@ void DECOMP_UI_DrawRaceClock(u_short paramX, u_short paramY, u_int flags, struct
 		return;
 	}
 
-#ifndef USE_ONLINE // 99:59:59:99
 	// set default time to 99:59:99
 	minutesTens = 9;
 	minutesOnes = 9;
@@ -76,15 +75,10 @@ void DECOMP_UI_DrawRaceClock(u_short paramX, u_short paramY, u_int flags, struct
 	secondsOnes = 9;
 	msTens = 9;
 	msOnes = 9;
-#endif
 
 	// milliseconds elapsed in race
 	msElapsed = driver->timeElapsedInRace;
 
-#ifdef USE_ONLINE
-	TotalTime tt;
-	ElapsedTimeToTotalTime(&tt, msElapsed);
-#else
 	// OG game was "== 7"
 	// but now expand for Online
 	if (gGT->numLaps >= 7)
@@ -112,7 +106,6 @@ void DECOMP_UI_DrawRaceClock(u_short paramX, u_short paramY, u_int flags, struct
 			msOnes = (char)(((msElapsed * 100) / 0x3c0) % 10);
 		}
 	}
-#endif
 
 	if ((flags & 1) == 0)
 	{
@@ -183,7 +176,6 @@ void DECOMP_UI_DrawRaceClock(u_short paramX, u_short paramY, u_int flags, struct
 		strFlags_but_its_also_posY = (u_short)((gGT->timer & 2) == 0) << 2;
 	}
 
-#ifndef USE_ONLINE
 	// OG game was "== 7"
 	// but now expand for Online
 	if (gGT->numLaps >= 7)
@@ -212,7 +204,6 @@ void DECOMP_UI_DrawRaceClock(u_short paramX, u_short paramY, u_int flags, struct
 	totalTimeString[strOffset + 3] = secondsOnes + '0';
 	totalTimeString[strOffset + 5] = msTens + '0';
 	totalTimeString[strOffset + 6] = msOnes + '0';
-#endif
 
 	// If in-race, reuse X and Y positions used for the TIME/TIME TRIAL text in the top left corner of the HUD for the actual time itself
 	// Except set the Y position to be lower
@@ -231,30 +222,8 @@ void DECOMP_UI_DrawRaceClock(u_short paramX, u_short paramY, u_int flags, struct
 	}
 
 // Draw String
-#ifdef USE_ONLINE
-	char displayTime[15]; // 99:59:59.999 or BEST: 9:59.999
-	sprintf(displayTime, "%d:%02d:%02d.%03d", tt.hours, tt.minutes, tt.seconds, tt.miliseconds);
-	DECOMP_DecalFont_DrawLine(displayTime, posX, numParamY >> 0x10, FONT_BIG, (int)strFlags_but_its_also_posY);
-#else
 	DECOMP_DecalFont_DrawLine(totalTimeString, posX, numParamY >> 0x10, FONT_BIG, (int)strFlags_but_its_also_posY);
-#endif
 
-#ifdef USE_ONLINE
-	if ((driver->driverID == 0) && (driver->lapIndex > 0))
-	{
-		ElapsedTimeToTotalTime(&tt, driver->bestLapTime);
-		tt.minutes = min(tt.minutes, 9);
-		sprintf(displayTime, "%d:%02d.%03d", tt.minutes, tt.seconds, tt.miliseconds);
-		DECOMP_DecalFont_DrawLine("BEST: ", posX, textPosY + 0x18, FONT_SMALL, RED);
-		DECOMP_DecalFont_DrawLine(displayTime, posX + data.font_charPixWidth[FONT_SMALL] * 5, textPosY + 0x18, FONT_SMALL, PERIWINKLE);
-
-		ElapsedTimeToTotalTime(&tt, driver->currLapTime);
-		tt.minutes = min(tt.minutes, 9);
-		sprintf(displayTime, "%d:%02d.%03d", tt.minutes, tt.seconds, tt.miliseconds);
-		DECOMP_DecalFont_DrawLine("LAST: ", posX, textPosY + 0x18 + 8, FONT_SMALL, RED);
-		DECOMP_DecalFont_DrawLine(displayTime, posX + data.font_charPixWidth[FONT_SMALL] * 5, textPosY + 0x18 + 8, FONT_SMALL, PERIWINKLE);
-	}
-#else
 	if (
 	    // If you're not in a Relic Race
 	    ((gGT->gameMode1 & RELIC_RACE) == 0) || ((flags & 2) != 0))
@@ -479,5 +448,4 @@ LAB_8004f378:
 	sdata->raceClockStr[6] = sdata->relicTime_1ms + '0';
 	DECOMP_DecalFont_DrawLine(sdata->raceClockStr, (int)(short)uVar11, (int)strFlags_but_its_also_posY, FONT_BIG,
 	                          (int)(short)(stringColor_but_its_also_relicColor & (0xffff ^ JUSTIFY_RIGHT)));
-#endif
 }

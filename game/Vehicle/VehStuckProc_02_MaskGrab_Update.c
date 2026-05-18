@@ -27,10 +27,6 @@ void DECOMP_VehStuckProc_MaskGrab_Update(struct Thread *t, struct Driver *d)
 	}
 
 
-#ifdef USE_ONLINE
-	if (d->driverID == 0)
-#endif
-
 		// CameraDC flag
 		gGT->cameraDC[d->driverID].flags |= 8;
 

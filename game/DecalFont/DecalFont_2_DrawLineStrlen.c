@@ -16,7 +16,7 @@ void DECOMP_DecalFont_DrawLineStrlen(u_char *str, short len, int posX, short pos
 	}
 
 // bug fix exclusive to versions after USA Retail
-#if BUILD >= JpnTrial || defined(USE_ONLINE) // use this fix in online, even though not Jpn.
+#if BUILD >= JpnTrial
 
 	flags &= 0x7ff;
 

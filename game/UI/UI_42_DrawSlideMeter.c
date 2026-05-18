@@ -3,15 +3,8 @@
 void DECOMP_UI_DrawSlideMeter(short posX, short posY, struct Driver *driver)
 {
 	const struct GameTracker *gGT = sdata->gGT;
-#ifdef USE_ONLINE
-	const int xOffset = 2;
-	const int barWidth = 39;
-	int barHeight = 10;
-	posX += xOffset;
-#else
 	const int barWidth = WIDE_34(49);
 	int barHeight = gGT->numPlyrCurrGame > 2 ? 3 : 7;
-#endif
 
 	int meterLength = 0;
 	if (driver->turbo_MeterRoomLeft != 0)
@@ -29,14 +22,6 @@ void DECOMP_UI_DrawSlideMeter(short posX, short posY, struct Driver *driver)
 	box.w = barWidth;
 	box.h = barHeight;
 	DECOMP_CTR_Box_DrawWireBox(&box, MakeColor(0, 0, 0), gGT->pushBuffer_UI.ptrOT);
-
-#ifdef USE_ONLINE
-	if (driver->driverID == 0 && driver->meterGradeTimer > 0)
-	{
-		driver->meterGradeTimer -= gGT->elapsedTimeMS;
-		DECOMP_DecalFont_DrawLine(driver->meterGrade, topX, topY - 8, FONT_SMALL, driver->gradeColor);
-	}
-#endif
 
 	const PrimCode primCode = {.poly = {.quad = 1, .renderCode = RenderCode_Polygon}};
 	ColorCode colorCode = MakeColorCode(0xFF, 0, 0, primCode); // red color, ready to boost
@@ -74,10 +59,6 @@ void DECOMP_UI_DrawSlideMeter(short posX, short posY, struct Driver *driver)
 
 #ifdef USE_BOOSTBAR
 	void DrawBoostBar(short posX, short posY, struct Driver *driver);
-#ifdef USE_ONLINE
-	DrawBoostBar(posX - xOffset, posY + 5, driver);
-#else
 	DrawBoostBar(posX, posY + 5, driver);
-#endif
 #endif
 }

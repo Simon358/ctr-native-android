@@ -261,13 +261,6 @@ int DECOMP_LOAD_TenStages(struct GameTracker *gGT, int loadingStage, struct BigH
 		break;
 	}
 	case 3: {
-#ifdef USE_ONLINE
-		// Load Region3 for planet
-		if (gGT->levelID == INTRO_OXIDE)
-			ovrRegion3 = 3;
-		else
-#endif
-
 			// main menu + scrapbook, 230
 			if ((levelID != ADVENTURE_GARAGE) && ((gGT->gameMode1 & MAIN_MENU) != 0))
 			{

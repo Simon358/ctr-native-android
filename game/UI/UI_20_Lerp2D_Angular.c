@@ -27,28 +27,17 @@ void DECOMP_UI_Lerp2D_Angular(short *ptrPos, short drawnPosition, short absolute
 	// if driver "just" passed another driver
 	if (absolutePositionInt < drawnPositionInt)
 	{
-#ifdef USE_ONLINE
-		ptrPos[0] = (short)(angle * 0x14 >> 0xc) + 10;
-#else
 		ptrPos[0] = (short)(angle * 0x14 >> 0xc) + 0x14;
-#endif
 	}
 
 	// if driver "was" passed by another driver
 	else
 	{
-#ifdef USE_ONLINE
-		ptrPos[0] = 10 - (short)(angle * 0x14 >> 0xc);
-#else
 		ptrPos[0] = 0x14 - (short)(angle * 0x14 >> 0xc);
-#endif
 	}
 
 // absolutePositionInt - drawnPositionInt is either -1 or +1
 // 0x1b is vertical size of the icon
-#ifdef USE_ONLINE
-	ptrPos[1] = 53 + (drawnPosition * 20) + (((((absolutePositionInt - drawnPositionInt) * 20) * (int)frameCounter) * 4) / (5 * 4));
-#else
 	ptrPos[1] =
 
 	    // Y value where all icons start
@@ -68,7 +57,6 @@ void DECOMP_UI_Lerp2D_Angular(short *ptrPos, short drawnPosition, short absolute
 
 	        // divide distance down
 	        / (5 * 4));
-#endif
 
 	return;
 }

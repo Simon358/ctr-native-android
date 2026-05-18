@@ -155,9 +155,7 @@ void DECOMP_UI_INSTANCE_InitAll(void)
 		    // If you're not in Battle Mode
 		    ((gameMode1 & BATTLE_MODE) == 0))
 		{
-#ifndef USE_ONLINE
 			DECOMP_UI_INSTANCE_BirthWithThread(0x38, (int)DECOMP_UI_ThTick_big1, 2, 0, 0, /*sdata->s_big1*/ 0);
-#endif
 		}
 
 		// If you're not in Adventure Mode
@@ -166,11 +164,9 @@ void DECOMP_UI_INSTANCE_InitAll(void)
 			return;
 		}
 
-#ifndef USE_ONLINE
 		sdata->ptrHudC = DECOMP_UI_INSTANCE_BirthWithThread(0x93, (int)DECOMP_UI_ThTick_CtrLetters, 0x12, 0, 0, /*sdata->s_hudc*/ 0);
 		sdata->ptrHudT = DECOMP_UI_INSTANCE_BirthWithThread(0x94, (int)DECOMP_UI_ThTick_CtrLetters, 0x12, 0, 0, /*sdata->s_hudt*/ 0);
 		sdata->ptrHudR = DECOMP_UI_INSTANCE_BirthWithThread(0x95, (int)DECOMP_UI_ThTick_CtrLetters, 0x12, 0, 0, /*sdata->s_hudr*/ 0);
-#endif
 
 #ifdef REBUILD_PC
 		if (sdata->ptrHudC == 0)

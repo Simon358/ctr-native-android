@@ -4,16 +4,12 @@
 #include "../math.c"
 #include "../gte.c"
 
-#ifndef USE_ONLINE
 #include "UI_00_SaveLapTime.c"
-#endif
 
 #include "UI_01_ThTick_CountPickup.c"
 #include "UI_02_ThTick_Reward.c"
 
-#ifndef USE_ONLINE
 #include "UI_03_ThTick_CtrLetters.c"
-#endif
 
 #include "UI_04_ThTick_big1.c"
 #include "UI_05_ConvertX_2.c"
@@ -26,9 +22,7 @@
 #include "UI_12_Map_DrawRawIcon.c"
 #include "UI_13_Map_DrawDrivers.c"
 
-#ifndef USE_ONLINE
 #include "UI_14_Map_DrawGhosts.c"
-#endif
 
 #include "UI_15_Map_DrawTracking.c"
 #include "UI_16_WeaponBG_AnimateShine.c"
@@ -61,7 +55,5 @@
 #include "UI_43_DrawRankedDrivers.c"
 #include "UI_44_RenderFrame_Racing.c"
 
-#ifndef USE_ONLINE
 #include "UI_45_RenderFrame_AdvHub.c"
 #include "UI_46_RenderFrame_CrystChall.c"
-#endif

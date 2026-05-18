@@ -21,11 +21,6 @@ void DECOMP_GAMEPAD_PollVsync(struct GamepadSystem *gGamepads)
 		maxPadsPerPort = 4;
 	}
 
-#ifdef USE_ONLINE
-	numPorts = 1;
-	maxPadsPerPort = 1;
-#endif
-
 #ifdef USE_REAL60PS1
 	numPorts = 1;
 	maxPadsPerPort = 1;

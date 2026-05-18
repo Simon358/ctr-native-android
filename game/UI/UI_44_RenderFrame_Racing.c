@@ -41,11 +41,7 @@ void DECOMP_UI_RenderFrame_Racing()
 	u_int mapPosX;
 	u_int mapPosY;
 
-#ifdef USE_ONLINE
-	offset = WIDE_PICK(-19, -27);
-#else
 	offset = 0;
-#endif
 
 	struct GameTracker *gGT;
 	gGT = sdata->gGT;
@@ -138,10 +134,6 @@ void DECOMP_UI_RenderFrame_Racing()
 			// pointer to player structure
 			playerStruct = (struct Driver *)playerThread->object;
 
-#ifdef USE_ONLINE
-			playerStruct = gGT->drivers[0];
-#endif
-
 			if (
 			    // if player has not driven backwards very far,
 			    (playerStruct->distanceDrivenBackwards < 0x1f5)
@@ -196,24 +188,15 @@ void DECOMP_UI_RenderFrame_Racing()
 			if (
 			    // numPlyrCurrGame is less than 2 (1P mode)
 			    (numPlyr < 2)
-#ifndef USE_ONLINE
 			    &&
 			    // if want to draw speedometer
 			    ((sdata->HudAndDebugFlags & 8) != 0)
-#endif
 			)
 			{
-#ifdef USE_ONLINE
-				DECOMP_UI_DrawSpeedNeedle(hudStructPtr[9].x + offset, hudStructPtr[9].y, playerStruct);
-				DECOMP_UI_DrawSlideMeter(hudStructPtr[8].x + offset - 8, hudStructPtr[8].y + 3, playerStruct);
-				DECOMP_UI_JumpMeter_Draw(hudStructPtr[8].x + offset + 18, hudStructPtr[8].y - 7, playerStruct);
-				DECOMP_UI_DrawSpeedBG();
-#else
 				DECOMP_UI_DrawSpeedNeedle(hudStructPtr[9].x + offset, hudStructPtr[9].y, playerStruct);
 				DECOMP_UI_JumpMeter_Draw(hudStructPtr[6].x, hudStructPtr[6].y, playerStruct);
 				DECOMP_UI_DrawSlideMeter(hudStructPtr[8].x + offset, hudStructPtr[8].y, playerStruct);
 				DECOMP_UI_DrawSpeedBG();
-#endif
 			}
 
 			// if racer hasn't finished the race
@@ -222,12 +205,8 @@ void DECOMP_UI_RenderFrame_Racing()
 				// If you're not in Battle Mode
 				if ((gameMode1 & BATTLE_MODE) == 0)
 				{
-#ifdef USE_ONLINE
-					DECOMP_UI_DrawSlideMeter(hudStructPtr[8].x + offset - 8, hudStructPtr[8].y + 3, playerStruct);
-#else
 					// Draw powerslide meter
 					DECOMP_UI_DrawSlideMeter(hudStructPtr[8].x + offset, hudStructPtr[8].y, playerStruct);
-#endif
 				}
 
 				// If you are not in Time Trial or Relic Race
@@ -491,9 +470,7 @@ void DECOMP_UI_RenderFrame_Racing()
 
 				sVar1 = hudStructPtr[5].x;
 				sVar2 = hudStructPtr[5].y;
-#ifndef USE_ONLINE
 				DECOMP_UI_DrawPosSuffix(sVar1, sVar2, playerStruct, (short)partTimeVariable5);
-#endif
 
 				if (numPlyr > 2)
 				{
@@ -574,10 +551,6 @@ void DECOMP_UI_RenderFrame_Racing()
 
 			// TODO: use num where 0x14 = NUM_HUD
 			hudStructPtr += 0x14;
-
-#ifdef USE_ONLINE
-			break;
-#endif
 
 		} while (playerThread != 0);
 	}
@@ -787,10 +760,8 @@ void DECOMP_UI_RenderFrame_Racing()
 	{
 		if (((numPlyr == 1)
 
-#ifndef USE_ONLINE
 		     // if want to draw map, not speedometer
 		     && (sdata->HudAndDebugFlags & 8) == 0
-#endif
 		     ) ||
 
 		    (numPlyr == 3))
@@ -800,18 +771,12 @@ void DECOMP_UI_RenderFrame_Racing()
 			DECOMP_UI_Map_DrawDrivers((int)levPtrMap, gGT->threadBuckets[PLAYER].thread, local_30);
 			DECOMP_UI_Map_DrawDrivers((int)levPtrMap, gGT->threadBuckets[ROBOT].thread, local_30);
 
-#ifndef USE_ONLINE
 			DECOMP_UI_Map_DrawGhosts((int)levPtrMap, gGT->threadBuckets[GHOST].thread);
-#endif
 
 			DECOMP_UI_Map_DrawTracking((int)levPtrMap, gGT->threadBuckets[TRACKING].thread);
 
 			mapPosX = 500;
-#ifdef USE_ONLINE
-			mapPosY = 145;
-#else
 			mapPosY = 195;
-#endif
 
 			if (numPlyr == 3)
 			{

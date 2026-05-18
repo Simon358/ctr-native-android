@@ -93,10 +93,6 @@ void DECOMP_LOAD_DriverMPK(unsigned int param_1, int levelLOD)
 	int i;
 	int gameMode1;
 
-#ifdef USE_ONLINE
-	goto ForceOnlineLoad8;
-#endif
-
 	struct GameTracker *gGT = sdata->gGT;
 	gameMode1 = gGT->gameMode1;
 

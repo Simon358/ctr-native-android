@@ -26,10 +26,6 @@ void DECOMP_VehStuckProc_RevEngine_Init(struct Thread *t, struct Driver *d)
 		// Driver flag
 		d->actionsFlagSet &= ~(1);
 
-#ifdef USE_ONLINE
-		if (d->driverID == 0)
-#endif
-
 			// CameraDC flag
 			sdata->gGT->cameraDC[d->driverID].flags |= 8;
 	}

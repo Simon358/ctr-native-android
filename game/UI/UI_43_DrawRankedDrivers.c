@@ -117,22 +117,11 @@ void DECOMP_UI_DrawRankedDrivers(void)
 			iVar14 = 2;
 		}
 
-#ifdef USE_ONLINE
-		int OnlineGetNumDrivers();
-		int oNumDrivers = OnlineGetNumDrivers();
-		if (oNumDrivers < 9)
-		{
-			iVar14 = oNumDrivers;
-		}
-#endif
-
-		// start drawing the icons
 		iVar15 = 0;
 
 		// height to draw rank (this bitshifts later)
 		iVar12 = 0x380000;
 
-#ifndef USE_ONLINE
 		for (iVar15 = 0; iVar15 < iVar14; iVar15++)
 		{
 			// make the text white by default
@@ -152,16 +141,9 @@ void DECOMP_UI_DrawRankedDrivers(void)
 			// add to Y, which mekes it lower on screen
 			iVar12 = iVar12 + 0x1b0000;
 		}
-#endif
 
 		for (iVar14 = 0; iVar14 < 8; iVar14++)
 		{
-#ifdef USE_ONLINE
-			if (!octr->nameBuffer[iVar14][0])
-			{
-				continue;
-			}
-#endif
 
 			short *curr = &data.rankIconsCurr[iVar14];
 			short *des = &data.rankIconsDesired[iVar14];
@@ -191,10 +173,6 @@ void DECOMP_UI_DrawRankedDrivers(void)
 					{
 						// if top positions
 
-#ifdef USE_ONLINE
-						pos.x = 10;
-						pos.y = 53 + iVar12 * 20;
-#else
 						if (iVar12 < 4)
 						{
 							pos.x = 0x14;
@@ -204,22 +182,10 @@ void DECOMP_UI_DrawRankedDrivers(void)
 						{
 							continue;
 						}
-#endif
 					}
 				}
 
-#ifdef USE_ONLINE
-				short iconScale = FP(0.75);
-				txtColor = 4;
-				if (checkpointTracker[iVar15].raceFinished)
-				{
-					txtColor = 3;
-				}
-				sdata->s_spacebar[0] = (char)*curr + '1';
-				DECOMP_DecalFont_DrawLine(&sdata->s_spacebar[0], 29, 53 + *curr * 20, 2, txtColor);
-#else
 				short iconScale = FP(1);
-#endif
 
 				// === Icon Transitioning ===
 				if (pos.x == -100)
@@ -247,21 +213,6 @@ void DECOMP_UI_DrawRankedDrivers(void)
 
 				    1, iconScale, color);
 
-#ifdef USE_ONLINE
-				if (checkpointTracker[iVar14].timer > 0)
-				{
-					DECOMP_DecalFont_DrawLineStrlen(checkpointTracker[iVar14].displayTime, 10, pos.x + 30, pos.y + 9, FONT_SMALL,
-					                                checkpointTracker[iVar14].drawFlags);
-					checkpointTracker[iVar14].timer -= sdata->gGT->elapsedTimeMS;
-					DECOMP_DecalFont_DrawLineStrlen(octr->nameBuffer[iVar14], 3, pos.x + 45, pos.y + 1, FONT_SMALL,
-					                                iVar14 == 0 ? JUSTIFY_CENTER | BLUE : JUSTIFY_CENTER | ORANGE);
-				}
-				else
-				{
-					DECOMP_DecalFont_DrawLineStrlen(octr->nameBuffer[iVar14], 3, pos.x + 45, pos.y + 7, FONT_SMALL,
-					                                iVar14 == 0 ? JUSTIFY_CENTER | BLUE : JUSTIFY_CENTER | ORANGE);
-				}
-#endif
 			}
 		}
 	}

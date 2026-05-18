@@ -29,11 +29,6 @@ void DECOMP_VehStuckProc_RevEngine_PhysLinear(struct Thread *t, struct Driver *d
 	if (d->KartStates.RevEngine.maskObj != 0)
 		d->KartStates.RevEngine.maskObj->duration = 7680;
 
-#ifdef USE_ONLINE
-	if (d->driverID != 0)
-		return;
-#endif
-
 	struct CameraDC *cDC = &gGT->cameraDC[d->driverID];
 	cDC->flags |= 0x10;
 	cDC->unk98 = 0x40;

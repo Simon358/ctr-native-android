@@ -6,11 +6,6 @@ void DECOMP_VehFire_Audio(struct Driver *driver, int speed_cap)
 	u_int volume;
 	u_int extraFlags;
 
-#ifdef USE_ONLINE
-	if (driver->driverID != 0)
-		return;
-#endif
-
 	// if turbo audio cooldown is not done
 	if (driver->VehFire_AudioCooldown != 0)
 	{
@@ -23,7 +18,7 @@ void DECOMP_VehFire_Audio(struct Driver *driver, int speed_cap)
 		volume = 0xff << 0x10;
 
 		// distort
-		distortion = 0x6c << 8;
+		distortion = 0x6c << 0x8;
 
 #ifndef REBUILD_PS1
 		Voiceline_RequestPlay(0x10, data.characterIDs[driver->driverID], 0x10);
@@ -38,7 +33,7 @@ void DECOMP_VehFire_Audio(struct Driver *driver, int speed_cap)
 		volume = 0xc0 << 0x10;
 
 		// no distort
-		distortion = 0x80 << 8;
+		distortion = 0x80 << 0x8;
 
 		goto Skip;
 	}
@@ -47,7 +42,7 @@ void DECOMP_VehFire_Audio(struct Driver *driver, int speed_cap)
 	volume = 0x80 << 0x10;
 
 	// distort
-	distortion = 0x94 << 8;
+	distortion = 0x94 << 0x8;
 
 Skip:
 

@@ -50,12 +50,6 @@ void DECOMP_Audio_Update1(void)
 	case 10:
 		DECOMP_Audio_SetMaskSong(0);
 
-#ifdef USE_ONLINE
-
-		d = gGT->drivers[0];
-
-#else
-
 		// human driver in the lead
 		for (i = 0; i < 8; i++)
 		{
@@ -70,8 +64,6 @@ void DECOMP_Audio_Update1(void)
 
 		if (d == 0)
 			break;
-
-#endif
 
 #ifndef REBUILD_PS1
 		Voiceline_Update();
@@ -96,12 +88,6 @@ void DECOMP_Audio_Update1(void)
 	case 11:
 		DECOMP_Audio_SetMaskSong(0);
 
-#ifdef USE_ONLINE
-
-		d = gGT->drivers[0];
-
-#else
-
 		// human driver in the lead
 		for (i = 0; i < 8; i++)
 		{
@@ -116,8 +102,6 @@ void DECOMP_Audio_Update1(void)
 
 		if (d == 0)
 			break;
-
-#endif
 
 		// if need to XASeek
 		if (((sdata->boolNeedXASeek != 0) && (sdata->XA_State == 0)) && (9 < gGT->frameTimer_MainFrame_ResetDB - sdata->XA_PauseFrame))
@@ -169,12 +153,6 @@ void DECOMP_Audio_Update1(void)
 	case 13:
 		DECOMP_Audio_SetMaskSong(20);
 
-#ifdef USE_ONLINE
-
-		d = gGT->drivers[0];
-
-#else
-
 		// human driver in the lead
 		for (i = 0; i < 8; i++)
 		{
@@ -189,8 +167,6 @@ void DECOMP_Audio_Update1(void)
 
 		if (d == 0)
 			break;
-
-#endif
 
 #ifndef REBUILD_PS1
 		Voiceline_Update();
@@ -210,12 +186,6 @@ void DECOMP_Audio_Update1(void)
 		break;
 	case 14:
 
-#ifdef USE_ONLINE
-
-		d = gGT->drivers[0];
-
-#else
-
 		// human driver in the lead
 		for (i = 0; i < 8; i++)
 		{
@@ -230,8 +200,6 @@ void DECOMP_Audio_Update1(void)
 
 		if (d == 0)
 			break;
-
-#endif
 
 		// if need to XASeek
 		if (((sdata->boolNeedXASeek != 0) && (sdata->XA_State == 0)) && (9 < gGT->frameTimer_MainFrame_ResetDB - sdata->XA_PauseFrame))

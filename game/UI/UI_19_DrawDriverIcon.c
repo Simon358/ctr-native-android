@@ -17,17 +17,12 @@ void DECOMP_UI_DrawDriverIcon(struct Icon *icon, Point point, u_long *ot, unsign
 	int height = icon->texLayout.v2 - icon->texLayout.v0;
 	int topX = point.x;
 	int bottomX = topX + FP_Mult(width, scale);
-#ifdef USE_ONLINE
-	int topY = point.y;
-	int bottomY = topY + FP_Mult(height, scale);
-#else
 #if BUILD != EurRetail
 	int topY = (point.y < 166) ? point.y : 165;
 	int bottomY = ((topY + FP_Mult(height, scale)) < 166) ? (topY + FP_Mult(height, scale)) : 165;
 #else
 	int topY = (point.y < 176) ? point.y : 175;
 	int bottomY = ((topY + FP_Mult(height, scale)) < 176) ? (topY + FP_Mult(height, scale)) : 175;
-#endif
 #endif
 
 #ifdef USE_16BY9
@@ -54,16 +49,6 @@ void DECOMP_UI_DrawDriverIcon(struct Icon *icon, Point point, u_long *ot, unsign
 		p->colorCode.code.poly.semiTransparency = 1;
 	}
 
-#ifdef USE_ONLINE
-	p->v[0].texCoords.u = icon->texLayout.u0;
-	p->v[0].texCoords.v = icon->texLayout.v0;
-	p->v[1].texCoords.u = icon->texLayout.u1;
-	p->v[1].texCoords.v = icon->texLayout.v1;
-	p->v[2].texCoords.u = icon->texLayout.u2;
-	p->v[2].texCoords.v = icon->texLayout.v2;
-	p->v[3].texCoords.u = icon->texLayout.u3;
-	p->v[3].texCoords.v = icon->texLayout.v3;
-#else
 	unsigned int bottomV = (icon->texLayout.v0 + bottomY) - point.y;
 	p->v[0].texCoords.u = icon->texLayout.u0;
 	p->v[0].texCoords.v = icon->texLayout.v0;
@@ -73,7 +58,6 @@ void DECOMP_UI_DrawDriverIcon(struct Icon *icon, Point point, u_long *ot, unsign
 	p->v[2].texCoords.v = bottomV;
 	p->v[3].texCoords.u = icon->texLayout.u3;
 	p->v[3].texCoords.v = bottomV;
-#endif
 
 	AddPrimitive(p, ot);
 }

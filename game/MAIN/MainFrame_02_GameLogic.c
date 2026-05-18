@@ -29,10 +29,6 @@ void DECOMP_MainFrame_GameLogic(struct GameTracker *gGT, struct GamepadSystem *g
 		{
 			psVar9 = (struct Driver *)psVar12->object;
 
-#ifdef USE_ONLINE
-			psVar9 = gGT->drivers[0];
-#endif
-
 			if (psVar9->clockSend)
 			{
 				psVar9->clockSend--;
@@ -70,12 +66,8 @@ void DECOMP_MainFrame_GameLogic(struct GameTracker *gGT, struct GamepadSystem *g
 #endif
 				psVar9->clockFlash--;
 			}
-		LAB_80034e74:
+			LAB_80034e74:
 			pushBuffer = pushBuffer + 1;
-
-#ifdef USE_ONLINE
-			break;
-#endif
 		}
 		gGT->timer = gGT->timer + 1;
 		gGT->framesInThisLEV = gGT->framesInThisLEV + 1;
@@ -192,14 +184,6 @@ void DECOMP_MainFrame_GameLogic(struct GameTracker *gGT, struct GamepadSystem *g
 			    // if threads exist
 			    (gGT->threadBuckets[iVar4].thread != 0))
 			{
-#if defined(USE_ONLINE)
-				// synchronize track hazards
-				if ((iVar4 == STATIC) || (iVar4 == SPIDER))
-				{
-					if (gGT->trafficLightsTimer > 3600)
-						continue;
-				}
-#endif
 				if (iVar4 == 0)
 				{
 					for (psVar12 = gGT->threadBuckets[iVar4].thread; psVar12 != 0; psVar12 = psVar12->siblingThread)
@@ -227,14 +211,10 @@ void DECOMP_MainFrame_GameLogic(struct GameTracker *gGT, struct GamepadSystem *g
 
 							pcVar5 = psVar9->funcPtrs[iVar11];
 
-#ifdef USE_ONLINE
-							RunVehicleThread(pcVar5, psVar12, psVar9);
-#else
 							if (pcVar5 != 0)
 							{
 								pcVar5(psVar12, psVar9);
 							}
-#endif
 						}
 
 // rig collisions to high-poly,
@@ -251,10 +231,6 @@ void DECOMP_MainFrame_GameLogic(struct GameTracker *gGT, struct GamepadSystem *g
 
 #ifdef USE_HIGHMP
 					gGT->numPlyrCurrGame = backupPlyrCount;
-#endif
-
-#ifdef USE_ONLINE
-					octr->readyToSend = 1;
 #endif
 				}
 

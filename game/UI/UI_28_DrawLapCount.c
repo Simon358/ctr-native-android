@@ -33,19 +33,9 @@ void DECOMP_UI_DrawLapCount(short posX, int posY, int param_3, struct Driver *d)
 		flags = (JUSTIFY_RIGHT | PERIWINKLE);
 	}
 
-#ifdef USE_ONLINE
-
-	char message[8];
-	char *str = &message[0];
-	sprintf(str, &sdata->s_intDividing[0], currLap, numLaps);
-
-#else
-
 	char *str = &sdata->s_printDividing[0];
 	str[0] = currLap + '0';
 	str[2] = numLaps + '0';
-
-#endif
 
 	// draw string
 	DECOMP_DecalFont_DrawLine(str, posX, (posY + 8), type, flags);

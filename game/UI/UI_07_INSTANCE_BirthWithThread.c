@@ -36,10 +36,6 @@ struct Instance *DECOMP_UI_INSTANCE_BirthWithThread(int param_1, int param_2, in
 	{
 		driver = driverThread->object;
 
-#ifdef USE_ONLINE
-		driver = gGT->drivers[0];
-#endif
-
 		// Create a new thread for this HUD element
 		// 0x38 = size
 		// 0 = no relation to param4
@@ -209,9 +205,6 @@ struct Instance *DECOMP_UI_INSTANCE_BirthWithThread(int param_1, int param_2, in
 		// TODO: use enum for hud elements
 		hudStruct += 0x14;
 
-#ifdef USE_ONLINE
-		break;
-#endif
 	}
 
 	return inst;

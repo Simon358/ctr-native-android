@@ -184,13 +184,7 @@ void DECOMP_MainInit_FinalizeInit(struct GameTracker *gGT)
 	gGT->trackLength_x_numLaps_x_8 = lev1->ptr_restart_points[0].distToFinish * gGT->numLaps * 8;
 #endif
 
-#ifndef USE_ONLINE
-	// OG code
 	DECOMP_MainInit_Drivers(gGT);
-#else
-	void OnlineInit_Drivers(struct GameTracker * gGT);
-	OnlineInit_Drivers(gGT);
-#endif
 
 #ifdef USE_FASTANIM
 	// leave room for FMV video
@@ -357,15 +351,6 @@ void DECOMP_MainInit_FinalizeInit(struct GameTracker *gGT)
 
 #if 0
     BOTS_EmptyFunc();
-#endif
-
-#ifdef USE_ONLINE
-	void octr_initHook();
-	octr_initHook();
-
-	// quit, so confetti doesn't initialize
-	// when loading into Polar Credits LEV
-	return;
 #endif
 
 	if ((gGT->gameMode1 & GAME_CUTSCENE) != 0)

@@ -261,15 +261,6 @@ int DECOMP_RB_CrateWeapon_LInC(struct Instance *crateInst, struct Thread *collid
 			return 1;
 		}
 
-#ifdef USE_ONLINE
-		if (driver->driverID != 0)
-			return 0; // guessing return 0 means """cancel"""
-
-		// do nothing at end of race
-		if ((driver->actionsFlagSet & 0x2000000) != 0)
-			return 0;
-#endif
-
 		// == give driver weapon ==
 
 		// set weapon to roulette
@@ -374,14 +365,6 @@ int DECOMP_RB_CrateFruit_LInC(struct Instance *crateInst, struct Thread *collidi
 		}
 		newWumpa = random + (newWumpa >> 2) * -4 + 5;
 
-#ifdef USE_ONLINE
-		if (driver->driverID != 0)
-		{
-			DECOMP_RB_Player_ModifyWumpa(driver, newWumpa);
-			return 0; // thread not born????
-		}
-#endif
-
 		driver->PickupWumpaHUD.cooldown = 5;
 		driver->PickupWumpaHUD.numCollected = newWumpa;
 
@@ -447,11 +430,6 @@ int DECOMP_RB_CrateTime_LInC(struct Instance *crateInst, struct Thread *driverTh
 	gGT = sdata->gGT;
 	driver = driverTh->object;
 	modelID = crateInst->model->id;
-
-#ifdef USE_ONLINE
-	if (driver->driverID != 0)
-		return 0;
-#endif
 
 	// if driver turned into AI during end-of-race menu
 	if ((driver->actionsFlagSet & 0x100000) != 0)

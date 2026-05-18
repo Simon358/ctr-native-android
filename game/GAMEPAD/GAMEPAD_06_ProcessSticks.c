@@ -135,10 +135,6 @@ void DECOMP_GAMEPAD_ProcessSticks(struct GamepadSystem *gGamepads)
 		if ((held & 8) != 0)
 			pad->stickLX = 0xFF;
 
-#ifdef USE_ONLINE
-		break;
-#endif
-
 #ifdef USE_REAL60PS1
 		break;
 #endif

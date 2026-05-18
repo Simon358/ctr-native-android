@@ -812,10 +812,6 @@ void StateZero()
 	gGT->levelID = NAUGHTY_DOG_CRATE;
 	// gGT->levelID = OXIDE_TRUE_ENDING;
 
-#ifdef USE_ONLINE
-	gGT->levelID = INTRO_OXIDE;
-#endif
-
 #ifdef FastBoot
 	gGT->levelID = POLAR_PASS;
 	gGT->numPlyrCurrGame = 2;
@@ -853,7 +849,7 @@ void StateZero()
 
 	VSyncCallback(DECOMP_MainDrawCb_Vsync);
 
-#if !defined(FastBoot) && !defined(USE_ONLINE)
+#if !defined(FastBoot)
 	DECOMP_Music_SetIntro();
 	DECOMP_CseqMusic_StopAll();
 	DECOMP_CseqMusic_Start(0, 0, NULL, 0, 0);

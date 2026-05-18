@@ -92,11 +92,6 @@ void DECOMP_RB_Follower_Init(struct Driver *d, struct Thread *mineTh)
 	if ((d->actionsFlagSet & 0x100000) != 0)
 		return;
 
-#ifdef USE_ONLINE
-	if (d->driverID != 0)
-		return;
-#endif
-
 	// disable for airborne camera
 	if (((sdata->gGT->cameraDC[d->driverID].flags) & 0x10000) != 0)
 		return;

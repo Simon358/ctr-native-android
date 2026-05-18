@@ -82,37 +82,12 @@ void DECOMP_VehPhysProc_Driving_PhysLinear(struct Thread *thread, struct Driver 
 	for (i = 0; i < 14; i++)
 	{
 		short *val = (short *)((int)driver + (int)PhysLinear_DriverOffsets[i]);
-#ifdef USE_ONLINE
-		if (i == 0)
-		{
-			if (driver->reserves == 0)
-			{
-				driver->uncappedReserves = 0;
-			}
-
-			if (driver->uncappedReserves > 0)
-			{
-				driver->uncappedReserves = max(driver->uncappedReserves - msPerFrame, 0);
-			}
-			else if (driver->reserves > 0)
-			{
-				driver->reserves = max(driver->reserves - msPerFrame, 0);
-			}
-		}
-		else if (*val > 0)
-		{
-			*val -= msPerFrame;
-			if (*val < 0)
-				*val = 0;
-		}
-#else
 		if (*val > 0)
 		{
 			*val -= msPerFrame;
 			if (*val < 0)
 				*val = 0;
 		}
-#endif
 	}
 
 	if (driver->reserves > 0)
@@ -461,20 +436,13 @@ void DECOMP_VehPhysProc_Driving_PhysLinear(struct Thread *thread, struct Driver 
 	    // if there is no tnt on your head
 	    (driver->instTntRecv == 0))
 	{
-#if defined(USE_ONLINE)
-		int rn = octr->serverRoom;
-#endif
-		// If there is a Bomb Pointer
+	// If there is a Bomb Pointer
 		if (driver->instBombThrow != 0)
 		{
 			// Detonate the bomb
 			bomb = (struct TrackerWeapon *)driver->instBombThrow->thread->object;
 			bomb->flags |= 2;
 			driver->instBombThrow = NULL;
-#if defined(USE_ONLINE)
-			if (ROOM_IS_ITEMS(rn) && driver->driverID == 0)
-				octr->Shoot[0].boolNow = 1;
-#endif
 			goto CheckJumpButtons;
 		}
 
@@ -485,10 +453,6 @@ void DECOMP_VehPhysProc_Driving_PhysLinear(struct Thread *thread, struct Driver 
 			shield = (struct Shield *)driver->instBubbleHold->thread->object;
 			shield->flags |= 2;
 			driver->instBubbleHold = NULL;
-#if defined(USE_ONLINE)
-			if (ROOM_IS_ITEMS(rn) && driver->driverID == 0)
-				octr->Shoot[0].boolNow = 1;
-#endif
 			goto CheckJumpButtons;
 		}
 
@@ -624,12 +588,6 @@ CheckJumpButtons:
 	// if you are holding square
 	if (square != 0)
 	{
-#if defined(USE_ONLINE)
-		int rn = octr->serverRoom;
-		if (!ROOM_IS_RETRO(rn)) // if not retro mode
-			goto SKIP_RF;
-#endif
-
 		// held DOWN or have landing boost
 		if ((ptrgamepad->buttonsHeldCurrFrame & BTN_DOWN) || (driver->jump_LandingBoost))
 		{

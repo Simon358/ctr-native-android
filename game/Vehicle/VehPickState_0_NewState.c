@@ -197,11 +197,6 @@ int DECOMP_VehPickState_NewState(struct Driver *victimDriver, int damageType, st
 
 	if ((attackDriver != 0) && ((gameMode1 & END_OF_RACE) == 0))
 	{
-#ifdef USE_ONLINE
-		if (attackDriver->driverID != 0)
-			return 0; // 0 = "quit"?
-#endif
-
 		struct PushBuffer *pb = &sdata->gGT->pushBuffer[attackDriver->driverID];
 
 		short posScreen[2];

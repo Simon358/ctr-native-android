@@ -40,12 +40,8 @@ void DECOMP_VehStuckProc_MaskGrab_Animate(struct Thread *t, struct Driver *d)
 			// whistle sound has played
 			d->KartStates.MaskGrab.boolWhistle = true;
 
-#ifdef USE_ONLINE
-			if (d->driverID == 0)
-#endif
-
-				// "falling" sound, like a whistle
-				OtherFX_Play(0x55, 1);
+			// "falling" sound, like a whistle
+			OtherFX_Play(0x55, 1);
 		}
 
 

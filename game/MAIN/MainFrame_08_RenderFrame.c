@@ -225,14 +225,12 @@ void DECOMP_MainFrame_RenderFrame(struct GameTracker *gGT, struct GamepadSystem 
 		{
 			DECOMP_DotLights_AudioAndVideo(gGT);
 
-#ifndef USE_ONLINE
 			if ((gGT->renderFlags & 0x8000) != 0)
 			{
 				WindowBoxLines(gGT);
 
 				WindowDivsionLines(gGT);
 			}
-#endif
 		}
 
 #ifndef REBUILD_PS1
@@ -621,11 +619,7 @@ void RenderAllHUD(struct GameTracker *gGT)
 					// if crystal challenge
 					else
 					{
-#ifndef REBUILD_PS1
-#ifndef USE_ONLINE
 						DECOMP_UI_RenderFrame_CrystChall();
-#endif
-#endif
 					}
 				}
 
@@ -641,12 +635,6 @@ void RenderAllHUD(struct GameTracker *gGT)
 						gGT->hudFlags = (hudFlags & 0xfe) | 4;
 						return;
 					}
-
-#ifdef USE_ONLINE
-					void OnlineEndOfRace();
-					OnlineEndOfRace();
-					return;
-#endif
 
 // PC can't share address spaces
 // and PS1 rebuild wont have the funcs
@@ -694,9 +682,7 @@ void RenderAllHUD(struct GameTracker *gGT)
 					// if any transition is over
 					if (gGT->pushBuffer_UI.fadeFromBlack_currentValue > 0xfff)
 					{
-#ifndef USE_ONLINE
 						DECOMP_UI_RenderFrame_AdvHub();
-#endif
 					}
 				}
 
@@ -1373,7 +1359,6 @@ void MultiplayerWumpaHUD(struct GameTracker *gGT)
 #endif
 }
 
-#ifndef USE_ONLINE
 void WindowBoxLines(struct GameTracker *gGT)
 {
 	int i;
@@ -1521,7 +1506,6 @@ void WindowDivsionLines(struct GameTracker *gGT)
 		gGT->backBuffer->primMem.curr = (void *)(p + 1);
 	}
 }
-#endif
 
 void RenderDispEnv_UI(struct GameTracker *gGT)
 {
@@ -1629,11 +1613,6 @@ void RenderSubmit(struct GameTracker *gGT)
 	gGT->bool_DrawOTag_InProgress = 1;
 
 	void *ot = &gGT->pushBuffer[0].ptrOT[0x3ff];
-
-#if 0 && defined(USE_ONLINE)
-	void OnlineMirrorMode(u_long* ot);
-	OnlineMirrorMode(ot);
-#endif
 
 #ifdef USE_PROFILER
 	void DebugProfiler_DrawOTag();

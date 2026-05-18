@@ -8441,41 +8441,16 @@ struct Data
 
             .RNG_itemSetRace1 =
                 {
-#ifdef USE_ONLINE
                     // 8/20 potion
                     // 8/20 tnt
                     // 2/20 bomb
                     // 1/20 turbo
                     // 1/20 shield
                     4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 1, 1, 0, 6,
-#else
-                    // 8/20 potion
-                    // 8/20 tnt
-                    // 2/20 bomb
-                    // 1/20 turbo
-                    // 1/20 shield
-                    4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 1, 1, 0, 6,
-#endif
                 },
 
             .RNG_itemSetRace2 =
                 {
-#ifdef USE_ONLINE
-                    // 11/52 potion
-                    // 9/52 tnt
-                    // 5/52 bomb
-                    // 4/52 bomb x3
-                    // 7/52 turbo
-                    // 2/52 shield
-                    // 3/52 missile
-                    // 2/52 missile x3
-                    // 1/52 warpball
-                    // 7/52 mask
-                    // 1/52 n tropy clock
-
-                    4,  4,  4,  4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3, 3, 3,  3,  3, 3, 3, 1, 1, 1, 1, 1, 10,
-                    10, 10, 10, 0, 0, 0, 0, 0, 0, 0, 6, 6, 2, 2, 2, 11, 11, 9, 7, 7, 7, 7, 7, 7, 7, 8,
-#else
                     // 10/52 potion
                     // 8/52 tnt
                     // 5/52 bomb
@@ -8490,26 +8465,10 @@ struct Data
 
                     4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3,  3,  3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 10, 10, 10,
                     0, 0, 0, 0, 0, 6, 6, 6, 2, 2, 2, 11, 11, 9, 9, 9, 9, 9, 7, 7, 7, 7, 7, 7,  7,  8,
-#endif
                 },
 
             .RNG_itemSetRace3 =
                 {
-#ifdef USE_ONLINE
-                    // 1/20 potion
-                    // 1/20 tnt
-                    // 1/20 bomb x1
-                    // 3/20 bomb x3
-                    // 2/20 turbo
-                    // 1/20 shield
-                    // 3/20 missile x1
-                    // 1/20 missile x3
-                    // 1/20 warpball
-                    // 5/20 mask
-                    // 1/20 clock
-
-                    4, 3, 1, 10, 10, 10, 0, 0, 6, 2, 2, 2, 11, 9, 7, 7, 7, 7, 7, 8,
-#else
                     // 1/20 potion
                     // 1/20 tnt
                     // 1/20 bomb x1
@@ -8523,23 +8482,10 @@ struct Data
                     // 1/20 clock
 
                     4, 3, 1, 10, 10, 0, 0, 6, 2, 2, 11, 9, 9, 9, 7, 7, 7, 7, 7, 8,
-#endif
                 },
 
             .RNG_itemSetRace4 =
                 {
-#ifdef USE_ONLINE
-                    // 2/20 turbo
-                    // 1/20 shield
-                    // 2/20 missile x1
-                    // 3/20 missile x3
-                    // 1/20 bomb x3
-                    // 2/20 warpball
-                    // 8/20 mask
-                    // 1/20 clock
-
-                    0, 0, 6, 2, 2, 11, 11, 11, 10, 9, 9, 7, 7, 7, 7, 7, 7, 7, 7, 8,
-#else
                     // 2/20 turbo (one zero at the start, and one at the end)
                     // 1/20 shield
                     // 1/20 missile x1
@@ -8549,7 +8495,6 @@ struct Data
                     // 2/20 clock
 
                     0, 6, 2, 11, 9, 9, 9, 9, 9, 7, 7, 7, 7, 7, 7, 7, 7, 8, 8, 0,
-#endif
                 },
 
             .RNG_itemSetBossrace =

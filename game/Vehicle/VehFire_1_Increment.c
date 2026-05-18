@@ -253,10 +253,6 @@ void DECOMP_VehFire_Increment(struct Driver *driver, int reserves, u_int type, i
 #endif
 	    );
 
-#if defined(USE_RETROFUELED) && defined(USE_ONLINE)
-	int rn = octr->serverRoom;
-	int doRetroFueled = ROOM_IS_RETRO(rn);
-#endif
 	if (
 	    // any gain in boost,
 	    // resize to gain boost
@@ -275,9 +271,6 @@ void DECOMP_VehFire_Increment(struct Driver *driver, int reserves, u_int type, i
 	        // AND
 	        // You are not on a super turbo pad
 	        (int)driver->const_SacredFireSpeed < (int)driver->fireSpeedCap && ((driver->stepFlagSet & 2) == 0)
-#if defined(USE_RETROFUELED) && defined(USE_ONLINE)
-	        && !doRetroFueled // is not retrofueled mode
-#endif
 	        ))
 
 	{
@@ -314,11 +307,7 @@ void DECOMP_VehFire_Increment(struct Driver *driver, int reserves, u_int type, i
 	else if (!(type & 1))
 	{
 // increase reserves BY param2
-#ifdef USE_ONLINE
-		FixReservesIncrement(driver, reserves);
-#else
 		driver->reserves += reserves;
-#endif
 	}
 
 	// turbo pad, boost powerup
@@ -332,22 +321,12 @@ void DECOMP_VehFire_Increment(struct Driver *driver, int reserves, u_int type, i
 
 		if (oldOTT < reserves)
 		{
-#ifdef USE_ONLINE
-			FixReservesIncrement(driver, reserves - oldOTT);
-#else
 			driver->reserves += (reserves - oldOTT);
-#endif
 			driver->turbo_outsideTimer += (reserves - oldOTT);
 		}
 	}
 
-#if defined(USE_ONLINE)
-	if (driver->driverID != 0) // if not ourself
-		return;
-#endif
-
-	// #if !defined (USE_ONLINE) //uncomment this if you need bytebudget.
-	//  player of any kind
+	// player of any kind
 	if (driver->instSelf->thread->modelIndex == DYNAMIC_PLAYER)
 	{
 		// CameraDC flag

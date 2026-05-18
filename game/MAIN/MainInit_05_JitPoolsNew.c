@@ -55,14 +55,6 @@ void DECOMP_MainInit_JitPoolsNew(struct GameTracker *gGT)
 	}
 
 
-// assume RAMEX,
-// always have 8 drivers
-#ifdef USE_ONLINE
-	uVar7 = 0x1000;
-	uVar9 = 0x1000;
-#endif
-
-
 	// add a bookmark
 	DECOMP_MEMPACK_PushState();
 
@@ -180,10 +172,6 @@ void DECOMP_MainInit_JitPoolsNew(struct GameTracker *gGT)
 	if ((gameMode & MAIN_MENU) != 0)
 		numDriver = 4;
 
-#ifdef USE_ONLINE
-	numDriver = 8;
-#endif
-
 	// ASM: li a2, 1648 (0x670) at 0x8003b574
 	// FIX: was sizeof(Item)+sizeof(Driver)=1600, ASM uses 1648 (+48/item)
 	DECOMP_JitPool_Init(&gGT->JitPools.largeStack, numDriver, 1648, 0);
@@ -192,12 +180,6 @@ void DECOMP_MainInit_JitPoolsNew(struct GameTracker *gGT)
 
 	// FIX(aalhendi): removed numParticle > 120 cap, not in SCUS ASM
 	int numParticle = uVar7 >> 5;
-
-#ifdef USE_ONLINE
-	// fix mystery caves with 8 players,
-	// cause all drivers use P1 exhaust
-	numParticle = 120 * 10;
-#endif
 
 	DECOMP_JitPool_Init(&gGT->JitPools.particle, numParticle, sizeof(struct Particle), /*"ParticlePool"*/ 0);
 	DECOMP_JitPool_Init(&gGT->JitPools.oscillator, numParticle, 0x18, /*"OscillatorPool"*/ 0);

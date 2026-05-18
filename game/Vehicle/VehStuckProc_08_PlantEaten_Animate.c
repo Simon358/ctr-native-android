@@ -44,11 +44,6 @@ void DECOMP_VehStuckProc_PlantEaten_Animate(struct Thread *t, struct Driver *d)
 
 		RotTrans(&plantVector, &camVec, (long *)alStack32);
 
-#ifdef USE_ONLINE
-		if (d->driverID != 0)
-			return;
-#endif
-
 		struct PushBuffer *pb = &gGT->pushBuffer[d->driverID];
 
 		pb->pos[0] = camVec.vx;

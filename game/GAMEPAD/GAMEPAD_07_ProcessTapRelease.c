@@ -65,8 +65,5 @@ void DECOMP_GAMEPAD_ProcessTapRelease(struct GamepadSystem *gGamepads)
 			pad->buttonsReleased = pad->buttonsHeldPrevFrame & ~pad->buttonsHeldCurrFrame;
 		}
 
-#ifdef USE_ONLINE
-		break;
-#endif
 	}
 }

@@ -37,12 +37,8 @@ struct MaskHeadWeapon *DECOMP_VehPickupItem_MaskUseWeapon(struct Driver *driver,
 		maskObj->duration = (driver->numWumpas < 10) ? 0x2d00 : 0x1e00;
 
 		if (
-#ifdef USE_ONLINE
-		    (driver->driverID == 0) &&
-#else
 		    // If this is human and not AI
 		    ((driver->actionsFlagSet & 0x100000) == 0) &&
-#endif
 
 		    (boolPlaySound != 0))
 		{
@@ -74,12 +70,8 @@ struct MaskHeadWeapon *DECOMP_VehPickupItem_MaskUseWeapon(struct Driver *driver,
 
 
 	if (
-#ifdef USE_ONLINE
-	    (driver->driverID == 0) &&
-#else
 	    // If this is human and not AI
 	    ((driver->actionsFlagSet & 0x100000) == 0) &&
-#endif
 
 	    (OtherFX_Play_Echo(soundID, 1, driver->actionsFlagSet & 0x10000),
 

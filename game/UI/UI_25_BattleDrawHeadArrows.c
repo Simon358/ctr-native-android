@@ -35,11 +35,6 @@ void DECOMP_UI_BattleDrawHeadArrows(struct Driver *player)
 
 	u_char numPlyr = gGT->numPlyrCurrGame;
 
-#ifdef USE_ONLINE
-	int OnlineGetNumDrivers();
-	numPlyr = OnlineGetNumDrivers();
-#endif
-
 	for (u_char i = 0; i < numPlyr; i++)
 	{
 		// something related to player structure address
@@ -124,11 +119,6 @@ void DECOMP_UI_BattleDrawHeadArrows(struct Driver *player)
 
 		// color data
 		color = *(u_int *)data.ptrColor[PLAYER_BLUE + currTeam];
-
-#ifdef USE_ONLINE
-		int onlineCharID = data.characterIDs[i];
-		color = *(u_int *)data.ptrColor[CRASH_BLUE + onlineCharID];
-#endif
 
 		// it's all the same color
 		*(int *)&p->g3.r0 = (color & 0xffffff) | 0x30000000;

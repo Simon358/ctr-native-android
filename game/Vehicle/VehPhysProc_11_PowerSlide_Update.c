@@ -1,9 +1,5 @@
 #include <common.h>
 
-#ifdef USE_ONLINE
-void AssignMeterGrade(struct Driver *driver, int meterLeft);
-#endif
-
 void DECOMP_VehPhysProc_PowerSlide_Update(struct Thread *t, struct Driver *d)
 {
 	short noInputTime;
@@ -44,12 +40,7 @@ void DECOMP_VehPhysProc_PowerSlide_Update(struct Thread *t, struct Driver *d)
 			// If bar is full
 			if (meterLeft == 0)
 			{
-#ifdef USE_ONLINE
-				if (d->driverID == 0)
-#endif
-
-					// Make a sound
-					DECOMP_OtherFX_Play_Echo(0xf, 1, d->actionsFlagSet & 0x10000);
+				DECOMP_OtherFX_Play_Echo(0xf, 1, d->actionsFlagSet & 0x10000);
 
 
 				// Add to your number of boost attempts, this makes it
@@ -75,9 +66,6 @@ void DECOMP_VehPhysProc_PowerSlide_Update(struct Thread *t, struct Driver *d)
 			// If distance remaining to be filled in turbo bar, is less than,
 			// the distance remaining from the red/green "turning point" to the end,
 
-#ifdef USE_ONLINE
-			AssignMeterGrade(d, meterLeft);
-#endif
 			// If meter is in the red
 			if (meterLeft < highMeter)
 			{

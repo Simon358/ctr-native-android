@@ -12,9 +12,6 @@ void DECOMP_UI_Map_DrawRawIcon(int ptrMap, int *param_2, int iconID, int colorID
 	posY = param_2[2];
 
 	DECOMP_UI_Map_GetIconPos((short *)ptrMap, &posX, &posY);
-#ifdef USE_ONLINE
-	posY -= 50;
-#endif
 
 	ptrColor = data.ptrColor[colorID];
 

@@ -18,15 +18,9 @@ void DECOMP_UI_JumpMeter_Draw(short posX, short posY, struct Driver *driver)
 	int jumpMeterHeight;
 	int whateverThisIs;
 
-#ifdef USE_ONLINE
-	int numbersYOffset = 0;
-	int numbersYHeight = 10;
-	int barHeight = 53;
-#else
 	int numbersYOffset = -45;
 	int numbersYHeight = 10;
 	int barHeight = 38;
-#endif
 
 	gGT = sdata->gGT;
 
@@ -64,31 +58,7 @@ void DECOMP_UI_JumpMeter_Draw(short posX, short posY, struct Driver *driver)
 
 	if (p != 0)
 	{
-#ifdef USE_ONLINE
-		jumpMeter = driver->jumpMeter;
-		colorAndCode = 0x28ffffff;
-		if (0x27f < jumpMeter)
-		{
-			if (jumpMeter < 0x3c0)
-			{
-				colorAndCode = 0x28a7faa7; // green
-			}
-			else
-			{
-				if (jumpMeter < 0x5a0)
-				{
-					colorAndCode = 0x28a7fafa; // yellow
-				}
-				else
-				{
-					colorAndCode = 0x28a7a7fa; // red
-				}
-			}
-		}
-		*(u_int *)&p->r0 = colorAndCode;
-#else
 		*(u_int *)&p->r0 = 0x28ffffff;
-#endif
 		p->x1 = posX + WIDE_34(13);
 		p->x3 = posX + WIDE_34(13);
 		p->x0 = box.x;
@@ -104,7 +74,6 @@ void DECOMP_UI_JumpMeter_Draw(short posX, short posY, struct Driver *driver)
 		*(int *)p = *primmemCurr | 0x5000000;
 		*primmemCurr = (u_int)p & 0xffffff;
 
-#ifndef USE_ONLINE
 		box2.y = posY - barHeight;
 		box2.w = WIDE_34(0xc);
 		box2.h = barHeight;
@@ -194,7 +163,6 @@ void DECOMP_UI_JumpMeter_Draw(short posX, short posY, struct Driver *driver)
 				*primmemCurr = (u_int)p & 0xffffff;
 			}
 		}
-#endif
 	}
 	return;
 }
