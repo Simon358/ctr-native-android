@@ -1,7 +1,5 @@
 #include <common.h>
 
-void CS_Camera_ThTick_Boss(struct Thread *t);
-
 static void CS_Camera_Podium_RIP_Init(struct Thread *t, struct Driver *d)
 {
 	DECOMP_VehPhysProc_FreezeEndEvent_Init(t, d);

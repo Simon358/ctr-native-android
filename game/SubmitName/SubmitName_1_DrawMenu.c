@@ -1,6 +1,6 @@
 #include <common.h>
 
-#ifdef REBUILD_PC
+#ifdef CTR_NATIVE
 int kbCurr = 0;
 int kbPrev = 0;
 void SubmitName_UseKeyboard(int key)
@@ -193,7 +193,8 @@ short DECOMP_SubmitName_DrawMenu(u_short string)
 
 	int tap = sdata->buttonTapPerPlayer[0];
 
-#ifdef REBUILD_PC
+#ifdef CTR_NATIVE
+	// NOTE(aalhendi): native keyboard shortcut; retail input remains gamepad-driven.
 
 	if (kbCurr != kbPrev)
 	{
@@ -256,7 +257,6 @@ short DECOMP_SubmitName_DrawMenu(u_short string)
 	kbPrev = kbCurr;
 
 	// Press Enter
-	int NikoGetEnterKey();
 	if (NikoGetEnterKey())
 	{
 		cursorPosition = 1001;

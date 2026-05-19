@@ -72,6 +72,6 @@ void DECOMP_Garage_Enter(char charId)
 		if (soundIDs[i] == 0)
 			continue;
 
-		OtherFX_RecycleNew(&garageSounds->audioPtr, (int)soundIDs[i], 0x8000 | LR);
+		DECOMP_OtherFX_RecycleNew((u_int *)&garageSounds->audioPtr, (int)soundIDs[i], 0x8000 | LR);
 	}
 }

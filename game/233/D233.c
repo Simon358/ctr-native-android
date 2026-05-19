@@ -1,15 +1,13 @@
-// TODO(aalhendi): This entire file is a hack. D230/D231/D232 use proper C struct
-// initializers with &D230.field self-references (see game/230/D230.c). This file
-// instead loads the raw overlay binary at runtime and does pointer rebasing.
-// Replace with proper static initialization once the overlay data is fully reverse-engineered into named struct fields.
+// NOTE(aalhendi): Native bridge for the still-raw overlay 233 data section.
+// D230/D231/D232 use C initializers with named self-references; 233 still loads
+// the retail overlay blob and rebases pointer words until the data is fully named.
+// TODO(aalhendi): fully name data
 
 #include <common.h>
 #include <stdio.h>
 
 #define PSX_OVR233_BASE  0x800AB9F0U
 #define OVR233_DATA_SIZE 48528
-
-extern typeof(OVR_233) OVR_233;
 
 void DECOMP_CS_OVR233_LoadData(void)
 {

@@ -1,19 +1,10 @@
 #include <common.h>
 
-// temporary workaround
-extern struct Ovr233_Credits_BSS *creditsBSS;
-
-void CS_Credits_ThTick(); // TODO(aalhendi): port from overlay 233
-
-void DECOMP_CS_Credits_Init()
+void DECOMP_CS_Credits_Init(void)
 {
 	int i;
 	int bitIndex;
 	struct Instance *inst;
-
-// optimization
-// int boolAllBlue;
-#define boolAllBlue creditsBSS->boolAllBlue
 
 	int boolAllGold;
 	struct GameTracker *gGT;
@@ -24,22 +15,22 @@ void DECOMP_CS_Credits_Init()
 
 	gGT = sdata->gGT;
 	advProg = &sdata->advProgress;
-	creditsObj = &creditsBSS->creditsObj;
+	creditsObj = &creditsBSS.creditsObj;
 
 	void **pointers = ST1_GETPOINTERS(gGT->level1->ptrSpawnType1);
 	CLH = pointers[ST1_CREDITS];
 
-	creditsBSS->DancerThread = 0;
+	creditsBSS.DancerThread = 0;
 
-	boolAllBlue = 1;
+	creditsBSS.boolAllBlue = 1;
 	boolAllGold = 1;
 
 	for (i = 0; i < 0x12; i++)
 	{
-		if (boolAllBlue != 0)
+		if (creditsBSS.boolAllBlue != 0)
 		{
 			bitIndex = i + 0x16;
-			boolAllBlue = CHECK_ADV_BIT(advProg->rewards, bitIndex);
+			creditsBSS.boolAllBlue = CHECK_ADV_BIT(advProg->rewards, bitIndex);
 		}
 
 		if (boolAllGold != 0)
@@ -48,8 +39,6 @@ void DECOMP_CS_Credits_Init()
 			boolAllGold = CHECK_ADV_BIT(advProg->rewards, bitIndex);
 		}
 	}
-
-#undef boolAllBlue
 
 	if (boolAllGold != 0)
 	{
@@ -64,7 +53,7 @@ void DECOMP_CS_Credits_Init()
 	// 0 = no relation to param4
 	// 0x300 = SmallStackPool
 	// 0xd = "other" thread bucket
-	creditsBSS->CreditThread = DECOMP_PROC_BirthWithObject(0x30d, CS_Credits_ThTick, NULL, NULL);
+	creditsBSS.CreditThread = DECOMP_PROC_BirthWithObject(0x30d, CS_Credits_ThTick, NULL, NULL);
 
 	memset(creditsObj, 0, sizeof(struct CreditsObj));
 	creditsObj->countdown = 360;
@@ -103,12 +92,12 @@ void DECOMP_CS_Credits_Init()
 
 	memcpy(creditsDst, CLH, CLH->size);
 
-	creditsBSS->numStrings = creditsDst->numStrings;
+	creditsBSS.numStrings = creditsDst->numStrings;
 
 	char **ptrStrings = (char **)CREDITSHEADER_GETSTRINGS(creditsDst);
-	creditsBSS->ptrStrings = ptrStrings;
+	creditsBSS.ptrStrings = ptrStrings;
 
-	for (i = 0; i < creditsBSS->numStrings; i++)
+	for (i = 0; i < creditsBSS.numStrings; i++)
 	{
 		ptrStrings[i] = (char *)((unsigned int)ptrStrings[i] + (unsigned int)creditsDst);
 	}
@@ -116,6 +105,3 @@ void DECOMP_CS_Credits_Init()
 	creditsObj->credits_posY = 340;
 	creditsObj->credits_topString = ptrStrings[0x14];
 }
-
-// temporary workaround
-struct Ovr233_Credits_BSS *creditsBSS = (struct Ovr233_Credits_BSS *)0x800b9488;

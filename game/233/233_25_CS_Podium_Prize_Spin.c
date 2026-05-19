@@ -1,7 +1,5 @@
 #include <common.h>
 
-void Vector_SpecLightSpin3D(struct Instance *inst, short *rot, short *lightDir);
-
 void CS_Podium_Prize_Spin(struct Instance *inst, short *prize)
 {
 	struct GamepadSystem *gGS;

@@ -1,11 +1,5 @@
 #include <common.h>
 
-void DECOMP_CS_Thread_MoveOnPath(struct Thread *t);
-void DECOMP_CS_Thread_Particles(struct Thread *t);
-void DECOMP_CS_Thread_InterpolateFramesMS(struct Thread *t);
-
-extern struct OVR233_Garage gGarage;
-
 void DECOMP_CS_Thread_ThTick(struct Thread *t)
 {
 	short pos[3];

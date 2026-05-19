@@ -1,24 +1,21 @@
 #include <common.h>
 
-// temporary workaround
-extern struct Ovr233_Credits_BSS *creditsBSS;
-
 void CS_Credits_NewDancer(struct Thread *dancerTh, int dancerModelID)
 {
-	struct CreditsObj *creditsObj = &creditsBSS->creditsObj;
+	struct CreditsObj *creditsObj = &creditsBSS.creditsObj;
 
 	// kill any living thread
-	if (creditsBSS->DancerThread != 0)
-		creditsBSS->DancerThread->flags |= 0x800;
+	if (creditsBSS.DancerThread != 0)
+		creditsBSS.DancerThread->flags |= 0x800;
 
 	// store globally, make instance invisible
-	creditsBSS->DancerThread = dancerTh;
-	creditsBSS->dancerInst_invisible = dancerTh->inst;
-	creditsBSS->dancerInst_invisible->flags |= 0x80;
+	creditsBSS.DancerThread = dancerTh;
+	creditsBSS.dancerInst_invisible = dancerTh->inst;
+	creditsBSS.dancerInst_invisible->flags |= 0x80;
 
 	creditsObj->countdown = 360;
 
-	char **ptrStrings = creditsBSS->ptrStrings;
+	char **ptrStrings = creditsBSS.ptrStrings;
 
 	// less than TAWNA1
 	if (dancerModelID < STATIC_TAWNA1)

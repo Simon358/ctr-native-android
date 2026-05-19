@@ -1,11 +1,9 @@
 #include <common.h>
 
-extern struct Ovr233_Credits_BSS *creditsBSS;
-
 void CS_Credits_ThTick(void)
 {
-	struct CreditsObj *co = &creditsBSS->creditsObj;
-	struct Instance *danceInst = creditsBSS->dancerInst_invisible;
+	struct CreditsObj *co = &creditsBSS.creditsObj;
+	struct Instance *danceInst = creditsBSS.dancerInst_invisible;
 
 	co->creditDanceInst = danceInst;
 
@@ -13,9 +11,9 @@ void CS_Credits_ThTick(void)
 	{
 		danceInst->flags |= 0x80;
 
-		danceInst->matrix.t[0] = (int)creditsBSS->creditGhost_Pos[0];
-		danceInst->matrix.t[1] = (int)creditsBSS->creditGhost_Pos[1];
-		danceInst->matrix.t[2] = (int)creditsBSS->creditGhost_Pos[2];
+		danceInst->matrix.t[0] = (int)creditsBSS.creditGhost_Pos[0];
+		danceInst->matrix.t[1] = (int)creditsBSS.creditGhost_Pos[1];
+		danceInst->matrix.t[2] = (int)creditsBSS.creditGhost_Pos[2];
 
 		struct GameTracker *gGT = sdata->gGT;
 

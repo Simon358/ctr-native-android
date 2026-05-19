@@ -1,7 +1,5 @@
 #include <common.h>
 
-void DECOMP_CS_LoadBossCallback(struct LoadQueueSlot *lqs);
-
 void DECOMP_CS_LoadBoss(struct BossCutsceneData *bcd)
 {
 	unsigned int *ptrArr;

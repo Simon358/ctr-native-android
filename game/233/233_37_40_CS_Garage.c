@@ -1,7 +1,5 @@
 #include <common.h>
 
-extern struct OVR233_Garage gGarage;
-
 void DECOMP_CS_Garage_ZoomOut(char zoomState)
 {
 	// if just entered garage
@@ -9,11 +7,8 @@ void DECOMP_CS_Garage_ZoomOut(char zoomState)
 	{
 		gGarage.numFramesCurr_ZoomOut = 0;
 
-#ifndef REBUILD_PS1
-		// both howl
-		Garage_Init();
-		Garage_Enter(sdata->advCharSelectIndex_curr);
-#endif
+		DECOMP_Garage_Init();
+		DECOMP_Garage_Enter(sdata->advCharSelectIndex_curr);
 
 		DECOMP_Audio_SetState_Safe(8);
 	}
@@ -335,9 +330,7 @@ void DECOMP_CS_Garage_MenuProc(struct RectMenu *param_1)
 					// return to main menu
 					sdata->mainMenuState = 0;
 
-#ifndef REBUILD_PS1
-					Garage_Leave();
-#endif
+					DECOMP_Garage_Leave();
 
 					// load main menu LEV
 					DECOMP_MainRaceTrack_RequestLoad(0x27);
@@ -416,9 +409,7 @@ void DECOMP_CS_Garage_MenuProc(struct RectMenu *param_1)
 			currSelectIndex &= 7;
 			sdata->advCharSelectIndex_curr = currSelectIndex;
 
-#ifndef REBUILD_PS1
-			Garage_MoveLR(currSelectIndex);
-#endif
+			DECOMP_Garage_MoveLR(currSelectIndex);
 		}
 
 		// reset frame counter to max number of frames
@@ -464,15 +455,11 @@ SKIP_CONTROLS:
 		}
 	}
 
-#ifdef REBUILD_PC
+#ifdef CTR_NATIVE
 	if (sdata->ptrDesiredMenu == &data.menuSubmitName)
 	{
-		// flush async key state buffer, otherwise
-		// tapping Enter "before" picking a garage
-		// character, then picking character, will
-		// immediately warp you to the adv hub, with
-		// no time to type the name
-		int NikoGetEnterKey();
+		// flush async key state buffer. If not, tapping Enter "before" picking a garage character,
+		//  then picking character, will immediately warp you to the adv hub, with no time to type the name
 		NikoGetEnterKey();
 	}
 #endif

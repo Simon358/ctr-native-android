@@ -1,11 +1,10 @@
 #include <common.h>
 
-// OVR_233 overlay data starts at 0x800ABCA0
-// (s_spawn at 0x800ABCA4 minus 4 for fill_beginning)
+// NOTE(aalhendi): These are native objects for retail overlay 233 data/BSS.
+// PS1 address comments remain in include/ovr_233.h for ASM audit, but native
+// code must not dereference those absolute PS1 addresses.
 typeof(OVR_233) OVR_233 __attribute__((section(".data")));
 
-// must be 0x800b8598 because CS_Thread_UseOpcode
-// is referencing these globals for character select animations
 struct OVR233_Garage gGarage = {
     .menuGarage =
         {
@@ -90,3 +89,5 @@ struct OVR233_Garage gGarage = {
 
     // rest initialize to zero
 };
+
+struct Ovr233_Credits_BSS creditsBSS;

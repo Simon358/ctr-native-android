@@ -474,6 +474,8 @@ struct OVR233_Garage
 	// Credits RDATA starts next byte
 };
 
+extern struct OVR233_Garage gGarage;
+
 #if 0
 800b8644 - CREDITS RDATA
 800b8668 - first byte of credits func (CREDITS TEXT)
@@ -576,3 +578,5 @@ struct Ovr233_Credits_BSS
 	// 800b94bc - CreditsObj (0x340 large)
 	struct CreditsObj creditsObj;
 };
+
+extern struct Ovr233_Credits_BSS creditsBSS;

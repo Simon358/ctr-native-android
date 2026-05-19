@@ -1,7 +1,5 @@
 #include <common.h>
 
-extern struct Ovr233_Credits_BSS *creditsBSS;
-
 void CS_Credits_DrawEpilogue(struct CreditsObj *co)
 {
 	if (co->epilogue_topString == 0)
@@ -57,7 +55,7 @@ void CS_Credits_DrawEpilogue(struct CreditsObj *co)
 		colorSlot = -1;
 	}
 
-	if ((colorSlot >= 0) && (creditsBSS->boolAllBlue != 0))
+	if ((colorSlot >= 0) && (creditsBSS.boolAllBlue != 0))
 	{
 		short strLen = -1;
 

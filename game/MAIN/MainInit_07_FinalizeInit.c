@@ -1,7 +1,5 @@
 #include <common.h>
 
-void DECOMP_CS_Cutscene_Start(void);
-
 void DECOMP_MainInit_FinalizeInit(struct GameTracker *gGT)
 {
 	int i;

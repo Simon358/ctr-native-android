@@ -1,7 +1,5 @@
 #include <common.h>
 
-struct Particle *Particle_Init(u_int param_1, struct IconGroup *ig, struct ParticleEmitter *pe);
-
 void DECOMP_CS_Thread_Particles(struct Thread *t)
 {
 	struct CutsceneObj *cs = t->object;

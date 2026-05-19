@@ -102,6 +102,8 @@ int DECOMP_OtherFX_Play_LowLevel(u_int soundID, char boolAntiSpam, u_int flags);
 u_int DECOMP_OtherFX_Modify(u_int soundId, u_int flags);
 void DECOMP_OtherFX_Stop1(int soundID_count);
 void DECOMP_OtherFX_Stop2(int soundID_count);
+void DECOMP_OtherFX_RecycleNew(u_int *soundID_Count, u_int newSoundID, u_int modifyFlags);
+void DECOMP_OtherFX_RecycleMute(int *soundID_Count);
 char DECOMP_EngineAudio_InitOnce(u_int soundID, u_int flags);
 short DECOMP_EngineAudio_Recalculate(u_int soundID, u_int sfx);
 void DECOMP_EngineAudio_Stop(u_int soundID);
@@ -213,6 +215,12 @@ void DECOMP_Music_Stop(void);
 void DECOMP_Music_Start(u_int songID);
 void DECOMP_Music_End(void);
 u_int DECOMP_Music_GetHighestSongPlayIndex(void);
+void DECOMP_Garage_Init(void);
+void DECOMP_Garage_Enter(char charId);
+void DECOMP_Garage_PlayFX(u_int soundId, char charId);
+void DECOMP_Garage_LerpFX(void);
+void DECOMP_Garage_MoveLR(int desiredId);
+void DECOMP_Garage_Leave(void);
 
 // INSTANCE
 void DECOMP_INSTANCE_Birth(struct Instance *inst, struct Model *model, char *name, struct Thread *th, int flags);
@@ -701,11 +709,47 @@ void DECOMP_AH_MaskHint_SpawnParticles(short numParticles, struct ParticleEmitte
 void DECOMP_AH_MaskHint_LerpVol(int param_1);
 void DECOMP_AH_MaskHint_Update(void);
 
+struct Particle *Particle_Init(u_int param_1, struct IconGroup *ig, struct ParticleEmitter *emSet);
+void Vector_SpecLightSpin3D(struct Instance *inst, short *rot, short *lightDir);
+
 // 233
 void DECOMP_CS_Garage_ZoomOut(char zoomState);
 void DECOMP_CS_Garage_MenuProc(struct RectMenu *param_1);
 void DECOMP_CS_Garage_Init(void);
 struct RectMenu *DECOMP_CS_Garage_GetMenuPtr(void);
+void DECOMP_CS_BoxScene_InstanceSplitLines(void);
+void DECOMP_CS_Thread_LInB(struct Instance *inst);
+void DECOMP_CS_Cutscene_Start(void);
+void DECOMP_CS_LoadBossCallback(struct LoadQueueSlot *lqs);
+void CS_Camera_ThTick_Boss(struct Thread *t);
+u_char DECOMP_CS_Camera_BoolGotoBoss(void);
+void CS_Camera_ThTick_Podium(struct Thread *th);
+int DECOMP_CS_Thread_UseOpcode(struct Instance *instance, struct CutsceneObj *cs);
+void DECOMP_CS_Thread_AnimateScale(struct Thread *t);
+void DECOMP_CS_Thread_MoveOnPath(struct Thread *t);
+void DECOMP_CS_Thread_Particles(struct Thread *t);
+void DECOMP_CS_Thread_InterpolateFramesMS(struct Thread *t);
+void DECOMP_CS_Thread_ThTick(struct Thread *t);
+struct Thread *DECOMP_CS_Thread_Init(short modelID, char *name, short *param_3, short param_4, struct Thread *parent);
+void DECOMP_CS_Podium_Prize_ThDestroy(struct Thread *t);
+void CS_Podium_Prize_Spin(struct Instance *inst, short *prize);
+void CS_Podium_Prize_ThTick1(struct Thread *th);
+void CS_Podium_Prize_ThTick2(struct Thread *th);
+void CS_Podium_Prize_Init(u_int prizeModel, char *prizeName, short *posOnScreen);
+void DECOMP_CS_Podium_Stand_ThTick(struct Thread *t);
+void DECOMP_CS_Podium_Stand_Init(short *podiumData);
+void DECOMP_CS_Podium_FullScene_Init(void);
+void DECOMP_CS_Credits_Init(void);
+char *CS_Credits_GetNextString(char *str);
+void CS_Credits_DestroyCreditGhost(void);
+void CS_Credits_AnimateCreditGhost(struct Instance *dst, struct Instance *src, int index);
+void CS_Credits_ThTick(void);
+int CS_Credits_IsTextValid(void);
+void CS_Credits_NewDancer(struct Thread *dancerTh, int dancerModelID);
+int CS_Credits_NewCreditGhosts(void);
+void CS_Credits_End(void);
+void CS_Credits_DrawNames(struct CreditsObj *co);
+void CS_Credits_DrawEpilogue(struct CreditsObj *co);
 
 //=====================================================================================================================
 // this section is forward decls to fix warnings by TheUbMunster.

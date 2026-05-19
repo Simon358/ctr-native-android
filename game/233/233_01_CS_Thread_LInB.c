@@ -1,7 +1,5 @@
 #include <common.h>
 
-void DECOMP_CS_Thread_ThTick(struct Thread *t);
-
 void DECOMP_CS_Thread_LInB(struct Instance *inst)
 {
 	struct Thread *t;

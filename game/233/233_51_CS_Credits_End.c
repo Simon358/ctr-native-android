@@ -1,9 +1,6 @@
 #include <common.h>
 
-// temporary workaround
-extern struct Ovr233_Credits_BSS *creditsBSS;
-
-void CS_Credits_End()
+void CS_Credits_End(void)
 {
 	int levID;
 	struct GameTracker *gGT = sdata->gGT;
@@ -12,10 +9,10 @@ void CS_Credits_End()
 	CS_Credits_DestroyCreditGhost();
 
 	// kill thread
-	creditsBSS->CreditThread->flags |= 0x800;
+	creditsBSS.CreditThread->flags |= 0x800;
 
 	// go to gemstone valley
-	if (creditsBSS->boolAllBlue == 0)
+	if (creditsBSS.boolAllBlue == 0)
 	{
 		levID = GEM_STONE_VALLEY;
 

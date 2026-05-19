@@ -1,13 +1,8 @@
 #include <common.h>
 
-// temporary workaround
-extern struct Ovr233_Credits_BSS *creditsBSS;
-
-int CS_Credits_IsTextValid()
+int CS_Credits_IsTextValid(void)
 {
-	// This dang byte budget
-	// struct CreditsObj* creditsObj = &creditsBSS->creditsObj;
-	struct CreditsObj *creditsObj = (struct CreditsObj *)0x800b94bc;
+	struct CreditsObj *creditsObj = &creditsBSS.creditsObj;
 
 	if (creditsObj->epilogue_topString != 0)
 		return 0;

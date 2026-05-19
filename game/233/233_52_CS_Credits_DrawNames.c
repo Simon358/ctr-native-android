@@ -1,7 +1,5 @@
 #include <common.h>
 
-extern struct Ovr233_Credits_BSS *creditsBSS;
-
 void CS_Credits_DrawNames(struct CreditsObj *co)
 {
 	if (co->credits_topString == 0)
@@ -73,7 +71,7 @@ void CS_Credits_DrawNames(struct CreditsObj *co)
 
 		int colorSlot = charId;
 
-		if ((fadeAmount < 20) && (creditsBSS->boolAllBlue != 0))
+		if ((fadeAmount < 20) && (creditsBSS.boolAllBlue != 0))
 		{
 			if (fadeAmount < 1)
 			{
@@ -97,7 +95,7 @@ void CS_Credits_DrawNames(struct CreditsObj *co)
 
 		if (colorSlot >= 0)
 		{
-			DECOMP_DecalFont_DrawLineStrlen((unsigned char *)str, strLen, creditsBSS->creditText_PosX, posY, 3, colorSlot | textFlags);
+			DECOMP_DecalFont_DrawLineStrlen((unsigned char *)str, strLen, creditsBSS.creditText_PosX, posY, 3, colorSlot | textFlags);
 		}
 
 		posY += 20;

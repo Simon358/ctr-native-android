@@ -11,4 +11,9 @@ struct ctr_state
 	int running;
 };
 
+#ifdef CTR_NATIVE
+int NikoGetEnterKey(void);
+void SubmitName_UseKeyboard(int key);
+#endif
+
 #endif

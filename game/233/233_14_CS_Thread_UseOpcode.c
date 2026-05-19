@@ -1,9 +1,5 @@
 #include <common.h>
 
-extern struct OVR233_Garage gGarage;
-
-struct Thread *DECOMP_CS_Thread_Init(short modelID, char *name, short *param_3, short param_4, struct Thread *parent);
-
 static void CS_SaveDecodedOpcode(const struct CutsceneObj *cs, int out[5])
 {
 	const int *src = (const int *)&cs->decodedOpcode;

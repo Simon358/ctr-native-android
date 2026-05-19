@@ -19,9 +19,7 @@ void DECOMP_Audio_Update1(void)
 		}
 		break;
 	case 7:
-#ifndef REBUILD_PS1
-		Garage_LerpFX();
-#endif
+		DECOMP_Garage_LerpFX();
 		break;
 	case 8:
 		if (sdata->XA_State == 0)

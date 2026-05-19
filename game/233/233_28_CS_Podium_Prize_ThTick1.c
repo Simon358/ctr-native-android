@@ -1,9 +1,5 @@
 #include <common.h>
 
-void CS_Podium_Prize_Spin(struct Instance *inst, short *prize);
-void CS_Podium_Prize_ThTick2(struct Thread *th);
-void ThTick_SetAndExec(struct Thread *t, void (*callback)(struct Thread *));
-
 void CS_Podium_Prize_ThTick1(struct Thread *th)
 {
 	struct Instance *inst = th->inst;

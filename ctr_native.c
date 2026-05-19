@@ -85,7 +85,6 @@ void PsyXKeyboardHandler(int key, char down)
 	if (down == 0)
 		key = 0;
 
-	void SubmitName_UseKeyboard(int key);
 	SubmitName_UseKeyboard(key);
 }
 

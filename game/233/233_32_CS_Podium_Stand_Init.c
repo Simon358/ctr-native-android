@@ -1,7 +1,5 @@
 #include <common.h>
 
-void DECOMP_CS_Podium_Stand_ThTick(struct Thread *);
-
 void DECOMP_CS_Podium_Stand_Init(short *podiumData)
 {
 	struct Instance *inst = DECOMP_INSTANCE_BirthWithThread(0xa8, 0, SMALL, OTHER, DECOMP_CS_Podium_Stand_ThTick, 0, 0);

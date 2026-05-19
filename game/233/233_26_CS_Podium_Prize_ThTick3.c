@@ -1,7 +1,5 @@
 #include <common.h>
 
-void CS_Podium_Prize_Spin(struct Instance *inst, short *prize);
-
 void CS_Podium_Prize_ThTick3(struct Thread *th)
 {
 	struct GameTracker *gGT;

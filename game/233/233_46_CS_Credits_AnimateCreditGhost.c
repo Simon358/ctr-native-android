@@ -1,10 +1,8 @@
 #include <common.h>
 
-extern struct Ovr233_Credits_BSS *creditsBSS;
-
 void CS_Credits_AnimateCreditGhost(struct Instance *dst, struct Instance *src, int index)
 {
-	struct CreditsObj *co = &creditsBSS->creditsObj;
+	struct CreditsObj *co = &creditsBSS.creditsObj;
 
 	dst->animFrame = src->animFrame;
 	dst->animIndex = src->animIndex;

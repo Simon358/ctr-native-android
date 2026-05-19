@@ -1,8 +1,5 @@
 #include <common.h>
 
-void CS_Podium_Prize_ThTick1(struct Thread *th);
-void DECOMP_CS_Podium_Prize_ThDestroy(struct Thread *t);
-
 void CS_Podium_Prize_Init(u_int prizeModel, char *prizeName, short *posOnScreen)
 {
 	struct GameTracker *gGT = sdata->gGT;

@@ -1,11 +1,6 @@
 #include <common.h>
 
-void DECOMP_CS_Podium_Stand_Init(short *);
-void CS_Podium_Prize_Init(u_int, char *, short *);
-struct Thread *DECOMP_CS_Thread_Init(short, char *, short *, short, struct Thread *);
-void CS_Camera_ThTick_Podium(struct Thread *th);
-
-void DECOMP_CS_Podium_FullScene_Init()
+void DECOMP_CS_Podium_FullScene_Init(void)
 {
 	struct Instance *driverInstSelf;
 	struct Thread *victoryCamThread;
