@@ -1,5 +1,6 @@
 #include <common.h>
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x800ac714-0x800ac840
 void DECOMP_CS_DestroyPodium_StartDriving(void)
 {
 	struct Instance *inst;
@@ -23,13 +24,15 @@ void DECOMP_CS_DestroyPodium_StartDriving(void)
 	}
 
 	d = gGT->drivers[0];
-	d->funcPtrs[0] = DECOMP_VehPhysProc_Driving_Init;
 
 	// enable collisions for thread,
 	// and make instance visible
 	inst = d->instSelf;
 	inst->thread->flags &= ~(0x1000);
 	inst->flags &= ~(HIDE_MODEL);
+
+	d->kartState = KS_ENGINE_REVVING;
+	d->funcPtrs[0] = DECOMP_VehPhysProc_Driving_Init;
 
 	// if cutscene changed audio, restore backup
 	if (OVR_233.CutsceneManipulatesAudio != 0)

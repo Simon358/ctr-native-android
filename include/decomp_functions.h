@@ -735,6 +735,7 @@ void DECOMP_CS_Podium_Prize_ThDestroy(struct Thread *t);
 void CS_Podium_Prize_Spin(struct Instance *inst, short *prize);
 void CS_Podium_Prize_ThTick1(struct Thread *th);
 void CS_Podium_Prize_ThTick2(struct Thread *th);
+void CS_Podium_Prize_ThTick3(struct Thread *th);
 void CS_Podium_Prize_Init(u_int prizeModel, char *prizeName, short *posOnScreen);
 void DECOMP_CS_Podium_Stand_ThTick(struct Thread *t);
 void DECOMP_CS_Podium_Stand_Init(short *podiumData);

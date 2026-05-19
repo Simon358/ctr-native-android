@@ -2,18 +2,19 @@
 
 // Make the trophy bounce 3 times
 // Then start ThTick3
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x800afbc8-0x800afcc4
 void CS_Podium_Prize_ThTick2(struct Thread *th)
 {
 	int currScale;
 
 	// get object from thread
 	// should replace with struct Prize in 233
-	void *prize = th->object;
+	short *prize = th->object;
 
 	// get instance from thread
 	struct Instance *inst = th->inst;
 
-	short frameIndex = *(short *)(prize + 0x2a);
+	short frameIndex = prize[0x15];
 
 	// bouncing scale animation
 	if (frameIndex < 5)
@@ -42,7 +43,7 @@ void CS_Podium_Prize_ThTick2(struct Thread *th)
 			}
 		}
 
-		*(short *)((u_int)prize + 0x2a) = frameIndex;
+		prize[0x15] = frameIndex;
 
 		// scaleY and scaleZ
 		inst->scale[0] = currScale;
@@ -53,7 +54,6 @@ void CS_Podium_Prize_ThTick2(struct Thread *th)
 	}
 	else
 	{
-		void CS_Podium_Prize_ThTick3();
 		ThTick_SetAndExec(th, CS_Podium_Prize_ThTick3);
 	}
 }
