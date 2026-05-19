@@ -38,7 +38,13 @@ struct OVR233_Garage gGarage = {
 
     // unusedFrameCount (ignore)
 
-    // unusedArr_lngIndex (ignore)
+    .unusedArr_lngIndex =
+        {
+            0x248,
+            0x249,
+            0x24a,
+            0,
+        },
 
     .barStat =
         {
@@ -61,7 +67,12 @@ struct OVR233_Garage gGarage = {
             0x50,
         },
 
-    // unusedArr_Colors (ignore)
+    .unusedArr_Colors =
+        {
+            0xff,
+            0xff00,
+            0xff00ff,
+        },
 
     .barColors =
         {

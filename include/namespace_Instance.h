@@ -516,11 +516,11 @@ struct Instance
 	MATRIX matrix;
 
 	// 0x50
-	char unk50;
-	char unk51;
+	u_char unk50;
+	u_char unk51;
 
 	// 0x52
-	char animIndex;
+	u_char animIndex;
 	char unk53;
 
 	// 0x54

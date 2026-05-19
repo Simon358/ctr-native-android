@@ -113,7 +113,7 @@ struct CutsceneObj
 	short unk22;
 	short unk24;
 	short unk26;
-	short unk28;
+	u_short unk28;
 
 	// 0x2a
 	short scaleSpeed;
@@ -151,7 +151,7 @@ struct CutsceneObj
 	// 0x46
 	char unk46;
 	// 0x47
-	char animIndex;
+	u_char animIndex;
 
 	// 0x48
 	int *frameOverrideRoot;
@@ -276,8 +276,7 @@ extern struct
 
 
 	// 800b0b7c
-	u_short VertSplitLine;
-	u_short VertSplit_unknown;
+	int VertSplitLine;
 
 	// 800b0b80
 	int boolLoadNextSwap;
@@ -468,7 +467,8 @@ struct OVR233_Garage
 	short delayOneSecond;
 
 	// 800b8640
-	int boolSelected;
+	short boolSelected;
+	short padding2;
 
 	// === End of Garage Data ===
 	// Credits RDATA starts next byte

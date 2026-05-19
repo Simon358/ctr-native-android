@@ -1,31 +1,35 @@
 #include <common.h>
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x800b7784-0x800b7834
 void DECOMP_CS_Garage_ZoomOut(char zoomState)
 {
+	if (zoomState != 0)
+	{
+		// number of frames to zoom in, or out,
+		// when selecting or cancelling OSK
+		gGarage.numFramesCurr_ZoomIn = gGarage.numFramesMax_Zoom;
+		gGarage.numFramesCurr_ZoomOut = gGarage.numFramesMax_Zoom;
+	}
+	else
+	{
+		gGarage.numFramesCurr_ZoomIn = 0;
+		gGarage.numFramesCurr_ZoomOut = 0;
+	}
+
+	gGarage.numFramesCurr_GarageMove = 0;
+	gGarage.boolSelected = 0;
+	gGarage.delayOneSecond = 0;
+
+	sdata->gGT->gameMode2 &= ~(GARAGE_OSK);
+
 	// if just entered garage
 	if (zoomState == 0)
 	{
-		gGarage.numFramesCurr_ZoomOut = 0;
-
 		DECOMP_Garage_Init();
 		DECOMP_Garage_Enter(sdata->advCharSelectIndex_curr);
 
 		DECOMP_Audio_SetState_Safe(8);
 	}
-	else
-	{
-		// number of frames to zoom in, or out,
-		// when selecting or cancelling OSK
-		gGarage.numFramesCurr_ZoomOut = gGarage.numFramesMax_Zoom;
-	}
-
-	gGarage.numFramesCurr_GarageMove = 0;
-	gGarage.delayOneSecond = 0;
-	gGarage.boolSelected = 0;
-
-	gGarage.numFramesCurr_ZoomIn = gGarage.numFramesCurr_ZoomOut;
-
-	sdata->gGT->gameMode2 &= ~(GARAGE_OSK);
 }
 
 
@@ -532,6 +536,7 @@ struct RectMenu *DECOMP_CS_Garage_GetMenuPtr(void)
 	return &gGarage.menuGarage;
 }
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x800b8558-0x800b8598
 void DECOMP_CS_Garage_Init(void)
 {
 	// go to 3D character selection

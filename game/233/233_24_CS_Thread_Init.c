@@ -1,8 +1,11 @@
 #include <common.h>
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x800ae54c-0x800ae81c
 void DECOMP_CS_Thread_ThTick(struct Thread *t)
 {
+	// NOTE(aalhendi): PSX-backfeed blocker: native scratchpad divergence; retail uses scratchpad 0x1f800108/0x1f800118 for parent frame-data temporaries.
 	short pos[3];
+	short rot[3];
 	struct CutsceneObj *cs = t->object;
 	struct Instance *inst = t->inst;
 	struct Instance *parentInst;
@@ -13,7 +16,7 @@ void DECOMP_CS_Thread_ThTick(struct Thread *t)
 		t->flags |= 0x800;
 
 		if ((sdata->gGT->gameMode2 & 0x80) != 0)
-			goto thTick_epilogue;
+			return;
 	}
 
 	DECOMP_CS_Thread_MoveOnPath(t);
@@ -34,7 +37,7 @@ void DECOMP_CS_Thread_ThTick(struct Thread *t)
 			{
 				parentInst = parentThread->inst;
 
-				DECOMP_CS_Instance_GetFrameData(parentInst, parentInst->animIndex, parentInst->animFrame, (u_short *)pos, 0, 0);
+				DECOMP_CS_Instance_GetFrameData(parentInst, parentInst->animIndex, parentInst->animFrame, (u_short *)pos, (u_short *)rot, 0);
 
 				inst->matrix.t[0] = parentInst->matrix.t[0] + pos[0];
 				inst->matrix.t[1] = parentInst->matrix.t[1] + pos[1];
@@ -42,10 +45,14 @@ void DECOMP_CS_Thread_ThTick(struct Thread *t)
 
 				if ((cs->flags & 0x10) == 0)
 				{
-					ConvertRotToMatrix(&inst->matrix, &pos[0]);
+					ConvertRotToMatrix(&inst->matrix, rot);
 				}
 			}
 		}
+
+		inst = t->inst;
+		if (inst == 0)
+			goto thTick_subtitles;
 
 		// ASM: 0x800ae6b4 - flag 0x8: write bone Y to OVR_233 global
 		if ((cs->flags & 0x8) != 0)
@@ -56,7 +63,7 @@ void DECOMP_CS_Thread_ThTick(struct Thread *t)
 
 			inst = t->inst;
 			if (inst == 0)
-				goto thTick_epilogue;
+				goto thTick_subtitles;
 		}
 
 		// ASM: 0x800ae6fc - flag 0x2: random alphaScale for fade effect
@@ -72,6 +79,7 @@ void DECOMP_CS_Thread_ThTick(struct Thread *t)
 	}
 
 	// ASM: 0x800ae744 - subtitle rendering
+thTick_subtitles:
 	if (cs->Subtitles.lngIndex > 0)
 	{
 		struct GameTracker *gGT = sdata->gGT;
@@ -81,12 +89,12 @@ void DECOMP_CS_Thread_ThTick(struct Thread *t)
 		textWidth = DECOMP_DecalFont_DrawMultiLine(sdata->lngStrings[cs->Subtitles.lngIndex], cs->Subtitles.textPos[0], cs->Subtitles.textPos[1], 460,
 		                                           cs->Subtitles.font, cs->Subtitles.colors);
 
-		textRect[0] = cs->Subtitles.textPos[0] - 236;
-		textRect[1] = cs->Subtitles.textPos[1] - 4;
+		textRect[0] = (u_short)((u_short)cs->Subtitles.textPos[0] - 236);
+		textRect[1] = (u_short)((u_short)cs->Subtitles.textPos[1] - 4);
 		textRect[2] = 472;
-		textRect[3] = (short)textWidth + 8;
+		textRect[3] = (u_short)((short)textWidth + 8);
 
-		DECOMP_RECTMENU_DrawInnerRect(textRect, 4, gGT->backBuffer->otMem.startPlusFour);
+		DECOMP_RECTMENU_DrawInnerRect((RECT *)textRect, 4, gGT->backBuffer->otMem.startPlusFour);
 	}
 
 thTick_epilogue:
@@ -97,6 +105,7 @@ thTick_epilogue:
 	}
 }
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x800af328-0x800af7c0
 struct Thread *DECOMP_CS_Thread_Init(short modelID, char *name, short *param_3, short param_4, struct Thread *parent)
 {
 	struct GameTracker *gGT = sdata->gGT;

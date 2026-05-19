@@ -1,5 +1,6 @@
 #include <common.h>
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x800ae318-0x800ae54c
 void DECOMP_CS_Thread_InterpolateFramesMS(struct Thread *t)
 {
 	struct GameTracker *gGT = sdata->gGT;
@@ -7,38 +8,35 @@ void DECOMP_CS_Thread_InterpolateFramesMS(struct Thread *t)
 	struct PrimMem *primMem;
 	u_int *prim;
 	u_int *end;
-	short curr[4] = {0};
-	short next[4] = {0};
+	u_short curr[3];
+	u_short next[3];
 	int depth;
 
-	if (inst == NULL)
-		return;
+	DECOMP_CS_Instance_GetFrameData(inst, inst->animIndex, inst->animFrame, curr, NULL, 0);
+	DECOMP_CS_Instance_GetFrameData(inst, inst->animIndex, inst->animFrame, next, NULL, 1);
 
-	DECOMP_CS_Instance_GetFrameData(inst, inst->animIndex, inst->animFrame, (u_short *)curr, NULL, 0);
-	DECOMP_CS_Instance_GetFrameData(inst, inst->animIndex, inst->animFrame, (u_short *)next, NULL, 1);
+	curr[0] = (u_short)(curr[0] + (u_short)inst->matrix.t[0]);
+	curr[1] = (u_short)(curr[1] + (u_short)inst->matrix.t[1]);
+	curr[2] = (u_short)(curr[2] + (u_short)inst->matrix.t[2]);
 
-	curr[0] += inst->matrix.t[0];
-	curr[1] += inst->matrix.t[1];
-	curr[2] += inst->matrix.t[2];
-
-	next[0] += inst->matrix.t[0];
-	next[1] += inst->matrix.t[1];
-	next[2] += inst->matrix.t[2];
+	next[0] = (u_short)(next[0] + (u_short)inst->matrix.t[0]);
+	next[1] = (u_short)(next[1] + (u_short)inst->matrix.t[1]);
+	next[2] = (u_short)(next[2] + (u_short)inst->matrix.t[2]);
 
 	primMem = &gGT->backBuffer->primMem;
 	prim = (u_int *)primMem->curr;
 	end = (u_int *)primMem->endMin100;
 
-	if (prim + 6 >= end)
+	if ((uintptr_t)(prim + 6) >= (uintptr_t)end)
 		return;
 
 	gte_SetRotMatrix(&gGT->pushBuffer[0].matrix_ViewProj);
 	gte_SetTransMatrix(&gGT->pushBuffer[0].matrix_ViewProj);
 
-	MTC2((curr[0] & 0xffff) | (curr[1] << 16), 0);
-	MTC2((u_short)curr[2], 1);
-	MTC2((next[0] & 0xffff) | (next[1] << 16), 2);
-	MTC2((u_short)next[2], 3);
+	MTC2((u_int)curr[0] | ((u_int)curr[1] << 16), 0);
+	MTC2((u_int)curr[2], 1);
+	MTC2((u_int)next[0] | ((u_int)next[1] << 16), 2);
+	MTC2((u_int)next[2], 3);
 	gte_rtpt();
 
 	prim[4] = MFC2(12);
