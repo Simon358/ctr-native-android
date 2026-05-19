@@ -96,24 +96,41 @@ void DECOMP_MainFrame_RenderFrame(struct GameTracker *gGT, struct GamepadSystem 
 #if 0
 	RenderAllBoxSceneSplitLines(gGT);
 #endif
+#endif
 
+#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
+	// NOTE(aalhendi): ctr-native routes instances through the retail
+	// RenderBucket queue/execute contract. The TEST_DrawInstances fallback below
+	// is reserved for non-CTR_NATIVE rebuild paths until they are cleaned up.
 	RenderBucket_QueueAllInstances(gGT);
-	RenderAllNormalParticles(gGT);
-	RenderDispEnv_World(gGT); // == RenderDispEnv_World ==
+#endif
 
+#ifndef REBUILD_PS1
+	RenderAllNormalParticles(gGT);
+#endif
+
+#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
+	RenderDispEnv_World(gGT); // == RenderDispEnv_World ==
+#endif
+
+#ifndef REBUILD_PS1
 	RenderAllFlag0x40(gGT); // I need a better name
 	RenderAllTitleDPP(gGT);
+#endif
 
+#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 	RenderBucket_ExecuteAllInstances(gGT);
+#endif
 
+#ifndef REBUILD_PS1
 	RenderAllTires(gGT);
 	RenderAllShadows(gGT);
 	RenderAllHeatParticles(gGT);
 
-#else
+#elif !defined(CTR_NATIVE)
 
-	// TODO(aalhendi): Remove this native test renderer and route ctr-native
-	// through the retail RenderBucket queue/execute path.
+	// TODO(aalhendi): Remove this legacy test renderer after non-CTR_NATIVE
+	// rebuild paths are routed through RenderBucket too.
 	// PC port version of ExecuteAllInstances
 	if ((gGT->renderFlags & 0x20) != 0)
 	{
@@ -665,6 +682,9 @@ void RenderAllBoxSceneSplitLines(struct GameTracker* gGT)
 }
 #endif
 
+#endif
+
+#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 void RenderBucket_QueueAllInstances(struct GameTracker *gGT)
 {
 	int lod;
@@ -698,7 +718,9 @@ void RenderBucket_QueueAllInstances(struct GameTracker *gGT)
 	// null terminator at end of list
 	*RBI = 0;
 }
+#endif
 
+#ifndef REBUILD_PS1
 void RenderAllNormalParticles(struct GameTracker *gGT)
 {
 	int i;
@@ -772,7 +794,9 @@ void RenderAllTitleDPP(struct GameTracker *gGT)
 		return;
 	DECOMP_MM_Title_SetTrophyDPP();
 }
+#endif
 
+#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 void RenderBucket_ExecuteAllInstances(struct GameTracker *gGT)
 {
 	if ((gGT->renderFlags & 0x20) == 0)
@@ -780,7 +804,9 @@ void RenderBucket_ExecuteAllInstances(struct GameTracker *gGT)
 
 	RenderBucket_Execute(gGT->ptrRenderBucketInstance, &gGT->backBuffer->primMem);
 }
+#endif
 
+#ifndef REBUILD_PS1
 void RenderAllTires(struct GameTracker *gGT)
 {
 	int i;
