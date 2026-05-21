@@ -8,7 +8,7 @@ struct CollFixedPlayerTrig
 
 static int COLL_FIXED_PlayerSearch_Abs(int value)
 {
-	return (value < 0) ? -value : value;
+	return (value < 0) ? (s32)(0u - (u32)value) : value;
 }
 
 static s32 COLL_FIXED_PlayerSearch_ClampByte(s32 value)
@@ -116,15 +116,15 @@ static void COLL_FIXED_PlayerSearch_UpdateLighting(struct ScratchpadStruct *sps,
 	s32 r0 = v0->color_hi[0];
 	s32 g0 = v0->color_hi[1];
 	s32 b0 = v0->color_hi[2];
-	s32 r = ((baryA * (v1->color_hi[0] - r0)) >> 12) + ((baryB * (v2->color_hi[0] - r0)) >> 12) + r0;
-	s32 g = ((baryA * (v1->color_hi[1] - g0)) >> 12) + ((baryB * (v2->color_hi[1] - g0)) >> 12) + g0;
-	s32 b = ((baryA * (v1->color_hi[2] - b0)) >> 12) + ((baryB * (v2->color_hi[2] - b0)) >> 12) + b0;
+	s32 r = (CollFixed_MulLo(baryA, v1->color_hi[0] - r0) >> 12) + (CollFixed_MulLo(baryB, v2->color_hi[0] - r0) >> 12) + r0;
+	s32 g = (CollFixed_MulLo(baryA, v1->color_hi[1] - g0) >> 12) + (CollFixed_MulLo(baryB, v2->color_hi[1] - g0) >> 12) + g0;
+	s32 b = (CollFixed_MulLo(baryA, v1->color_hi[2] - b0) >> 12) + (CollFixed_MulLo(baryB, v2->color_hi[2] - b0) >> 12) + b0;
 
 	r = COLL_FIXED_PlayerSearch_ClampByte(r);
 	g = COLL_FIXED_PlayerSearch_ClampByte(g);
 	b = COLL_FIXED_PlayerSearch_ClampByte(b);
 
-	s32 light = (((r * 0x4c) >> 8) + ((g * 0x96) >> 8) + ((b * 0x1e) >> 8)) * -0x20 + 0xc00;
+	s32 light = CollFixed_MulLo(((CollFixed_MulLo(r, 0x4c) >> 8) + (CollFixed_MulLo(g, 0x96) >> 8) + (CollFixed_MulLo(b, 0x1e) >> 8)), -0x20) + 0xc00;
 	s32 scaledLight;
 
 	if (light < 0)
@@ -140,17 +140,17 @@ static void COLL_FIXED_PlayerSearch_UpdateLighting(struct ScratchpadStruct *sps,
 		scaledLight = 0x8000;
 	}
 
-	light = (scaledLight - light) * 8;
+	light = CollFixed_MulLo(scaledLight - light, 8);
 
-	d->alphaScaleBackup = (d->alphaScaleBackup * 200 + light) >> 8;
-	inst->alphaScale = (inst->alphaScale * 200 + light) >> 8;
+	d->alphaScaleBackup = (CollFixed_MulLo(d->alphaScaleBackup, 200) + light) >> 8;
+	inst->alphaScale = (CollFixed_MulLo(inst->alphaScale, 200) + light) >> 8;
 }
 
 static void COLL_FIXED_PlayerSearch_NormalizeAxis3(struct ScratchpadStruct *sps, struct Driver *d)
 {
-	s32 x = d->AxisAngle3_normalVec[0] * 5 + sps->Set2.normalVec[0] * 3;
-	s32 y = d->AxisAngle3_normalVec[1] * 5 + sps->Set2.normalVec[1] * 3;
-	s32 z = d->AxisAngle3_normalVec[2] * 5 + sps->Set2.normalVec[2] * 3;
+	s32 x = CollFixed_MulLo(d->AxisAngle3_normalVec[0], 5) + CollFixed_MulLo(sps->Set2.normalVec[0], 3);
+	s32 y = CollFixed_MulLo(d->AxisAngle3_normalVec[1], 5) + CollFixed_MulLo(sps->Set2.normalVec[1], 3);
+	s32 z = CollFixed_MulLo(d->AxisAngle3_normalVec[2], 5) + CollFixed_MulLo(sps->Set2.normalVec[2], 3);
 	u32 sum = (u32)CollFixed_MulLo(x, x) + (u32)CollFixed_MulLo(y, y) + (u32)CollFixed_MulLo(z, z);
 	u32 len = VehCalc_FastSqrt(sum, 0x18) >> 12;
 
@@ -192,14 +192,14 @@ static int COLL_FIXED_PlayerSearch_CheckMaskGrabProgress(struct Driver *d, struc
 	struct CheckpointNode *node = &level->ptr_restart_points[(u8)quad->checkpointIndex];
 
 	if (((d->actionsFlagSet & 0x1000000) == 0) && (node->nextIndex_forward > 1) &&
-	    ((((level->ptr_restart_points[0].distToFinish >> 2) << 3) < (int)(d->distanceToFinish_checkpoint - node->distToFinish * 8))))
+	    ((((level->ptr_restart_points[0].distToFinish >> 2) << 3) < (int)(d->distanceToFinish_checkpoint - CollFixed_MulLo(node->distToFinish, 8)))))
 	{
 		return 1;
 	}
 
 	u16 trackLength = level->ptr_restart_points[0].distToFinish;
 
-	if ((node->distToFinish < ((trackLength * 0xf) >> 4)) && (d->lastValid->checkpointIndex != -1) &&
+	if ((node->distToFinish < (CollFixed_MulLo(trackLength, 0xf) >> 4)) && (d->lastValid->checkpointIndex != -1) &&
 	    ((level->ptr_restart_points[(u8)d->lastValid->checkpointIndex].distToFinish + (trackLength >> 2)) < node->distToFinish))
 	{
 		return 1;
@@ -209,6 +209,7 @@ static int COLL_FIXED_PlayerSearch_CheckMaskGrabProgress(struct Driver *d, struc
 	return 0;
 }
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x8001d944-0x8001eb0c
 void COLL_FIXED_PlayerSearch(struct Thread *t, struct Driver *d)
 {
 	struct GameTracker *gGT = sdata->gGT;
@@ -438,14 +439,14 @@ DriverAirborne:
 BlendNormal:
 {
 	s32 invFrames = 8 - lerpFrames;
-	s32 normalX = (lerpFrames * d->AxisAngle2_normalVec[0] + invFrames * d->normalVecUP.x) >> 3;
-	s32 normalY = (lerpFrames * d->AxisAngle2_normalVec[1] + invFrames * d->normalVecUP.y) >> 3;
-	s32 normalZ = (lerpFrames * d->AxisAngle2_normalVec[2] + invFrames * d->normalVecUP.z) >> 3;
+	s32 normalX = (CollFixed_MulLo(lerpFrames, d->AxisAngle2_normalVec[0]) + CollFixed_MulLo(invFrames, d->normalVecUP.x)) >> 3;
+	s32 normalY = (CollFixed_MulLo(lerpFrames, d->AxisAngle2_normalVec[1]) + CollFixed_MulLo(invFrames, d->normalVecUP.y)) >> 3;
+	s32 normalZ = (CollFixed_MulLo(lerpFrames, d->AxisAngle2_normalVec[2]) + CollFixed_MulLo(invFrames, d->normalVecUP.z)) >> 3;
 
 	if (d->hazardTimer > 0)
 	{
-		struct CollFixedPlayerTrig trig = COLL_FIXED_PlayerSearch_Trig(d->hazardTimer * 0xc);
-		s16 input[4] = {(trig.x * 0x19) >> 10, 0, (trig.z * 0x19) >> 10, 0};
+		struct CollFixedPlayerTrig trig = COLL_FIXED_PlayerSearch_Trig(CollFixed_MulLo(d->hazardTimer, 0xc));
+		s16 input[4] = {CollFixed_MulLo(trig.x, 0x19) >> 10, 0, CollFixed_MulLo(trig.z, 0x19) >> 10, 0};
 		int output[3];
 
 		gte_ldv0(input);
@@ -463,7 +464,8 @@ BlendNormal:
 	{
 		struct CollFixedPlayerTrig trig = COLL_FIXED_PlayerSearch_Trig(d->angle);
 
-		d->rotCurr.z = ratan2((-(s32)d->AxisAngle2_normalVec[0] * trig.z + d->AxisAngle2_normalVec[2] * trig.x) >> 12, d->AxisAngle2_normalVec[1]);
+		d->rotCurr.z = ratan2((CollFixed_MulLo(-d->AxisAngle2_normalVec[0], trig.z) + CollFixed_MulLo(d->AxisAngle2_normalVec[2], trig.x)) >> 12,
+		                      d->AxisAngle2_normalVec[1]);
 	}
 
 	if (d->hazardTimer < 1)
