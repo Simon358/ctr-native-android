@@ -4,6 +4,8 @@ void DECOMP_RB_TNT_ThTick_SitOnHead();
 
 static const s16 s_tntThrowHeadY[0x10] = {32, 32, 64, 32, 32, 48, 32, 32, 48, 64, 32, 48, 56, 24, 32, 56};
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x800ad710-0x800ad92c.
+// NOTE(aalhendi): Native uses retail character-height table bytes from 0x800b2ac4.
 void DECOMP_RB_TNT_ThTick_ThrowOnHead(struct Thread *t)
 {
 	struct MineWeapon *mw;

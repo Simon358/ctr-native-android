@@ -1,6 +1,7 @@
 #include <common.h>
 // In air, after spamming L1 or R1,
 // will explode on impact with ground
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x800ad310-0x800ad44c.
 void DECOMP_RB_TNT_ThTick_ThrowOffHead(struct Thread *t)
 {
 	struct GameTracker *gGT = sdata->gGT;
