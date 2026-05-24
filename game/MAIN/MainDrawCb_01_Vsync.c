@@ -1,16 +1,18 @@
 #include <common.h>
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x80034aa4-0x80034b48;
+// REBUILD_PC keeps native input/audio/VRAM bridge work.
 void DECOMP_MainDrawCb_Vsync()
 {
 	struct GameTracker *gGT;
 
-	sdata->vsyncTillFlip--;
-
 	gGT = sdata->gGT;
 	gGT->frameTimer_VsyncCallback++;
-	gGT->vSync_between_drawSync++;
 	if ((gGT->gameMode1 & PAUSE_ALL) == 0)
 		gGT->frameTimer_Confetti++;
+
+	sdata->vsyncTillFlip--;
+	gGT->vSync_between_drawSync++;
 
 	// 1 unit = 1/16th millisecond
 	// 1 second = ~16,000 units
@@ -18,14 +20,11 @@ void DECOMP_MainDrawCb_Vsync()
 	sdata->rcntTotalUnits += GetRCnt(0xf2000001);
 	ResetRCnt(0xf2000001);
 
-	// If Software-CriticalSection is active,
-	// then vsync ticked during a block of code
-	// where channelTaken/channelFree are mid-edit,
-	// traversing the list here will cause corruption.
-	// This avoids the use of Hardware-CriticalSection,
-	// which allows the rest of VsyncCallback to run,
-	// preventing a frame spike from 30fps->20fps
+#ifdef REBUILD_PC
+	// NOTE(aalhendi): Retail calls HOWL unconditionally. Native skips only while
+	// channel lists are mid-edit.
 	if (sdata->criticalSectionCount == 0)
+#endif
 	{
 		DECOMP_howl_PlayAudio_Update();
 	}
@@ -36,7 +35,7 @@ void DECOMP_MainDrawCb_Vsync()
 
 	DECOMP_GAMEPAD_PollVsync(sdata->gGamepads);
 
-#if 1
+#ifdef REBUILD_PC
 
 	// wait two vsyncs for VRAM upload to finish
 	if (sdata->frameFinishedVRAM != 0)
