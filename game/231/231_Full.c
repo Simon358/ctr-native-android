@@ -29,9 +29,11 @@
 #include "231_027_RB_Warpball_Death.c"
 #include "231_028_RB_Warpball_NewPathNode.c"
 #include "231_029_RB_Warpball_Start.c"
+#include "231_030_RB_Warpball_GetDriverTarget.c"
+#include "231_031_RB_Warpball_SetTargetDriver.c"
 
-// TODO(aalhendi): unported warpball target selection, tracking tick, audio recycle, and matrix-parent behavior.
-// TODO(aalhendi): 030-038 are the remaining warpball / mask / shield cluster.
+// TODO(aalhendi): unported warpball tracking tick, audio recycle, and matrix-parent behavior.
+// TODO(aalhendi): 034 and 037-038 are the remaining warpball / mask / shield cluster.
 #include "231_032_RB_Warpball_SeekDriver.c"
 #include "231_035_RB_MaskWeapon_FadeAway.c"
 #include "231_036_RB_MaskWeapon_ThTick.c"
