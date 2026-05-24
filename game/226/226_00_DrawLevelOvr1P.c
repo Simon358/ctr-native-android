@@ -667,30 +667,76 @@ static void DrawLevelOvr1P_RestoreProjectedUvScratch(void)
 	*CTR_SCRATCHPAD_PTR(u32, 0x1a4) = *CTR_SCRATCHPAD_PTR(u32, 0x1b0);
 }
 
-static u32 DrawLevelOvr1P_GetDeepestMosaicReloadSpan(u32 handlerAddress)
+static int DrawLevelOvr1P_GetDeepestMosaicReloadGate(u32 directHandlerAddress, u32 previousHandlerAddress, u32 *reloadSpan)
 {
-	switch (handlerAddress)
+	u32 expectedHandlerAddress;
+
+	switch (directHandlerAddress)
 	{
-	case 0x800a3a34:
-	case 0x800a4550:
-		return 0x30;
+	case 0x800a4034:
+	case 0x800a402c:
+	case 0x800a40b8:
+		expectedHandlerAddress = 0x800a3a34;
+		*reloadSpan = 0x30;
+		break;
 
-	case 0x800a557c:
-	case 0x800a6480:
-		return 0x60;
+	case 0x800a4c14:
+	case 0x800a4c0c:
+	case 0x800a4cc8:
+		expectedHandlerAddress = 0x800a4550;
+		*reloadSpan = 0x30;
+		break;
 
-	case 0x800a745c:
-	case 0x800a810c:
-	case 0x800a907c:
-	case 0x800a9d2c:
-		return 0xc0;
+	case 0x800a5d14:
+	case 0x800a5d0c:
+	case 0x800a5d98:
+		expectedHandlerAddress = 0x800a557c;
+		*reloadSpan = 0x60;
+		break;
+
+	case 0x800a6bb4:
+	case 0x800a6bac:
+	case 0x800a6c68:
+		expectedHandlerAddress = 0x800a6480;
+		*reloadSpan = 0x60;
+		break;
+
+	case 0x800a7a60:
+	case 0x800a7a58:
+	case 0x800a7ae4:
+		expectedHandlerAddress = 0x800a745c;
+		*reloadSpan = 0xc0;
+		break;
+
+	case 0x800a87d4:
+	case 0x800a87cc:
+	case 0x800a8888:
+		expectedHandlerAddress = 0x800a810c;
+		*reloadSpan = 0xc0;
+		break;
+
+	case 0x800a9680:
+	case 0x800a9678:
+	case 0x800a9704:
+		expectedHandlerAddress = 0x800a907c;
+		*reloadSpan = 0xc0;
+		break;
+
+	case 0x800aa3f4:
+	case 0x800aa3ec:
+	case 0x800aa4a8:
+		expectedHandlerAddress = 0x800a9d2c;
+		*reloadSpan = 0xc0;
+		break;
 
 	default:
 		return 0;
 	}
+
+	return previousHandlerAddress == expectedHandlerAddress;
 }
 
-static void DrawLevelOvr1P_PrepareDeepestMosaicUv(const struct DrawLevelOvr1PScratchVertex *projected, const int *indices)
+static void DrawLevelOvr1P_PrepareDeepestMosaicUv(const struct DrawLevelOvr1PScratchVertex *projected, const int *indices, u32 directHandlerAddress)
 {
 	u32 mosaicBase;
 	u32 reloadSpan;
@@ -705,17 +751,18 @@ static void DrawLevelOvr1P_PrepareDeepestMosaicUv(const struct DrawLevelOvr1PScr
 
 	mosaicBase = *CTR_SCRATCHPAD_PTR(u32, 0x84);
 	// NOTE(aalhendi): Retail 0x800a8714/0x800aa334 restores saved UV scratch
-	// before checking the default-helper mosaic reload gate.
+	// when the mosaic sentinel is positive or the previous-helper gate fails.
 	if ((s32)mosaicBase > 0)
 	{
 		DrawLevelOvr1P_RestoreProjectedUvScratch();
 		return;
 	}
 
-	reloadSpan = DrawLevelOvr1P_GetDeepestMosaicReloadSpan(*CTR_SCRATCHPAD_PTR(u32, 0x9c));
-
-	if (reloadSpan == 0)
+	if (!DrawLevelOvr1P_GetDeepestMosaicReloadGate(directHandlerAddress, *CTR_SCRATCHPAD_PTR(u32, 0x9c), &reloadSpan))
+	{
+		DrawLevelOvr1P_RestoreProjectedUvScratch();
 		return;
+	}
 
 	sourceOffset = *CTR_SCRATCHPAD_PTR(u32, 0x320) << 1;
 	if ((s32)(*CTR_SCRATCHPAD_PTR(u32, 0x194) << 8) < 0)
@@ -2384,7 +2431,7 @@ static int DrawLevelOvr1P_EmitPreparedProjectedDirectMaskAtOt(struct PushBuffer 
                                                               const struct TextureLayout *texture, u32 directMask, int writeClipBytes, int waterRenderedDirect,
                                                               int otIndexOverride);
 
-static int DrawLevelOvr1P_IsListDirectHandlerAddress(u32 handlerAddress)
+static int DrawLevelOvr1P_IsRawListDirectHandlerAddress(u32 handlerAddress)
 {
 	switch (handlerAddress)
 	{
@@ -2430,9 +2477,11 @@ static int DrawLevelOvr1P_EmitPreparedProjectedDirectMaskAtOt(struct PushBuffer 
 	if (handlerAddress == 0)
 		return 1;
 
-	// NOTE(aalhendi): Retail list-bucket direct handlers are raw packet writers
-	// after the caller's cull/direct-mask checks.
-	if (writeClipBytes == DRAW_LEVEL_OVR1P_CLIP_BYTES_LIST && !waterRenderedDirect && DrawLevelOvr1P_IsListDirectHandlerAddress(handlerAddress))
+	// NOTE(aalhendi): Retail list-bucket direct handlers outside the target
+	// 0x800a87d4/0x800a8888 family are raw packet writers after the caller's
+	// cull/direct-mask checks. The target family keeps local terminal clip
+	// checks even though list-projected clip bytes normally make them inert.
+	if (writeClipBytes == DRAW_LEVEL_OVR1P_CLIP_BYTES_LIST && !waterRenderedDirect && DrawLevelOvr1P_IsRawListDirectHandlerAddress(handlerAddress))
 		return DrawLevelOvr1P_EmitPreparedProjectedDirectMaskRawAtOt(pb, primMem, block, projected, indices, faceIndex, texture, directMask, otIndexOverride);
 
 	// NOTE(aalhendi): Retail direct table offsets 4/8/12 map to GT3 primary,
@@ -2520,6 +2569,7 @@ static int DrawLevelOvr1P_EmitPreparedProjectedDirectMaskRawAtOt(struct PushBuff
 	case 0x800a4034:
 	case 0x800a5d14:
 	case 0x800a7a60:
+	case 0x800a87d4:
 	case 0x800a9680:
 	{
 		int triIndices[3] = {indices[0], indices[1], indices[2]};
@@ -2533,6 +2583,7 @@ static int DrawLevelOvr1P_EmitPreparedProjectedDirectMaskRawAtOt(struct PushBuff
 	case 0x800a402c:
 	case 0x800a5d0c:
 	case 0x800a7a58:
+	case 0x800a87cc:
 	case 0x800a9678:
 	{
 		int triIndices[3] = {indices[1], indices[3], indices[2]};
@@ -2546,6 +2597,7 @@ static int DrawLevelOvr1P_EmitPreparedProjectedDirectMaskRawAtOt(struct PushBuff
 	case 0x800a40b8:
 	case 0x800a5d98:
 	case 0x800a7ae4:
+	case 0x800a8888:
 	case 0x800a9704:
 		return DrawLevelOvr1P_EmitPreparedProjectedQuadRawAtOt(pb, primMem, block, projected, indices, faceIndex, texture,
 		                                                       DrawLevelOvr1P_GetProjectedMaxDepth(projected, indices), otIndexOverride);
@@ -2593,9 +2645,9 @@ static int DrawLevelOvr1P_EmitPreparedProjectedQuadDirectAtOt(struct PushBuffer 
                                                               const struct TextureLayout *texture, int writeClipBytes, int waterRenderedDirect,
                                                               int otIndexOverride)
 {
-	if (writeClipBytes && !waterRenderedDirect)
-		DrawLevelOvr1P_StoreRenderedClipRecordHeader(*CTR_SCRATCHPAD_PTR(u32, 0x194));
-
+	// NOTE(aalhendi): Retail terminal GT4 helpers consume the current scratch
+	// 0x80 clipped-record header; selector/rendered owners refresh it before
+	// dispatch, while copied recursive helpers inherit it unchanged.
 	if (writeClipBytes)
 	{
 		if (DrawLevelOvr1P_AreProjectedVerticesHalfNear(projected, indices, 4))
@@ -2638,7 +2690,7 @@ static u32 DrawLevelOvr1P_GetNearSubdivisionHandlerAddress(u32 nearMask, int wri
 static void DrawLevelOvr1P_SetPreviousRecursiveHandler(u32 handlerAddress)
 {
 	// NOTE(aalhendi): Retail stores the active recursive handler at scratch
-	// 0x9c before jumping through the copied table at scratch 0x14c.
+	// 0x9c immediately before jumping through the copied table at scratch 0x14c.
 	*CTR_SCRATCHPAD_PTR(u32, 0x9c) = handlerAddress;
 }
 
@@ -2673,11 +2725,13 @@ static int DrawLevelOvr1P_EmitDeepestProjectedDirectAtOt(struct PushBuffer *pb, 
                                                          int otIndexOverride)
 {
 	u32 directMask;
+	u32 directHandlerAddress;
 	int result;
 
 	directMask = DrawLevelOvr1P_SelectAndStoreDirectMask(block, projected, indices, tableWord, allowedMask);
-	if (texture != NULL && DrawLevelOvr1P_GetDirectHandlerAddress(directMask) != 0)
-		DrawLevelOvr1P_PrepareDeepestMosaicUv(projected, indices);
+	directHandlerAddress = DrawLevelOvr1P_GetDirectHandlerAddress(directMask);
+	if (texture != NULL && directHandlerAddress != 0)
+		DrawLevelOvr1P_PrepareDeepestMosaicUv(projected, indices, directHandlerAddress);
 
 	result = DrawLevelOvr1P_EmitPreparedProjectedDirectMaskAtOt(pb, primMem, block, projected, indices, faceIndex, texture, directMask, writeClipBytes, 0,
 	                                                            otIndexOverride);
@@ -2704,11 +2758,13 @@ static int DrawLevelOvr1P_EmitDeepestProjectedDirectStoredMaskAtOt(struct PushBu
                                                                    const struct DrawLevelOvr1PScratchVertex *projected, const int *indices, int faceIndex,
                                                                    const struct TextureLayout *texture, u32 directMask, int writeClipBytes, int otIndexOverride)
 {
+	u32 directHandlerAddress;
 	int result;
 
 	*CTR_SCRATCHPAD_PTR(u32, 0x70) = directMask;
-	if (texture != NULL && DrawLevelOvr1P_GetDirectHandlerAddress(directMask) != 0)
-		DrawLevelOvr1P_PrepareDeepestMosaicUv(projected, indices);
+	directHandlerAddress = DrawLevelOvr1P_GetDirectHandlerAddress(directMask);
+	if (texture != NULL && directHandlerAddress != 0)
+		DrawLevelOvr1P_PrepareDeepestMosaicUv(projected, indices, directHandlerAddress);
 
 	result = DrawLevelOvr1P_EmitPreparedProjectedDirectMaskAtOt(pb, primMem, block, projected, indices, faceIndex, texture, directMask, writeClipBytes, 0,
 	                                                            otIndexOverride);
@@ -2735,13 +2791,15 @@ static int DrawLevelOvr1P_EmitDeepestProjectedDirectMaskAtOt(struct PushBuffer *
                                                              const struct DrawLevelOvr1PScratchVertex *projected, const int *indices, int faceIndex,
                                                              const struct TextureLayout *texture, u32 directMask, int writeClipBytes, int otIndexOverride)
 {
+	u32 directHandlerAddress;
 	int result;
 
 	(void)writeClipBytes;
 
 	*CTR_SCRATCHPAD_PTR(u32, 0x70) = directMask;
-	if (texture != NULL && DrawLevelOvr1P_GetDirectHandlerAddress(directMask) != 0)
-		DrawLevelOvr1P_PrepareDeepestMosaicUv(projected, indices);
+	directHandlerAddress = DrawLevelOvr1P_GetDirectHandlerAddress(directMask);
+	if (texture != NULL && directHandlerAddress != 0)
+		DrawLevelOvr1P_PrepareDeepestMosaicUv(projected, indices, directHandlerAddress);
 
 	result = DrawLevelOvr1P_EmitPreparedProjectedDirectMaskRawAtOt(pb, primMem, block, projected, indices, faceIndex, texture, directMask, otIndexOverride);
 
@@ -2776,6 +2834,7 @@ static int DrawLevelOvr1P_EmitProjectedGridNearClippedBridge(struct PushBuffer *
                                                              const struct DrawLevelOvr1PScratchVertex *projected, const int *indices, int faceIndex,
                                                              const struct TextureLayout *texture, u32 nearMask, int depth, int writeClipBytes, u32 allowedMask,
                                                              int inheritedOtIndex);
+static int DrawLevelOvr1P_IsDeepestSubdivisionFrame(const struct DrawLevelOvr1PScratchVertex *projected);
 
 static int DrawLevelOvr1P_EmitProjectedGridFaceCommon(struct PushBuffer *pb, struct PrimMem *primMem, const struct QuadBlock *block,
                                                       const struct DrawLevelOvr1PScratchVertex *projected, const int *indices, int faceIndex,
@@ -2792,21 +2851,23 @@ static int DrawLevelOvr1P_EmitProjectedGridFaceCommon(struct PushBuffer *pb, str
 	if (writeClipBytes && DrawLevelOvr1P_IsProjectedFaceFullyNear(projected, indices))
 		return 1;
 
-	if (writeClipBytes)
-		DrawLevelOvr1P_StoreRenderedClipRecordHeader(*CTR_SCRATCHPAD_PTR(u32, 0x194));
-
 	// NOTE(aalhendi): Rendered helpers branch on clip bytes before direct-mask reduction.
+	// The clipped-record header scratch word is inherited here; retail only
+	// refreshes it in the selector-style body before this shared recursive path.
 	if (writeClipBytes && DrawLevelOvr1P_HasProjectedVertexNear(projected, indices, 4))
 	{
 		directMask = DRAW_LEVEL_OVR1P_DIRECT_QUAD;
 		*CTR_SCRATCHPAD_PTR(u32, 0x70) = directMask;
 
+		// NOTE(aalhendi): Retail 0x800a8360/0x800a9f80 enters the deepest
+		// handler from frame 0x324 before selecting another near child.
+		if (DrawLevelOvr1P_IsDeepestSubdivisionFrame(projected))
+			return DrawLevelOvr1P_EmitDeepestProjectedDirectStoredMaskAtOt(pb, primMem, block, projected, indices, faceIndex, texture, directMask,
+			                                                               writeClipBytes, inheritedOtIndex);
+
 		nearMask = DrawLevelOvr1P_GetProjectedNearMaskForDepth(projected, indices, depth);
 		if (nearMask != 0)
 		{
-			u32 handlerAddress = DrawLevelOvr1P_GetNearSubdivisionHandlerAddress(nearMask, writeClipBytes);
-
-			DrawLevelOvr1P_SetPreviousRecursiveHandler(handlerAddress);
 			return DrawLevelOvr1P_EmitProjectedGridNearClippedBridge(pb, primMem, block, projected, indices, faceIndex, texture, nearMask, depth,
 			                                                         writeClipBytes, directMask, inheritedOtIndex);
 		}
@@ -2828,12 +2889,15 @@ static int DrawLevelOvr1P_EmitProjectedGridFaceCommon(struct PushBuffer *pb, str
 	if (directMask == 0)
 		return 1;
 
+	// NOTE(aalhendi): The shared retail helper uses the deepest-frame direct
+	// path for frame 0x324 even when no further near child is selected.
+	if (DrawLevelOvr1P_IsDeepestSubdivisionFrame(projected))
+		return DrawLevelOvr1P_EmitDeepestProjectedDirectStoredMaskAtOt(pb, primMem, block, projected, indices, faceIndex, texture, directMask, writeClipBytes,
+		                                                               inheritedOtIndex);
+
 	nearMask = DrawLevelOvr1P_GetProjectedNearMaskForDepth(projected, indices, depth);
 	if (nearMask != 0)
 	{
-		u32 handlerAddress = DrawLevelOvr1P_GetNearSubdivisionHandlerAddress(nearMask, writeClipBytes);
-
-		DrawLevelOvr1P_SetPreviousRecursiveHandler(handlerAddress);
 		return DrawLevelOvr1P_EmitProjectedGridNearClippedBridge(pb, primMem, block, projected, indices, faceIndex, texture, nearMask, depth, writeClipBytes,
 		                                                         directMask, inheritedOtIndex);
 	}
@@ -3106,13 +3170,13 @@ static int DrawLevelOvr1P_EmitProjectedGridNearClippedBridge(struct PushBuffer *
 	}
 
 	handlerAddress = DrawLevelOvr1P_GetNearSubdivisionHandlerAddress(nearMask, writeClipBytes);
-	DrawLevelOvr1P_SetPreviousRecursiveHandler(handlerAddress);
 	sub = DrawLevelOvr1P_GetSubdivisionFrame(depth);
 	if (DrawLevelOvr1P_HandlerUses4x4GridFrame(handlerAddress))
 		DrawLevelOvr1P_BuildGridSubdivisionFrame4x4(sub, projected, indices, writeClipBytes);
 	else
 		DrawLevelOvr1P_BuildGridSubdivisionFrame(sub, projected, indices, writeClipBytes);
 
+	DrawLevelOvr1P_SetPreviousRecursiveHandler(handlerAddress);
 	return DrawLevelOvr1P_DispatchProjectedGridHelper(pb, primMem, block, sub, faceIndex, depth + 1, texture, handlerAddress, writeClipBytes, allowedMask,
 	                                                  inheritedOtIndex);
 }
@@ -3142,12 +3206,12 @@ static int DrawLevelOvr1P_EmitProjectedNearClippedBridge(struct PushBuffer *pb, 
 	}
 
 	handlerAddress = DrawLevelOvr1P_GetNearSubdivisionHandlerAddress(nearMask, writeClipBytes);
-	DrawLevelOvr1P_SetPreviousRecursiveHandler(handlerAddress);
 	subdivisionCase = DrawLevelOvr1P_FindCompactNearSubdivisionCase(handlerAddress);
 	if (subdivisionCase == NULL)
 		return DrawLevelOvr1P_EmitProjectedGridNearClippedBridge(pb, primMem, block, projected, indices, faceIndex, texture, nearMask, depth, writeClipBytes,
 		                                                         allowedMask, inheritedOtIndex);
 
+	DrawLevelOvr1P_SetPreviousRecursiveHandler(handlerAddress);
 	sub = DrawLevelOvr1P_GetSubdivisionFrame(depth);
 
 	// TODO(aalhendi): Replace the shared native body with retail's exact
@@ -3181,8 +3245,6 @@ static int DrawLevelOvr1P_EmitProjectedNearClippedBridge(struct PushBuffer *pb, 
 			*CTR_SCRATCHPAD_PTR(u32, 0x70) = renderedDirectMask;
 			if (subNearMask != 0)
 			{
-				DrawLevelOvr1P_SetPreviousRecursiveHandler(DrawLevelOvr1P_GetNearSubdivisionHandlerAddress(subNearMask, writeClipBytes));
-
 				if (!DrawLevelOvr1P_EmitProjectedNearClippedBridge(pb, primMem, block, sub, subIndices, faceIndex, texture, subNearMask, depth + 1,
 				                                                   writeClipBytes, renderedDirectMask, inheritedOtIndex))
 					return 0;
@@ -3213,8 +3275,6 @@ static int DrawLevelOvr1P_EmitProjectedNearClippedBridge(struct PushBuffer *pb, 
 
 			if (subNearMask != 0)
 			{
-				DrawLevelOvr1P_SetPreviousRecursiveHandler(DrawLevelOvr1P_GetNearSubdivisionHandlerAddress(subNearMask, writeClipBytes));
-
 				if (!DrawLevelOvr1P_EmitProjectedNearClippedBridge(pb, primMem, block, sub, subIndices, faceIndex, texture, subNearMask, depth + 1,
 				                                                   writeClipBytes, directMask, inheritedOtIndex))
 					return 0;
@@ -3243,14 +3303,14 @@ static int DrawLevelOvr1P_EmitProjectedGroundQuadAllowed(struct PushBuffer *pb, 
 	if (writeClipBytes && DrawLevelOvr1P_IsProjectedFaceFullyNear(projected, indices))
 		return 1;
 
-	if (writeClipBytes)
-		DrawLevelOvr1P_StoreRenderedClipRecordHeader(tableWord);
-
 	// NOTE(aalhendi): Retail rendered helpers carry mask 0xc into near recursion here.
 	if (writeClipBytes && DrawLevelOvr1P_HasProjectedVertexNear(projected, indices, 4))
 	{
 		directMask = DRAW_LEVEL_OVR1P_DIRECT_QUAD;
 		*CTR_SCRATCHPAD_PTR(u32, 0x70) = directMask;
+		// NOTE(aalhendi): Selector-style helpers refresh the clipped-record
+		// header only after the surviving direct mask is committed.
+		DrawLevelOvr1P_StoreRenderedClipRecordHeader(tableWord);
 
 		maxDepth = DrawLevelOvr1P_GetProjectedMaxDepth(projected, indices);
 		inheritedOtIndex = DrawLevelOvr1P_GetProjectedOtIndex(block, projected, maxDepth, faceIndex);
@@ -3276,6 +3336,9 @@ static int DrawLevelOvr1P_EmitProjectedGroundQuadAllowed(struct PushBuffer *pb, 
 	directMask = DrawLevelOvr1P_SelectAndStoreDirectMask(block, projected, indices, tableWord, allowedMask);
 	if (directMask == 0)
 		return 1;
+
+	if (writeClipBytes)
+		DrawLevelOvr1P_StoreRenderedClipRecordHeader(tableWord);
 
 	maxDepth = DrawLevelOvr1P_GetProjectedMaxDepth(projected, indices);
 	inheritedOtIndex = DrawLevelOvr1P_GetProjectedOtIndex(block, projected, maxDepth, faceIndex);
