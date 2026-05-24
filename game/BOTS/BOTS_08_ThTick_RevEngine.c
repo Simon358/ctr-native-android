@@ -1,5 +1,6 @@
 #include <common.h>
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x8001372c-0x80013838.
 void DECOMP_BOTS_ThTick_RevEngine(struct Thread *botThread)
 {
 	struct Driver *botDriver = (struct Driver *)botThread->object;

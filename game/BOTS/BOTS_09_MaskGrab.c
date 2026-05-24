@@ -1,5 +1,6 @@
 #include <common.h>
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x80013838-0x80013a70.
 void DECOMP_BOTS_MaskGrab(struct Thread *botThread)
 {
 	int midpoint;
