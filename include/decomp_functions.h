@@ -463,6 +463,7 @@ void DECOMP_UI_DrawDriverIcon(struct Icon *icon, Point point, u_long *ot, u32 tr
 void DECOMP_UI_RenderFrame_AdvHub(void);
 void DECOMP_UI_RenderFrame_Racing(void);
 
+void UI_SaveLapTime(int numLaps, int lapTime, s16 driverID);
 void DECOMP_UI_SaveLapTime(int numLaps, int lapTime, s16 driverID);
 
 void DECOMP_UI_Map_GetIconPos(s16 *m, int *posX, int *posY);
@@ -556,7 +557,9 @@ void DECOMP_VehPhysProc_SpinStop_Init(struct Thread *t, struct Driver *d);
 
 void PlayLevel_UpdateLapStats(void);
 void DECOMP_PlayLevel_UpdateLapStats(void);
+void MainGameEnd_SoloRaceGetReward(int subtractTimeCrateBonus);
 void DECOMP_MainGameEnd_SoloRaceGetReward(int subtractTimeCrateBonus);
+void MainGameEnd_SoloRaceSaveHighScore(void);
 void DECOMP_MainGameEnd_SoloRaceSaveHighScore(void);
 void MainGameEnd_Initialize(void);
 void DECOMP_MainGameEnd_Initialize(void);
@@ -825,6 +828,7 @@ void DECOMP_AA_EndEvent_DisplayTime(s16 driverId, s16 param_2);
 void DECOMP_UI_DrawPosSuffix(s16 posX, s16 posY, struct Driver *d, s16 flags);
 void DECOMP_UI_DrawRaceClock(u16 paramX, u16 paramY, u32 flags, struct Driver *driver);
 int DECOMP_DecalFont_GetLineWidth(char *str, s16 fontType);
+void RR_EndEvent_UnlockAward(void);
 void DECOMP_RR_EndEvent_UnlockAward(void);
 void DECOMP_RR_EndEvent_DrawHighScore(s16 startX, int startY);
 int DECOMP_LOAD_IsOpen_RacingOrBattle(void);

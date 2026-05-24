@@ -1,12 +1,8 @@
 #include <common.h>
 
-// TODO(aalhendi): Source-backed gameplay progression bridge; audit NTSC-U 926
-// 0x800414f4-0x80041c84 before ASM stamp. Direct finish-flow dependencies are
-// now build-wired, but BOTS_ThTick_Drive and MainGameEnd_Initialize remain
-// suspect until their full ASM passes are complete.
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x800414f4-0x80041c84
 void PlayLevel_UpdateLapStats(void)
 {
-	u8 bVar1;
 	int iVar2;
 	u8 lapCounter;
 	int iVar4;
@@ -112,7 +108,7 @@ void PlayLevel_UpdateLapStats(void)
 				    // player of any kind
 				    (currDriver->instSelf->thread->modelIndex == DYNAMIC_PLAYER))
 				{
-					DECOMP_UI_SaveLapTime(currDriver->lapIndex, gGT->elapsedEventTime - currDriver->lapTime, currDriver->driverID);
+					UI_SaveLapTime(currDriver->lapIndex, gGT->elapsedEventTime - currDriver->lapTime, currDriver->driverID);
 
 
 					gGT->lapTime[currDriver->lapIndex] = gGT->elapsedEventTime - currDriver->lapTime;
@@ -316,7 +312,7 @@ void PlayLevel_UpdateLapStats(void)
 			        // AND
 
 			        // new lowest distance (max progress)
-			        (currDriver->distanceToFinish_curr < (u32)minDistance)))
+			        ((s32)currDriver->distanceToFinish_curr < minDistance)))
 			{
 				// set new min distToFinish (max progress)
 				minDistance = currDriver->distanceToFinish_curr;
@@ -373,7 +369,7 @@ void PlayLevel_UpdateLapStats(void)
 
 		int currRank = currDriver->driverRank;
 
-		if ((-1 < currRank) && (0x4b00 < gGT->elapsedEventTime) && (gGT->humanPlayerPositions[iVar10] < currRank))
+		if ((-1 < currRank) && (0x4b00 < gGT->elapsedEventTime) && ((s8)gGT->humanPlayerPositions[iVar10] < currRank))
 		{
 			int characterID = data.characterIDs[gGT->driversInRaceOrder[currRank - 1]->driverID];
 

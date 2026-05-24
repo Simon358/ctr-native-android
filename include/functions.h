@@ -723,6 +723,7 @@ void PickupBots_Update();
 // PlayLevel (?)
 
 void PlayLevel_UpdateLapStats();
+void RR_EndEvent_UnlockAward(void);
 
 // Tawna (?)
 
@@ -865,7 +866,7 @@ void Torch_Main(void *particleList_heatWarp, struct PushBuffer *pb, struct PrimM
 
 // UI
 
-void UI_SaveLapTime(int lapID, int time, int driverID);
+void UI_SaveLapTime(int lapID, int time, s16 driverID);
 void UI_ThTick_CountPickup(struct Thread *);
 void UI_ThTick_Reward(struct Thread *);
 void UI_ThTick_CtrLetters(struct Thread *);

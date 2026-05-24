@@ -1,19 +1,10 @@
 #include <common.h>
 
-// TODO(aalhendi): Source-backed bridge for NTSC-U 926 0x8003a3fc-0x8003aee8.
-// Keep unstamped until the battle ranking loops and reward callouts are checked
-// instruction-by-instruction against retail.
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x8003a3fc-0x8003aee8
 
 static void MainGameEnd_AddBattleWinner(struct GameTracker *gGT, struct Driver *driver)
 {
-	if (driver == NULL)
-		return;
-
 	u32 winnerIndex = gGT->numWinners;
-
-	if (winnerIndex >= 4)
-		return;
-
 	u8 driverID = driver->driverID;
 	gGT->winnerIndex[winnerIndex] = driverID;
 
@@ -24,7 +15,10 @@ static void MainGameEnd_AddBattleWinner(struct GameTracker *gGT, struct Driver *
 
 	BOTS_Driver_Convert(driver);
 	gGT->numWinners++;
+}
 
+static void MainGameEnd_SetBattleConfetti(struct GameTracker *gGT)
+{
 	gGT->confetti.numParticles_max = 0xfa;
 	gGT->confetti.unk2 = 0xfa;
 }
@@ -32,9 +26,6 @@ static void MainGameEnd_AddBattleWinner(struct GameTracker *gGT, struct Driver *
 static void MainGameEnd_UpdateAdventureLosses(struct GameTracker *gGT, struct Driver *player)
 {
 	if ((gGT->gameMode1 & (ADVENTURE_CUP | RELIC_RACE | ADVENTURE_MODE)) != ADVENTURE_MODE)
-		return;
-
-	if (player == NULL)
 		return;
 
 	if (player->driverRank == 0)
@@ -64,9 +55,6 @@ static void MainGameEnd_RecordNonBattleStandings(struct GameTracker *gGT)
 	{
 		struct Driver *driver = gGT->drivers[i];
 
-		if (driver == NULL)
-			continue;
-
 		int rank = driver->driverRank;
 
 		if (rank < 3)
@@ -82,14 +70,14 @@ static int MainGameEnd_BattleTeamActive(struct GameTracker *gGT, int team)
 	return (gGT->battleSetup.teamFlags & (1u << team)) != 0;
 }
 
-static void MainGameEnd_RankBattleTeams(struct GameTracker *gGT, int scores[4])
+static void MainGameEnd_RankBattlePointLimit(struct GameTracker *gGT)
 {
 	u8 usedTeams = 0;
 
 	for (int rank = 0; rank < 4; rank++)
 	{
 		int bestScore = -400;
-		int tiedTeams[4];
+		s16 tiedTeams[4] = {-1, -1, -1, -1};
 		int numTies = 0;
 
 		for (int team = 3; team >= 0; team--)
@@ -97,15 +85,14 @@ static void MainGameEnd_RankBattleTeams(struct GameTracker *gGT, int scores[4])
 			if ((usedTeams & (1u << team)) != 0)
 				continue;
 
-			if (!MainGameEnd_BattleTeamActive(gGT, team))
+			int score = gGT->battleSetup.pointsPerTeam[team];
+
+			if (score < bestScore)
 				continue;
 
-			if (scores[team] < bestScore)
-				continue;
-
-			if (scores[team] > bestScore)
+			if (score > bestScore)
 			{
-				bestScore = scores[team];
+				bestScore = score;
 				numTies = 0;
 			}
 
@@ -130,62 +117,114 @@ static void MainGameEnd_RankBattleTeams(struct GameTracker *gGT, int scores[4])
 	}
 }
 
-static void MainGameEnd_UpdateBattleWinners(struct GameTracker *gGT)
+static void MainGameEnd_UpdateBattleWinners_PointLimit(struct GameTracker *gGT)
 {
 	for (int i = 0; i < 4; i++)
 	{
 		struct Driver *driver = gGT->drivers[i];
 
-		if (driver == NULL)
-			continue;
+		if ((driver != NULL) && (gGT->battleSetup.finishedRankOfEachTeam[driver->BattleHUD.teamID] == 0))
+		{
+			MainGameEnd_AddBattleWinner(gGT, driver);
+		}
 
-		if (gGT->battleSetup.finishedRankOfEachTeam[driver->BattleHUD.teamID] != 0)
-			continue;
-
-		MainGameEnd_AddBattleWinner(gGT, driver);
+		MainGameEnd_SetBattleConfetti(gGT);
 	}
 }
 
 static void MainGameEnd_UpdateBattlePointLimit(struct GameTracker *gGT)
 {
-	int scores[4];
-
-	for (int team = 0; team < 4; team++)
-		scores[team] = gGT->battleSetup.pointsPerTeam[team];
-
-	MainGameEnd_RankBattleTeams(gGT, scores);
-	MainGameEnd_UpdateBattleWinners(gGT);
+	MainGameEnd_RankBattlePointLimit(gGT);
+	MainGameEnd_UpdateBattleWinners_PointLimit(gGT);
 }
 
-static void MainGameEnd_UpdateBattleLifeLimit(struct GameTracker *gGT)
+static void MainGameEnd_MarkBattleTeamSlotsUsed(struct GameTracker *gGT, int representativeSlot, u8 *usedSlots)
 {
-	int scores[4] = {-400, -400, -400, -400};
-
-	for (int team = 0; team < 4; team++)
-	{
-		if (!MainGameEnd_BattleTeamActive(gGT, team))
-			continue;
-
-		scores[team] = 0;
-	}
+	int team = gGT->drivers[representativeSlot]->BattleHUD.teamID;
 
 	for (int i = 0; i < gGT->numPlyrCurrGame; i++)
 	{
 		struct Driver *driver = gGT->drivers[i];
 
-		if (driver == NULL)
-			continue;
-
-		int team = driver->BattleHUD.teamID;
-
-		if (!MainGameEnd_BattleTeamActive(gGT, team))
-			continue;
-
-		scores[team] += driver->BattleHUD.numLives;
+		if (driver->BattleHUD.teamID == team)
+			*usedSlots |= 1u << i;
 	}
+}
 
-	MainGameEnd_RankBattleTeams(gGT, scores);
-	MainGameEnd_UpdateBattleWinners(gGT);
+static void MainGameEnd_UpdateBattleLifeLimit(struct GameTracker *gGT)
+{
+	u8 usedSlots = 0;
+
+	for (int rank = 0; rank < 4; rank++)
+	{
+		int bestLives = -400;
+		s16 tiedSlots[4] = {-1, -1, -1, -1};
+		int numTies = 0;
+
+		for (int slot = 3; slot >= 0; slot--)
+		{
+			struct Driver *driver = gGT->drivers[slot];
+
+			if (driver->BattleHUD.numLives == 0)
+				continue;
+
+			if (driver->BattleHUD.numLives == bestLives)
+			{
+				if ((usedSlots & (1u << slot)) != 0)
+					continue;
+
+				numTies++;
+				tiedSlots[numTies] = slot;
+				usedSlots |= 1u << slot;
+				continue;
+			}
+
+			if (driver->BattleHUD.numLives < bestLives)
+				continue;
+
+			if ((usedSlots & (1u << slot)) != 0)
+				continue;
+
+			for (int i = 0; i < numTies + 1; i++)
+			{
+				int oldSlot = tiedSlots[i];
+
+				if (oldSlot != -1)
+					usedSlots &= ~(1u << oldSlot);
+			}
+
+			bestLives = driver->BattleHUD.numLives;
+			numTies = 0;
+			tiedSlots[0] = driver->BattleHUD.teamID;
+			usedSlots |= 1u << driver->BattleHUD.teamID;
+		}
+
+		if (tiedSlots[0] == -1)
+		{
+			rank += numTies;
+			continue;
+		}
+
+		for (int i = 0; i < numTies + 1; i++)
+		{
+			int representativeSlot = tiedSlots[i];
+			struct Driver *driver = gGT->drivers[representativeSlot];
+			int team = driver->BattleHUD.teamID;
+
+			gGT->standingsPoints[team * 3 + rank]++;
+
+			if (rank == 0)
+			{
+				MainGameEnd_AddBattleWinner(gGT, driver);
+			}
+
+			MainGameEnd_SetBattleConfetti(gGT);
+			gGT->battleSetup.finishedRankOfEachTeam[representativeSlot] = rank;
+			MainGameEnd_MarkBattleTeamSlotsUsed(gGT, representativeSlot, &usedSlots);
+		}
+
+		rank += numTies;
+	}
 }
 
 static void MainGameEnd_UpdateStandingsOrder(struct GameTracker *gGT)
@@ -244,9 +283,7 @@ static void MainGameEnd_CheckTimeTrialGhost(struct GameTracker *gGT, struct Driv
 {
 	if ((gGT->gameMode1 & RELIC_RACE) != 0)
 	{
-		// TODO(aalhendi): Retail jumps to the active relic overlay entry at
-		// 0x8009f71c. Native currently calls the compiled 223 helper directly.
-		DECOMP_RR_EndEvent_UnlockAward();
+		RR_EndEvent_UnlockAward();
 		return;
 	}
 

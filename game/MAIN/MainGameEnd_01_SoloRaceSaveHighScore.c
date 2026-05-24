@@ -1,7 +1,6 @@
 #include <common.h>
 
-// TODO(aalhendi): Source-backed finish-flow helper; audit NTSC-U 926
-// 0x8003a2b4-0x8003a3fc before ASM stamp.
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x8003a2b4-0x8003a3fc
 void MainGameEnd_SoloRaceSaveHighScore(void)
 {
 	struct GameTracker *gGT = sdata->gGT;

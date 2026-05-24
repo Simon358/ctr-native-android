@@ -1,6 +1,7 @@
 #include <common.h>
 
-void DECOMP_UI_SaveLapTime(int numLaps, int lapTime, s16 driverID)
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x8004c55c-0x8004c718
+void UI_SaveLapTime(int numLaps, int lapTime, s16 driverID)
 {
 	int numMinutes;
 	int PlayerLapIndex;
@@ -34,4 +35,9 @@ void DECOMP_UI_SaveLapTime(int numLaps, int lapTime, s16 driverID)
 	sdata->LapTimes.p1_Ms10s[PlayerLapIndex] = ((lapTime * 10) / 0x3c0) % 10;
 	sdata->LapTimes.p1_Ms1s[PlayerLapIndex] = ((lapTime * 100) / 0x3c0) % 10;
 	return;
+}
+
+void DECOMP_UI_SaveLapTime(int numLaps, int lapTime, s16 driverID)
+{
+	UI_SaveLapTime(numLaps, lapTime, driverID);
 }

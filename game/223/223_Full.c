@@ -6,7 +6,7 @@
 // this goes to footer
 static int str_number223 = 0x20; // " \0"
 
-// required to start on 8009f71c until we rewrite MainGameEnd_Initialize
+// NOTE(aalhendi): Direct symbol for the retail 223 overlay entry at 0x8009f71c.
 void JunkPadding223()
 {
 	asm("nop");
@@ -17,7 +17,7 @@ void JunkPadding223()
 	asm("nop");
 	asm("nop");
 }
-void DECOMP_RR_EndEvent_UnlockAward()
+void RR_EndEvent_UnlockAward(void)
 {
 	int i;
 	struct Driver *driver;
@@ -88,6 +88,11 @@ void DECOMP_RR_EndEvent_UnlockAward()
 		// [Not Done]
 		sdata->relicTime_10ms = 0;
 	}
+}
+
+void DECOMP_RR_EndEvent_UnlockAward(void)
+{
+	RR_EndEvent_UnlockAward();
 }
 
 void DECOMP_RR_EndEvent_DrawMenu(void)

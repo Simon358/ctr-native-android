@@ -1,7 +1,6 @@
 #include <common.h>
 
-// TODO(aalhendi): Source-backed finish-flow helper; audit NTSC-U 926
-// 0x80039fa8-0x8003a2b4 before ASM stamp.
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x80039fa8-0x8003a2b4
 void MainGameEnd_SoloRaceGetReward(int subtractTimeCrateBonus)
 {
 	struct GameTracker *gGT = sdata->gGT;
@@ -22,7 +21,7 @@ void MainGameEnd_SoloRaceGetReward(int subtractTimeCrateBonus)
 
 	for (s16 i = 0; i < 5; i++)
 	{
-		if (raceTime < sdata->ptrActiveHighScoreEntry[i + 1].time)
+		if (raceTime < (s32)sdata->ptrActiveHighScoreEntry[i + 1].time)
 		{
 			gGT->newHighScoreIndex = i;
 			gGT->gameModeEnd |= 0x88000000;

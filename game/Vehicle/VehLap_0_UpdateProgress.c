@@ -60,9 +60,10 @@ void VehLap_UpdateProgress(struct Driver *driver)
 	s32 projection = MFC2_S(25);
 	s32 wrongWayTest = MFC2_S(26);
 	s32 progress = ((u32)progressNode->distToFinish << 3) + (projection >> 0xc);
-	u32 trackLength = (u32)nodes[0].distToFinish << 3;
+	s32 trackLength = (s32)nodes[0].distToFinish << 3;
 
 	driver->distanceToFinish_curr = progress;
+	// NOTE(aalhendi): Retail uses signed div/mfhi for this remainder.
 	driver->distanceToFinish_curr = progress % trackLength;
 
 	if (wrongWayTest < 0x5a801)
