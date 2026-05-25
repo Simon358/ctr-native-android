@@ -1,11 +1,12 @@
 #include <common.h>
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x800ba2c0-0x800ba548.
+
 void DECOMP_RB_Turtle_ThTick(struct Thread *t)
 {
 	struct Turtle *turtleObj;
 	struct Instance *turtleInst;
 	int currTimer;
-	int newTimer;
 
 	turtleObj = t->object;
 	turtleInst = t->inst;
@@ -27,29 +28,15 @@ void DECOMP_RB_Turtle_ThTick(struct Thread *t)
 			// set
 			turtleObj->timer = currTimer;
 
-			// == fixed Naughty Dog bug ==
-
-#if 0
-			
-			// Naughty Dog "intended" this
-			if(currTimer >= 0x3c0)
+			if (currTimer > 0x5a0)
 			{
-				turtleObj->timer = 0x3c0;
+				turtleObj->timer = 0x5a0;
+			}
+
+			if (turtleObj->timer == 0x5a0)
+			{
 				PlaySound3D(0x7d, turtleInst);
 			}
-
-#else
-
-			// but for the sake of a functionally
-			// identical decomp that represents
-			// the "shipped" game
-
-			if (currTimer > 0x3c0)
-			{
-				turtleObj->timer = 0x3c0;
-			}
-
-#endif
 		}
 
 		// if more than one second has passed
@@ -101,11 +88,9 @@ void DECOMP_RB_Turtle_ThTick(struct Thread *t)
 			// set
 			turtleObj->timer = currTimer;
 
-			// == fixed Naughty Dog bug ==
-
-			if (currTimer > 0x3c0)
+			if (currTimer > 0x5a0)
 			{
-				turtleObj->timer = 0x3c0;
+				turtleObj->timer = 0x5a0;
 			}
 		}
 
@@ -182,20 +167,17 @@ void DECOMP_RB_Turtle_LInB(struct Instance *inst)
 	struct Thread *t;
 	struct Turtle *turtleObj;
 
-#ifdef REBUILD_PC
-	// turtles crash the renderer?
-	inst->flags |= 0x80;
-	return;
-#endif
-
 	inst->flags |= 0x2000;
+
+	if (inst->thread != 0)
+		return;
 
 	t = DECOMP_PROC_BirthWithObject(
 	    // creation flags
 	    SIZE_RELATIVE_POOL_BUCKET(sizeof(struct Turtle), NONE, SMALL, STATIC),
 
 	    DECOMP_RB_Turtle_ThTick, // behavior
-	    0,                       // debug name
+	    "turtle",                // debug name
 	    0                        // thread relative
 	);
 
@@ -208,23 +190,13 @@ void DECOMP_RB_Turtle_LInB(struct Instance *inst)
 	inst->scale[1] = 0x1000;
 	inst->scale[2] = 0x1000;
 
-	// double-digit number,
-	turtleID = inst->name[8];
-
-	// take [8] and check for null character (0x00)
-	// switch to [7] if [8] is invalid
-	if (turtleID == 0)
-		turtleID = inst->name[7];
-
-	// one turtle is just "turtle" with no number
-	if (turtleID == 0)
-		turtleID = 1;
-
-	// dont subtract '0', just do & 1,
-	// that'll work fine
+	turtleID = inst->name[strlen(inst->name) - 1] - '0';
 
 	turtleObj = ((struct Turtle *)t->object);
+	turtleObj->turtleID = turtleID;
 	turtleObj->timer = 0;
+	turtleObj->direction = 1;
+	inst->animFrame = 0;
 
 	// put turtles on different cycles, based on turtleID
 	if ((turtleID & 1) == 0)
