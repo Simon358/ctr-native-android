@@ -1,12 +1,10 @@
 #include <common.h>
 
-void DECOMP_UI_RaceEnd_MenuProc(struct RectMenu *menu)
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x80055c90-0x8005607c.
+void UI_RaceEnd_MenuProc(struct RectMenu *menu)
 {
 	s16 option;
 	struct GameTracker *gGT;
-	u32 uVar3;
-	int iVar4;
-	u16 style;
 
 	gGT = sdata->gGT;
 
@@ -156,20 +154,29 @@ void DECOMP_UI_RaceEnd_MenuProc(struct RectMenu *menu)
 		sdata->Loading.OnBegin.AddBitsConfig0 |= ADVENTURE_ARENA;
 		sdata->Loading.OnBegin.RemBitsConfig8 |= TOKEN_RACE;
 
-		sdata->Loading.OnBegin.RemBitsConfig0 |= (ADVENTURE_CUP | CRYSTAL_CHALLENGE | RELIC_RACE | ADVENTURE_BOSS);
+		sdata->Loading.OnBegin.RemBitsConfig0 |= (CRYSTAL_CHALLENGE | RELIC_RACE);
 
 		if ((gGT->gameMode1 & ADVENTURE_CUP) != 0)
 		{
+			sdata->Loading.OnBegin.RemBitsConfig0 |= ADVENTURE_CUP;
 			DECOMP_MainRaceTrack_RequestLoad(GEM_STONE_VALLEY);
 			break;
 		}
 
 		// If you're in a Boss Race
 		if (gGT->gameMode1 < 0)
+		{
+			sdata->Loading.OnBegin.RemBitsConfig0 |= ADVENTURE_BOSS;
 			sdata->Loading.OnBegin.AddBitsConfig8 |= SPAWN_AT_BOSS;
+		}
 
 		DECOMP_MainRaceTrack_RequestLoad(gGT->prevLEV);
 		break;
 	}
 	}
+}
+
+void DECOMP_UI_RaceEnd_MenuProc(struct RectMenu *menu)
+{
+	UI_RaceEnd_MenuProc(menu);
 }
