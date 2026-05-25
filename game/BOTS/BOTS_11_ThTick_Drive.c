@@ -1,7 +1,17 @@
 #include <common.h>
 
-// TODO(aalhendi): Source-backed from CTR-ModSDK WIP; audit against retail
-// 0x80013c18-0x80016b00 before adding an ASM-verified stamp.
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x80013c18-0x80016b00.
+
+// NOTE(aalhendi): First 0x18 bytes match `struct BucketSearchParams`; the
+// trailing hitDir fields are written by `VehPhysCrash_AnyTwoCars`.
+struct BotsThTickDrive_CollisionSearch
+{
+	s16 pos[4];
+	struct Thread *th;
+	int radius;
+	s16 dist[4];
+	s16 hitDir[4];
+};
 
 void BOTS_ThTick_Drive(struct Thread *botThread)
 {
@@ -81,7 +91,8 @@ void BOTS_ThTick_Drive(struct Thread *botThread)
 		speedApprox = ((speedApprox << 1) >> 1); // why does the OG code do this? is this just abs(speedApprox)?
 	}
 
-	bool local_38; // something to do with incrementing the fire level when drift boosting
+	// NOTE(aalhendi): Retail initializes this boost scale before catch-up can overwrite it.
+	u32 local_38 = 1;
 	short unkSpeedThing = ((((speedApprox * 0x89) + (botDriver->unkSpeedValue2 * 0x177)) * 8) >> 0xC); // sVar7
 	botDriver->unkSpeedValue2 = unkSpeedThing;
 
@@ -133,13 +144,12 @@ give_this_label_a_better_name:
 		navFrameNext = botDriver->botData.botNavFrame;
 	}
 
-	// OG game uses stack, now using scratchpad
-	struct BucketSearchParams *cpwb_param_2 = CTR_SCRATCHPAD_PTR(struct BucketSearchParams, 0x0);
-	cpwb_param_2->pos[0] = (short)(botDriver->posCurr.x >> 8);
-	cpwb_param_2->pos[1] = (short)(botDriver->posCurr.y >> 8);
-	cpwb_param_2->pos[2] = (short)(botDriver->posCurr.z >> 8);
-	cpwb_param_2->th = NULL;
-	cpwb_param_2->radius = 0x7fffffff;
+	struct BotsThTickDrive_CollisionSearch cpwb_param_2;
+	cpwb_param_2.pos[0] = (short)(botDriver->posCurr.x >> 8);
+	cpwb_param_2.pos[1] = (short)(botDriver->posCurr.y >> 8);
+	cpwb_param_2.pos[2] = (short)(botDriver->posCurr.z >> 8);
+	cpwb_param_2.th = NULL;
+	cpwb_param_2.radius = 0x7fffffff;
 
 	struct Thread *uVar12;
 
@@ -147,7 +157,7 @@ give_this_label_a_better_name:
 	{
 		if (botThread->modelIndex == DYNAMIC_PLAYER)
 		{
-			PROC_CollidePointWithBucket(botThread->siblingThread, (short *)cpwb_param_2);
+			PROC_CollidePointWithBucket(botThread->siblingThread, &cpwb_param_2.pos[0]);
 
 			uVar12 = gGT->threadBuckets[ROBOT].thread;
 		}
@@ -159,22 +169,21 @@ give_this_label_a_better_name:
 			uVar12 = botThread->siblingThread;
 		}
 
-		PROC_CollidePointWithBucket(uVar12, (short *)cpwb_param_2);
+		PROC_CollidePointWithBucket(uVar12, &cpwb_param_2.pos[0]);
 	}
 give_this_label_a_better_name2:
 
-	struct Thread *t = cpwb_param_2->th;
+	struct Thread *t = cpwb_param_2.th;
 	if (t != NULL)
 	{
 		int iVar4 = botThread->driver_HitRadius + t->driver_HitRadius;
-		if (cpwb_param_2->radius < iVar4 * iVar4)
+		if (cpwb_param_2.radius < iVar4 * iVar4)
 		{
-			int *xyz = CTR_SCRATCHPAD_PTR(int, 0x40);
-			xyz[0] = botDriver->xSpeed + botDriver->botData.unk5bc.ai_accelAxis[0]; //(*(int*)&botDriver->unk5bc[0x1c]);
-			xyz[1] = botDriver->ySpeed + botDriver->botData.unk5bc.ai_accelAxis[1]; //(*(int*)&botDriver->unk5bc[0x20]);
-			xyz[2] = botDriver->zSpeed + botDriver->botData.unk5bc.ai_accelAxis[2]; //(*(int*)&botDriver->unk5bc[0x24]);
-			// similar to BucketSearchParams usage, idk if this will overrun the stack from assignment within this call, needs investigation.
-			VehPhysCrash_AnyTwoCars(botThread, (u_short *)cpwb_param_2, &xyz[0]);
+			Vec3 xyz;
+			xyz.x = botDriver->xSpeed + botDriver->botData.unk5bc.ai_accelAxis[0]; //(*(int*)&botDriver->unk5bc[0x1c]);
+			xyz.y = botDriver->ySpeed + botDriver->botData.unk5bc.ai_accelAxis[1]; //(*(int*)&botDriver->unk5bc[0x20]);
+			xyz.z = botDriver->zSpeed + botDriver->botData.unk5bc.ai_accelAxis[2]; //(*(int*)&botDriver->unk5bc[0x24]);
+			VehPhysCrash_AnyTwoCars(botThread, (u_short *)&cpwb_param_2, &xyz);
 		}
 	}
 
@@ -274,12 +283,8 @@ give_this_label_a_better_name2:
 							continue;
 
 
-						// Find the index of the path: "(curr - first) / sizeof(NavFrame)"
-						unsigned int subtractAddr = (unsigned int)botData->botNavFrame - (unsigned int)botDriver->botData.botNavFrame;
-
-						subtractAddr /= sizeof(struct NavFrame);
-
-						int iVar13 = subtractAddr;
+						// Find the signed index difference between nav frames on this path.
+						int iVar13 = (int)(botData->botNavFrame - botDriver->botData.botNavFrame);
 
 						// if "other" botData driver is behind "this" botDriver driver,
 						if (iVar13 < 0)
@@ -502,7 +507,7 @@ give_this_label_a_better_name2:
 					{
 						if (gGT->numLaps - 1 <= botDriver->lapIndex)
 						{
-							otherDifficultyStat = sdata->cup_difficultyParams[0x8] + sdata->cup_difficultyParams[0xA];
+							otherDifficultyStat = sdata->arcade_difficultyParams[0x8] + sdata->arcade_difficultyParams[0xA];
 						}
 						else
 						{
@@ -537,7 +542,7 @@ give_this_label_a_better_name2:
 				int netSpeedStat = (((bestDriverRank->const_AccelSpeed_ClassStat - bestDriverRank->const_Speed_ClassStat) * 0x1000) / 5) - 1; // iVar9
 
 				int additionalVelocity =
-				    ((bestDriverRank->const_Speed_ClassStat << 3) / 10) + ((bestDriverWumpaCount * netSpeedStat) / 10) + ((turboMult * netSpeedStat) >> 0xC);
+				    ((bestDriverRank->const_Speed_ClassStat << 3) / 10) + (((bestDriverWumpaCount * netSpeedStat) / 10) + (turboMult * netSpeedStat) >> 0xC);
 
 				if (additionalVelocity > 0x6900)
 					additionalVelocity = 0x6900;
@@ -670,14 +675,9 @@ give_this_label_a_better_name2:
 					}
 				}
 
-				// Find the index of the path: "(curr - first) / sizeof(NavFrame)"
-				unsigned int subtractAddr = (unsigned int)navFrameCurr - (unsigned int)sdata->NavPath_ptrNavFrameArray[botDriver->botData.botPath]->pos[0];
-
-				subtractAddr /= sizeof(struct NavFrame);
-
 				// This is now the index of the path,
 				// named "wtf" cause of ghidra bitshifting nonsense, outdated name
-				int wtf = subtractAddr;
+				int wtf = (int)(navFrameCurr - sdata->NavPath_ptrNavFrameArray[botDriver->botData.botPath]);
 
 				if ((data.botsThrottle[botPathIndex] <= wtf) && (wtf < data.botsThrottle[botPathIndex] + 0xb) &&
 				    (9000 < botDriver->botData.unk5bc.ai_speedLinear))
@@ -866,7 +866,7 @@ give_this_label_a_better_name2:
 	botDriver->actionsFlagSet &= ~(0x11800);
 	botDriver->actionsFlagSet |= actionFlagsBuildup;
 
-	struct Terrain *terrain = VehAfterColl_GetTerrain((u_char)(navFrameCurr->flags >> 3));
+	struct Terrain *terrain = VehAfterColl_GetTerrain(((u_char)navFrameCurr->flags) >> 3);
 
 	botDriver->terrainMeta1 = terrain;
 
@@ -1011,7 +1011,6 @@ give_this_label_a_better_name2:
 
 	if ((botDriver->botData.botFlags & 0x8) != 0)
 	{
-		// this block of += nonsense may not be 100% correct.
 		botDriver->botData.unk5bc.ai_accelAxis[1] = 0;
 		botDriver->botData.unk5bc.ai_velAxis[0] += botDriver->botData.unk5bc.ai_accelAxis[0];
 		botDriver->botData.unk5bc.ai_velAxis[1] += botDriver->botData.unk5bc.ai_accelAxis[1];
@@ -1020,9 +1019,7 @@ give_this_label_a_better_name2:
 		int preAccelZ = botDriver->botData.unk5bc.ai_accelAxis[2]; // iVar15
 		botDriver->botData.unk5bc.ai_accelAxis[0] >>= 1;
 		botDriver->botData.unk5bc.ai_accelAxis[2] >>= 1;
-		botDriver->botData.unk5bc.ai_velAxis[0] += botDriver->botData.unk5bc.ai_accelAxis[0];
 		botDriver->botData.unk5bc.ai_velAxis[1] += botDriver->botData.unk5bc.ai_accelAxis[1];
-		botDriver->botData.unk5bc.ai_velAxis[2] += botDriver->botData.unk5bc.ai_accelAxis[2];
 
 		botDriver->botData.unk5bc.ai_velAxis[0] += preAccelX;
 		botDriver->botData.unk5bc.ai_velAxis[2] += preAccelZ;
@@ -1465,9 +1462,9 @@ give_this_label_a_better_name2:
 						{
 							SVECTOR v;
 							v.vx = 0xfa;
-							if (plant != NULL && (plant->inst != NULL || (v.vx = -0xfa, plant->inst->prev == NULL)))
+							if ((plant->object != NULL) && (((struct Plant *)plant->object)->LeftOrRight != 0))
 							{
-								v.vx = 0xfa;
+								v.vx = -0xfa;
 							}
 							v.vy = 0;
 							v.vz = 0x2ee;
