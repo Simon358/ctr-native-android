@@ -61,6 +61,6 @@
 // #include "230_80_MM_Video_StartStream.c"
 // #include "230_81_MM_Video_StopStream.c"
 // #include "230_82_MM_Video_AllocMem.c"
-// #include "230_83_MM_Video_ClearMem.c"
+#include "230_83_MM_Video_ClearMem.c"
 // #include "230_84_MM_Video_DecodeFrame.c"
 // #include "230_85_MM_Video_CheckIfFinished.c"

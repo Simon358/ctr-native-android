@@ -681,7 +681,7 @@ void MM_TrackSelect_Video_Draw(RECT *r, struct MainMenu_LevelRow *selectMenu, in
 char MM_TrackSelect_boolTrackOpen(struct MainMenu_LevelRow *menuSelect);
 void MM_TrackSelect_Init(void);
 void MM_TrackSelect_MenuProc(struct RectMenu *menu);
-void *MM_TrackSelect_GetMenuPtr(void);
+struct RectMenu *MM_TrackSelect_GetMenuPtr(void);
 void MM_CupSelect_Init(void);
 void MM_CupSelect_MenuProc(struct RectMenu *menu);
 void MM_Battle_CloseSubMenu(struct RectMenu *menu);
