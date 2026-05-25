@@ -1,5 +1,6 @@
 #include <common.h>
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 overlay 230 0x800ae0bc-0x800ae274.
 void MM_Characters_SetMenuLayout(void)
 {
 	u16 unlocked;
@@ -27,7 +28,7 @@ void MM_Characters_SetMenuLayout(void)
 		// OG game code
 		unlocked = D230.csm_1P2P[i].unlockFlags;
 
-		if ((sdata->gameProgress.unlocks[0] >> unlocked & 1) != 0)
+		if (((sdata->gameProgress.unlocks[unlocked >> 5] >> (unlocked & 0x1f)) & 1) != 0)
 		{
 			expand = 1;
 			break;
@@ -44,7 +45,6 @@ void MM_Characters_SetMenuLayout(void)
 		// layout [4] and [5] for 1P2P without expansion
 		iVar3 += 4;
 	}
-
 
 	D230.isRosterExpanded = expand;
 

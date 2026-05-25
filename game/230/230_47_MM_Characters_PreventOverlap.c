@@ -1,5 +1,6 @@
 #include <common.h>
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 overlay 230 0x800ae2c0-0x800ae464.
 void MM_Characters_PreventOverlap(void)
 {
 	struct GameTracker *gGT = sdata->gGT;
@@ -14,8 +15,8 @@ void MM_Characters_PreventOverlap(void)
 	char local_8[8];
 
 	// default 0,1,2,3,4,5,6,7
-	*(int *)&local_8[0] = 0x3020100;
-	*(int *)&local_8[4] = 0x7060504;
+	*(int *)&local_8[0] = R230.characterID_default[0];
+	*(int *)&local_8[4] = R230.characterID_default[1];
 
 	iVar2 = 0;
 
