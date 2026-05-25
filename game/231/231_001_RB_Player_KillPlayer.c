@@ -1,7 +1,6 @@
 #include <common.h>
 
-// TODO(aalhendi): Source-backed finish-flow dependency; audit NTSC-U 926
-// 0x800abbb4-0x800abefc before ASM stamp.
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x800abbb4-0x800abefc.
 void RB_Player_KillPlayer(struct Driver *attacker, struct Driver *victim)
 {
 	struct GameTracker *gGT = sdata->gGT;
