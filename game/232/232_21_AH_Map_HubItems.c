@@ -1,5 +1,6 @@
 #include <common.h>
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x800b14f4-0x800b1a18.
 void AH_Map_HubItems(void *hubPtrs, s16 *param_2)
 {
 	struct GameTracker *gGT;

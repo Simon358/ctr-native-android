@@ -474,7 +474,8 @@ struct OverlayDATA_232
 	s16 padding4;
 
 	// 800b5670
-	int unkModeHubItems;
+	s16 unkModeHubItems;
+	s16 padding_800b5672;
 };
 
 extern struct OverlayRDATA_232 R232;
