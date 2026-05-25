@@ -11,6 +11,7 @@ void *DECOMP_LOAD_ReadFile_ex(/*struct BigHeader* bigfile,*/ u32 loadType, int s
 	CdlLOC cdLoc;
 	u8 paramOutput[8];
 
+	// NOTE(aalhendi): ASM-verified NTSC-U 926 0x800321f4 for the stream-data mode side effect.
 	DECOMP_CDSYS_SetMode_StreamData();
 
 	// get size and offset of subfile
