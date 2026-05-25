@@ -1,7 +1,6 @@
 #include <common.h>
 
-// TODO(aalhendi): Source-backed helper required by BOTS_ThTick_Drive; audit
-// against retail 0x8003d460 before adding an ASM-verified stamp.
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x8003d460-0x8003d4e4.
 void MATH_MatrixMul(MATRIX *output, MATRIX *input, VECTOR *rotate)
 {
 	MATRIX *rotateMatrix = (MATRIX *)rotate;
