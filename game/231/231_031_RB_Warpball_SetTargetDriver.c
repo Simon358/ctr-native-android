@@ -1,6 +1,6 @@
 #include <common.h>
 
-// NOTE(aalhendi): ASM-verified NTSC-U 926 0x800aeaac-0x800aece0.
+// NOTE(aalhendi): ASM-verified against NTSC-U 926 overlay 231 0x800aeaac-0x800aece0.
 void RB_Warpball_SetTargetDriver(struct TrackerWeapon *tw)
 {
 	struct GameTracker *gGT = sdata->gGT;
