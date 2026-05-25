@@ -820,6 +820,7 @@ void DrawAllSplits()
 
 // forward declarations
 int ParsePrimitive(P_TAG* polyTag);
+int ParseTaglessPrimitive(u_int* command);
 
 void ParsePrimitivesLinkedList(u_int* p, int singlePrimitive)
 {
@@ -857,10 +858,16 @@ void ParsePrimitivesLinkedList(u_int* p, int singlePrimitive)
 				uintptr_t currentPacket = basePacket;
 				const uintptr_t endPacket = basePacket + (tagLength + P_LEN) * sizeof(u_int);
 				int primLength = 0;
-				while (currentPacket < endPacket)
+				if (currentPacket < endPacket)
 				{
 					primLength = ParsePrimitive(reinterpret_cast<P_TAG*>(currentPacket));
 					currentPacket += (primLength + P_LEN) * sizeof(u_int);
+				}
+
+				while (currentPacket < endPacket)
+				{
+					primLength = ParseTaglessPrimitive(reinterpret_cast<u_int*>(currentPacket));
+					currentPacket += primLength * sizeof(u_int);
 				}
 
 				if (currentPacket != endPacket)
@@ -1534,6 +1541,42 @@ static int ProcessDrawEnv(P_TAG* polyTag)
 	return processedLongs;
 }
 
+static void ProcessDrawEnvCommand(u_int code)
+{
+	const int primSubType = code >> 24 & 0x0F;
+
+	switch (primSubType)
+	{
+	case 0x1:
+		activeDrawEnv.tpage = (code & 0x1FF);
+		activeDrawEnv.dtd = (code >> 9) & 1;
+		break;
+	case 0x2:
+		activeDrawEnv.tw.w = (code & 0x1F);
+		activeDrawEnv.tw.h = ((code >> 5) & 0x1F);
+		activeDrawEnv.tw.x = ((code >> 10) & 0x1F);
+		activeDrawEnv.tw.y = ((code >> 15) & 0x1F);
+		break;
+	case 0x3:
+		activeDrawEnv.clip.x = code & 1023;
+		activeDrawEnv.clip.y = (code >> 10) & 1023;
+		break;
+	case 0x4:
+		activeDrawEnv.clip.w = code & 1023;
+		activeDrawEnv.clip.h = (code >> 10) & 1023;
+		activeDrawEnv.clip.w -= activeDrawEnv.clip.x;
+		activeDrawEnv.clip.h -= activeDrawEnv.clip.y;
+		break;
+	case 0x5:
+		activeDrawEnv.ofs[0] = code & 2047;
+		activeDrawEnv.ofs[1] = (code >> 11) & 2047;
+		break;
+	case 0x6:
+		eprintf("Mask setting: %08x\n", code);
+		break;
+	}
+}
+
 static int ProcessPsyXPrims(P_TAG* polyTag)
 {
 	const int primType = polyTag->code & 0xF0;
@@ -1568,6 +1611,7 @@ int ParsePrimitive(P_TAG* polyTag)
 	const int primType = polyTag->code & 0xF0;
 
 	int primLength = 0;
+	bool handledZeroLength = false;
 
 	switch (primType)
 	{
@@ -1582,6 +1626,13 @@ int ParsePrimitive(P_TAG* polyTag)
 			if (polyTag->len == 2 && codePtr[0] == 0 && codePtr[1] == 0)
 		{
 			primLength = 2;
+		}
+		else if (polyTag->len == 0 && *(u_int*)polyTag == 0)
+		{
+			// CTR ghost transparency packets include raw GPU NOP words between
+			// draw-mode changes and triangle commands. They consume exactly one
+			// command word; ParsePrimitivesLinkedList adds P_LEN to the return.
+			handledZeroLength = true;
 		}
 		else if (primSubType == 0x0)
 		{
@@ -1668,9 +1719,35 @@ int ParsePrimitive(P_TAG* polyTag)
 	//	eprinterr("got %0x primitive\n", primType);
 	}
 
-	if(primLength == 0)
+	if(primLength == 0 && !handledZeroLength)
 	{
 		eprinterr("Unhandled zero length %0x primitive\n", primType);
+	}
+
+	return primLength;
+}
+
+int ParseTaglessPrimitive(u_int* command)
+{
+	const u_int code = *command;
+	const int primType = (code >> 24) & 0xF0;
+
+	if (code == 0)
+		return 1;
+
+	if (primType == 0xE0)
+	{
+		ProcessDrawEnvCommand(code);
+		return 1;
+	}
+
+	P_TAG* polyTag = reinterpret_cast<P_TAG*>(command - P_LEN);
+	int primLength = ParsePrimitive(polyTag);
+
+	if (primLength == 0)
+	{
+		eprinterr("Unhandled tagless primitive %08x\n", code);
+		return 1;
 	}
 
 	return primLength;
