@@ -220,8 +220,8 @@ void DECOMP_VehPickupItem_ShootNow(struct Driver *d, int weaponID, int flags)
 			{
 				tw->flags |= 0x20;
 
-				tw->vel[0] = (((-tw->vel[0] / 2) * 3) / 5);
-				tw->vel[2] = (((-tw->vel[2] / 2) * 3) / 5);
+				tw->vel[0] = -(((tw->vel[0] >> 1) * 3) / 5);
+				tw->vel[2] = -(((tw->vel[2] >> 1) * 3) / 5);
 			}
 		}
 
