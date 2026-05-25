@@ -55,6 +55,7 @@
 #include "game/BOTS/BOTS_03_Adv_NumTimesLostEvent.c"
 #include "game/BOTS/BOTS_00_SetGlobalNavData.c"
 #include "game/BOTS/BOTS_01_InitNavPath.c"
+#include "game/BOTS/BOTS_02_EmptyFunc.c"
 #include "game/BOTS/BOTS_04_Adv_AdjustDifficulty.c"
 #include "game/BOTS/BOTS_06_SetRotation.c"
 #include "game/BOTS/BOTS_07_LevInstColl.c"

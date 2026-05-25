@@ -1,5 +1,6 @@
 #include <common.h>
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x8004cac8-0x8004cae8.
 int UI_ConvertY_2(int oldPosY, int newPosY)
 {
 #define midpointY 0x6c
