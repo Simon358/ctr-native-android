@@ -91,6 +91,7 @@ void RR_EndEvent_UnlockAward(void)
 	}
 }
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x800a01d8-0x800a0cb8.
 void RR_EndEvent_DrawMenu(void)
 {
 	struct GameTracker *gGT;
@@ -114,6 +115,8 @@ void RR_EndEvent_DrawMenu(void)
 	int endY;
 	int uVar11;
 	char auStack72[16];
+	char countdownText[24];
+	char drawCountdown;
 
 	gGT = sdata->gGT;
 	d = gGT->drivers[0];
@@ -130,18 +133,17 @@ void RR_EndEvent_DrawMenu(void)
 	// relics start in adventure progress
 	bitIndex = gGT->levelID + 0x3a;
 
-	// set color of relic in Instance
-	relic->colorRGBA =
+	// check if platinum is unlocked, set platinum color
+	if (CHECK_ADV_BIT(adv->rewards, bitIndex))
+	{
+		relic->colorRGBA = 0xffede90;
+	}
 
-	    // check if platinum is unlocked, set platinum color
-	    (CHECK_ADV_BIT(adv->rewards, bitIndex)) ? 0xffede90 :
-
-	                                            // check if gold is unlocked, set gold color
-	        (CHECK_ADV_BIT(adv->rewards, (bitIndex - 0x12))) ? 0xd8d2090
-	                                                         :
-
-	                                                         // if sapphire, keep original color
-	        relic->colorRGBA;
+	// check if gold is unlocked, set gold color
+	else if (CHECK_ADV_BIT(adv->rewards, (bitIndex - 0x12)))
+	{
+		relic->colorRGBA = 0xd8d2090;
+	}
 
 	sdata->ptrTimebox1->scale[0] = 0x300;
 	sdata->ptrTimebox1->scale[1] = 0x300;
@@ -187,7 +189,7 @@ void RR_EndEvent_DrawMenu(void)
 	// Reset local frame counter
 	elapsedFrames = sdata->framesSinceRaceEnded;
 	{
-		if (elapsedFrames >= 490)
+		if (elapsedFrames >= 491)
 		{
 			elapsedFrames -= 490;
 
@@ -216,17 +218,15 @@ void RR_EndEvent_DrawMenu(void)
 
 	if ((gGT->gameModeEnd & NEW_RELIC) != 0)
 	{
-		// default
-		pos[0] = 0x100;
-
-		if (elapsedFrames >= 490)
+		if (elapsedFrames >= 491)
 		{
 			elapsedFrames -= 490;
 
-			UI_Lerp2D_Linear(&pos[0], 0x100, 0, -0x64, 0, elapsedFrames, 0x14);
+			UI_Lerp2D_Linear(&pos[0], UI_ConvertX_2(0x100, 0x100), UI_ConvertY_2(0xa2, 0x100), UI_ConvertX_2(-0x64, 0x100), UI_ConvertY_2(0xa2, 0x100),
+			                 elapsedFrames, 0x14);
 		}
 
-		else if (elapsedFrames >= 250)
+		else if (elapsedFrames >= 251)
 		{
 			// on exactly the 251st frame after race ends
 			if (elapsedFrames == 251)
@@ -244,18 +244,20 @@ void RR_EndEvent_DrawMenu(void)
 				relic->scale[1] += 0x80;
 				relic->scale[2] += 0x80;
 			}
-		}
 
-		relic->matrix.t[0] = UI_ConvertX_2(pos[0], 0x100);
-		relic->matrix.t[1] = UI_ConvertY_2(0xa2, 0x100);
+			UI_Lerp2D_Linear(&pos[0], UI_ConvertX_2(0x100, 0x100), UI_ConvertY_2(0xa2, 0x100), UI_ConvertX_2(0x100, 0x100), UI_ConvertY_2(0xa2, 0x100),
+			                 elapsedFrames - 250, 0x14);
+		}
 	}
 
+	relic->matrix.t[0] = pos[0];
+	relic->matrix.t[1] = pos[1];
 
 	// Draw Time Crates
 	// Reset local frame counter
 	elapsedFrames = sdata->framesSinceRaceEnded;
 	{
-		if (elapsedFrames >= 490)
+		if (elapsedFrames >= 491)
 		{
 			elapsedFrames -= 490;
 
@@ -265,10 +267,8 @@ void RR_EndEvent_DrawMenu(void)
 
 		else
 		{
-			pos[0] = 200;
+			UI_Lerp2D_Linear(&pos[0], 200, 0x79, 200, 0x79, elapsedFrames, 0x14);
 		}
-
-		pos[1] = 0x79;
 
 		sdata->ptrTimebox1->matrix.t[0] = UI_ConvertX_2(pos[0], 0x100);
 		sdata->ptrTimebox1->matrix.t[1] = UI_ConvertY_2(pos[1], 0x100);
@@ -329,37 +329,40 @@ void RR_EndEvent_DrawMenu(void)
 		// fade-in COUNTDOWN (-10, -9, -8...)
 		if (elapsedFrames >= 140)
 		{
-			elapsedFrames -= 140;
-
 			// -10
-			char *str = (char *)0x1f800000;
+			char *str = countdownText;
 			str[0] = '-';
 			str[1] = '1';
 			str[2] = '0';
 			str[3] = 0;
 
-			// interpolate fly-in
-			UI_Lerp2D_Linear(&pos[0], 0x296, 0, 0x199, 0, elapsedFrames, 0x14);
+			drawCountdown = 0;
 
-			// 20 frames after fly-in starts, do the countdown
-			if (elapsedFrames >= 20)
+			if (elapsedFrames >= 490)
 			{
-				elapsedFrames -= 20;
+				// interpolate fly-out
+				UI_Lerp2D_Linear(&pos[0], 0x199, 0x32, 0x199, -0x32, elapsedFrames - 140, 0x14);
+				drawCountdown = 1;
+			}
 
-				// 10, 9, 8, 7...
-				// changes once every 5 frames
-				int minusSeconds = elapsedFrames / 5;
-
-				// -3, -2, -1, -0... (dont go past 0)
-				if (minusSeconds > 10)
-					minusSeconds = 10;
-
-				// "if != 0" means
-				// "if text is not -10"
-				else if (minusSeconds != 0)
+			else if ((u32)(elapsedFrames - 140) < 110)
+			{
+				// 20 frames after fly-in starts, do the countdown
+				if (elapsedFrames >= 160)
 				{
-					// on every 5th frame, except the first frame
-					if (elapsedFrames % 5 == 0)
+					int countdownDelta = 160 - elapsedFrames;
+
+					// 10, 9, 8, 7...
+					// changes once every 5 frames
+					int minusSeconds = 10 + (countdownDelta / 5);
+
+					if (minusSeconds < 0)
+					{
+						minusSeconds = 0;
+					}
+
+					// "if != 10" means "if text is not -10"
+					else if ((minusSeconds != 10) && (countdownDelta == ((countdownDelta / 5) * 5)))
 					{
 						// subtract a second
 						d->timeElapsedInRace -= 960;
@@ -367,14 +370,19 @@ void RR_EndEvent_DrawMenu(void)
 						OtherFX_Play(99, 1);
 					}
 
-					// change string to match new -X
-					str[1] = '0' + (10 - minusSeconds);
-					str[2] = 0;
+					sprintf(str, "-%d", minusSeconds);
 				}
+
+				// interpolate fly-in
+				UI_Lerp2D_Linear(&pos[0], 0x296, 0x2a, 0x199, 0x2a, elapsedFrames - 140, 0x14);
+				drawCountdown = 1;
 			}
 
 			// Draw String
-			DecalFont_DrawLine(str, pos[0], 0x2a, 1, txtColor);
+			if (drawCountdown)
+			{
+				DecalFont_DrawLine(str, pos[0], pos[1], 1, txtColor);
+			}
 		}
 	}
 
@@ -383,24 +391,34 @@ void RR_EndEvent_DrawMenu(void)
 	// copy to local frame counter
 	elapsedFrames = sdata->framesSinceRaceEnded;
 
-	if ((elapsedFrames >= 250) && ((gGT->gameModeEnd & NEW_RELIC) != 0))
+	if ((gGT->gameModeEnd & NEW_RELIC) != 0)
 	{
-		// Fade-out early, so "NEW HIGH SCORE" can fade-in
-		if (elapsedFrames >= 370)
+		if (((gGT->gameModeEnd & (NEW_RELIC | NEW_HIGH_SCORE)) == NEW_RELIC) && (elapsedFrames >= 490))
 		{
-			elapsedFrames -= 370;
-
 			startX = 0x100;
 			endX = 0x296;
+			elapsedFrames -= 490;
+		}
+
+		// Fade-out early, so "NEW HIGH SCORE" can fade-in
+		else if (((gGT->gameModeEnd & (NEW_RELIC | NEW_HIGH_SCORE)) == (NEW_RELIC | NEW_HIGH_SCORE)) && (elapsedFrames >= 370))
+		{
+			startX = 0x100;
+			endX = 0x296;
+			elapsedFrames -= 370;
 		}
 
 		// Fade-In
-		else
+		else if (elapsedFrames >= 250)
 		{
-			elapsedFrames -= 250;
-
 			startX = -0x96;
 			endX = 0x100;
+			elapsedFrames -= 250;
+		}
+
+		else
+		{
+			goto skipRelicAwarded;
 		}
 
 		// interpolate fly-in
@@ -410,6 +428,7 @@ void RR_EndEvent_DrawMenu(void)
 		DecalFont_DrawLine(sdata->lngStrings[0x160], pos[0], pos[1], 1, txtColor);
 	}
 
+skipRelicAwarded:
 
 	// copy to local frame counter
 	elapsedFrames = sdata->framesSinceRaceEnded;
@@ -447,7 +466,7 @@ void RR_EndEvent_DrawMenu(void)
 	pos[1] = 0xc;
 
 	// if race ended more than 490 frames ago
-	if (elapsedFrames >= 490)
+	if (elapsedFrames >= 491)
 	{
 		elapsedFrames -= 490;
 
