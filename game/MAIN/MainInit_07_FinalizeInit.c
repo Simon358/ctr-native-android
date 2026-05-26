@@ -149,8 +149,11 @@ void MainInit_FinalizeInit(struct GameTracker *gGT)
 		}
 	}
 
-#ifndef REBUILD_PS1
 	// execute all camera thread update functions
+#ifdef CTR_NATIVE
+    // TODO(aalhendi): we should actually port this and kill this branch.
+    TEST_ThTickRunBucket(gGT->threadBuckets[CAMERA].thread);
+#else
 	ThTick_RunBucket(gGT->threadBuckets[CAMERA].thread);
 #endif
 
