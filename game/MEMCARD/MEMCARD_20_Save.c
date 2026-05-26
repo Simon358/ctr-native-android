@@ -1,5 +1,6 @@
 #include <common.h>
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 PS1 path 0x8003e344-0x8003e51c; CTR_NATIVE writes host files directly.
 u8 MEMCARD_Save(int slotIdx, char *name, char *param_3, u8 *ptrMemcard, int memcardFileSize, u32 param6)
 
 {
@@ -40,34 +41,45 @@ u8 MEMCARD_Save(int slotIdx, char *name, char *param_3, u8 *ptrMemcard, int memc
 	if (sdata->memcard_stage != MC_STAGE_IDLE)
 		return MC_RETURN_TIMEOUT;
 
-	MEMCARD_NewTask(slotIdx, name, ptrMemcard, memcardFileSize, 0);
+	sdata->memcardIconSize = 0x100;
+
+	if (MEMCARD_NewTask(slotIdx, name, ptrMemcard, memcardFileSize, 0) != 0)
+		return MC_RETURN_TIMEOUT;
+
+	u8 *icon = (u8 *)&data.memcardIcon_PsyqHand[0];
+
+	if (((param6 & 1) == 0) && (((sdata->memcardIconSize + memcardFileSize * 2 + 0x1fff) >> 13) >= 2))
+	{
+		icon[3] = (sdata->memcardIconSize + memcardFileSize + 0x1fff) >> 13;
+		sdata->memcardStatusFlags |= 4;
+	}
+	else
+	{
+		sdata->memcardStatusFlags &= ~4;
+		icon[3] = (sdata->memcardIconSize + memcardFileSize * 2 + 0x1fff) >> 13;
+	}
+
+	for (int i = 0; i < 0x40; i += 2)
+	{
+		icon[i + 4] = 0x81;
+		icon[i + 5] = 0x40;
+	}
+
+	if (param_3[0] != '\0')
+	{
+		for (int i = 0; (i < 0x40) && (param_3[i] != '\0'); i++)
+			icon[i + 4] = param_3[i];
+	}
 
 	MEMCARD_ChecksumSave(ptrMemcard, memcardFileSize);
 
-	int numBlock = 1;
-	if (memcardFileSize == 0x3E00)
-		numBlock = 2;
+	sdata->memcard_fd = open(sdata->s_memcardFileCurr, (icon[3] << 16) | FCREATE);
 
-	// ====== Open 1 ======
-
-	sdata->memcard_fd = open(sdata->s_memcardFileCurr, (numBlock << 16) | FCREATE);
-
-	if (sdata->memcard_fd == -1)
-	{
-// do NOT return,
-// the -1 could mean the file already exists
-#if 0
-		// MEMCARD_CloseFile();
-        // return MC_RETURN_FULL;
-#endif
-	}
-	else
+	if (sdata->memcard_fd != -1)
 	{
 		close(sdata->memcard_fd);
 		sdata->memcard_fd = -1;
 	}
-
-	// ====== Open 2 ======
 
 	sdata->memcard_fd = open(sdata->s_memcardFileCurr, FASYNC | FWRITE);
 
@@ -78,9 +90,8 @@ u8 MEMCARD_Save(int slotIdx, char *name, char *param_3, u8 *ptrMemcard, int memc
 	}
 	else
 	{
-		sdata->memcardIconSize = 0x100;
 		sdata->memcard_stage = MC_STAGE_SAVE_PART0_START;
-		return MC_RETURN_PENDING;
+		return MEMCARD_WriteFile(0, icon, sdata->memcardIconSize);
 	}
 #endif
 }
