@@ -1,5 +1,6 @@
 #include <common.h>
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x8003dc9c-0x8003dd10.
 u8 MEMCARD_WriteFile(int start_offset, const u8 *data, int size)
 {
 	if ((lseek(sdata->memcard_fd, start_offset, 0) >= 0) && (write(sdata->memcard_fd, data, size) >= 0))
