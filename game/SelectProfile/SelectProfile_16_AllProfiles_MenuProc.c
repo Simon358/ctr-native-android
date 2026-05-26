@@ -47,13 +47,12 @@ static void SelectProfile_DrawGhostRows(struct RectMenu *menu, int rowCount)
 {
 	struct GameTracker *gGT = sdata->gGT;
 	RECT box;
-	char rowText[0x60];
 	int i;
 	int x;
 	int y;
-	int color;
 	int pair;
 	int rowHeight;
+	int isLoading;
 
 	box.x = 0x50;
 	box.y = 0x32;
@@ -64,9 +63,13 @@ static void SelectProfile_DrawGhostRows(struct RectMenu *menu, int rowCount)
 	DecalFont_DrawLine("SAVE GHOST", 0x100, 0x3d, FONT_BIG, JUSTIFY_CENTER | ORANGE);
 
 	rowHeight = (rowCount > 6) ? 0x2c : 0x30;
+	isLoading = sdata->memcardAction != 1;
 
 	for (i = 0; i < rowCount; i++)
 	{
+		struct GhostProfile *profile = NULL;
+		int unavailable = 0;
+
 		pair = i >> 1;
 		if ((i < rowCount - 1) || ((i & 1) != 0))
 			x = ((i & 1) * 0xd4) + 0x2e;
@@ -74,21 +77,14 @@ static void SelectProfile_DrawGhostRows(struct RectMenu *menu, int rowCount)
 			x = 0x98;
 
 		y = 0x58 + (pair * rowHeight);
-		color = JUSTIFY_CENTER | WHITE;
-
-		if (i == menu->rowSelected)
-			color = JUSTIFY_CENTER | ORANGE;
 
 		if (i < sdata->numGhostProfilesSaved)
 		{
-			sprintf(rowText, "%s  %s", sdata->ghostProfile_memcard[i].SubmitName_name, RECTMENU_DrawTime(sdata->ghostProfile_memcard[i].trackTime));
-		}
-		else
-		{
-			sprintf(rowText, "EMPTY SLOT  %s", RECTMENU_DrawTime(sdata->gGT->drivers[0]->timeElapsedInRace));
+			profile = &sdata->ghostProfile_memcard[i];
+			unavailable = (isLoading != 0) && (profile->trackID != gGT->levelID);
 		}
 
-		DecalFont_DrawLine(rowText, x + 0x64, y, FONT_SMALL, color);
+		SelectProfile_DrawGhostProfile(profile, x, y, i == menu->rowSelected, 0, menu->drawStyle, isLoading, unavailable);
 	}
 
 	DecalFont_DrawLine("X: SAVE   TRIANGLE: BACK", 0x100, 0xa8, FONT_SMALL, JUSTIFY_CENTER | ORANGE);

@@ -842,7 +842,8 @@ void SelectProfile_GetTrackID(void);
 void SelectProfile_Init(u16 flags);
 void SelectProfile_Destroy(void);
 void SelectProfile_AdvPickMode_MenuProc(struct RectMenu *menu);
-// SelectProfile_DrawGhostProfile()
+void SelectProfile_DrawGhostProfile(struct GhostProfile *profile, int posX, int posY, u32 isHighlighted, int unused, u16 menuFlag, s16 isLoading,
+                                    s16 isUnavailable);
 void SelectProfile_MuteCursors(void);
 void SelectProfile_UnMuteCursors(void);
 void SelectProfile_ToggleMode(u32 param_1);

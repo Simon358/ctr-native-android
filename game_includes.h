@@ -570,6 +570,7 @@
 #include "game/SelectProfile/SelectProfile_07_Init.c"
 #include "game/SelectProfile/SelectProfile_08_Destroy.c"
 #include "game/SelectProfile/SelectProfile_09_AdvPickMode_MenuProc.c"
+#include "game/SelectProfile/SelectProfile_10_DrawGhostProfile.c"
 #include "game/SelectProfile/SelectProfile_13_Cursors.c"
 #include "game/SelectProfile/SelectProfile_14_ToggleMode.c"
 #include "game/SelectProfile/SelectProfile_15_InputLogic.c"
