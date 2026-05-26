@@ -1,6 +1,6 @@
 #include <common.h>
 
-// animate rotation and scale in warppad
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x80068be8-0x80068e04.
 void VehStuckProc_Warp_PhysAngular(struct Thread *th, struct Driver *d)
 {
 	s16 sVar2;
@@ -25,7 +25,7 @@ void VehStuckProc_Warp_PhysAngular(struct Thread *th, struct Driver *d)
 		d->KartStates.Warp.numParticle -= 100;
 
 		// add dust puff
-		VehStuckProc_Warp_AddDustPuff2((struct Thread *)d, (struct Driver *)&d->KartStates.Warp.timer);
+		VehStuckProc_Warp_AddDustPuff2(d, &d->KartStates.Warp.timer);
 	}
 
 	timer = d->KartStates.Warp.timer;

@@ -55,13 +55,13 @@ void MainFrame_GameLogic(struct GameTracker *gGT, struct GamepadSystem *gGamepad
 					uVar3 = (u32)psVar9->clockReceive;
 				}
 
-#ifndef REBUILD_PS1
+#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 				DISPLAY_Blur_Main(pushBuffer, uVar3);
 #endif
 			}
 			else
 			{
-#ifndef REBUILD_PS1
+#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 				DISPLAY_Blur_Main(pushBuffer, -uVar3);
 #endif
 				psVar9->clockFlash--;

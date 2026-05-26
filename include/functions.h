@@ -157,7 +157,7 @@ void DecalMP_03(struct GameTracker *gGT);
 
 // DISPLAY
 
-// DISPLAY_Blur_SubFunc()
+u32 *DISPLAY_Blur_SubFunc(u32 *prim, s16 *tile);
 void DISPLAY_Blur_Main(struct PushBuffer *pb, int strength);
 // DISPLAY_SWap()
 
@@ -183,7 +183,7 @@ void ElimBG_Deactivate(struct GameTracker *gGT);
 
 // FLARE
 
-// FLARE_ThTick()
+void FLARE_ThTick(struct Thread *th);
 void FLARE_Init(s16 *pos);
 
 // GAMEPAD
@@ -985,7 +985,7 @@ void VehFrameProc_Spinning(struct Thread *t, struct Driver *d);
 void VehFrameProc_LastSpin(struct Thread *t, struct Driver *d);
 bool VehGroundShadow_Subset1(struct TextureLayout *pDst, int iconIndex);
 void VehGroundShadow_Main(void);
-// VehGroundSkids_Subset1()
+void VehGroundSkids_Subset1(u32 *currXY, u32 *prevXY, int depth, u8 *scratch);
 void VehGroundSkids_Subset2(SVECTOR *scratch, SVECTOR *v1, SVECTOR *v2, SVECTOR *v3);
 void VehGroundSkids_Main(struct Thread *thread, struct PushBuffer *pb);
 // VehLap_UpdateProgress()
@@ -1082,7 +1082,7 @@ void VehStuckProc_Tumble_Animate(struct Thread *t, struct Driver *d);
 void VehStuckProc_Tumble_Init(struct Thread *t, struct Driver *d);
 void VehStuckProc_Warp_MoveDustPuff(s16 *points, int span, int radius, s16 *jitterScale);
 void VehStuckProc_Warp_AddDustPuff1(struct ScratchpadStruct *sps);
-void VehStuckProc_Warp_AddDustPuff2(struct Thread *t, struct Driver *d);
+void VehStuckProc_Warp_AddDustPuff2(struct Driver *d, int *warp);
 void VehStuckProc_Warp_PhysAngular(struct Thread *t, struct Driver *d);
 void VehStuckProc_Warp_Init(struct Thread *t, struct Driver *d);
 

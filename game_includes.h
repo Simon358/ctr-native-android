@@ -146,6 +146,12 @@
 #include "game/DecalHUD/DecalHUD_2_DrawPolyGT4.c"
 #include "game/DecalHUD/DecalHUD_3_Arrow2D.c"
 
+#include "game/DecalMP/DecalMP_01.c"
+#include "game/DecalMP/DecalMP_02.c"
+#include "game/DecalMP/DecalMP_03.c"
+
+#include "game/Display/DISPLAY_0_Blur_SubFunc.c"
+#include "game/Display/DISPLAY_1_Blur_Main.c"
 #include "game/Display/DISPLAY_2_Swap.c"
 
 #include "game/DotLights/DotLights_0_Video.c"
@@ -161,6 +167,9 @@
 #include "game/ElimBG/ElimBG_4_ToggleAllInstances.c"
 #include "game/ElimBG/ElimBG_5_HandleState.c"
 #include "game/ElimBG/ElimBG_6_Deactivate.c"
+
+#include "game/FLARE/FLARE_0_ThTick.c"
+#include "game/FLARE/FLARE_1_Init.c"
 
 #include "game/GAMEPAD/GAMEPAD_00_Init.c"
 #include "game/GAMEPAD/GAMEPAD_01_SetMainMode.c"
@@ -484,6 +493,7 @@
 #include "game/Particle/Particle_4_Init.c"
 
 #include "game/PickupBots/PickupBots_0_Init.c"
+#include "game/PickupBots/PickupBots_1_Update.c"
 
 #include "game/PROC/PROC_00_DestroyTracker.c"
 #include "game/PROC/PROC_01_DestroyInstance.c"
@@ -724,7 +734,9 @@
 #include "game/Vehicle/VehPhysJoystick_1_GetStrength.c"
 #include "game/Vehicle/VehPhysJoystick_2_GetStrengthAbsolute.c"
 
+#include "game/Vehicle/VehGroundSkids_0_Subset1.c"
 #include "game/Vehicle/VehGroundSkids_1_Subset2.c"
+#include "game/Vehicle/VehGroundSkids_2_Main.c"
 
 #include "game/Vehicle/VehPhysProc_00_Driving_PhysLinear.c"
 #include "game/Vehicle/VehPhysProc_01_Driving_Audio.c"
@@ -765,6 +777,9 @@
 #include "game/Vehicle/VehStuckProc_19_Tumble_Init.c"
 #include "game/Vehicle/VehStuckProc_20_Warp_MoveDustPuff.c"
 #include "game/Vehicle/VehStuckProc_21_Warp_AddDustPuff1.c"
+#include "game/Vehicle/VehStuckProc_22_Warp_AddDustPuff2.c"
+#include "game/Vehicle/VehStuckProc_23_Warp_PhysAngular.c"
+#include "game/Vehicle/VehStuckProc_24_Warp_Init.c"
 
 #include "game/Vehicle/VehTurbo_0_ProcessBucket.c"
 #include "game/Vehicle/VehTurbo_1_ThDestroy.c"

@@ -56,7 +56,12 @@ void DecalGlobal_Clear(struct GameTracker *gGT);
 void DecalHUD_DrawPolyFT4(struct Icon *icon, s16 posX, s16 posY, struct PrimMem *primMem, u_long *ot, char transparency, s16 scale);
 void DecalHUD_DrawPolyGT4(struct Icon *icon, s16 posX, s16 posY, struct PrimMem *primMem, u_long *ot, u32 color0, u32 color1, u32 color2, u32 color3,
                           char transparency, s16 scale);
+void DecalMP_01(struct GameTracker *gGT);
+void DecalMP_02(struct GameTracker *gGT);
+void DecalMP_03(struct GameTracker *gGT);
 
+u32 *DISPLAY_Blur_SubFunc(u32 *prim, s16 *tile);
+void DISPLAY_Blur_Main(struct PushBuffer *pb, int strength);
 void DISPLAY_Swap(void);
 
 void DotLights_Video(struct GameTracker *gGT, int red1, int red2, int red3, int green, int posY);
@@ -456,6 +461,9 @@ void RECTMENU_Show(struct RectMenu *m);
 
 int MixRNG_Scramble(void);
 
+void PickupBots_Init(void);
+void PickupBots_Update(void);
+
 struct Thread *PROC_BirthWithObject(int flags, void *funcThTick, char *name, struct Thread *relativeTh);
 void PROC_CheckAllForDead(void);
 void PROC_CheckBloodlineForDead(struct Thread **replaceSelf, struct Thread *th);
@@ -638,6 +646,8 @@ void VehStuckProc_RevEngine_Animate(struct Thread *t, struct Driver *d);
 void VehStuckProc_RevEngine_Init(struct Thread *t, struct Driver *d);
 void VehStuckProc_RevEngine_Init(struct Thread *t, struct Driver *d);
 
+void VehStuckProc_Warp_AddDustPuff2(struct Driver *d, int *warp);
+void VehStuckProc_Warp_PhysAngular(struct Thread *t, struct Driver *d);
 void VehStuckProc_Warp_Init(struct Thread *t, struct Driver *d);
 
 void VehPhysForce_ConvertSpeedToVec(struct Driver *driver);
@@ -932,6 +942,7 @@ int VehCalc_SteerAccel(int param_1, int param_2, int param_3, int param_4, int p
 void VehFrameProc_Driving(struct Thread *t, struct Driver *d);
 void VehFrameProc_Spinning(struct Thread *t, struct Driver *d);
 void VehFrameProc_LastSpin(struct Thread *t, struct Driver *d);
+void VehGroundSkids_Subset1(u32 *currXY, u32 *prevXY, int depth, u8 *scratch);
 void VehGroundSkids_Subset2(SVECTOR *scratch, SVECTOR *v1, SVECTOR *v2, SVECTOR *v3);
 void GAMEPAD_ShockForce1(struct Driver *d, int frame, int val);
 u32 *RaceFlag_GetOT(void);
@@ -1002,6 +1013,7 @@ void ElimBG_ToggleInstance(struct Instance *inst, char boolGameIsPaused);
 void ElimBG_ToggleAllInstances(struct GameTracker *gGT, int boolGameIsPaused);
 void INSTANCE_LevDelayedLInBs(struct InstDef *instDef, int numInstances);
 void CAM_ThTick(struct Thread *t);
+void FLARE_ThTick(struct Thread *th);
 void FLARE_Init(s16 *pos);
 void DotLights_AudioAndVideo(struct GameTracker *gGT);
 void LOAD_HubCallback(struct LoadQueueSlot *lqs);

@@ -7,7 +7,7 @@ void FLARE_Init(s16 *pos)
 	// 0 = no relation to param4
 	// 0x300 = SmallStackPool
 	// 0xd = "other" thread bucket
-	struct Thread *th = PROC_BirthWithObject(0xc030d, FLARE_ThTick, data.s_lensflare, NULL);
+	struct Thread *th = PROC_BirthWithObject(0xc030d, FLARE_ThTick, rdata.s_lensflare, NULL);
 	if (th != NULL)
 	{
 		// Get the pointer to flare, attached to the thread

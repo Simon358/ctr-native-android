@@ -95,6 +95,9 @@ void MainFrame_RenderFrame(struct GameTracker *gGT, struct GamepadSystem *gGamep
 		RenderStars(&gGT->pushBuffer[0], &gGT->backBuffer->primMem, &gGT->stars, gGT->numPlyrCurrGame);
 #endif
 
+	if (((gGT->renderFlags & 0x100) != 0) && (gGT->numPlyrCurrGame > 1))
+		DecalMP_01(gGT);
+
 	RenderAllHUD(gGT);
 
 #if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
@@ -120,6 +123,9 @@ void MainFrame_RenderFrame(struct GameTracker *gGT, struct GamepadSystem *gGamep
 #if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 	RenderDispEnv_World(gGT); // == RenderDispEnv_World ==
 #endif
+
+	if (((gGT->renderFlags & 0x100) != 0) && (gGT->numPlyrCurrGame > 1))
+		DecalMP_02(gGT);
 
 #if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 	RenderAllFlag0x40(gGT); // I need a better name
@@ -196,6 +202,9 @@ void MainFrame_RenderFrame(struct GameTracker *gGT, struct GamepadSystem *gGamep
 
 		MultiplayerWumpaHUD(gGT);
 
+		if (((gGT->renderFlags & 0x100) != 0) && (gGT->numPlyrCurrGame > 1))
+			DecalMP_03(gGT);
+
 		if (
 		    // if not cutscene
 		    // if not in adventure arena
@@ -228,10 +237,13 @@ void MainFrame_RenderFrame(struct GameTracker *gGT, struct GamepadSystem *gGamep
 			PlayLevel_UpdateLapStats();
 		}
 #elif defined(CTR_NATIVE)
-		// TODO(aalhendi): Retail also updates PickupBots here. Keep the native
-		// PlayLevel path live first; port PickupBots_Update before enabling it.
 		if (sdata->Loading.stage == -1)
 		{
+			if ((gGT->gameMode1 & PAUSE_ALL) == 0)
+			{
+				PickupBots_Update();
+			}
+
 			PlayLevel_UpdateLapStats();
 		}
 #endif
@@ -799,14 +811,8 @@ void RenderAllFlag0x40(struct GameTracker *gGT)
 	for (i = 0; i < gGT->numPlyrCurrGame; i++)
 	{
 		pb = &gGT->pushBuffer[i];
-#ifndef CTR_NATIVE
 		VehGroundSkids_Main(gGT->threadBuckets[PLAYER].thread, pb);
 		VehGroundSkids_Main(gGT->threadBuckets[ROBOT].thread, pb);
-#else
-		// NOTE(aalhendi): Keep the verified flag-0x40 effects live on native;
-		// VehGroundSkids_Main is still unported and remains the only skipped call here.
-		(void)pb;
-#endif
 	}
 }
 
