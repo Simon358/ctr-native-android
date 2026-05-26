@@ -1,5 +1,6 @@
 #include <common.h>
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x80022bdc-0x80022c88.
 void DecalGlobal_Store(struct GameTracker *gGT, struct LevTexLookup *LTL)
 {
 	struct Icon *currIcon;

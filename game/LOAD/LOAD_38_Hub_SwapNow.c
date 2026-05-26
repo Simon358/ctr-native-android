@@ -64,13 +64,13 @@ void LOAD_Hub_SwapNow()
 
 	if (level1 != 0)
 	{
-		LibraryOfModels_Store(gGT, level1->numModels, (int *)level1->ptrModelsPtrArray);
+		LibraryOfModels_Store(gGT, level1->numModels, level1->ptrModelsPtrArray);
 
 		INSTANCE_LevInitAll(level1->ptrInstDefs, level1->numInstances);
 
 		LevInstDef_UnPack(level1->ptr_mesh_info);
 
-		DecalGlobal_Store(gGT, (struct Icon *)level1->levTexLookup); // 2nd param might be `level1->levTexLookup->firstIcon`
+		DecalGlobal_Store(gGT, level1->levTexLookup);
 	}
 
 	cDC = &gGT->cameraDC[0];
