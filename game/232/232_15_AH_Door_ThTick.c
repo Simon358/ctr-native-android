@@ -1,7 +1,24 @@
 #include <common.h>
 
-// current 2208
-// budget 3276
+static char AH_Door_IsOpenByRewards(s16 levelID, s16 doorID)
+{
+	if ((levelID == N_SANITY_BEACH) && (doorID == 4))
+		return (sdata->advProgress.rewards[3] & 0x40) != 0;
+
+	if ((levelID == N_SANITY_BEACH) && (doorID == 5))
+		return (sdata->advProgress.rewards[3] & 0x10) != 0;
+
+	if (levelID == GEM_STONE_VALLEY)
+		return (sdata->advProgress.rewards[3] & 0x20) != 0;
+
+	if (levelID == THE_LOST_RUINS)
+		return (sdata->advProgress.rewards[3] & 0x80) != 0;
+
+	if (levelID == GLACIER_PARK)
+		return (sdata->advProgress.rewards[3] & 0x100) != 0;
+
+	return false;
+}
 
 void AH_Door_ThTick(struct Thread *t)
 {
@@ -14,7 +31,6 @@ void AH_Door_ThTick(struct Thread *t)
 	int i;
 	int ratio;
 	int distX;
-	int distY;
 	int distZ;
 	int dist;
 	int iVar17;
@@ -38,21 +54,14 @@ void AH_Door_ThTick(struct Thread *t)
 
 	lev = gGT->levelID;
 
-	// check if the door that the player approached is open
-	if (door->doorRot[1] == 0x400)
-	{
-		// door is open
-		doorIsOpen = true;
-	}
+	// NOTE(aalhendi): Retail derives open state from adventure rewards here.
+	doorIsOpen = AH_Door_IsOpenByRewards(lev, doorID);
 
 	// Cosine(angle)
 	ratio = MATH_Cos((int)doorInst->instDef->rot[1]);
 
 	// X distance of player and door
 	distX = doorInst->matrix.t[0] + (ratio * 0x300 >> 0xc) - driver->instSelf->matrix.t[0];
-
-	// Y distance of player and door
-	distY = doorInst->matrix.t[1] - driver->instSelf->matrix.t[1];
 
 	// Sine(angle)
 	ratio = MATH_Sin((int)doorInst->instDef->rot[1]);
@@ -61,7 +70,7 @@ void AH_Door_ThTick(struct Thread *t)
 	distZ = doorInst->matrix.t[2] + (ratio * 0x300 >> 0xc) - driver->instSelf->matrix.t[2];
 
 	// distance from player and door
-	dist = distX * distX + distY * distY + distZ * distZ;
+	dist = distX * distX + distZ * distZ;
 
 	// If player is close to a door
 	if (dist < 0x90000)
@@ -303,7 +312,6 @@ void AH_Door_ThTick(struct Thread *t)
 								keyInst->matrix.t[2] = driver->instSelf->matrix.t[2] + ((iVar17 >> 5) * ratio >> 0xc);
 							}
 
-#ifndef REBUILD_PS1
 							s16 *kr = &door->keyRot[0];
 
 							// desiredPos is actually specLightDir in this case, variable re-use
@@ -311,7 +319,6 @@ void AH_Door_ThTick(struct Thread *t)
 
 							// convert 3 rotation shorts into rotation matrix
 							ConvertRotToMatrix(&keyInst->matrix, kr);
-#endif
 						}
 						door->keyInst[i] = keyInst;
 					}
@@ -389,9 +396,7 @@ void AH_Door_ThTick(struct Thread *t)
 		// set desired position and rotation for CamerDC transition
 		CAM_SetDesiredPosRot(&gGT->cameraDC[0], &desiredPos[0], &desiredRot[0]);
 
-#ifndef REBUILD_PS1
 		GAMEPAD_JogCon2(driver, 0, 0);
-#endif
 
 		// start camera out transition (in "else" below)
 		door->camFlags |= WdCam_FlyingOut;
