@@ -20,9 +20,9 @@ void TEST_ThTickRunBucket(struct Thread *t)
 	}
 }
 
-// NOTE(aalhendi): Retail ThTick_FastRET unwinds the R3000A scratchpad thread
-// runner. Native thread ticks are normal C calls, so the portable equivalent is
-// just the caller returning normally after this no-op.
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x80071694-0x800716ec as a
+// native-equivalent divergence. Retail unwinds the scratchpad thread runner;
+// native thread ticks are normal C calls, so the equivalent is a no-op return.
 void ThTick_FastRET(struct Thread *t)
 {
 	(void)t;
