@@ -77,6 +77,7 @@ typedef enum
 
 #include "game_includes.h"
 
+#include "game/zGlobal_RDATA.c"
 #include "game/zGlobal_DATA.c"
 #include "game/zGlobal_SDATA.c"
 

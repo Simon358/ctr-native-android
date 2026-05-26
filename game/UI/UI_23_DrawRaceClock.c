@@ -1,13 +1,5 @@
 #include <common.h>
 
-#ifdef REBUILD_PC
-struct
-{
-	char s_timeString_empty[12];
-	// NOTE(aalhendi): Retail RDATA is pre-shaped; this function patches digits only.
-} rdata = {"  :  :  "};
-#endif
-
 // used for both finished lap time and current race time
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x8004edac-0x8004f894
 void UI_DrawRaceClock(u16 paramX, u16 paramY, u32 flags, struct Driver *driver)

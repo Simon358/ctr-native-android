@@ -5005,9 +5005,7 @@ struct sData
 // ram:80010000-ram:800123df
 // constant, initialized by compiler
 // switch jmp pointers, string parameters, etc
-#ifndef REBUILD_PC
 extern struct rData rdata;
-#endif
 
 // .text
 // ram:800123e0-ram:8008099f
