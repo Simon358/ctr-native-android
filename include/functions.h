@@ -522,7 +522,7 @@ void LOAD_StringToUpper(char *path);
 void LOAD_InitCD(void);
 void *LOAD_ReadDirectory(char *filepath);
 void LOAD_DramFileCallback(struct LoadQueueSlot *lqs);
-// LOAD_DramFile()
+void *LOAD_DramFile(void *bigfilePtr, int subfileIndex, void *ptrDestination, int *sizePtr, int callbackOrFlags);
 void LOAD_VramFileCallback(struct LoadQueueSlot *lqs);
 void *LOAD_VramFile(void *bigfilePtr, int subfileIndex, void *ptrDestination, int *sizePtr, int callbackOrFlags);
 void LOAD_ReadFileASyncCallback(CdlIntrResult result, u8 *unk);
