@@ -1,5 +1,6 @@
 #include <common.h>
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x8006749c-0x80067554.
 void VehStuckProc_PlantEaten_Update(struct Thread *t, struct Driver *d)
 {
 	d->NoInputTimer -= sdata->gGT->elapsedTimeMS;

@@ -1,6 +1,6 @@
 #include <common.h>
 
-// NOTE(aalhendi): ASM-verified NTSC-U 926 0x80068150-0x80068244
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x80068150-0x80068244.
 void VehStuckProc_Tumble_PhysAngular(struct Thread *thread, struct Driver *driver)
 {
 	int elapsedTimeMS = sdata->gGT->elapsedTimeMS;
