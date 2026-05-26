@@ -10,7 +10,7 @@ __attribute__((optimize("O0"))) int ScrapBookPlayMovie_DecodeFrame()
 }
 #endif
 
-// NOTE(aalhendi): ASM-verified NTSC-U 926 overlay 230 0x800b4014-0x800b42b0.
+// NOTE(aalhendi): ASM-verified NTSC-U 926 overlay 230 0x800b4014-0x800b42b0 PSX path.
 void MM_Scrapbook_PlayMovie(struct RectMenu *menu)
 {
 	s16 lev;

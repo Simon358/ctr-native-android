@@ -1,19 +1,57 @@
 #include <common.h>
 
+static void MM_Title_RotMatrixMul(MATRIX *matrix, const SVec3 *input, VECTOR *mac)
+{
+	gte_SetRotMatrix(matrix);
+	gte_ldv0((SVECTOR *)input);
+	gte_rtv0();
+	gte_stlvnl(mac);
+}
+
+static void MM_Title_UpdateTrophySpecLight(struct Instance *titleInst)
+{
+	struct GameTracker *gGT = sdata->gGT;
+	struct PushBuffer *pb = &gGT->pushBuffer[0];
+	struct InstDrawPerPlayer *idpp = INST_GETIDPP(titleInst);
+	MATRIX matrix;
+	SVec3 rot;
+	SVec3 light;
+	SVec3 view;
+	VECTOR lightMac;
+	VECTOR viewMac;
+
+	rot.x = -pb->rot[0];
+	rot.y = -pb->rot[1];
+	rot.z = -pb->rot[2];
+	ConvertRotToMatrix_Transpose(&matrix, (s16 *)&rot);
+
+	light.x = 0;
+	light.y = 0x1000;
+	light.z = 0;
+	MM_Title_RotMatrixMul(&matrix, &light, &lightMac);
+
+	titleInst->unk53 = (u8)lightMac.vx;
+	titleInst->reflectionRGBA = (u32)lightMac.vz;
+
+	view.x = titleInst->matrix.t[0] - pb->pos[0];
+	view.y = titleInst->matrix.t[1] - pb->pos[1];
+	view.z = titleInst->matrix.t[2] - pb->pos[2];
+	MATH_VectorNormalize(&view);
+	MM_Title_RotMatrixMul(&matrix, &view, &viewMac);
+
+	idpp[0].specLight[0] = (s16)((u16)lightMac.vx + (u16)viewMac.vx);
+	idpp[0].specLight[1] = (s16)((u16)lightMac.vy + (u16)viewMac.vy);
+	idpp[0].specLight[2] = (s16)((u16)lightMac.vz + (u16)viewMac.vz);
+}
+
+// NOTE(aalhendi): ASM-verified NTSC-U 926 overlay 230 0x800ac350-0x800ac6dc.
 void MM_Title_ThTick(struct Thread *title)
 {
 	s16 animFram;
-	struct GameTracker *gGT;
 	struct Instance *titleInst;
-	s16 in_zero;
-	s16 in_at;
-	s16 framIndex;
 	int i;
 	int timer;
 	struct Title *ptrTitle;
-	int cops[6];
-	s16 direction[3];
-	s16 rot[3];
 
 	// frame counters
 	timer = D230.timerInTitle;
@@ -97,7 +135,7 @@ void MM_Title_ThTick(struct Thread *title)
 				titleInst->animIndex = 1;
 			}
 
-			// TODO(aalhendi): Retail runs a GTE/specular-light block here; port it before stamping this function.
+			MM_Title_UpdateTrophySpecLight(titleInst);
 		}
 	}
 
