@@ -4,31 +4,51 @@
 void MainFreeze_IfPressStart(void)
 {
 	struct GameTracker *gGT = sdata->gGT;
+	u32 gameMode1;
+	struct RectMenu *menu;
 
-	// Check conditions for pausing the game
-	if ((RaceFlag_IsFullyOnScreen() == 0) &&
+	if (RaceFlag_IsFullyOnScreen() != 0)
+		return;
 
-	    // if you are not drawing loading screen (after fully off screen)
-	    ((gGT->renderFlags & 0x1000) == 0) &&
+	if ((gGT->renderFlags & 0x1000) != 0)
+		return;
 
-	    (sdata->AkuAkuHintState == 0) && (sdata->ptrActiveMenu == 0) && ((gGT->gameMode1 & (END_OF_RACE | PAUSE_ALL | GAME_CUTSCENE)) == 0) &&
-	    (gGT->levelID != MAIN_MENU_LEVEL) && (gGT->boolDemoMode == 0) && ((u32)(gGT->levelID - OXIDE_ENDING) > 1) && (sdata->load_inProgress == 0) &&
-	    ((gGT->gameMode2 & 4) == 0))
-	{
-		// pause the game
-		gGT->gameMode1 |= PAUSE_1;
+	if (sdata->AkuAkuHintState != 0)
+		return;
 
-		// set row selected to the top row
-		struct RectMenu *menu = MainFreeze_GetMenuPtr();
-		menu->rowSelected = 0;
+	if (sdata->ptrActiveMenu != NULL)
+		return;
 
-		RECTMENU_Show(menu);
+	gameMode1 = gGT->gameMode1;
 
-		// pause audio
-		MainFrame_TogglePauseAudio(1);
+	if ((gameMode1 & (END_OF_RACE | PAUSE_ALL)) != 0)
+		return;
 
-		OtherFX_Play(1, 1);
+	if (gGT->levelID == MAIN_MENU_LEVEL)
+		return;
 
-		ElimBG_Activate(gGT);
-	}
+	if ((gameMode1 & GAME_CUTSCENE) != 0)
+		return;
+
+	if (gGT->boolDemoMode != 0)
+		return;
+
+	if ((u32)(gGT->levelID - OXIDE_ENDING) < 2)
+		return;
+
+	if (sdata->load_inProgress != 0)
+		return;
+
+	if ((gGT->gameMode2 & VEH_FREEZE_PODIUM) != 0)
+		return;
+
+	gGT->gameMode1 = gameMode1 | PAUSE_1;
+
+	menu = MainFreeze_GetMenuPtr();
+	menu->rowSelected = 0;
+
+	RECTMENU_Show(menu);
+	MainFrame_TogglePauseAudio(1);
+	OtherFX_Play(1, 1);
+	ElimBG_Activate(gGT);
 }
