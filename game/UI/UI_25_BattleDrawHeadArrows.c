@@ -1,5 +1,6 @@
 #include <common.h>
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x8004f9d8-0x8004fd34.
 // Draw arrows over the heads of players
 void UI_BattleDrawHeadArrows(struct Driver *player)
 {
