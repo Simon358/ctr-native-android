@@ -122,6 +122,7 @@
 #include "game/CTR/CTR_09_ClearRenderLists_3P4P.c"
 #include "game/CTR/CTR_11_ErrorScreen.c"
 #include "game/CTR/CTR_17_MatrixToRot.c"
+#include "game/CTR/CTR_18_ScrambleGhostString.c"
 
 #include "game/DebugFont/DebugFont_0_Init.c"
 #include "game/DebugFont/DebugFont_1_DrawNumbers.c"
