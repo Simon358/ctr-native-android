@@ -1,7 +1,8 @@
 #include <common.h>
 
-void UI_Map_DrawMap_ExtraFunc(struct Icon *icon, POLY_FT4 *p, s16 posX, s16 empty, struct PrimMem *primMem, u_long *otMem, u32 colorID);
+void UI_Map_DrawMap_ExtraFunc(struct Icon *icon, POLY_FT4 *p, s16 posX, s16 empty, struct PrimMem *primMem, u_long *otMem, u32 transparency);
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x8004d614-0x8004d8b4.
 void UI_Map_DrawMap(struct Icon *mapTop, struct Icon *mapBottom, s16 posX, s16 posY, struct PrimMem *primMem, u_long *otMem, u32 colorID)
 {
 	s16 mapBottomHeight;
@@ -9,6 +10,7 @@ void UI_Map_DrawMap(struct Icon *mapTop, struct Icon *mapBottom, s16 posX, s16 p
 	int iVar9;
 	POLY_FT4 *p;
 	u32 color;
+	u32 transparency;
 	struct GameTracker *gGT;
 
 	gGT = sdata->gGT;
@@ -17,12 +19,14 @@ void UI_Map_DrawMap(struct Icon *mapTop, struct Icon *mapBottom, s16 posX, s16 p
 
 	// draw minimap with neutral/none vertex color, minimap's regular color is white
 	color = 0x808080;
+	transparency = colorID;
 
 	// draw map black
 	// used for the minimap shadow in the track select screen
 	if (colorID == 2)
 	{
 		color = 0;
+		transparency = 0;
 	}
 
 	// draw minimap blue
@@ -30,6 +34,7 @@ void UI_Map_DrawMap(struct Icon *mapTop, struct Icon *mapBottom, s16 posX, s16 p
 	if (colorID == 3)
 	{
 		color = 0x402000;
+		transparency = 0;
 	}
 
 	if (gGT->level1->ptrSpawnType1 != 0)
@@ -61,7 +66,7 @@ void UI_Map_DrawMap(struct Icon *mapTop, struct Icon *mapBottom, s16 posX, s16 p
 		p->y2 = posY - mapBottomHeight;
 		p->y3 = posY - mapBottomHeight;
 
-		UI_Map_DrawMap_ExtraFunc(mapTop, p, posX, 0, primMem, otMem, colorID);
+		UI_Map_DrawMap_ExtraFunc(mapTop, p, posX, 0, primMem, otMem, transparency);
 
 		p = p + 1;
 	}
@@ -74,12 +79,12 @@ void UI_Map_DrawMap(struct Icon *mapTop, struct Icon *mapBottom, s16 posX, s16 p
 	p->y2 = posY;
 	p->y3 = posY;
 
-	UI_Map_DrawMap_ExtraFunc(mapBottom, p, posX, 0, primMem, otMem, colorID);
+	UI_Map_DrawMap_ExtraFunc(mapBottom, p, posX, 0, primMem, otMem, transparency);
 
 	primMem->curr = p + 1;
 }
 
-void UI_Map_DrawMap_ExtraFunc(struct Icon *icon, POLY_FT4 *p, s16 posX, s16 empty, struct PrimMem *primMem, u_long *otMem, u32 colorID)
+void UI_Map_DrawMap_ExtraFunc(struct Icon *icon, POLY_FT4 *p, s16 posX, s16 empty, struct PrimMem *primMem, u_long *otMem, u32 transparency)
 {
 	s16 leftX;
 	s16 sizeX;
@@ -104,10 +109,9 @@ void UI_Map_DrawMap_ExtraFunc(struct Icon *icon, POLY_FT4 *p, s16 posX, s16 empt
 	*(int *)&p->u2 = *(int *)&icon->texLayout.u2;
 	*(s16 *)&p->u3 = *(s16 *)&icon->texLayout.u3;
 
-	// check for if the minimap being drawn is white, if it's white then alter the blending mode bits of the texpage from 11 to 01
-	if (colorID == 1)
+	if (transparency != 0)
 	{
-		p->tpage = p->tpage & 0xff9f | (u16)(1 << 5);
+		p->tpage = (p->tpage & 0xff9f) | ((u16)transparency << 5);
 	}
 
 	p->code |= 2;
