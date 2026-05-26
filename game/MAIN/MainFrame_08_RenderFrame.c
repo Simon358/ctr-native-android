@@ -1323,9 +1323,16 @@ void RenderSubmit(struct GameTracker *gGT)
 	// 1 VSYNC = 60fps
 	// 2 VSYNCs = 30fps
 
-#ifdef REBUILD_PC
+#if defined(CTR_NATIVE)
 
 	sdata->vsyncTillFlip = 2;
+
+	// Native still renders immediately through PsyCross, so keep the host GPU's
+	// active draw/display envs in step with the retail DB selected this frame.
+	PutDrawEnv(&gGT->backBuffer->drawEnv);
+	gGT->frontBuffer = &gGT->db[1 - gGT->swapchainIndex];
+	PutDispEnv(&gGT->frontBuffer->dispEnv);
+
 #else
 
 	// do I need the "if"? will it ever be nullptr?

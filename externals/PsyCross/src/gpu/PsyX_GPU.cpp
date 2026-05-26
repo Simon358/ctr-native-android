@@ -109,9 +109,10 @@ void DrawEnvOffset(float& ofsX, float& ofsY)
 
 		if (w <= 0) w = 1;
 
-		// also make offset in draw dimensions range to prevent flicker
-		ofsX = activeDrawEnv.ofs[0] % w;
-		ofsY = activeDrawEnv.ofs[1] % 256; // HACK: use half of VRAM
+		// NOTE(aalhendi): Convert PS1 VRAM-page draw offsets into display-relative host-screen offsets. 
+		// CTR alternates draw pages at y=0 and y=0x128; using raw modulo VRAM offsets shifts every other native frame vertically.
+		ofsX = activeDrawEnv.ofs[0] - activeDispEnv.disp.x;
+		ofsY = activeDrawEnv.ofs[1] - activeDispEnv.disp.y;
 	}
 	else
 	{
