@@ -1,27 +1,12 @@
 #include <common.h>
 
-/**
- * @brief Draws an inner rectangle for a menu box with various styles depending on the type.
- *        This function is part of the UI system for drawing menu boxes and allows for different
- *        styles like transparent or solid black, as well as additional customizations.
- *        The function adjusts the dimensions and style of the rectangle based on type
- *        and then draws it using specific graphical functions.
- * Byte budget: 508/572
- * Function Identifier: FUN_800457b0
- *
- * @author aalhendi
- *
- * @param r Pointer to a RECT structure that specifies the initial position and size of the rectangle.
- * @param type An integer that determines the style of the tile view:
- *                     0 for transparent (like main menu), 1 for solid black (like "gamepad unplugged"), etc.
- * @param ot Pointer to a rendering structure or object, used internally in the drawing functions.
- */
-void RECTMENU_DrawInnerRect(RECT *r, int type, void *ot)
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x800457b0-0x800459ec.
+void RECTMENU_DrawInnerRect(RECT *r, int type, u_long *ot)
 {
-	int *colorDataNormal;  // TODO(aalhendi): colorData1?
-	int *colorDataSpecial; // TODO(aalhendi): colorData2?
-	int drawMode;          // TODO(aalhendi): Check type?
-	RECT adjustedRect;     // Using a single RECT for adjustments
+	int *colorDataNormal;
+	int *colorDataSpecial;
+	int drawMode;
+	RECT adjustedRect;
 
 	colorDataNormal = &sdata->battleSetup_Color_UI_1;
 	if ((type & 0x10) != 0)
@@ -45,7 +30,6 @@ void RECTMENU_DrawInnerRect(RECT *r, int type, void *ot)
 	{
 		if ((type & 2) == 0)
 		{
-			// Modify RECT components directly
 			adjustedRect.x += 3;
 			adjustedRect.y += 2;
 			adjustedRect.w -= 6;
@@ -66,7 +50,6 @@ void RECTMENU_DrawInnerRect(RECT *r, int type, void *ot)
 		}
 	}
 
-	// Draw shadow under the menu
 	if ((type & 4) == 0)
 	{
 		s16 horizontalOffset = ((type & 0x80) != 0) ? 4 : 0xc;
@@ -78,7 +61,7 @@ void RECTMENU_DrawInnerRect(RECT *r, int type, void *ot)
 		adjustedRect.h = r->h;
 
 		int *color = &sdata->DrawSolidBoxData[0];
-		CTR_Box_DrawClearBox(&adjustedRect, (Color *)color, 0, ot); // Adjust and draw the box
+		CTR_Box_DrawClearBox(&adjustedRect, (Color *)color, 0, ot);
 
 		adjustedRect.x = r->x + horizontalOffset;
 		adjustedRect.y = r->y + r->h;

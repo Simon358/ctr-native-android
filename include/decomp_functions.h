@@ -415,7 +415,7 @@ void MEMPACK_PopState(void);
 void MEMPACK_PopToState(int id);
 
 void RECTMENU_DrawQuip(char *comment, s16 startX, int startY, u32 sizeX, s16 fontType, int textFlag, s16 boxFlag);
-void RECTMENU_DrawInnerRect(RECT *r, int x, void *ot);
+void RECTMENU_DrawInnerRect(RECT *r, int x, u_long *ot);
 void RECTMENU_DrawSelf(struct RectMenu *menu, int param_2, s16 param_3, s16 width);
 void RECTMENU_DrawPolyGT4(struct Icon *icon, s16 posX, s16 posY, struct PrimMem *primMem, u_long *ot, u32 color0, u32 color1, u32 color2, u32 color3,
                           char transparency, s16 scale);
@@ -987,7 +987,6 @@ void LOAD_StringToUpper(char *path);
 // void LHMatrix_Parent(struct Instance* inst, struct Instance* driverInst, SVECTOR* param_3);
 
 // TODO:
-// RECTMENU_DrawInnerRect change void* ot to u_long* ot
 // CTR_Box_DrawWirePrims change void* ot to u_long* ot
 
 void MainLoadVLC(void);

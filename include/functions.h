@@ -799,7 +799,7 @@ void RECTMENU_DrawRwdTriangle(s16 *position, char *color, u_long *otMem, struct 
 void RECTMENU_DrawOuterRect_LowLevel(RECT *r, s16 x, u16 y, Color color, s16 param_5, u_long *otMem);
 void RECTMENU_DrawOuterRect_HighLevel(RECT *r, Color color, s16 param_3, u_long *otMem);
 void RECTMENU_DrawQuip(char *comment, s16 startX, int startY, u32 sizeX, s16 fontType, int textFlag, s16 boxFlag);
-void RECTMENU_DrawInnerRect(RECT *r, int flag, void *ot);
+void RECTMENU_DrawInnerRect(RECT *r, int flag, u_long *ot);
 void RECTMENU_DrawFullRect(struct RectMenu *menu, RECT *r);
 void RECTMENU_GetHeight(struct RectMenu *m, s16 *height, int boolCheckSubmenu);
 void RECTMENU_GetWidth(struct RectMenu *m, s16 *width, int boolCheckSubmenu);
