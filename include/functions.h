@@ -221,7 +221,7 @@ void GAMEPROG_GetPtrHighScoreTrack();
 
 // void GhostReplay_ThTick();
 // GhostReplay_Init1()
-// GhostTape_Start()
+void GhostTape_Start(void);
 void GhostTape_End(void);
 void GhostTape_WriteMoves(s16 param_1);
 void GhostTape_WriteBoosts(int reserves, u8 type, int fireLevel);

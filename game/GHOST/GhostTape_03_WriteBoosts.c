@@ -1,5 +1,6 @@
 #include <common.h>
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x8002838c-0x80028410.
 void GhostTape_WriteBoosts(int addReserve, u8 type, int speedCap)
 {
 	char *puVar1;

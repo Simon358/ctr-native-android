@@ -1,5 +1,6 @@
 #include <common.h>
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x80027df4-0x80027e90.
 void GhostTape_Start(void)
 {
 	struct GhostHeader *gh;
