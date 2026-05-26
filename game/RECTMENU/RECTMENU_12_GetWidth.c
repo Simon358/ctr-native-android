@@ -1,5 +1,6 @@
 #include <common.h>
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x80045c50-0x80045db0.
 void RECTMENU_GetWidth(struct RectMenu *m, s16 *width, int boolCheckSubmenu)
 {
 	int fontType;

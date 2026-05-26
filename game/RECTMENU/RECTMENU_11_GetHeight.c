@@ -1,5 +1,6 @@
 #include <common.h>
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x80045b1c-0x80045c50.
 void RECTMENU_GetHeight(struct RectMenu *m, s16 *height, int boolCheckSubmenu)
 {
 	int lineHeight;

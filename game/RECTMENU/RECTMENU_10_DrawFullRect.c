@@ -1,5 +1,6 @@
 #include <common.h>
 
+// NOTE(aalhendi): ASM-verified NTSC-U 926 0x800459ec-0x80045b1c.
 void RECTMENU_DrawFullRect(struct RectMenu *menu, RECT *inner)
 {
 	u32 *rgb;
