@@ -1,15 +1,16 @@
 #include <common.h>
 
-// NOTE(aalhendi): First 0x18 bytes match `struct BucketSearchParams`; the
-// trailing hitDir fields are written by `VehPhysCrash_AnyTwoCars`.
+// NOTE(aalhendi): Keep bucket typed; native O2 can drop punned stack writes.
+// First 0x18 bytes match `struct BucketSearchParams`; the trailing hitDir
+// fields are written by `VehPhysCrash_AnyTwoCars`.
 struct VehPhysForce_CollideDrivers_Search
 {
-	s16 pos[4];
-	struct Thread *th;
-	int radius;
-	s16 dist[4];
+	struct BucketSearchParams bucket;
 	s16 hitDir[4];
 };
+
+_Static_assert(offsetof(struct VehPhysForce_CollideDrivers_Search, bucket) == 0);
+_Static_assert(offsetof(struct VehPhysForce_CollideDrivers_Search, hitDir) == sizeof(struct BucketSearchParams));
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x8005ebac-0x8005ee34.
 void VehPhysForce_CollideDrivers(struct Thread *thread, struct Driver *driver)
@@ -55,20 +56,20 @@ void VehPhysForce_CollideDrivers(struct Thread *thread, struct Driver *driver)
 	{
 		struct VehPhysForce_CollideDrivers_Search search;
 
-		search.pos[0] = (s16)(driver->posCurr.x >> 8);
-		search.pos[1] = (s16)(driver->posCurr.y >> 8);
-		search.pos[2] = (s16)(driver->posCurr.z >> 8);
-		search.th = NULL;
-		search.radius = 0x7fffffff;
+		search.bucket.pos[0] = (s16)(driver->posCurr.x >> 8);
+		search.bucket.pos[1] = (s16)(driver->posCurr.y >> 8);
+		search.bucket.pos[2] = (s16)(driver->posCurr.z >> 8);
+		search.bucket.th = NULL;
+		search.bucket.radius = 0x7fffffff;
 
-		PROC_CollidePointWithBucket(thread->siblingThread, &search.pos[0]);
-		PROC_CollidePointWithBucket(sdata->gGT->threadBuckets[ROBOT].thread, &search.pos[0]);
+		PROC_CollidePointWithBucket(thread->siblingThread, &search.bucket);
+		PROC_CollidePointWithBucket(sdata->gGT->threadBuckets[ROBOT].thread, &search.bucket);
 
-		if (search.th != NULL)
+		if (search.bucket.th != NULL)
 		{
-			int radiusSum = thread->driver_HitRadius + search.th->driver_HitRadius;
+			int radiusSum = thread->driver_HitRadius + search.bucket.th->driver_HitRadius;
 
-			if (search.radius < radiusSum * radiusSum)
+			if (search.bucket.radius < radiusSum * radiusSum)
 			{
 				VehPhysCrash_AnyTwoCars(thread, (u16 *)&search, &driver->velocity);
 			}

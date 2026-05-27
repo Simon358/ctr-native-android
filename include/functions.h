@@ -745,7 +745,7 @@ void PROC_CheckAllForDead(void);
 struct Thread *PROC_BirthWithObject(int creationFlags, void *behaviorFuncPtr, char *debugName,
                                     struct Thread *threadRelative); // 2nd param function ptr, maybe (void (*)(int))?
 void PROC_CollidePointWithSelf(struct Thread *th, struct BucketSearchParams *buf);
-void PROC_CollidePointWithBucket(struct Thread *th, s16 *vec3_pos);
+void PROC_CollidePointWithBucket(struct Thread *th, struct BucketSearchParams *buf);
 struct Thread *PROC_SearchForModel(struct Thread *th, s16 modelID);
 void PROC_PerBspLeaf_CheckInstances(struct BSP *bspLeaf, struct ScratchpadStruct *sps);
 void PROC_StartSearch_Self(struct ScratchpadStruct *sps);

@@ -467,7 +467,7 @@ void PickupBots_Update(void);
 struct Thread *PROC_BirthWithObject(int flags, void *funcThTick, char *name, struct Thread *relativeTh);
 void PROC_CheckAllForDead(void);
 void PROC_CheckBloodlineForDead(struct Thread **replaceSelf, struct Thread *th);
-void PROC_CollidePointWithBucket(struct Thread *th, s16 *vec3_pos);
+void PROC_CollidePointWithBucket(struct Thread *th, struct BucketSearchParams *buf);
 void PROC_CollidePointWithSelf(struct Thread *th, struct BucketSearchParams *buf);
 void PROC_CollideHitboxWithBucket(struct Thread *collThread, struct ScratchpadStruct *sps, struct Thread *ignoredThread);
 void PROC_DestroyInstance(struct Thread *t);

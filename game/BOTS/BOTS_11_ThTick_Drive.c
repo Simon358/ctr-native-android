@@ -2,16 +2,17 @@
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80013c18-0x80016b00.
 
-// NOTE(aalhendi): First 0x18 bytes match `struct BucketSearchParams`; the
-// trailing hitDir fields are written by `VehPhysCrash_AnyTwoCars`.
+// NOTE(aalhendi): Keep bucket typed; native O2 can drop punned stack writes.
+// First 0x18 bytes match `struct BucketSearchParams`; the trailing hitDir
+// fields are written by `VehPhysCrash_AnyTwoCars`.
 struct BotsThTickDrive_CollisionSearch
 {
-	s16 pos[4];
-	struct Thread *th;
-	int radius;
-	s16 dist[4];
+	struct BucketSearchParams bucket;
 	s16 hitDir[4];
 };
+
+_Static_assert(offsetof(struct BotsThTickDrive_CollisionSearch, bucket) == 0);
+_Static_assert(offsetof(struct BotsThTickDrive_CollisionSearch, hitDir) == sizeof(struct BucketSearchParams));
 
 void BOTS_ThTick_Drive(struct Thread *botThread)
 {
@@ -145,11 +146,11 @@ give_this_label_a_better_name:
 	}
 
 	struct BotsThTickDrive_CollisionSearch cpwb_param_2;
-	cpwb_param_2.pos[0] = (short)(botDriver->posCurr.x >> 8);
-	cpwb_param_2.pos[1] = (short)(botDriver->posCurr.y >> 8);
-	cpwb_param_2.pos[2] = (short)(botDriver->posCurr.z >> 8);
-	cpwb_param_2.th = NULL;
-	cpwb_param_2.radius = 0x7fffffff;
+	cpwb_param_2.bucket.pos[0] = (short)(botDriver->posCurr.x >> 8);
+	cpwb_param_2.bucket.pos[1] = (short)(botDriver->posCurr.y >> 8);
+	cpwb_param_2.bucket.pos[2] = (short)(botDriver->posCurr.z >> 8);
+	cpwb_param_2.bucket.th = NULL;
+	cpwb_param_2.bucket.radius = 0x7fffffff;
 
 	struct Thread *uVar12;
 
@@ -157,7 +158,7 @@ give_this_label_a_better_name:
 	{
 		if (botThread->modelIndex == DYNAMIC_PLAYER)
 		{
-			PROC_CollidePointWithBucket(botThread->siblingThread, &cpwb_param_2.pos[0]);
+			PROC_CollidePointWithBucket(botThread->siblingThread, &cpwb_param_2.bucket);
 
 			uVar12 = gGT->threadBuckets[ROBOT].thread;
 		}
@@ -169,15 +170,15 @@ give_this_label_a_better_name:
 			uVar12 = botThread->siblingThread;
 		}
 
-		PROC_CollidePointWithBucket(uVar12, &cpwb_param_2.pos[0]);
+		PROC_CollidePointWithBucket(uVar12, &cpwb_param_2.bucket);
 	}
 give_this_label_a_better_name2:
 
-	struct Thread *t = cpwb_param_2.th;
+	struct Thread *t = cpwb_param_2.bucket.th;
 	if (t != NULL)
 	{
 		int iVar4 = botThread->driver_HitRadius + t->driver_HitRadius;
-		if (cpwb_param_2.radius < iVar4 * iVar4)
+		if (cpwb_param_2.bucket.radius < iVar4 * iVar4)
 		{
 			Vec3 xyz;
 			xyz.x = botDriver->xSpeed + botDriver->botData.unk5bc.ai_accelAxis[0]; //(*(int*)&botDriver->unk5bc[0x1c]);
