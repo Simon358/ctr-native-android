@@ -109,6 +109,12 @@ static void CollMoved_PlayerSearch_BoostHitboxScrub(struct ScratchpadStruct *sps
 	CollFixed_WriteS16(sps, 0xe, CollFixed_ReadS16(sps, 0xe) + 0x200);
 }
 
+static u8 CollMoved_PlayerSearch_HitboxId(struct BSP *bsp)
+{
+	// NOTE(aalhendi): Retail reads the hitbox kind with lbu +0x1, not BSP.id.
+	return ((u8 *)bsp)[1];
+}
+
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80020410-0x80020c58
 void COLL_MOVED_PlayerSearch(struct Thread *t, struct Driver *d)
 {
@@ -205,14 +211,16 @@ void COLL_MOVED_PlayerSearch(struct Thread *t, struct Driver *d)
 		if (sps->boolDidTouchHitbox != 0)
 		{
 			struct BSP *bspHitbox = sps->bspHitbox;
+			u8 hitboxId;
 			int hitboxResult;
 
 			sps->Union.QuadBlockColl.searchFlags &= 0xfff7;
 			d->unkAA &= 0xfffd;
 
 			hitboxResult = CollMoved_PlayerSearch_RunHitboxLInC(sps, t);
+			hitboxId = CollMoved_PlayerSearch_HitboxId(bspHitbox);
 
-			if ((hitboxResult == 2) || (bspHitbox->id == 4))
+			if ((hitboxResult == 2) || (hitboxId == 4))
 			{
 				CollMoved_PlayerSearch_StoreHitbox(sps);
 			}
@@ -223,7 +231,7 @@ void COLL_MOVED_PlayerSearch(struct Thread *t, struct Driver *d)
 				COLL_MOVED_FindScrub((struct QuadBlock *)bspHitbox, 0, sps);
 				CollMoved_PlayerSearch_BoostHitboxScrub(sps);
 
-				scrub = VehAfterColl_GetSurface((u8)bspHitbox->id);
+				scrub = VehAfterColl_GetSurface(hitboxId);
 				hitboxResult = COLL_MOVED_ScrubImpact(d, t, sps, scrub, &d->velocity.x);
 
 				if (hitboxResult == 0)
