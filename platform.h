@@ -17,6 +17,7 @@ void Platform_InitScratchpad(void);
 const struct PlatformMempackArena *Platform_InitMempackArena(void);
 void Platform_BeginFrame(void);
 void Platform_EndFrame(void);
+void Platform_PresentVRAMDisplay(void);
 int Platform_PollInput(void);
 void Platform_InitFilesystem(const char *disc_image);
 

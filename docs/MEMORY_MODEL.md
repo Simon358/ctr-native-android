@@ -112,6 +112,15 @@ The split is intentional:
 The pressure mode is useful for finding native paths that silently rely on more dynamic memory than retail had.
 The PS1 path does not call the platform arena hook; it computes the allocator window from retail overlay symbols.
 
+## Native VRAM
+
+Native keeps the PS1-visible VRAM contract at `1024x512x16`, but the platform layer owns the host backing and presentation path.
+
+| Layer | Responsibility |
+|-------|----------------|
+| Platform/PsyCross | Owns the CPU VRAM mirror, OpenGL textures, uploads, and native presentation bridge |
+| Game/GPU compatibility layer | Keeps retail `LoadImage`, `MoveImage`, `StoreImage`, draw packets, asset rects, and upload timing |
+
 ## Scratchpad
 
 The PS1 scratchpad is 1 KiB:

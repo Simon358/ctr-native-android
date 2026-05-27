@@ -294,6 +294,13 @@ void Platform_EndFrame(void)
 	CalcFPS();
 }
 
+void Platform_PresentVRAMDisplay(void)
+{
+	Platform_BeginFrame();
+	GR_PresentVRAMDisplay();
+	Platform_EndFrame();
+}
+
 int Platform_PollInput(void)
 {
 	return 1;

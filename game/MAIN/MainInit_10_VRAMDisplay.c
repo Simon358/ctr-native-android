@@ -1,9 +1,5 @@
 #include <common.h>
 
-#ifdef CTR_NATIVE
-#include <PsyX/PsyX_render.h>
-#endif
-
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x8003c310-0x8003c41c; native wraps
 // the VRAM page moves in a platform frame for presentation.
 void MainInit_VRAMDisplay()
@@ -39,8 +35,6 @@ void MainInit_VRAMDisplay()
 	}
 
 #ifdef CTR_NATIVE
-	Platform_BeginFrame();
-	GR_PresentVRAMDisplay();
-	Platform_EndFrame();
+	Platform_PresentVRAMDisplay();
 #endif
 }
