@@ -128,6 +128,7 @@ void RB_Seal_ThTick_TurnAround(struct Thread *t)
 		ConvertRotToMatrix(&sealInst->matrix, &sealObj->rotCurr[0]);
 
 		ThTick_SetAndExec(t, RB_Seal_ThTick_Move);
+		return;
 	}
 
 	else
@@ -226,8 +227,7 @@ void RB_Seal_ThTick_Move(struct Thread *t)
 
 	// turn around
 	ThTick_SetAndExec(t, RB_Seal_ThTick_TurnAround);
-
-	Seal_CheckColl(sealInst, t, 1, 0x4000, 0x78);
+	return;
 }
 
 void RB_Seal_LInB(struct Instance *inst)

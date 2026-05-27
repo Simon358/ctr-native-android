@@ -10,12 +10,8 @@
 #include "game/226/226_00_DrawLevelOvr1P.c"
 #include "game/TEST_DrawSkybox.c"
 #include "game/TEST_DrawInstances.c"
-#include "game/TEST_ThTickRunBucket.c"
-#include "game/TEST_ThTickSetAndExec.c"
 #include "game/DrawConfetti/DrawConfetti.c"
 #include "game/DrawSky/DrawSky.c"
-
-#define ThTick_SetAndExec TEST_ThTickSetAndExec
 
 #include "game/RenderBucket/RenderBucket_08_InitDepthGTE.c"
 #include "game/RenderBucket/RenderBucket_QueueExecute.c"
@@ -509,6 +505,7 @@
 #include "game/PROC/PROC_11_PerBspLeaf_CheckInstances.c"
 #include "game/PROC/PROC_12_StartSearch_Self.c"
 #include "game/PROC/PROC_13_CollideHitboxWithBucket.c"
+#include "game/PROC/PROC_14_ThTick.c"
 
 #include "game/PushBuffer/PushBuffer_00_Init.c"
 #include "game/PushBuffer/PushBuffer_01_SetPsyqGeom.c"

@@ -1160,8 +1160,8 @@ void *RenderBucket_QueueNonLevInstances(struct Item *item, u_long *otMem, void *
 // RenderBucket_QueueDraw()
 void ThTick_RunBucket(struct Thread *thread);
 void ThTick_FastRET(struct Thread *thread);
-// ThTick_SetAndExec()
-// ThTick_Set()
+void ThTick_SetAndExec(struct Thread *thread, void (*funcThTick)(struct Thread *));
+void ThTick_Set(struct Thread *thread, void (*funcThTick)(struct Thread *));
 
 // PSY-Q
 
@@ -1268,7 +1268,6 @@ void RB_Fruit_GetScreenCoords(struct PushBuffer *pb, struct Instance *inst, s16 
 void VehPhysForce_OnGravity(struct Driver *driver, Vec3 *velocity);
 int RngDeadCoed(u32 *);
 struct Terrain *VehAfterColl_GetTerrain(u8 terrainType);
-void ThTick_SetAndExec(struct Thread *, void (*callbackMaybe)(struct Thread *)); // guessed about the signature
 void RB_Default_LInB(struct Instance *);
 u16 INSTANCE_GetNumAnimFrames(struct Instance *pInstance, int animIndex);
 void RB_RainCloud_Init(struct Driver *d);

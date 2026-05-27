@@ -205,12 +205,7 @@ void MainFrame_GameLogic(struct GameTracker *gGT, struct GamepadSystem *gGamepad
 					}
 				}
 
-
-#ifndef REBUILD_PS1
 				ThTick_RunBucket(gGT->threadBuckets[iVar4].thread);
-#else
-				TEST_ThTickRunBucket(gGT->threadBuckets[iVar4].thread);
-#endif
 			}
 		}
 
@@ -232,11 +227,7 @@ void MainFrame_GameLogic(struct GameTracker *gGT, struct GamepadSystem *gGamepad
 		psVar12 = gGT->threadBuckets[AKUAKU].thread;
 		if (psVar12 != 0)
 		{
-#ifndef REBUILD_PS1
 			ThTick_RunBucket(psVar12);
-#else
-			TEST_ThTickRunBucket(psVar12);
-#endif
 		}
 	}
 
