@@ -576,35 +576,51 @@ void RenderAllHUD(struct GameTracker *gGT)
 				// drawing end of race
 				else
 				{
-					if (
-					    // VS mode, and Cup
-					    ((gGT->gameMode1 & ARCADE_MODE) == 0) && ((gGT->gameMode2 & CUP_ANY_KIND) != 0))
+#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
+					if ((u32)(sdata->Loading.stage + 5) > 1)
 					{
-						// disable drawing hud,
-						// enable drawing "standings"
-						gGT->hudFlags = (hudFlags & 0xfe) | 4;
-						return;
+						if ((gameMode1 & CRYSTAL_CHALLENGE) == 0)
+						{
+							if ((gameMode1 & TIME_TRIAL) == 0)
+							{
+								if ((gameMode1 & ARCADE_MODE) == 0)
+								{
+									if ((gameMode1 & RELIC_RACE) == 0)
+									{
+										if ((gameMode1 & ADVENTURE_MODE) != 0)
+										{
+											AA_EndEvent_DrawMenu();
+										}
+										else if ((gGT->gameMode2 & CUP_ANY_KIND) == 0)
+										{
+											VB_EndEvent_DrawMenu();
+										}
+										else
+										{
+											gGT->hudFlags = (hudFlags & 0xfe) | 4;
+										}
+									}
+									else
+									{
+										RR_EndEvent_DrawMenu();
+									}
+								}
+								else
+								{
+									AA_EndEvent_DrawMenu();
+								}
+							}
+							else
+							{
+								TT_EndEvent_DrawMenu();
+							}
+						}
+						else
+						{
+							CC_EndEvent_DrawMenu();
+						}
 					}
 
-#if defined(CTR_NATIVE)
-					// NOTE(aalhendi): Preserve the original OVR_Region1 overlay-entry contract with a dispatcher.
-					OVR_Region1();
-#elif !defined(REBUILD_PS1)
-					// temporary, until we rewrite MainGameEnd_Initialize
-					if ((gGT->gameMode1 & RELIC_RACE) == 0)
-					{
-						// all 221-225 overlays share the same
-						// function address, so call as one func
-						void OVR_Region1();
-						OVR_Region1();
-					}
-
-					// except relic, until we rewrite MainGameEnd_Initialize
-					else
-					{
-						void RR_EndEvent_DrawMenu();
-						RR_EndEvent_DrawMenu();
-					}
 #endif
 
 					return;
