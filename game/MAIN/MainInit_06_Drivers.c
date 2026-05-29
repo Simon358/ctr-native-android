@@ -111,16 +111,17 @@ void MainInit_Drivers(struct GameTracker *gGT)
 	{
 		m = sdata->PLYROBJECTLIST[i++];
 
+		// NOTE(aalhendi): Native MPK model lists can end before the menu token.
+		if (m == 0)
+		{
+			i = 0;
+			break;
+		}
+
 		// "token"
 		if (*(int *)&m->name[0] == 0x656b6f74)
 		{
 			// Player 1 always comes after Token
-			break;
-		}
-
-		if (m == 0)
-		{
-			i = 0;
 			break;
 		}
 	}

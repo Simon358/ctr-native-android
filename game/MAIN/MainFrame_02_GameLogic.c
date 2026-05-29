@@ -157,6 +157,11 @@ void MainFrame_GameLogic(struct GameTracker *gGT, struct GamepadSystem *gGamepad
 					psVar9 = psVar9;
 				}
 				psVar10 = psVar8;
+#ifdef CTR_NATIVE
+				// NOTE(aalhendi): Retail may read PSX low memory before driver 0 appears.
+				if (psVar8 == NULL)
+					continue;
+#endif
 				if ((u8)psVar9->numTimesAttacking < (u8)psVar8->numTimesAttacking)
 					goto LAB_80035098;
 			}
