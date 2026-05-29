@@ -104,68 +104,62 @@ void MainInit_Drivers(struct GameTracker *gGT)
 	}
 
 #if defined(CTR_NATIVE)
-	i = 0;
-	int driverID = 0;
-	struct Model *m;
-	while (1)
+	// NOTE(aalhendi): Garage adventure MPKs carry one selected driver; retail menu birth already assigns it.
+	if (gGT->levelID != ADVENTURE_GARAGE)
 	{
-		m = sdata->PLYROBJECTLIST[i++];
-
-		// NOTE(aalhendi): Native MPK model lists can end before the menu token.
-		if (m == 0)
+		i = 0;
+		int driverID = 0;
+		struct Model *m;
+		while (1)
 		{
-			i = 0;
-			break;
+			m = sdata->PLYROBJECTLIST[i++];
+
+			// NOTE(aalhendi): Native MPK model lists can end before the menu token.
+			if (m == 0)
+			{
+				i = 0;
+				break;
+			}
+
+			// "token"
+			if (*(int *)&m->name[0] == 0x656b6f74)
+			{
+				// Player 1 always comes after Token
+				break;
+			}
 		}
 
-		// "token"
-		if (*(int *)&m->name[0] == 0x656b6f74)
+		if (gGT->numPlyrCurrGame == 1)
 		{
-			// Player 1 always comes after Token
-			break;
+			driverID = 0;
+		}
+
+		else if (gGT->numPlyrCurrGame == 2)
+		{
+			gGT->drivers[0]->instSelf->model = data.driverModelExtras[0];
+			gGT->drivers[1]->instSelf->model = data.driverModelExtras[1];
+			driverID = 2;
+		}
+
+		else
+		{
+			gGT->drivers[0]->instSelf->model = data.driverModelExtras[0];
+			gGT->drivers[1]->instSelf->model = data.driverModelExtras[1];
+			gGT->drivers[2]->instSelf->model = data.driverModelExtras[2];
+
+			if (gGT->numPlyrCurrGame == 4)
+				gGT->drivers[3]->instSelf->model = sdata->PLYROBJECTLIST[i++];
+
+			driverID = 8;
+		}
+
+		for (driverID; driverID < 7; driverID++)
+		{
+			if (gGT->drivers[driverID] == 0)
+				break;
+			gGT->drivers[driverID]->instSelf->model = sdata->PLYROBJECTLIST[i++];
 		}
 	}
-
-	if (gGT->numPlyrCurrGame == 1)
-	{
-		driverID = 0;
-	}
-
-	else if (gGT->numPlyrCurrGame == 2)
-	{
-		gGT->drivers[0]->instSelf->model = data.driverModelExtras[0];
-		gGT->drivers[1]->instSelf->model = data.driverModelExtras[1];
-		driverID = 2;
-	}
-
-	else
-	{
-		gGT->drivers[0]->instSelf->model = data.driverModelExtras[0];
-		gGT->drivers[1]->instSelf->model = data.driverModelExtras[1];
-		gGT->drivers[2]->instSelf->model = data.driverModelExtras[2];
-
-		if (gGT->numPlyrCurrGame == 4)
-			gGT->drivers[3]->instSelf->model = sdata->PLYROBJECTLIST[i++];
-
-		driverID = 8;
-	}
-
-	for (driverID; driverID < 7; driverID++)
-	{
-		if (gGT->drivers[driverID] == 0)
-			break;
-		gGT->drivers[driverID]->instSelf->model = sdata->PLYROBJECTLIST[i++];
-	}
-
-// leave commented, or it crashes Adventure->New
-#if 0
-	for(driverID = 0; driverID < 7; driverID++)
-	{
-		if(gGT->drivers[driverID] == 0) break;
-		printf("%s\n", gGT->drivers[driverID]->instSelf->model->name);
-	}
-#endif
-
 #endif
 
 	// if you're in time trial, not main menu, not loading.

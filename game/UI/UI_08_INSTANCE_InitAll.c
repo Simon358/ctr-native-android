@@ -58,7 +58,15 @@ void UI_INSTANCE_InitAll(void)
 	{
 		for (i = 0; i < 8; i++)
 		{
-			data.rankIconsCurr[i] = gGT->drivers[i]->driverRank;
+#if defined(CTR_NATIVE)
+			// NOTE(aalhendi): PSX low-memory reads are non-fatal for unused driver slots.
+			if (gGT->drivers[i] == NULL)
+			{
+				data.rankIconsCurr[i] = 0;
+			}
+			else
+#endif
+				data.rankIconsCurr[i] = gGT->drivers[i]->driverRank;
 
 			// if more than 1 screen
 			if (1 < gGT->numPlyrCurrGame)

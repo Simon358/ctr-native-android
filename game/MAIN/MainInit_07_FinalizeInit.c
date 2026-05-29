@@ -83,7 +83,15 @@ void MainInit_FinalizeInit(struct GameTracker *gGT)
 	PushBuffer_SetPsyqGeom(pb);
 	PushBuffer_SetMatrixVP(pb);
 
-	if ((gGT->hudFlags & 2) != 0)
+	int shouldInitUI = (gGT->hudFlags & 2) != 0;
+
+#if defined(CTR_NATIVE)
+	// NOTE(aalhendi): PSX Garage UI init does non-fatal null writes for absent CTR-letter HUD models.
+	if (((gGT->gameMode1 & ADVENTURE_MODE) != 0) && (gGT->levelID == ADVENTURE_GARAGE))
+		shouldInitUI = 0;
+#endif
+
+	if (shouldInitUI)
 	{
 		UI_INSTANCE_InitAll();
 	}

@@ -38,8 +38,8 @@ int LOAD_DriverMPK(struct BigHeader *bigfile, int levelLOD, void (*callback)(str
 		    // credits
 		    ((gGT->gameMode2 & CREDITS) != 0) ||
 
-		    // intro cutscene
-		    (gGT->levelID == INTRO_CRASH))
+		    // adventure character select
+		    (gGT->levelID == ADVENTURE_GARAGE))
 		{
 			lastFileIndexMPK = BI_ADVENTUREPACK + data.characterIDs[0];
 			goto QueueLastPack;

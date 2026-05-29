@@ -5,7 +5,8 @@ void SelectProfile_QueueLoadHub_MenuProc(struct RectMenu *menu)
 {
 	struct GameTracker *gGT = sdata->gGT;
 
-	gGT->levelID = ADVENTURE_GARAGE;
+	// NOTE(aalhendi): Retail stores 0x27 before LOAD_LevelFile records prevLEV.
+	gGT->levelID = MAIN_MENU_LEVEL;
 
 	data.characterIDs[0] = sdata->advProgress.characterID;
 	MainRaceTrack_RequestLoad(gGT->currLEV);
