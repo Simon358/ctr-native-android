@@ -11,6 +11,8 @@ static char *MEMCARD_NativePath(char *save_name)
 	return save_name;
 }
 
+static u8 s_memcardNativeInfoSeen[2];
+
 // NOTE(aalhendi): ctr-native stubs host-unsupported card directory ops here;
 // the retail implementations live in MEMCARD_16/18/21-25 and are not included.
 void MEMCARD_GetFreeBytes(int slotIdx)
@@ -25,8 +27,15 @@ u8 MEMCARD_GetInfo(int slotIdx)
 	// PSX updates free space while handling the async info event that native skips.
 	MEMCARD_GetFreeBytes(slotIdx);
 
-	// Returning NEWCARD makes the retail RefreshCard path refresh file presence.
-	return MC_RETURN_NEWCARD;
+	// NOTE(aalhendi): Report the host directory as a new card once; repeated
+	// NEWCARD results make RefreshCard reload the profile forever.
+	if (s_memcardNativeInfoSeen[slotIdx & 1] == 0)
+	{
+		s_memcardNativeInfoSeen[slotIdx & 1] = 1;
+		return MC_RETURN_NEWCARD;
+	}
+
+	return MC_RETURN_IOE;
 }
 
 u8 MEMCARD_Format(int slotIdx)

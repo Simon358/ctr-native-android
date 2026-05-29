@@ -639,7 +639,8 @@ static void SelectProfile_FinalizeAdventure(struct RectMenu *menu)
 			sdata->advProfileIndex = menu->rowSelected;
 			GAMEPROG_AdvPercent(&sdata->advProgress);
 			sdata->ptrDesiredMenu = &data.menuQueueLoadHub;
-			gGT->levelID = sdata->advProgress.HubLevYouSavedOn;
+			// NOTE(aalhendi): Retail 0x8004a8a0-0x8004a8c4 queues through currLEV.
+			gGT->currLEV = sdata->advProgress.HubLevYouSavedOn;
 			data.menuQueueLoadHub.rowSelected = 3;
 		}
 		else
@@ -660,8 +661,10 @@ static void SelectProfile_FinalizeAdventure(struct RectMenu *menu)
 		}
 
 		sdata->advProfileIndex = menu->rowSelected;
-		gGT->levelID = 0x1a;
+		// NOTE(aalhendi): Retail 0x8004a75c-0x8004a778 queues new Adventure through currLEV.
+		gGT->currLEV = 0x1a;
 		Garage_Leave();
+		sdata->ptrDesiredMenu = QueueLoadTrack_GetMenuPtr();
 		return;
 	}
 
@@ -678,10 +681,11 @@ static void SelectProfile_FinalizeAdventure(struct RectMenu *menu)
 		}
 
 		sdata->advProfileIndex = menu->rowSelected;
+		// NOTE(aalhendi): Retail 0x8004a848-0x8004a864 stores saved/fallback hub in currLEV.
 		if (sdata->advProgress.HubLevYouSavedOn != 0)
-			gGT->levelID = sdata->advProgress.HubLevYouSavedOn;
+			gGT->currLEV = sdata->advProgress.HubLevYouSavedOn;
 		else
-			gGT->levelID = 0x1a;
+			gGT->currLEV = 0x1a;
 		memmove(gGT->prevNameEntered, sdata->advProgress.name, sizeof(gGT->prevNameEntered));
 		memmove(gGT->currNameEntered, sdata->advProgress.name, sizeof(gGT->currNameEntered));
 		sdata->ptrDesiredMenu = QueueLoadTrack_GetMenuPtr();
@@ -705,7 +709,7 @@ static void SelectProfile_FinalizeAdventure(struct RectMenu *menu)
 	}
 }
 
-// NOTE(aalhendi): ASM-verified NTSC-U 926 0x800490c4-0x8004aa08.
+// NOTE(aalhendi): Partial retail audit only; this large structured rewrite is not fully ASM-stamped.
 void SelectProfile_AllProfiles_MenuProc(struct RectMenu *menu)
 {
 	int color = ((menu->drawStyle & 0x10) != 0) ? DARK_RED : ORANGE;
