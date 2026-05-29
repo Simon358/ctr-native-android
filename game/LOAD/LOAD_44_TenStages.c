@@ -74,7 +74,7 @@ int LOAD_TenStages(struct GameTracker *gGT, int loadingStage, struct BigHeader *
 		// this permanently reserves LNG, bigfile header, etc
 		sdata->bookmarkID = MEMPACK_PushState();
 
-		// NOTE(aalhendi): Retail clears draw/start bits; callers set UI init.
+		// Reset HUD
 		gGT->hudFlags &= ~(1 | 8);
 
 		// disable all rendering except loading screen
@@ -151,6 +151,8 @@ int LOAD_TenStages(struct GameTracker *gGT, int loadingStage, struct BigHeader *
 		{
 			sdata->levelLOD = 8;
 		}
+
+		gGT->hudFlags |= 2;
 
 
 		// ========== End of LevelLOD ================
