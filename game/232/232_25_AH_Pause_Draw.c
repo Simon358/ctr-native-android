@@ -90,23 +90,24 @@ void AH_Pause_Draw(int pageID, int posX)
 
 				inst->matrix.t[1] = UI_ConvertY_2(i * 0x10 + 4 + 0x2f, 0x100);
 
-				// 6, 7, 8,
-				// sapphire, gold, platinum
-
-				// set sapphire by default
-				ptrPauseObject->PauseMember[i].indexAdvPauseInst = 6;
-
-				// unlock if sapphire is visible
-				ptrPauseObject->PauseMember[i].unlockFlag |= CHECK_ADV_BIT(adv->rewards, (0x10 + i + 0x16));
-
-				// increment to gold
-				ptrPauseObject->PauseMember[i].indexAdvPauseInst += CHECK_ADV_BIT(adv->rewards, (0x10 + i + 0x28));
-
-				// increment to platinum
-				ptrPauseObject->PauseMember[i].indexAdvPauseInst += CHECK_ADV_BIT(adv->rewards, (0x10 + i + 0x3a));
+				if (CHECK_ADV_BIT(adv->rewards, (0x10 + i + 0x3a)) != 0)
+				{
+					ptrPauseObject->PauseMember[i].unlockFlag |= 1;
+					ptrPauseObject->PauseMember[i].indexAdvPauseInst = 8;
+				}
+				else if (CHECK_ADV_BIT(adv->rewards, (0x10 + i + 0x28)) != 0)
+				{
+					ptrPauseObject->PauseMember[i].unlockFlag |= 1;
+					ptrPauseObject->PauseMember[i].indexAdvPauseInst = 7;
+				}
+				else
+				{
+					ptrPauseObject->PauseMember[i].indexAdvPauseInst = 6;
+					ptrPauseObject->PauseMember[i].unlockFlag |= CHECK_ADV_BIT(adv->rewards, (0x10 + i + 0x16));
+				}
 			}
 
-			char bossID = 0xf;
+			int bossID = D232.advPausePages[pageID].characterID_Boss;
 
 			DecalFont_DrawLine(sdata->lngStrings[data.MetaDataCharacters[bossID].name_LNG_long], posX + 0x6e, 2 * 0x10 + 4 + 0x26, FONT_BIG, 4);
 
@@ -116,7 +117,7 @@ void AH_Pause_Draw(int pageID, int posX)
 			int color = 0x15;
 
 			// set to grey (if beaten oxide at least once)
-			if (CHECK_ADV_BIT(adv->rewards, 0x62) != 0)
+			if (CHECK_ADV_BIT(adv->rewards, data.BeatBossPrize[0]) != 0)
 				color = 1;
 
 			u32 *starColor;
@@ -179,30 +180,28 @@ void AH_Pause_Draw(int pageID, int posX)
 				ptrPauseObject->PauseMember[i * 3 + 0].indexAdvPauseInst = 14;
 				ptrPauseObject->PauseMember[i * 3 + 0].unlockFlag |= CHECK_ADV_BIT(adv->rewards, (check[i] + 6));
 
-				// 6, 7, 8,
-				// sapphire, gold, platinum
-
-				// set sapphire by default
-				ptrPauseObject->PauseMember[i * 3 + 1].indexAdvPauseInst = 6;
-
-				// unlock if sapphire is visible
-				ptrPauseObject->PauseMember[i * 3 + 1].unlockFlag |= CHECK_ADV_BIT(adv->rewards, (check[i] + 0x16));
-
-				// increment to gold
-				ptrPauseObject->PauseMember[i * 3 + 1].indexAdvPauseInst += CHECK_ADV_BIT(adv->rewards, (check[i] + 0x28));
-
-				// increment to platinum
-				ptrPauseObject->PauseMember[i * 3 + 1].indexAdvPauseInst += CHECK_ADV_BIT(adv->rewards, (check[i] + 0x3a));
+				if (CHECK_ADV_BIT(adv->rewards, (check[i] + 0x3a)) != 0)
+				{
+					ptrPauseObject->PauseMember[i * 3 + 1].unlockFlag |= 1;
+					ptrPauseObject->PauseMember[i * 3 + 1].indexAdvPauseInst = 8;
+				}
+				else if (CHECK_ADV_BIT(adv->rewards, (check[i] + 0x28)) != 0)
+				{
+					ptrPauseObject->PauseMember[i * 3 + 1].unlockFlag |= 1;
+					ptrPauseObject->PauseMember[i * 3 + 1].indexAdvPauseInst = 7;
+				}
+				else
+				{
+					ptrPauseObject->PauseMember[i * 3 + 1].indexAdvPauseInst = 6;
+					ptrPauseObject->PauseMember[i * 3 + 1].unlockFlag |= CHECK_ADV_BIT(adv->rewards, (check[i] + 0x16));
+				}
 
 				// CTR Tokens
 				ptrPauseObject->PauseMember[i * 3 + 2].indexAdvPauseInst = 9 + mdLev->ctrTokenGroupID;
 				ptrPauseObject->PauseMember[i * 3 + 2].unlockFlag |= CHECK_ADV_BIT(adv->rewards, (check[i] + 0x4c));
 			}
 
-			// roo, papu, joe, pinstripe
-			// 10, 9, 11, 8
-			int bossArr = 0x080b090a;
-			char bossID = bossArr >> (8 * (hubID - 1));
+			int bossID = D232.advPausePages[pageID].characterID_Boss;
 
 			DecalFont_DrawLine(sdata->lngStrings[data.MetaDataCharacters[bossID].name_LNG_long], posX + 0x50, 4 * 0x10 + 0 + 0x26, FONT_BIG, 4);
 
@@ -214,7 +213,7 @@ void AH_Pause_Draw(int pageID, int posX)
 			inst->matrix.t[1] = UI_ConvertY_2(4 * 0x10 + 0 + 0x2f, 0x100);
 
 			ptrPauseObject->PauseMember[12].indexAdvPauseInst = 5;
-			ptrPauseObject->PauseMember[12].unlockFlag |= CHECK_ADV_BIT(adv->rewards, ((hubID - 1) + 0x5e));
+			ptrPauseObject->PauseMember[12].unlockFlag |= CHECK_ADV_BIT(adv->rewards, data.BeatBossPrize[hubID]);
 
 			// skull rock, rampage ruins,
 			// rocky road, nitro court
@@ -232,7 +231,7 @@ void AH_Pause_Draw(int pageID, int posX)
 			inst->matrix.t[1] = UI_ConvertY_2(5 * 0x10 + 0 + 0x2f, 0x100);
 
 			ptrPauseObject->PauseMember[13].indexAdvPauseInst = 13;
-			ptrPauseObject->PauseMember[13].unlockFlag |= CHECK_ADV_BIT(adv->rewards, ((hubID - 1) + 0x6f));
+			ptrPauseObject->PauseMember[13].unlockFlag |= CHECK_ADV_BIT(adv->rewards, hubID + 0x6e);
 		}
 	}
 
