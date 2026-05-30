@@ -74,7 +74,7 @@ struct ParticleEmitter emSet_OrcaSplash[7] = {
 
 static void RB_Orca_SpawnSplash(struct Instance *orcaInst)
 {
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
+#if defined(CTR_NATIVE)
 	struct Particle *particle;
 	struct GameTracker *gGT;
 	int i;

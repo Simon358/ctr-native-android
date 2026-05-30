@@ -1248,14 +1248,10 @@ void CdDataCallback(int);
 void DecDCTReset(int);
 u_long DecDCTvlcSize2(u_long);
 void DecDCToutCallback(void *);
-#ifndef REBUILD_PS1 // this forward decl hoisted from 231_006_RB_Hazard_HurtDriver.c
 int VehPickState_NewState(
     struct Driver *victim, int damageType, struct Driver *attacker,
     int reason); // this is present (but commented out) further up the file. Idk why, also, return value was void when should have been int
-#endif
-#ifndef REBUILD_PS1 // this forward decl hoisted from 231_011_RB_Hazard_ThCollide_Generic.c
 void RB_Explosion_InitGeneric(struct Instance *inst);
-#endif
 void RB_GenericMine_ThTick(struct Thread *);
 void RB_MakeInstanceReflective(struct ScratchpadStruct *, struct Instance *);
 // void COLL_MOVED_PlayerSearch(struct Thread* thread, struct Driver* driver);

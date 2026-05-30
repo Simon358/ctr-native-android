@@ -1,8 +1,6 @@
 #ifndef GAME_INCLUDES_H
 #define GAME_INCLUDES_H
 
-#define REBUILD_PS1
-
 #include <common.h>
 
 #include "game/TEST_226.c"

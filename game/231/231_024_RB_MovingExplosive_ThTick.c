@@ -201,7 +201,7 @@ LAB_800adc08:;
 		inst->animFrame = 0;
 	}
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
+#if defined(CTR_NATIVE)
 	if (
 	    // if missile
 	    (modelID == DYNAMIC_ROCKET) &&
@@ -359,7 +359,7 @@ LAB_800adc08:;
 
 			    (((instDef->ptrInstance != 0) && (instDef->modelID == STATIC_TEETH))))
 			{
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
+#if defined(CTR_NATIVE)
 				RB_Teeth_OpenDoor(instDef->ptrInstance);
 #endif
 			}

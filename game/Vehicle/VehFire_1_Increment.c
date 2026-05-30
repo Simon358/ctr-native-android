@@ -105,7 +105,7 @@ void VehFire_Increment(struct Driver *driver, int reserves, u32 type, int fireLe
 
 #endif
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
+#if defined(CTR_NATIVE)
 		turboInst1 = INSTANCE_BirthWithThread(0x2c, 0, SMALL, TURBO, VehTurbo_ThTick, sizeof(struct Turbo), 0);
 
 		turboObj = 0;

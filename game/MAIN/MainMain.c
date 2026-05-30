@@ -241,26 +241,6 @@ u32 main(void)
 				}
 			}
 
-// sync music, in case loading is too fast,
-// https://www.youtube.com/watch?v=rzJcVdm4ny4
-#ifndef USE_PCDRV
-#ifndef REBUILD_PS1
-#if 1 // not part of the OG game
-			else
-			{
-				if (gGT->levelID == NAUGHTY_DOG_CRATE)
-				{
-					// wait around
-					int GetSongTime();
-					while (GetSongTime() < 0x11c0)
-					{
-					}
-				}
-			}
-#endif
-#endif
-#endif
-
 			// =========== Main Game Loop ======================
 
 			if ((
@@ -395,7 +375,7 @@ u32 main(void)
 
 
 // NOTE(aalhendi): Native-only XA/request shim. Camera ownership belongs to CAM_ThTick.
-#if defined(REBUILD_PS1) && defined(CTR_NATIVE)
+#if defined(CTR_NATIVE)
 
 			if ((gGT->level1 != 0) && (gGT->levelID != MAIN_MENU_LEVEL) && (gGT->levelID != ADVENTURE_GARAGE) && (gGT->levelID != NAUGHTY_DOG_CRATE))
 			{
@@ -459,13 +439,6 @@ u32 main(void)
 		}
 	} while (true);
 }
-
-#ifndef REBUILD_PS1
-__attribute__((optimize("O0"))) int GetSongTime()
-{
-	return sdata->songPool[0].timeSpentPlaying;
-}
-#endif
 
 // NOTE(aalhendi): Source split of retail main's state-0 body
 // 0x8003c614-0x8003c984.

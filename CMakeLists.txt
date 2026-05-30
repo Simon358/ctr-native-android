@@ -84,7 +84,6 @@ add_executable(ctr_native ${GAME_SOURCES})
 target_include_directories(ctr_native PRIVATE ${GAME_INCLUDES})
 target_compile_definitions(ctr_native PRIVATE
     CTR_NATIVE
-    REBUILD_PS1
     USE_EXTENDED_PRIM_POINTERS=0
     USE_PCDRV
     BUILD=926

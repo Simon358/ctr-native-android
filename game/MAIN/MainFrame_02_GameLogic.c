@@ -55,13 +55,13 @@ void MainFrame_GameLogic(struct GameTracker *gGT, struct GamepadSystem *gGamepad
 					uVar3 = (u32)psVar9->clockReceive;
 				}
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
+#if defined(CTR_NATIVE)
 				DISPLAY_Blur_Main(pushBuffer, uVar3);
 #endif
 			}
 			else
 			{
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
+#if defined(CTR_NATIVE)
 				DISPLAY_Blur_Main(pushBuffer, -uVar3);
 #endif
 				psVar9->clockFlash--;
@@ -139,7 +139,7 @@ void MainFrame_GameLogic(struct GameTracker *gGT, struct GamepadSystem *gGamepad
 		psVar8 = 0;
 		psVar9 = 0;
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
+#if defined(CTR_NATIVE)
 		for (psVar12 = gGT->threadBuckets[0].thread; psVar12 != 0; psVar12 = psVar12->siblingThread)
 		{
 			psVar9 = (struct Driver *)psVar12->object;
@@ -215,13 +215,13 @@ void MainFrame_GameLogic(struct GameTracker *gGT, struct GamepadSystem *gGamepad
 			}
 		}
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
+#if defined(CTR_NATIVE)
 		BOTS_UpdateGlobals();
 #endif
 		GhostTape_WriteMoves(0);
 		gGT->unk1cc4[4] = (u32)(gGT->unk1cc4[4] * 10000) / 0x147e;
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
+#if defined(CTR_NATIVE)
 
 
 		Particle_UpdateAllParticles();
@@ -240,7 +240,7 @@ void MainFrame_GameLogic(struct GameTracker *gGT, struct GamepadSystem *gGamepad
 	uVar5 = LOAD_IsOpen_RacingOrBattle();
 	if (uVar5 != 0)
 	{
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
+#if defined(CTR_NATIVE)
 		if ((gGT->gameMode1 & PAUSE_ALL) == 0)
 		{
 			RB_Bubbles_RoosTubes();
@@ -303,7 +303,7 @@ void MainFrame_GameLogic(struct GameTracker *gGT, struct GamepadSystem *gGamepad
 							{
 								if ((((uVar5 != 0) &&
 								      ((
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
+#if defined(CTR_NATIVE)
 								          uVar3 = MainFrame_HaveAllPads((u16)(u8)gGT->numPlyrNextGame), (uVar3 & 0xffff) == 0 &&
 #endif
 								                                                                            ((gGT->gameMode1 & PAUSE_ALL) == 0)))) ||
@@ -353,7 +353,7 @@ void MainFrame_GameLogic(struct GameTracker *gGT, struct GamepadSystem *gGamepad
 				}
 
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
+#if defined(CTR_NATIVE)
 
 				// if SAVE
 				if (sVar2 == 1)
@@ -381,7 +381,7 @@ void MainFrame_GameLogic(struct GameTracker *gGT, struct GamepadSystem *gGamepad
 	{
 		if (gGT->timerEndOfRaceVS < 0x96)
 		{
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
+#if defined(CTR_NATIVE)
 			UI_VsQuipDrawAll();
 			UI_VsWaitForPressX();
 #endif

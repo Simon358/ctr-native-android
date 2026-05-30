@@ -52,10 +52,14 @@ void MainInit_FinalizeInit(struct GameTracker *gGT)
 
 	lev1 = gGT->level1;
 
-#ifndef REBUILD_PS1
-	// 0x1d7c
-	gGT->trackLength_x_numLaps_x_8 = lev1->ptr_restart_points[0].distToFinish * gGT->numLaps * 8;
+#if defined(CTR_NATIVE)
+	// NOTE(aalhendi): Native menu LEVs may publish no restart table.
+	if (lev1->ptr_restart_points != NULL)
 #endif
+	// 0x1d7c
+	{
+		gGT->trackLength_x_numLaps_x_8 = lev1->ptr_restart_points[0].distToFinish * gGT->numLaps * 8;
+	}
 
 	MainInit_Drivers(gGT);
 
@@ -142,9 +146,7 @@ void MainInit_FinalizeInit(struct GameTracker *gGT)
 		{
 			for (i = 0; i < gGT->numPlyrCurrGame; i++)
 			{
-#ifndef REBUILD_PS1
 				BOTS_Driver_Convert(gGT->drivers[i]);
-#endif
 			}
 		}
 	}
@@ -183,14 +185,10 @@ void MainInit_FinalizeInit(struct GameTracker *gGT)
 
 	MainInit_VisMem(gGT);
 
-#ifndef REBUILD_PS1
 	MainInit_RainBuffer(gGT);
 
 	// animates water, 1P mode
 	AnimateWater1P(gGT->timer, lev1->numWaterVertices, lev1->ptr_water, lev1->ptr_tex_waterEnvMap, lev1->unk5);
-#elif defined(CTR_NATIVE)
-	MainInit_RainBuffer(gGT);
-#endif
 
 	gGT->pushBuffer_UI.fadeFromBlack_desiredResult = 0x1000;
 	gGT->pushBuffer_UI.fade_step = 0x200;
@@ -229,12 +227,9 @@ void MainInit_FinalizeInit(struct GameTracker *gGT)
 		CS_Cutscene_Start();
 	}
 
-#ifndef REBUILD_PS1
 	if ((gGT->gameMode1 & ADVENTURE_ARENA) != 0)
 		if (gGT->podiumRewardID != NOFUNC) // 0
 			CS_Podium_FullScene_Init();
-
-#endif
 
 	PickupBots_Init();
 }

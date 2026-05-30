@@ -1137,9 +1137,7 @@ struct Data
 
             .MetaDataModels =
                 {
-// turn off for rebuild_ps1,
 // leave on for CTR_NATIVE,
-// leave on for decomp/General
 #if 1
 
                     // 0x00 - NO_FUNC
