@@ -312,6 +312,7 @@ int LOAD_HowlSectorChainStart(CdlFILE *cdlFileHWL, void *ptrDestination, int fir
 int LOAD_HowlSectorChainEnd(void);
 
 void LOAD_InitCD(void);
+int LOAD_InitCDvol(void);
 void LOAD_RunPtrMap(char *origin, int *patchArr, int numPtrs); // 1st param might be `struct Level*`, 2nd param might be `char*`
 void LOAD_LangFile(int bigfilePtr, int lang);
 
