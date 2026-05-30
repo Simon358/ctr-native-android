@@ -58,10 +58,8 @@ void MainFrame_RenderFrame(struct GameTracker *gGT, struct GamepadSystem *gGamep
 
 	ElimBG_HandleState(gGT);
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 	if ((gGT->renderFlags & 0x21) != 0)
 		MainFrame_VisMemFullFrame(gGT, gGT->level1);
-#endif
 
 
 	if ((gGT->renderFlags & 1) != 0)
@@ -82,80 +80,40 @@ void MainFrame_RenderFrame(struct GameTracker *gGT, struct GamepadSystem *gGamep
 	DropRain_MakeSound(gGT);
 	MenuHighlight();
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 	RenderAllWeather(gGT);
-#endif
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 	RenderAllConfetti(gGT);
-#endif
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 	// NOTE(aalhendi): ASM-verified NTSC-U 926 subrange 0x800364f8-0x80036538.
 	if ((gGT->renderFlags & 8) != 0 && gGT->stars.numStars != 0)
 		RenderStars(&gGT->pushBuffer[0], &gGT->backBuffer->primMem, &gGT->stars, gGT->numPlyrCurrGame);
-#endif
 
 	if (((gGT->renderFlags & 0x100) != 0) && (gGT->numPlyrCurrGame > 1))
 		DecalMP_01(gGT);
 
 	RenderAllHUD(gGT);
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 	RenderAllBeakerRain(gGT);
 
 	RenderAllBoxSceneSplitLines(gGT);
-#endif
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
-	// NOTE(aalhendi): ctr-native routes instances through the retail
-	// RenderBucket queue/execute contract. The TEST_DrawInstances fallback below
-	// is reserved for non-CTR_NATIVE rebuild paths until they are cleaned up.
 	RenderBucket_QueueAllInstances(gGT);
-#endif
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 	RenderAllNormalParticles(gGT);
-#endif
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 	RenderDispEnv_World(gGT); // == RenderDispEnv_World ==
-#endif
 
 	if (((gGT->renderFlags & 0x100) != 0) && (gGT->numPlyrCurrGame > 1))
 		DecalMP_02(gGT);
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 	RenderAllFlag0x40(gGT); // I need a better name
 	RenderAllTitleDPP(gGT);
-#endif
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 	RenderBucket_ExecuteAllInstances(gGT);
-#endif
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 	RenderAllTires(gGT);
-#endif
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 	RenderAllShadows(gGT);
-#endif
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 	RenderAllHeatParticles(gGT);
-
-#elif !defined(CTR_NATIVE)
-
-	// TODO(aalhendi): Remove this legacy test renderer after non-CTR_NATIVE
-	// rebuild paths are routed through RenderBucket too.
-	// PC port version of ExecuteAllInstances
-	if ((gGT->renderFlags & 0x20) != 0)
-	{
-		RenderDispEnv_World(gGT); // == RenderDispEnv_World ==
-
-		void TEST_DrawInstances(struct GameTracker * gGT);
-		TEST_DrawInstances(gGT);
-	}
-#endif
 
 	PushBuffer_FadeAllWindows();
 
@@ -165,33 +123,7 @@ void MainFrame_RenderFrame(struct GameTracker *gGT, struct GamepadSystem *gGamep
 		if (gCtrDebugSkipLevelGeometry == 0)
 #endif
 		{
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
-
 			RenderAllLevelGeometry(gGT);
-
-#else
-
-			for (int i = 0; i < gGT->numPlyrCurrGame; i++)
-			{
-				// 226-229
-				// placeholder for DrawLevelOvr1P
-				TEST_226(0, &gGT->pushBuffer[i], gGT->level1->ptr_mesh_info, &gGT->backBuffer->primMem, gGT->visMem1->visFaceList[i],
-				         0); // waterEnvMap?
-
-#ifdef CTR_NATIVE
-				DrawSky_Full(gGT->level1->ptr_skybox, &gGT->pushBuffer[i], &gGT->backBuffer->primMem);
-
-				if (((gGT->level1->configFlags & 1) != 0) || (gGT->numPlyrCurrGame > 1))
-				{
-					CAM_SkyboxGlow((s16 *)&gGT->level1->glowGradient[0], &gGT->pushBuffer[i], &gGT->backBuffer->primMem, &gGT->pushBuffer[i].ptrOT[0x3ff]);
-				}
-#else
-				// placeholder for DrawSky_Full
-				TEST_DrawSkybox(gGT->level1->ptr_skybox, &gGT->pushBuffer[i], &gGT->backBuffer->primMem);
-#endif
-			}
-
-#endif
 		}
 
 		RenderDispEnv_World(gGT); // == RenderDispEnv_World ==
@@ -220,7 +152,6 @@ void MainFrame_RenderFrame(struct GameTracker *gGT, struct GamepadSystem *gGamep
 			WindowDivsionLines(gGT);
 		}
 
-#if !defined(REBUILD_PS1)
 		// if game is not loading
 		if (sdata->Loading.stage == -1)
 		{
@@ -232,31 +163,14 @@ void MainFrame_RenderFrame(struct GameTracker *gGT, struct GamepadSystem *gGamep
 
 			PlayLevel_UpdateLapStats();
 		}
-#elif defined(CTR_NATIVE)
-		if (sdata->Loading.stage == -1)
-		{
-			if ((gGT->gameMode1 & PAUSE_ALL) == 0)
-			{
-				PickupBots_Update();
-			}
-
-			PlayLevel_UpdateLapStats();
-		}
-#endif
 	}
 
-#if defined(CTR_NATIVE) || !defined(REBUILD_PS1)
 	// If in main menu, or in adventure arena,
 	// or in End-Of-Race menu
 	if ((gGT->gameMode1 & (ADVENTURE_ARENA | END_OF_RACE | MAIN_MENU)) != 0)
 	{
-#ifdef CTR_NATIVE
 		RefreshCard_Entry();
-#else
-		RefreshCard_Entry();
-#endif
 	}
-#endif
 
 	// clear swapchain
 	if (((gGT->renderFlags & 0x2000) != 0) && ((lev->clearColor[0].enable != 0) || (lev->clearColor[1].enable != 0)))
@@ -296,13 +210,8 @@ void DrawUnpluggedMsg(struct GameTracker *gGT, struct GamepadSystem *gGamepads)
 	if ((gGT->gameMode1 & GAME_CUTSCENE) != 0)
 		return;
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 	if (MainFrame_HaveAllPads(gGT->numPlyrNextGame) == 1)
 		return;
-#else
-	// assume all connected on PC
-	return;
-#endif
 
 	// if main menu is open, assume 230 loaded,
 	// quit if menu is at highest level (no ptrNext to draw)
@@ -468,7 +377,6 @@ void MenuHighlight()
 	sdata->menuRowHighlight_Green.self = ((trig + 0xA0) * 0x100) | 0x400040;
 }
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 void RenderAllWeather(struct GameTracker *gGT)
 {
 	int numPlyrCurrGame = gGT->numPlyrCurrGame;
@@ -484,9 +392,7 @@ void RenderAllWeather(struct GameTracker *gGT)
 
 	RenderWeather(&gGT->pushBuffer[0], &gGT->backBuffer->primMem, &gGT->rainBuffer[0], numPlyrCurrGame, gGT->gameMode1 & PAUSE_ALL);
 }
-#endif
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 void RenderAllConfetti(struct GameTracker *gGT)
 {
 	int i;
@@ -506,8 +412,6 @@ void RenderAllConfetti(struct GameTracker *gGT)
 	}
 }
 
-#endif
-
 void RenderAllHUD(struct GameTracker *gGT)
 {
 	int hudFlags;
@@ -516,24 +420,10 @@ void RenderAllHUD(struct GameTracker *gGT)
 	hudFlags = gGT->hudFlags;
 	gameMode1 = gGT->gameMode1;
 
-// Why is this needed? What's broken
-// that causes this to run premature?
-#if defined(REBUILD_PS1) && !defined(CTR_NATIVE)
-	// LOADING... and pause screen (see adv pause)
-	if ((gGT->gameMode1 & 0x4000000f) != 0)
-		return;
-
-	// before level is done loading
-	if (gGT->level1 == 0)
-		return;
-#endif
-
 	// if drawing intro-race title bars
 	if ((gGT->numPlyrCurrGame == 1) && ((hudFlags & 8) != 0) && ((gameMode1 & START_OF_RACE) != 0))
 	{
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 		UI_RaceStart_IntroText1P();
-#endif
 	}
 
 	// if not drawing intro-race title bars
@@ -579,7 +469,6 @@ void RenderAllHUD(struct GameTracker *gGT)
 				// drawing end of race
 				else
 				{
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 					if ((u32)(sdata->Loading.stage + 5) > 1)
 					{
 						if ((gameMode1 & CRYSTAL_CHALLENGE) == 0)
@@ -624,8 +513,6 @@ void RenderAllHUD(struct GameTracker *gGT)
 						}
 					}
 
-#endif
-
 					return;
 				}
 			}
@@ -638,11 +525,9 @@ void RenderAllHUD(struct GameTracker *gGT)
 				// and load the 232 overlay
 				if (gGT->overlayTransition > 1)
 				{
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 					gGT->overlayTransition--;
 					if (gGT->overlayTransition == 1)
 						LOAD_OvrThreads(2);
-#endif
 				}
 
 				// if 233 is still loaded
@@ -693,7 +578,6 @@ void RenderAllHUD(struct GameTracker *gGT)
 	}
 }
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 void RenderAllBeakerRain(struct GameTracker *gGT)
 {
 	int numPlyrCurrGame = gGT->numPlyrCurrGame;
@@ -721,9 +605,6 @@ void RenderAllBoxSceneSplitLines(struct GameTracker *gGT)
 	}
 }
 
-#endif
-
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 void RenderBucket_QueueAllInstances(struct GameTracker *gGT)
 {
 	int lod;
@@ -757,9 +638,7 @@ void RenderBucket_QueueAllInstances(struct GameTracker *gGT)
 	// null terminator at end of list
 	*RBI = 0;
 }
-#endif
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 void RenderAllNormalParticles(struct GameTracker *gGT)
 {
 	int i;
@@ -772,7 +651,6 @@ void RenderAllNormalParticles(struct GameTracker *gGT)
 		Particle_RenderList(&gGT->pushBuffer[i], gGT->particleList_ordinary);
 	}
 }
-#endif
 
 void RenderDispEnv_World(struct GameTracker *gGT)
 {
@@ -785,7 +663,6 @@ void RenderDispEnv_World(struct GameTracker *gGT)
 	}
 }
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 // I need a better name
 void RenderAllFlag0x40(struct GameTracker *gGT)
 {
@@ -832,9 +709,7 @@ void RenderAllTitleDPP(struct GameTracker *gGT)
 		return;
 	MM_Title_SetTrophyDPP();
 }
-#endif
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 void RenderBucket_ExecuteAllInstances(struct GameTracker *gGT)
 {
 	if ((gGT->renderFlags & 0x20) == 0)
@@ -842,9 +717,7 @@ void RenderBucket_ExecuteAllInstances(struct GameTracker *gGT)
 
 	RenderBucket_Execute(gGT->ptrRenderBucketInstance, &gGT->backBuffer->primMem);
 }
-#endif
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 void RenderAllTires(struct GameTracker *gGT)
 {
 	int numPlyrCurrGame;
@@ -874,18 +747,14 @@ void RenderAllTires(struct GameTracker *gGT)
 		DrawTires_Reflection(gGT->threadBuckets[GHOST].thread, gGT_primMem, numPlyrCurrGame);
 	}
 }
-#endif
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 void RenderAllShadows(struct GameTracker *gGT)
 {
 	if ((gGT->renderFlags & 0x400) == 0)
 		return;
 	VehGroundShadow_Main();
 }
-#endif
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 void RenderAllHeatParticles(struct GameTracker *gGT)
 {
 	if ((gGT->renderFlags & 0x800) == 0)
@@ -893,9 +762,7 @@ void RenderAllHeatParticles(struct GameTracker *gGT)
 
 	Torch_Main(gGT->particleList_heatWarp, &gGT->pushBuffer[0], &gGT->backBuffer->primMem, gGT->numPlyrCurrGame, gGT->swapchainIndex * 0x128);
 }
-#endif
 
-#if !defined(REBUILD_PS1) || defined(CTR_NATIVE)
 void RenderAllLevelGeometry(struct GameTracker *gGT)
 {
 	int i;
@@ -1092,8 +959,6 @@ SkyboxGlow:
 	return;
 }
 
-#endif // !defined(REBUILD_PS1) || defined(CTR_NATIVE)
-
 void WindowBoxLines(struct GameTracker *gGT)
 {
 	int i;
@@ -1275,7 +1140,9 @@ void RenderVSYNC(struct GameTracker *gGT)
 
 	while (1)
 	{
-#ifdef REBUILD_PC
+#ifdef CTR_NATIVE
+		// NOTE(aalhendi): Native host sync needs DrawSync polling here; retail
+		// falls through to the BreakDraw guard below instead.
 		// must be called in the loop,
 		// or else it wont properly sync
 		DrawSync(0);
@@ -1287,7 +1154,7 @@ void RenderVSYNC(struct GameTracker *gGT)
 			return;
 		}
 
-#ifndef REBUILD_PC
+#ifndef CTR_NATIVE
 		if (ReadyToBreak(gGT))
 		{
 			// just quit and try the next frame
