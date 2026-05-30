@@ -28,21 +28,18 @@ void RenderFMV();
 void RenderSubmit(struct GameTracker *gGT);
 
 // original CTR funcs
-void UI_CupStandings_InputAndDraw();
 void VB_EndEvent_DrawMenu();
 void RR_EndEvent_DrawMenu();
 void AA_EndEvent_DrawMenu();
 void TT_EndEvent_DrawMenu(void);
 void CC_EndEvent_DrawMenu();
 void OVR_Region1(void);
-void CS_BoxScene_InstanceSplitLines();
 void RB_Player_ToggleInvisible();
 void RB_Player_ToggleFlicker();
 void RB_Burst_ProcessBucket(struct Thread *thread);
 void RB_Blowup_ProcessBucket(struct Thread *thread);
 void RB_Follower_ProcessBucket(struct Thread *thread);
 void RB_StartText_ProcessBucket(struct Thread *thread);
-u32 MM_Video_CheckIfFinished(int param_1);
 
 #ifdef CTR_INTERNAL
 volatile int gCtrDebugSkipLevelGeometry = 0;

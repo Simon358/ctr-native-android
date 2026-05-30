@@ -4,7 +4,6 @@ void Seal_CheckColl(struct Instance *sealInst, struct Thread *sealTh, int damage
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800b5984-0x800b5f50.
 
-void RB_Armadillo_ThTick_Rolling(struct Thread *t);
 
 int RB_Armadillo_ThCollide(struct Thread *armadilloThread, struct Thread *driverTh, void *funcThCollide, struct ScratchpadStruct *sps)
 {

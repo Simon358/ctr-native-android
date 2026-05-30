@@ -1,6 +1,5 @@
 #include <common.h>
 
-void COLL_FIXED_PlayerSearch();
 
 void *PlayerLastSpinFuncTable[0xD] = {0,
                                       VehPhysProc_SpinLast_Update,

@@ -14,18 +14,7 @@ int RB_CrateFruit_LInC();
 int RB_CrateWeapon_LInC();
 int RB_CrateTime_LInC();
 void RB_FlameJet_LInB();
-// void RB_Plant_LInB();		-- DONE
-// void RB_Minecart_LInB();	-- DONE
-// void RB_Snowball_LInB();	-- DONE
-// void RB_Armadillo_LInB();	-- DONE
-// void RB_Blade_LInB();		-- DONE
-// void RB_Seal_LInB();		-- DONE
 void RB_Orca_LInB();
-// void RB_Baron_LInB();		-- DONE
-// void RB_Turtle_LInB();		-- DONE
-// void RB_Turtle_LInC();		-- DONE
-// void RB_Spider_LInB();		-- DONE
-// void RB_Fireball_LInB();	-- DONE
 void RB_StartText_LInB();
 void RB_Banner_LInB();
 void RB_CtrLetter_LInB();
@@ -35,24 +24,7 @@ int RB_Crystal_LInC();
 void RB_Teeth_LInB();
 int RB_Teeth_LInC();
 
-void AH_Sign_LInB(struct Instance *inst);
-// void AH_Door_LInB();		-- DONE
-// void AH_Garage_LInB();		-- DONE
-// void AH_SaveObj_LInB();	-- DONE
-// void AH_WarpPad_LInB();	-- DONE
-
-// CS_Thread_LInB moved to game/233/233_01_CS_Thread_LInB.c
-
-// Missing from Decomp/General:
-// GenericMine, CS
-
-// This inserts debug names if needed
-#if 1
 #define SET_MDM(x, y, z) {.name = 0, .LInB = y, .LInC = z}
-#else
-#define SET_MDM(x, y, z) {.name = x, .LInB = y, .LInC = z}
-#endif
-
 // usage of this macro is mainly because I'm too lazy to go through this file and manually recalculate all the values where s16 is expected instead of uint.
 // this is purely to reduce warnings in the compiler output. (i.e., the compiler was doing this implicitly). (literally 800 lines of warnings at
 // time-of-writing).

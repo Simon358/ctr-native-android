@@ -1,7 +1,5 @@
 #include <common.h>
 
-void COLL_FIXED_PlayerSearch();
-void VehPhysProc_SlamWall_Animate();
 
 void *PlayerCrashingFuncTable[13] = {
     0,

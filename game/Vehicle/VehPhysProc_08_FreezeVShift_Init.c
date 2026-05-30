@@ -19,8 +19,6 @@ void VehPhysProc_FreezeVShift_Init(struct Thread *t, struct Driver *d)
 	}
 }
 
-void VehPhysProc_FreezeVShift_Update(struct Thread *t, struct Driver *d);
-void VehPhysProc_FreezeVShift_ReverseOneFrame(struct Thread *t, struct Driver *d);
 
 void *PlayerAntiVShiftFuncTable[13] = {NULL,
                                        VehPhysProc_FreezeVShift_Update,

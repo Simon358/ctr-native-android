@@ -1,19 +1,5 @@
 #include <common.h>
 
-void MM_MenuProc_Main();
-void MM_MenuProc_1p2p();
-void MM_MenuProc_2p3p4p();
-void MM_MenuProc_Difficulty();
-void MM_MenuProc_SingleCup();
-void MM_MenuProc_NewLoad();
-void MM_Characters_MenuProc();
-void MM_TrackSelect_MenuProc();
-void MM_CupSelect_MenuProc();
-void MM_Battle_MenuProc();
-void MM_HighScore_MenuProc();
-void MM_Scrapbook_PlayMovie();
-void MM_Battle_CloseSubMenu();
-void MainKillGame_LaunchSpyro2(void);
 void MM_Cheat_MaxWumpa(void);
 void MM_Cheat_UnlockRoo(void);
 void MM_Cheat_UnlockPapu(void);

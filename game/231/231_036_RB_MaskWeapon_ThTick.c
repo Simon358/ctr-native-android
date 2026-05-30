@@ -1,6 +1,5 @@
 #include <common.h>
 
-void RB_MaskWeapon_FadeAway(struct Thread *);
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800afdbc-0x800b0278.
 void RB_MaskWeapon_ThTick(struct Thread *maskTh)

@@ -1,7 +1,5 @@
 #include <common.h>
 
-void AH_HintMenu_MenuProc();
-void AH_WarpPad_MenuProc();
 
 struct OverlayDATA_232
     D232 =

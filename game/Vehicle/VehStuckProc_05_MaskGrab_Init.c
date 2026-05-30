@@ -89,9 +89,6 @@ void VehStuckProc_MaskGrab_Init(struct Thread *t, struct Driver *d)
 	mask->pos[2] = d->posCurr.z >> 8;
 }
 
-void VehStuckProc_MaskGrab_Update(struct Thread *t, struct Driver *d);
-void VehStuckProc_MaskGrab_PhysLinear(struct Thread *t, struct Driver *d);
-void VehStuckProc_MaskGrab_Animate(struct Thread *t, struct Driver *d);
 
 void *PlayerMaskGrabFuncTable[13] = {NULL,
                                      VehStuckProc_MaskGrab_Update,

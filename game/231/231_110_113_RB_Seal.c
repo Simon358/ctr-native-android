@@ -2,7 +2,6 @@
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800b8c00-0x800b92ac.
 
-void RB_Seal_ThTick_Move(struct Thread *t);
 
 // one seal can not collide with more than one other thread,
 // then quits, it was like that in the original game too,
