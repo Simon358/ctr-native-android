@@ -201,24 +201,33 @@ void DrawUnpluggedMsg(struct GameTracker *gGT, struct GamepadSystem *gGamepads)
 {
 	int posY;
 	int lngArrStart;
+	int skipMainMenuTopLevel;
 	RECT window;
 	int i;
 
-	// dont draw error if demo mode, or cutscene,
-	// or if no controllers are missing currently
-	if (gGT->boolDemoMode == 1)
-		return;
+	skipMainMenuTopLevel = 0;
+
+	if (LOAD_IsOpen_MainMenu() != 0)
+	{
+		// if main menu is open, assume 230 loaded,
+		// quit if menu is at highest level (no ptrNext to draw)
+		if (sdata->ptrActiveMenu == (struct RectMenu *)0x800B4540) // maybe a member of D230.c?
+			skipMainMenuTopLevel = ((*(int *)0x800b4548 & 0x10) == 0);
+	}
+
+	// dont draw error in cutscene, if no controllers are missing currently,
+	// in demo mode, or at the highest main-menu level.
 	if ((gGT->gameMode1 & GAME_CUTSCENE) != 0)
 		return;
 
 	if (MainFrame_HaveAllPads(gGT->numPlyrNextGame) == 1)
 		return;
 
-	// if main menu is open, assume 230 loaded,
-	// quit if menu is at highest level (no ptrNext to draw)
-	if (sdata->ptrActiveMenu == (struct RectMenu *)0x800B4540) // maybe a member of D230.c?
-		if ((*(int *)0x800b4548 & 0x10) == 0)
-			return;
+	if (gGT->boolDemoMode != 0)
+		return;
+
+	if (skipMainMenuTopLevel != 0)
+		return;
 
 	// position of error
 	posY = data.errorPosY[sdata->errorMessagePosIndex];
@@ -382,13 +391,13 @@ void RenderAllWeather(struct GameTracker *gGT)
 {
 	int numPlyrCurrGame = gGT->numPlyrCurrGame;
 
-	// only for single player,
-	// probably Naughty Dog's last-minute hack
-	if (numPlyrCurrGame != 1)
-		return;
-
 	// only if rain is enabled
 	if ((gGT->renderFlags & 2) == 0)
+		return;
+
+	// only for single player,
+	// probably Naughty Dog's last-minute hack
+	if (numPlyrCurrGame > 1)
 		return;
 
 	RenderWeather(&gGT->pushBuffer[0], &gGT->backBuffer->primMem, &gGT->rainBuffer[0], numPlyrCurrGame, gGT->gameMode1 & PAUSE_ALL);
@@ -399,12 +408,12 @@ void RenderAllConfetti(struct GameTracker *gGT)
 	int i;
 	int numWinners = gGT->numWinners;
 
-	// only if someone needs confetti
-	if (numWinners == 0)
-		return;
-
 	// only if confetti is enabled
 	if ((gGT->renderFlags & 4) == 0)
+		return;
+
+	// only if someone needs confetti
+	if (numWinners == 0)
 		return;
 
 	for (i = 0; i < numWinners; i++)
@@ -583,12 +592,12 @@ void RenderAllBeakerRain(struct GameTracker *gGT)
 {
 	int numPlyrCurrGame = gGT->numPlyrCurrGame;
 
-	// only for 1P/2P
-	if (numPlyrCurrGame > 2)
-		return;
-
 	// only if beaker rain is enabled
 	if ((gGT->renderFlags & 0x10) == 0)
+		return;
+
+	// only for 1P/2P
+	if (numPlyrCurrGame > 2)
 		return;
 
 	RedBeaker_RenderRain(&gGT->pushBuffer[0], &gGT->backBuffer->primMem, &gGT->JitPools.rain, numPlyrCurrGame, gGT->gameMode1 & PAUSE_ALL);
