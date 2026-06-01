@@ -26,11 +26,6 @@ void *LOAD_DramFile(void *bigfilePtr, int subfileIndex, void *ptrDestination, in
 	if (callbackOrFlags == -2)
 	{
 		loadedFile = LOAD_ReadFile_ex(bigfilePtr, LT_GETADDR, subfileIndex, NULL, sizePtr, LOAD_DramFileCallback);
-#if defined(CTR_NATIVE)
-		// NOTE(aalhendi): PCDRV completes synchronously, so the callback has
-		// already relocated ptrDestination from the file header to payload.
-		loadedFile = data.currSlot.ptrDestination;
-#endif
 		data.currSlot.ptrDestination = loadedFile;
 		*(void **)ptrDestination = loadedFile;
 		return loadedFile;

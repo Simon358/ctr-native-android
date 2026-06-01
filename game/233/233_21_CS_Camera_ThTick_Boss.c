@@ -84,17 +84,7 @@ void CS_Camera_ThTick_Boss(struct Thread *t)
 			if (mArr[i] != NULL)
 			{
 				if (i != 0)
-				{
-#if !defined(CTR_NATIVE)
 					mArr[i] = (struct Model *)((char *)mArr[i] + 4);
-#else
-					// NOTE(aalhendi): CTR_NATIVE PCDRV completes the DRAM callback
-					// before LOAD_DramFile(-2) publishes the destination pointer,
-					// so native stores the relocated payload pointer here. Retail
-					// publishes the file-header pointer and skips it for the body
-					// model.
-#endif
-				}
 
 				gGT->modelPtr[mArr[i]->id] = mArr[i];
 			}

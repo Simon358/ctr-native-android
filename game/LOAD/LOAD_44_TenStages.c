@@ -324,16 +324,12 @@ int LOAD_TenStages(struct GameTracker *gGT, int loadingStage, struct BigHeader *
 			Cutscene_VolumeRestore();
 		}
 
-#if !defined(CTR_NATIVE)
 		// NOTE(aalhendi): ASM-verified NTSC-U 926 0x80033f1c-0x80033f44; retail converts driver DRAM file headers to model payload pointers here.
 		for (int i = 0; i < 3; i++)
 		{
 			if (data.driverModelExtras[i] != 0)
 				data.driverModelExtras[i] += 4;
 		}
-#else
-		// NOTE(aalhendi): CTR_NATIVE LOAD_DramFile(-2) stores the relocated payload pointer synchronously, so the retail +4 conversion is already applied.
-#endif
 
 		// == banks are done parsing ===
 
@@ -563,15 +559,11 @@ int LOAD_TenStages(struct GameTracker *gGT, int loadingStage, struct BigHeader *
 				if (m == 0)
 					continue;
 
-#if !defined(CTR_NATIVE)
 				if (i < 7)
 				{
 					m = (struct Model *)((u8 *)m + 4);
 					modelPtrArr[i] = m;
 				}
-#else
-				// NOTE(aalhendi): Native loader stores these pointers after the file header.
-#endif
 
 				if (m->id == -1)
 					continue;
