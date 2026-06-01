@@ -18,7 +18,7 @@ void CS_Thread_Particles(struct Thread *t)
 	if ((u8)particleID >= 9)
 		return;
 
-	entry = &OVR_233.pointerToWhateverThisMeans[(int)particleID];
+	entry = &OVR_233.particleConfigs[(int)particleID];
 
 	while (1)
 	{

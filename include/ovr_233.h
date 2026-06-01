@@ -211,7 +211,7 @@ struct BossCutsceneData
 	int modelIndex_unused;
 
 	// 0x10
-	int opcode;
+	char *opcode;
 
 	// 0x14
 	s16 camPos[4];
@@ -223,6 +223,15 @@ struct BossCutsceneData
 
 	// 0x34
 };
+
+struct CsInitMatrixEntry
+{
+	s16 offset[4];
+	s16 rotScaleOrMatrix[10];
+	s16 pad[2];
+};
+
+_Static_assert(sizeof(struct CsInitMatrixEntry) == 0x20);
 
 extern struct
 {
@@ -291,19 +300,18 @@ extern struct
 	int CutsceneManipulatesAudio;
 
 	// 800b0b90
-	// 120 bytes
-	struct unknown233 whateverThisMeans[10];
-
-
-	// TODO: Divide OVR_233 into 'real' sections
-	char fill2[0x864];
-
+	struct ParticleEmitter particleEmitterData[63];
 
 	// 800b146c
-	struct unknown233 pointerToWhateverThisMeans[10];
+	struct unknown233 particleConfigs[8];
 
+	// 800b14cc
+	// NOTE(aalhendi): Retail cs_opcodeMeta prefix. Native interpreter uses
+	// the source-owned table in 233_02_09_CS_ScriptCmd.c.
+	char csOpcodeMetaPrefix[0x34];
 
-	char fill3_beforeTawnaScripts[0x2d0];
+	// 800b1500
+	char bossOpcodeData[0x2b4];
 
 	// 800b17b4
 	char script_tawnaNormal[0x28];
@@ -368,10 +376,10 @@ extern struct
 	// NOTE(aalhendi): Retail PTR_DAT_800b5024_800b5b48.
 	char *advCharSelectDeselectOpcodes[8];
 
-	char fill3_afterAdvCharSelect[0x8];
+	char *boxAndAdvCharSelectExtraOpcodes[2];
 
 	// 800b5b70
-	char cs_initMatrixData[0x17c0];
+	struct CsInitMatrixEntry cs_initMatrixData[190];
 
 	// 800b7330
 	// NOTE(aalhendi): Retail PTR_DAT_800b5b70_800b7330.
@@ -435,15 +443,43 @@ extern struct
 _Static_assert(sizeof(void *) == 4);
 OVR233_LAYOUT_ASSERT(s_spawn, 0x4, 0x8);
 OVR233_LAYOUT_ASSERT(s_g_dancer, 0xc, 0x10);
+OVR233_LAYOUT_ASSERT(s_podium, 0x2ac, 0x8);
+OVR233_LAYOUT_ASSERT(s_third, 0x2b4, 0x8);
+OVR233_LAYOUT_ASSERT(s_second, 0x2bc, 0x8);
+OVR233_LAYOUT_ASSERT(s_first, 0x2c4, 0x8);
+OVR233_LAYOUT_ASSERT(s_tawna, 0x2cc, 0x8);
+OVR233_LAYOUT_ASSERT(s_prize, 0x2d4, 0x8);
+OVR233_LAYOUT_ASSERT(s_victorycam, 0x2dc, 0x10);
 OVR233_LAYOUT_ASSERT(s_introguy, 0x328, 0xc);
 OVR233_LAYOUT_ASSERT(s_introcam, 0x334, 0xc);
+OVR233_LAYOUT_ASSERT(s_box1, 0x340, 0x8);
+OVR233_LAYOUT_ASSERT(s_box2, 0x348, 0x8);
+OVR233_LAYOUT_ASSERT(s_box2_bottom, 0x350, 0x10);
+OVR233_LAYOUT_ASSERT(s_box2_front, 0x360, 0x10);
+OVR233_LAYOUT_ASSERT(s_box2_A, 0x370, 0x8);
+OVR233_LAYOUT_ASSERT(s_box3, 0x378, 0x8);
+OVR233_LAYOUT_ASSERT(s_code, 0x380, 0x8);
+OVR233_LAYOUT_ASSERT(s_glow, 0x388, 0x8);
+OVR233_LAYOUT_ASSERT(s_lid, 0x390, 0x4);
+OVR233_LAYOUT_ASSERT(s_lidb, 0x394, 0x8);
+OVR233_LAYOUT_ASSERT(s_lidc, 0x39c, 0x8);
+OVR233_LAYOUT_ASSERT(s_lidd, 0x3a4, 0x8);
+OVR233_LAYOUT_ASSERT(s_lid2, 0x3ac, 0x8);
+OVR233_LAYOUT_ASSERT(s_kart0, 0x3b4, 0x8);
+OVR233_LAYOUT_ASSERT(s_kart1, 0x3bc, 0x8);
+OVR233_LAYOUT_ASSERT(s_kart2, 0x3c4, 0x8);
+OVR233_LAYOUT_ASSERT(s_kart3, 0x3cc, 0x8);
+OVR233_LAYOUT_ASSERT(s_kart6, 0x3d4, 0x8);
+OVR233_LAYOUT_ASSERT(s_kart7, 0x3dc, 0x8);
 OVR233_LAYOUT_ASSERT(VertSplitLine, 0x518c, 0x4);
 OVR233_LAYOUT_ASSERT(boolLoadNextSwap, 0x5190, 0x4);
 OVR233_LAYOUT_ASSERT(boolStartToSkip, 0x5194, 0x4);
 OVR233_LAYOUT_ASSERT(bossCutsceneIndex, 0x5198, 0x4);
 OVR233_LAYOUT_ASSERT(CutsceneManipulatesAudio, 0x519c, 0x4);
-OVR233_LAYOUT_ASSERT(whateverThisMeans, 0x51a0, 0x78);
-OVR233_LAYOUT_ASSERT(pointerToWhateverThisMeans, 0x5a7c, 0x78);
+OVR233_LAYOUT_ASSERT(particleEmitterData, 0x51a0, 0x8dc);
+OVR233_LAYOUT_ASSERT(particleConfigs, 0x5a7c, 0x60);
+OVR233_LAYOUT_ASSERT(csOpcodeMetaPrefix, 0x5adc, 0x34);
+OVR233_LAYOUT_ASSERT(bossOpcodeData, 0x5b10, 0x2b4);
 OVR233_LAYOUT_ASSERT(script_tawnaNormal, 0x5dc4, 0x28);
 OVR233_LAYOUT_ASSERT(script_tawnaCredits, 0x5dec, 0x164c);
 OVR233_LAYOUT_ASSERT(script_default, 0x7438, 0x18);
@@ -463,6 +499,7 @@ OVR233_LAYOUT_ASSERT(boxAndAdvCharSelectOpcodeData, 0x8fc8, 0x10c4);
 OVR233_LAYOUT_ASSERT(boxModelScripts, 0xa08c, 0xac);
 OVR233_LAYOUT_ASSERT(advCharSelectSelectOpcodes, 0xa138, 0x20);
 OVR233_LAYOUT_ASSERT(advCharSelectDeselectOpcodes, 0xa158, 0x20);
+OVR233_LAYOUT_ASSERT(boxAndAdvCharSelectExtraOpcodes, 0xa178, 0x8);
 OVR233_LAYOUT_ASSERT(cs_initMatrixData, 0xa180, 0x17c0);
 OVR233_LAYOUT_ASSERT(cs_initMatrixTable, 0xb940, 0x20);
 OVR233_LAYOUT_ASSERT(cs_initMatrixBool, 0xb960, 0x1);
