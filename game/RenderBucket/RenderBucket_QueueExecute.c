@@ -4154,9 +4154,8 @@ static void RenderBucket_DrawFunc_Reflection(struct RenderBucketDrawContext *ctx
 {
 	u32 *pCmd = (u32 *)ctx->idpp->ptrCommandList;
 
-	// NOTE(aalhendi): Source-backs retail 0x8006c9c4's reflected split draw
-	// shape. The exact scratchpad/FIFO instruction choreography is still pending
-	// a direct ASM pass.
+	// NOTE(aalhendi): ASM-verified NTSC-U 926 0x8006c9c4-0x8006cdec;
+	// native uses the accepted explicit RenderBucketDrawContext split/FIFO ABI.
 	pCmd++;
 
 	while (*pCmd != 0xffffffff)

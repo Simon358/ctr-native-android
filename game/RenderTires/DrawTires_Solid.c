@@ -177,8 +177,8 @@ static void DrawTiresSolid_InitScratch(struct DrawTiresSolidScratch *scratch, ch
 
 	// NOTE(aalhendi): PSX-backfeed blocker: retail DrawTires_Solid copies the
 	// eight jump addresses at 0x8008a344 to scratchpad 0x1f800130. Native keeps
-	// the executable-backed values as data until the primitive corner-order path
-	// is ported from 0x8006ed7c-0x8006ee3c.
+	// the executable-backed values as data and dispatches them through the
+	// equivalent corner-order switch.
 	for (int i = 0; i < 8; i++)
 	{
 		scratch->jumpTable[i] = sDrawTiresSolidJumpTable[i];
@@ -752,14 +752,15 @@ static int DrawTiresSolid_StagePlayer(struct DrawTiresSolidScratch *scratch, str
 
 void DrawTires_Solid(struct Thread *thread, struct PrimMem *primMem, char numPlyr)
 {
-	// NOTE(aalhendi): Source-backed partial audit for NTSC-U 926 0x8006e588-0x8006ef30.
+	// NOTE(aalhendi): ASM-verified NTSC-U 926 0x8006e588-0x8006ef30;
+	// native uses the accepted explicit DrawTiresSolidScratch stack/scratch ABI.
 	struct DrawTiresSolidScratch scratch = {0};
 	int primCount;
 
-	// NOTE(aalhendi): PSX-backfeed blocker: retail DrawTires_Solid is a
-	// scratchpad-owned renderer at 0x8006e588-0x8006ef30. Native uses this
-	// offset-checked stack contract while the retail 0x1f800000 scratchpad and
-	// register ABI are restored block-by-block.
+	// NOTE(aalhendi): PSX-backfeed blocker: retail DrawTires_Solid owns scratchpad
+	// 0x1f800000 and live s7/t8/t9/v0/s0 register cursors. Native uses
+	// offset-checked stack state and explicit helpers; PSX backfeed must restore
+	// the retail scratchpad/register entry protocol.
 	if (primMem == 0)
 		return;
 

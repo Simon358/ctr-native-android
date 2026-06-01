@@ -68,6 +68,18 @@ _Static_assert(offsetof(POLY_FT4, r0) == 0x4);
 _Static_assert(offsetof(POLY_FT4, x0) == 0x8);
 _Static_assert(offsetof(POLY_FT4, u0) == 0xc);
 _Static_assert(offsetof(POLY_FT4, x3) == 0x20);
+_Static_assert(sizeof(struct Instance) == 0x74);
+_Static_assert(offsetof(struct Instance, scale) == 0x1c);
+_Static_assert(offsetof(struct Instance, matrix) == 0x30);
+_Static_assert(offsetof(struct Instance, vertSplit) == 0x56);
+_Static_assert(sizeof(struct InstDrawPerPlayer) == 0x88);
+_Static_assert(offsetof(struct InstDrawPerPlayer, pushBuffer) == 0x0);
+_Static_assert(offsetof(struct InstDrawPerPlayer, m3x3) == 0x24);
+_Static_assert(offsetof(struct InstDrawPerPlayer, instFlags) == 0x44);
+_Static_assert(offsetof(struct InstDrawPerPlayer, lodIndex) == 0x64);
+_Static_assert(offsetof(struct InstDrawPerPlayer, depthOffset) == 0x68);
+_Static_assert(offsetof(struct InstDrawPerPlayer, unkE4) == 0x70);
+_Static_assert(offsetof(struct InstDrawPerPlayer, unkE8) == 0x74);
 
 static const u32 sDrawTiresReflectionJumpTable[8] = {
     0x8006f7f8, 0x8006f814, 0x8006f830, 0x8006f848, 0x8006f860, 0x8006f87c, 0x8006f898, 0x8006f8b8,
@@ -128,8 +140,8 @@ static void DrawTiresReflection_InitScratch(struct DrawTiresReflectionScratch *s
 
 	// NOTE(aalhendi): PSX-backfeed blocker: retail DrawTires_Reflection copies
 	// the eight jump addresses at 0x8008a364 to scratchpad 0x1f800130. Native
-	// keeps the executable-backed values as data until the reflected primitive
-	// corner-order path is ported from 0x8006f7f8-0x8006f8b8.
+	// keeps the executable-backed values as data and dispatches them through the
+	// equivalent reflected corner-order switch.
 	for (int i = 0; i < 8; i++)
 	{
 		scratch->jumpTable[i] = sDrawTiresReflectionJumpTable[i];
@@ -653,14 +665,15 @@ static int DrawTiresReflection_StagePlayer(struct DrawTiresReflectionScratch *sc
 
 void DrawTires_Reflection(struct Thread *thread, struct PrimMem *primMem, char numPlyr)
 {
-	// NOTE(aalhendi): Source-backed partial audit for NTSC-U 926 0x8006f004-0x8006f9a8.
+	// NOTE(aalhendi): ASM-verified NTSC-U 926 0x8006f004-0x8006f9a8;
+	// native uses the accepted explicit DrawTiresReflectionScratch stack/scratch ABI.
 	struct DrawTiresReflectionScratch scratch = {0};
 	int primCount;
 
-	// NOTE(aalhendi): PSX-backfeed blocker: retail DrawTires_Reflection is a
-	// scratchpad-owned renderer at 0x8006f004-0x8006f9a8. Native uses this
-	// offset-checked stack contract while the retail 0x1f800000 scratchpad and
-	// register ABI are restored block-by-block.
+	// NOTE(aalhendi): PSX-backfeed blocker: retail DrawTires_Reflection owns
+	// scratchpad 0x1f800000 and live s7/t8/t9/v0/s0 register cursors. Native uses
+	// offset-checked stack state and explicit helpers; PSX backfeed must restore
+	// the retail scratchpad/register entry protocol.
 	if (primMem == 0)
 		return;
 
