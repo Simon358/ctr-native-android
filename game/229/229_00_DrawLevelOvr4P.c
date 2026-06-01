@@ -17,6 +17,7 @@ enum Ovr229DrawLevelConstants
 	OVR229_WATER_RENDERED_DEFAULT_WRAPPER = 0x800a22d8,
 	OVR229_WATER_BSP_LIST_PRIM_RESERVE_BIAS = 0x1d40,
 	OVR229_SPLIT_GROUND_LIST_B_PRIM_RESERVE_BIAS = 0x23c0,
+	OVR229_TERMINAL_PRIM_RESERVE_BIAS = 0x2700,
 	OVR229_SPLIT_GROUND_RENDERED_A_SETUP_INDEX = 3,
 	OVR229_SPLIT_GROUND_LIST_B_SETUP_INDEX = 4,
 	OVR229_SPLIT_GROUND_RENDERED_B_SETUP_INDEX = 5,
@@ -92,6 +93,17 @@ static u32 Ovr229_800a106c_TranslateCopiedWord(int setupIndex, const struct Over
 	return value;
 }
 
+static u32 Ovr229_800a8ebc_TranslateClipRecordLabel(u32 address)
+{
+	for (int i = 0; i < OVR229_CLIP_RECORD_JUMP_WORD_COUNT; i++)
+	{
+		if (R229.clipRecordJumpTable[i] == address)
+			return R226.clipRecordJumpTable[i];
+	}
+
+	return address;
+}
+
 static void Ovr229_800a106c_CopyScratchWords(const struct OverlayRDATA_229_BucketSetupRecord *setup, int setupIndex,
                                              const struct OverlayRDATA_229_BucketSetupCopy *copy)
 {
@@ -139,7 +151,7 @@ static void Ovr229_800a8ebc_CopyClipRecordJumpTable(void)
 	u32 *clipRecordJumpTable = CTR_SCRATCHPAD_PTR(u32, 0x240);
 
 	for (int i = 0; i < OVR229_CLIP_RECORD_JUMP_WORD_COUNT; i++)
-		clipRecordJumpTable[i] = R229.clipRecordJumpTable[i];
+		clipRecordJumpTable[i] = Ovr229_800a8ebc_TranslateClipRecordLabel(R229.clipRecordJumpTable[i]);
 }
 
 static void Ovr229_800a10c8_SetViewportContext(struct PushBuffer *pb, const int *visFaceList, u8 *clipStart, u8 *clipCursor,
@@ -327,21 +339,18 @@ static int Ovr229_800a1178_800a8270_BucketDispatch(u32 handlerAddress, void *buc
 	if (handlerAddress == OVR229_QUAD_4X4_RENDERED_HANDLER)
 		return Ovr229_800a72b0_DrawQuad4x4RenderedList(bucketValue, pb, mesh, primMem);
 
-	// NOTE(aalhendi): Bucket families outside 0x800a1178..0x800a8270 remain
-	// unported. Fail closed if this audit-only entry reaches them.
+	// NOTE(aalhendi): Reject handler addresses that are not present in the
+	// recovered R229 bucket table.
 	return 0;
 }
 
-static int Ovr229_UnportedClipConsumer(struct PushBuffer *pb, struct PrimMem *primMem, u8 *clipCursor, int playerIndex)
+static int Ovr229_800a8270_ConsumeClipRecords(struct PushBuffer *pb, struct PrimMem *primMem, u8 *clipCursor, int playerIndex)
 {
-	(void)pb;
-	(void)primMem;
 	(void)clipCursor;
 	(void)playerIndex;
 
-	// NOTE(aalhendi): 0x800a8270+ terminal core is outside this pass.
-	// Fail closed if this audit-only entry is called without a real consumer.
-	return 0;
+	DrawLevelOvr1P_SetPrimReserveBias(OVR229_TERMINAL_PRIM_RESERVE_BIAS);
+	return DrawLevelOvr1P_ConsumeClipRecords(pb, primMem);
 }
 
 static int Ovr229_800a0cbc_EntryWithCallbacks(void *LevRenderList, struct PushBuffer *pb, struct BSP *bspList, struct PrimMem *primMem, void *VisMem10,
@@ -359,7 +368,7 @@ static int Ovr229_800a0cbc_EntryWithCallbacks(void *LevRenderList, struct PushBu
 
 	// NOTE(aalhendi): ASM-audited against NTSC-U 926 229 entry/setup
 	// 0x800a0cbc-0x800a1178. The public 4P renderer still uses the 226
-	// fallback until the downstream 229 bucket and terminal families are owned.
+	// fallback until the final public route-promotion and runtime proof phase.
 	*CTR_SCRATCHPAD_PTR(u32, 0x38) = (u32)(uintptr_t)&hostStackAnchor;
 	*CTR_SCRATCHPAD_PTR(u32, 0xcc) = (u32)(uintptr_t)VisMem10;
 	if (VisMem10 == NULL)
@@ -431,5 +440,5 @@ int Ovr229_800a0cbc_Entry(void *LevRenderList, struct PushBuffer *pb, struct BSP
                           void *VisMem18, void *VisMem1C, void *waterEnvMap)
 {
 	return Ovr229_800a0cbc_EntryWithCallbacks(LevRenderList, pb, bspList, primMem, VisMem10, VisMem14, VisMem18, VisMem1C, waterEnvMap,
-	                                          Ovr229_800a1178_800a8270_BucketDispatch, Ovr229_UnportedClipConsumer);
+	                                          Ovr229_800a1178_800a8270_BucketDispatch, Ovr229_800a8270_ConsumeClipRecords);
 }
