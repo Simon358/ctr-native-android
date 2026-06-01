@@ -424,12 +424,16 @@ void GR_BeginScene()
 	g_lastBoundTexture = 0;
 
 #if USE_OPENGL
+	// NOTE(aalhendi): Depth is a PGXP host enhancement. The retail-faithful
+	// native build compiles PGXP out, so only clear the PSX stencil mask here.
+#if USE_PGXP
 #ifdef RENDERER_OGLES
 	glClearDepthf(1.0f);
 #else
 	glClearDepth(1.0f);
 #endif
 	glClear(GL_DEPTH_BUFFER_BIT);
+#endif
 	glClear(GL_STENCIL_BUFFER_BIT);
 #endif
 
@@ -1350,7 +1354,11 @@ void GR_Clear(int x, int y, int w, int h, unsigned char r, unsigned char g, unsi
 
 #if USE_OPENGL
 	glClearColor(r / 255.0f, g / 255.0f, b / 255.0f, 0.0f);
+#if USE_PGXP
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+#else
+	glClear(GL_COLOR_BUFFER_BIT);
+#endif
 #endif
 }
 
@@ -1844,9 +1852,11 @@ void GR_EnableDepth(int enable)
 	g_PreviousDepthMode = enable;
 
 #if USE_OPENGL
+#if USE_PGXP
 	if (enable && g_cfg_pgxpZBuffer)
 		glEnable(GL_DEPTH_TEST);
 	else
+#endif
 		glDisable(GL_DEPTH_TEST);
 #endif
 }

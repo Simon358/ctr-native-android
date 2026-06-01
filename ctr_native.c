@@ -251,15 +251,11 @@ int main(int argc, char *argv[])
 
 	Platform_InitScratchpad();
 
-	// // NOTE(aalhendi): CTR already throttles through the retail VSync/draw-sync
-	// // path. Do not add a second SDL swap wait here, or gameplay runs as 64 ms
-	// // physics frames and collision can tunnel through slopes.
-	// PsyX_SetSwapInterval(0);
-	// PsyX_EnableSwapInterval(0);
-
-	// NOTE(aalhendi): PsyCross swap interval - combined with VSync() below, locks to 30fps
-	PsyX_SetSwapInterval(2);
-	PsyX_EnableSwapInterval(1);
+	// NOTE(aalhendi): CTR already throttles through the retail VSync/draw-sync
+	// path. Do not add a second SDL swap wait; some GL drivers charge that wait
+	// to the next frame's first clear instead of SDL_GL_SwapWindow.
+	PsyX_SetSwapInterval(0);
+	PsyX_EnableSwapInterval(0);
 
 	g_cfg_controllerToSlotMapping[0] = 0;
 
@@ -283,7 +279,9 @@ void Platform_Shutdown(void)
 
 void Platform_BeginFrame(void)
 {
-	PsyX_BeginScene();
+	// NOTE(aalhendi): Normal rendering begins from DrawOTag after the current
+	// draw env is installed. Starting PsyCross here clears the previous env and
+	// can force the host GL driver to block before the retail render-submit path.
 }
 
 // NOTE(aalhendi): Frame timing is handled by VSync() in the platform layer,
@@ -296,7 +294,7 @@ void Platform_EndFrame(void)
 
 void Platform_PresentVRAMDisplay(void)
 {
-	Platform_BeginFrame();
+	PsyX_BeginScene();
 	GR_PresentVRAMDisplay();
 	Platform_EndFrame();
 }
