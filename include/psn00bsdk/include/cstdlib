@@ -33,7 +33,7 @@ extern const char	**__argv;
 void abort(void);
 
 int rand(void);
-void srand(int seed);
+void srand(unsigned int seed);
 
 int abs(int j);
 long labs(long i);

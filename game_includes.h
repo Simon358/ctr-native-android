@@ -489,6 +489,7 @@
 #include "game/MEMPACK/MEMPACK_10_PopState.c"
 #include "game/MEMPACK/MEMPACK_11_PopToState.c"
 
+#include "game/MixRNG/PSX_BIOS_Rand.c"
 #include "game/MixRNG/RngDeadCoed.c"
 #include "game/MixRNG/MixRNG_0_Scramble.c"
 #include "game/MixRNG/MixRNG_1_Particles.c"
