@@ -51,15 +51,7 @@ static short GetTPageBase(int tpage)
 
 DISPENV activeDispEnv;
 DRAWENV activeDrawEnv;
-
-static const char *currentSplitDebugText = NULL;
-TextureID overrideTexture = 0;
-int overrideTextureWidth = 0;
-int overrideTextureHeight = 0;
-
 int g_GPUDisabledState = 0;
-int g_DrawPrimMode = 0;
-static bool g_psxDrawMaskSet = false;
 
 typedef struct
 {
@@ -83,20 +75,37 @@ typedef struct
 
 #define MAX_DRAW_SPLITS 4096
 
-GrVertex g_vertexBuffer[MAX_VERTEX_BUFFER_SIZE];
-GPUDrawSplit g_splits[MAX_DRAW_SPLITS];
-
-int g_vertexIndex = 0;
-int g_splitIndex = 0;
-
-void ClearSplits()
+typedef struct
 {
-	currentSplitDebugText = NULL;
-	g_vertexIndex = 0;
-	g_splitIndex = 0;
-	g_splits[0].texFormat = (TexFormat)0xFFFF;
-	g_splits[0].psxTexturedSemiTrans = false;
-	g_splits[0].psxDrawMaskSet = false;
+	const char *currentSplitDebugText;
+	TextureID overrideTexture;
+	int overrideTextureWidth;
+	int overrideTextureHeight;
+
+	int drawPrimMode;
+	bool psxDrawMaskSet;
+
+	GrVertex vertexBuffer[MAX_VERTEX_BUFFER_SIZE];
+	GPUDrawSplit splits[MAX_DRAW_SPLITS];
+	int vertexIndex;
+	int splitIndex;
+} NativeGpuState;
+
+static NativeGpuState s_gpu;
+
+int NativeGpu_HasPendingSplits(void)
+{
+	return s_gpu.splitIndex > 0;
+}
+
+void ClearSplits(void)
+{
+	s_gpu.currentSplitDebugText = NULL;
+	s_gpu.vertexIndex = 0;
+	s_gpu.splitIndex = 0;
+	s_gpu.splits[0].texFormat = (TexFormat)0xFFFF;
+	s_gpu.splits[0].psxTexturedSemiTrans = false;
+	s_gpu.splits[0].psxDrawMaskSet = false;
 }
 
 static void DrawEnvDimensionsInt(int *width, int *height)
@@ -637,11 +646,11 @@ void TriangulateQuad()
 	NOTE: v2 swapped with v3 during primitive parsing but it not shown here
 	*/
 
-	g_vertexBuffer[g_vertexIndex + 4] = g_vertexBuffer[g_vertexIndex + 3];
+	s_gpu.vertexBuffer[s_gpu.vertexIndex + 4] = s_gpu.vertexBuffer[s_gpu.vertexIndex + 3];
 
-	g_vertexBuffer[g_vertexIndex + 5] = g_vertexBuffer[g_vertexIndex + 2];
-	g_vertexBuffer[g_vertexIndex + 2] = g_vertexBuffer[g_vertexIndex + 3];
-	g_vertexBuffer[g_vertexIndex + 3] = g_vertexBuffer[g_vertexIndex + 1];
+	s_gpu.vertexBuffer[s_gpu.vertexIndex + 5] = s_gpu.vertexBuffer[s_gpu.vertexIndex + 2];
+	s_gpu.vertexBuffer[s_gpu.vertexIndex + 2] = s_gpu.vertexBuffer[s_gpu.vertexIndex + 3];
+	s_gpu.vertexBuffer[s_gpu.vertexIndex + 3] = s_gpu.vertexBuffer[s_gpu.vertexIndex + 1];
 }
 
 //------------------------------------------------------------------------------------------------------------------------
@@ -649,54 +658,54 @@ void TriangulateQuad()
 static void AddSplit(bool semiTrans, bool textured)
 {
 	int tpage = activeDrawEnv.tpage;
-	GPUDrawSplit *curSplit = &g_splits[g_splitIndex];
+	GPUDrawSplit *curSplit = &s_gpu.splits[s_gpu.splitIndex];
 
 	BlendMode blendMode = semiTrans ? GET_TPAGE_BLEND(tpage) : BM_NONE;
 	TexFormat texFormat = GetTPageFormat(tpage);
 	TextureID textureId = textured ? NativeRenderer_GetVRAMTexture() : NativeRenderer_GetWhiteTexture();
-	bool psxTexturedSemiTrans = semiTrans && textured && overrideTexture == 0;
+	bool psxTexturedSemiTrans = semiTrans && textured && s_gpu.overrideTexture == 0;
 
-	if (textured && overrideTexture != 0)
+	if (textured && s_gpu.overrideTexture != 0)
 	{
 		// override texture format, zero tpage
 		texFormat = TF_32_BIT_RGBA;
-		textureId = overrideTexture;
+		textureId = s_gpu.overrideTexture;
 		psxTexturedSemiTrans = false;
 	}
 
 	// FIXME: compare drawing environment too?
 	if (!psxTexturedSemiTrans && curSplit->blendMode == blendMode && curSplit->texFormat == texFormat && curSplit->textureId == textureId &&
-	    curSplit->drawPrimMode == g_DrawPrimMode && curSplit->psxTexturedSemiTrans == psxTexturedSemiTrans && curSplit->psxDrawMaskSet == g_psxDrawMaskSet &&
-	    curSplit->drawenv.clip.x == activeDrawEnv.clip.x && curSplit->drawenv.clip.y == activeDrawEnv.clip.y &&
-	    curSplit->drawenv.clip.w == activeDrawEnv.clip.w && curSplit->drawenv.clip.h == activeDrawEnv.clip.h && curSplit->drawenv.dfe == activeDrawEnv.dfe &&
-	    curSplit->debugText == currentSplitDebugText)
+	    curSplit->drawPrimMode == s_gpu.drawPrimMode && curSplit->psxTexturedSemiTrans == psxTexturedSemiTrans &&
+	    curSplit->psxDrawMaskSet == s_gpu.psxDrawMaskSet && curSplit->drawenv.clip.x == activeDrawEnv.clip.x &&
+	    curSplit->drawenv.clip.y == activeDrawEnv.clip.y && curSplit->drawenv.clip.w == activeDrawEnv.clip.w &&
+	    curSplit->drawenv.clip.h == activeDrawEnv.clip.h && curSplit->drawenv.dfe == activeDrawEnv.dfe && curSplit->debugText == s_gpu.currentSplitDebugText)
 	{
 		return;
 	}
 
-	curSplit->numVerts = g_vertexIndex - curSplit->startVertex;
+	curSplit->numVerts = s_gpu.vertexIndex - curSplit->startVertex;
 
-	if (g_splitIndex + 1 >= MAX_DRAW_SPLITS)
+	if (s_gpu.splitIndex + 1 >= MAX_DRAW_SPLITS)
 	{
 		NATIVE_GPU_ERROR("MAX_DRAW_SPLITS reached (too many blend modes, texture formats, drawEnv clip rects, dfe switches), expect rendering errors\n");
 		return;
 	}
 
-	GPUDrawSplit *split = &g_splits[++g_splitIndex];
+	GPUDrawSplit *split = &s_gpu.splits[++s_gpu.splitIndex];
 	split->blendMode = blendMode;
 	split->texFormat = texFormat;
 	split->textureId = textureId;
-	split->drawPrimMode = g_DrawPrimMode;
+	split->drawPrimMode = s_gpu.drawPrimMode;
 	split->psxTexturedSemiTrans = psxTexturedSemiTrans;
-	split->psxDrawMaskSet = g_psxDrawMaskSet;
+	split->psxDrawMaskSet = s_gpu.psxDrawMaskSet;
 	split->drawenv = activeDrawEnv;
 	split->dispenv = activeDispEnv;
-	split->debugText = currentSplitDebugText;
+	split->debugText = s_gpu.currentSplitDebugText;
 
-	split->drawenv.tw.w = overrideTextureWidth;
-	split->drawenv.tw.h = overrideTextureHeight;
+	split->drawenv.tw.w = s_gpu.overrideTextureWidth;
+	split->drawenv.tw.h = s_gpu.overrideTextureHeight;
 
-	split->startVertex = g_vertexIndex;
+	split->startVertex = s_gpu.vertexIndex;
 	split->numVerts = 0;
 }
 
@@ -747,7 +756,7 @@ void DrawSplit(const GPUDrawSplit *split)
 
 static void SetPSXMaskState(u32 code)
 {
-	g_psxDrawMaskSet = (code & 1) != 0;
+	s_gpu.psxDrawMaskSet = (code & 1) != 0;
 }
 
 extern int g_dbg_polygonSelected;
@@ -762,7 +771,7 @@ void DrawAllSplits()
 	{
 		for (int i = 0; i < 3; i++)
 		{
-			GrVertex *vert = &g_vertexBuffer[g_dbg_polygonSelected + i];
+			GrVertex *vert = &s_gpu.vertexBuffer[g_dbg_polygonSelected + i];
 			vert->r = 255;
 			vert->g = 0;
 			vert->b = 0;
@@ -781,10 +790,10 @@ void DrawAllSplits()
 #endif
 
 	// next code ideally should be called before EndScene
-	NativeRenderer_UpdateVertexBuffer(g_vertexBuffer, g_vertexIndex);
+	NativeRenderer_UpdateVertexBuffer(s_gpu.vertexBuffer, s_gpu.vertexIndex);
 
-	for (int i = 1; i <= g_splitIndex; i++)
-		DrawSplit(&g_splits[i]);
+	for (int i = 1; i <= s_gpu.splitIndex; i++)
+		DrawSplit(&s_gpu.splits[i]);
 
 	ClearSplits();
 }
@@ -799,15 +808,15 @@ void ParsePrimitivesLinkedList(u32 *p, int singlePrimitive)
 		return;
 
 	// setup single primitive flag (needed for AddSplits)
-	g_DrawPrimMode = singlePrimitive;
+	s_gpu.drawPrimMode = singlePrimitive;
 
 	if (singlePrimitive)
 	{
 		P_TAG *polyTag = (P_TAG *)p;
 		ParsePrimitive(polyTag);
 
-		GPUDrawSplit *lastSplit = &g_splits[g_splitIndex];
-		lastSplit->numVerts = g_vertexIndex - lastSplit->startVertex;
+		GPUDrawSplit *lastSplit = &s_gpu.splits[s_gpu.splitIndex];
+		lastSplit->numVerts = s_gpu.vertexIndex - lastSplit->startVertex;
 	}
 	else
 	{
@@ -843,8 +852,8 @@ void ParsePrimitivesLinkedList(u32 *p, int singlePrimitive)
 				}
 			}
 
-			GPUDrawSplit *lastSplit = &g_splits[g_splitIndex];
-			lastSplit->numVerts = g_vertexIndex - lastSplit->startVertex;
+			GPUDrawSplit *lastSplit = &s_gpu.splits[s_gpu.splitIndex];
+			lastSplit->numVerts = s_gpu.vertexIndex - lastSplit->startVertex;
 
 			if (isendprim(basePacket))
 				break;
@@ -876,7 +885,7 @@ static int ProcessFlatLines(P_TAG *polyTag)
 		u8 *c0 = &poly->r0;
 		u8 *c1 = c0;
 
-		GrVertex *firstVertex = &g_vertexBuffer[g_vertexIndex];
+		GrVertex *firstVertex = &s_gpu.vertexBuffer[s_gpu.vertexIndex];
 		LineSwapSourceVerts(&p0, &p1, &c0, &c1);
 		MakeLineArray(firstVertex, p0, p1);
 		MakeTexcoordLineZero(firstVertex, 0);
@@ -884,7 +893,7 @@ static int ProcessFlatLines(P_TAG *polyTag)
 
 		TriangulateQuad();
 
-		g_vertexIndex += 6;
+		s_gpu.vertexIndex += 6;
 
 #if defined(DEBUG_POLY_COUNT)
 		polygon_count++;
@@ -903,7 +912,7 @@ static int ProcessFlatLines(P_TAG *polyTag)
 			u8 *c0 = &poly->r0;
 			u8 *c1 = c0;
 
-			GrVertex *firstVertex = &g_vertexBuffer[g_vertexIndex];
+			GrVertex *firstVertex = &s_gpu.vertexBuffer[s_gpu.vertexIndex];
 			LineSwapSourceVerts(&p0, &p1, &c0, &c1);
 			MakeLineArray(firstVertex, p0, p1);
 			MakeTexcoordLineZero(firstVertex, 0);
@@ -911,7 +920,7 @@ static int ProcessFlatLines(P_TAG *polyTag)
 
 			TriangulateQuad();
 
-			g_vertexIndex += 6;
+			s_gpu.vertexIndex += 6;
 #if defined(DEBUG_POLY_COUNT)
 			polygon_count++;
 #endif
@@ -923,7 +932,7 @@ static int ProcessFlatLines(P_TAG *polyTag)
 			u8 *c0 = &poly->r0;
 			u8 *c1 = c0;
 
-			GrVertex *firstVertex = &g_vertexBuffer[g_vertexIndex];
+			GrVertex *firstVertex = &s_gpu.vertexBuffer[s_gpu.vertexIndex];
 			LineSwapSourceVerts(&p0, &p1, &c0, &c1);
 			MakeLineArray(firstVertex, p0, p1);
 			MakeTexcoordLineZero(firstVertex, 0);
@@ -931,7 +940,7 @@ static int ProcessFlatLines(P_TAG *polyTag)
 
 			TriangulateQuad();
 
-			g_vertexIndex += 6;
+			s_gpu.vertexIndex += 6;
 #if defined(DEBUG_POLY_COUNT)
 			polygon_count++;
 #endif
@@ -952,7 +961,7 @@ static int ProcessFlatLines(P_TAG *polyTag)
 			u8 *c0 = &poly->r0;
 			u8 *c1 = c0;
 
-			GrVertex *firstVertex = &g_vertexBuffer[g_vertexIndex];
+			GrVertex *firstVertex = &s_gpu.vertexBuffer[s_gpu.vertexIndex];
 			LineSwapSourceVerts(&p0, &p1, &c0, &c1);
 			MakeLineArray(firstVertex, p0, p1);
 			MakeTexcoordLineZero(firstVertex, 0);
@@ -960,7 +969,7 @@ static int ProcessFlatLines(P_TAG *polyTag)
 
 			TriangulateQuad();
 
-			g_vertexIndex += 6;
+			s_gpu.vertexIndex += 6;
 #if defined(DEBUG_POLY_COUNT)
 			polygon_count++;
 #endif
@@ -972,7 +981,7 @@ static int ProcessFlatLines(P_TAG *polyTag)
 			u8 *c0 = &poly->r0;
 			u8 *c1 = c0;
 
-			GrVertex *firstVertex = &g_vertexBuffer[g_vertexIndex];
+			GrVertex *firstVertex = &s_gpu.vertexBuffer[s_gpu.vertexIndex];
 			LineSwapSourceVerts(&p0, &p1, &c0, &c1);
 			MakeLineArray(firstVertex, p0, p1);
 			MakeTexcoordLineZero(firstVertex, 0);
@@ -980,7 +989,7 @@ static int ProcessFlatLines(P_TAG *polyTag)
 
 			TriangulateQuad();
 
-			g_vertexIndex += 6;
+			s_gpu.vertexIndex += 6;
 #if defined(DEBUG_POLY_COUNT)
 			polygon_count++;
 #endif
@@ -992,7 +1001,7 @@ static int ProcessFlatLines(P_TAG *polyTag)
 			u8 *c0 = &poly->r0;
 			u8 *c1 = c0;
 
-			GrVertex *firstVertex = &g_vertexBuffer[g_vertexIndex];
+			GrVertex *firstVertex = &s_gpu.vertexBuffer[s_gpu.vertexIndex];
 			LineSwapSourceVerts(&p0, &p1, &c0, &c1);
 			MakeLineArray(firstVertex, p0, p1);
 			MakeTexcoordLineZero(firstVertex, 0);
@@ -1000,7 +1009,7 @@ static int ProcessFlatLines(P_TAG *polyTag)
 
 			TriangulateQuad();
 
-			g_vertexIndex += 6;
+			s_gpu.vertexIndex += 6;
 #if defined(DEBUG_POLY_COUNT)
 			polygon_count++;
 #endif
@@ -1031,7 +1040,7 @@ static int ProcessGouraudLines(P_TAG *polyTag)
 		u8 *c0 = &poly->r0;
 		u8 *c1 = &poly->r1;
 
-		GrVertex *firstVertex = &g_vertexBuffer[g_vertexIndex];
+		GrVertex *firstVertex = &s_gpu.vertexBuffer[s_gpu.vertexIndex];
 		LineSwapSourceVerts(&p0, &p1, &c0, &c1);
 		MakeLineArray(firstVertex, p0, p1);
 		MakeTexcoordLineZero(firstVertex, 0);
@@ -1039,7 +1048,7 @@ static int ProcessGouraudLines(P_TAG *polyTag)
 
 		TriangulateQuad();
 
-		g_vertexIndex += 6;
+		s_gpu.vertexIndex += 6;
 
 #if defined(DEBUG_POLY_COUNT)
 		polygon_count++;
@@ -1074,12 +1083,12 @@ static int ProcessFlatPoly(P_TAG *polyTag)
 
 		AddSplit(semiTrans, false);
 
-		GrVertex *firstVertex = &g_vertexBuffer[g_vertexIndex];
+		GrVertex *firstVertex = &s_gpu.vertexBuffer[s_gpu.vertexIndex];
 		MakeVertexTriangle(firstVertex, &poly->x0, &poly->x1, &poly->x2);
 		MakeTexcoordTriangleZero(firstVertex, 0);
 		MakeColourTriangle(firstVertex, shadeTexOn, &poly->r0, &poly->r0, &poly->r0);
 
-		g_vertexIndex += 3;
+		s_gpu.vertexIndex += 3;
 
 #if defined(DEBUG_POLY_COUNT)
 		polygon_count++;
@@ -1096,13 +1105,13 @@ static int ProcessFlatPoly(P_TAG *polyTag)
 		{
 			AddSplit(semiTrans, true);
 
-			GrVertex *firstVertex = &g_vertexBuffer[g_vertexIndex];
+			GrVertex *firstVertex = &s_gpu.vertexBuffer[s_gpu.vertexIndex];
 			MakeVertexTriangle(firstVertex, &poly->x0, &poly->x1, &poly->x2);
 			MakeTexcoordTriangle(firstVertex, &poly->u0, &poly->u1, &poly->u2, poly->tpage, poly->clut,
 			                     GET_TPAGE_DITHER(activeDrawEnv.tpage) || activeDrawEnv.dtd);
 			MakeColourTriangle(firstVertex, shadeTexOn, &poly->r0, &poly->r0, &poly->r0);
 
-			g_vertexIndex += 3;
+			s_gpu.vertexIndex += 3;
 
 #if defined(DEBUG_POLY_COUNT)
 			polygon_count++;
@@ -1116,14 +1125,14 @@ static int ProcessFlatPoly(P_TAG *polyTag)
 
 		AddSplit(semiTrans, false);
 
-		GrVertex *firstVertex = &g_vertexBuffer[g_vertexIndex];
+		GrVertex *firstVertex = &s_gpu.vertexBuffer[s_gpu.vertexIndex];
 		MakeVertexQuad(firstVertex, &poly->x0, &poly->x1, &poly->x3, &poly->x2);
 		MakeTexcoordQuadZero(firstVertex, 0);
 		MakeColourQuad(firstVertex, shadeTexOn, &poly->r0, &poly->r0, &poly->r0, &poly->r0);
 
 		TriangulateQuad();
 
-		g_vertexIndex += 6;
+		s_gpu.vertexIndex += 6;
 #if defined(DEBUG_POLY_COUNT)
 		polygon_count++;
 #endif
@@ -1136,7 +1145,7 @@ static int ProcessFlatPoly(P_TAG *polyTag)
 
 		AddSplit(semiTrans, true);
 
-		GrVertex *firstVertex = &g_vertexBuffer[g_vertexIndex];
+		GrVertex *firstVertex = &s_gpu.vertexBuffer[s_gpu.vertexIndex];
 		MakeVertexQuad(firstVertex, &poly->x0, &poly->x1, &poly->x3, &poly->x2);
 		MakeTexcoordQuad(firstVertex, &poly->u0, &poly->u1, &poly->u3, &poly->u2, poly->tpage, poly->clut,
 		                 GET_TPAGE_DITHER(activeDrawEnv.tpage) || activeDrawEnv.dtd);
@@ -1144,7 +1153,7 @@ static int ProcessFlatPoly(P_TAG *polyTag)
 
 		TriangulateQuad();
 
-		g_vertexIndex += 6;
+		s_gpu.vertexIndex += 6;
 
 #if defined(DEBUG_POLY_COUNT)
 		polygon_count++;
@@ -1169,12 +1178,12 @@ static int ProcessGouraudPoly(P_TAG *polyTag)
 
 		AddSplit(semiTrans, false);
 
-		GrVertex *firstVertex = &g_vertexBuffer[g_vertexIndex];
+		GrVertex *firstVertex = &s_gpu.vertexBuffer[s_gpu.vertexIndex];
 		MakeVertexTriangle(firstVertex, &poly->x0, &poly->x1, &poly->x2);
 		MakeTexcoordTriangleZero(firstVertex, 1);
 		MakeColourTriangle(firstVertex, shadeTexOn, &poly->r0, &poly->r1, &poly->r2);
 
-		g_vertexIndex += 3;
+		s_gpu.vertexIndex += 3;
 
 #if defined(DEBUG_POLY_COUNT)
 		polygon_count++;
@@ -1188,12 +1197,12 @@ static int ProcessGouraudPoly(P_TAG *polyTag)
 
 		AddSplit(semiTrans, true);
 
-		GrVertex *firstVertex = &g_vertexBuffer[g_vertexIndex];
+		GrVertex *firstVertex = &s_gpu.vertexBuffer[s_gpu.vertexIndex];
 		MakeVertexTriangle(firstVertex, &poly->x0, &poly->x1, &poly->x2);
 		MakeTexcoordTriangle(firstVertex, &poly->u0, &poly->u1, &poly->u2, poly->tpage, poly->clut, GET_TPAGE_DITHER(activeDrawEnv.tpage) || activeDrawEnv.dtd);
 		MakeColourTriangle(firstVertex, shadeTexOn, &poly->r0, &poly->r1, &poly->r2);
 
-		g_vertexIndex += 3;
+		s_gpu.vertexIndex += 3;
 
 #if defined(DEBUG_POLY_COUNT)
 		polygon_count++;
@@ -1206,14 +1215,14 @@ static int ProcessGouraudPoly(P_TAG *polyTag)
 
 		AddSplit(semiTrans, false);
 
-		GrVertex *firstVertex = &g_vertexBuffer[g_vertexIndex];
+		GrVertex *firstVertex = &s_gpu.vertexBuffer[s_gpu.vertexIndex];
 		MakeVertexQuad(firstVertex, &poly->x0, &poly->x1, &poly->x3, &poly->x2);
 		MakeTexcoordQuadZero(firstVertex, 1);
 		MakeColourQuad(firstVertex, shadeTexOn, &poly->r0, &poly->r1, &poly->r3, &poly->r2);
 
 		TriangulateQuad();
 
-		g_vertexIndex += 6;
+		s_gpu.vertexIndex += 6;
 
 #if defined(DEBUG_POLY_COUNT)
 		polygon_count++;
@@ -1227,7 +1236,7 @@ static int ProcessGouraudPoly(P_TAG *polyTag)
 
 		AddSplit(semiTrans, true);
 
-		GrVertex *firstVertex = &g_vertexBuffer[g_vertexIndex];
+		GrVertex *firstVertex = &s_gpu.vertexBuffer[s_gpu.vertexIndex];
 		MakeVertexQuad(firstVertex, &poly->x0, &poly->x1, &poly->x3, &poly->x2);
 		MakeTexcoordQuad(firstVertex, &poly->u0, &poly->u1, &poly->u3, &poly->u2, poly->tpage, poly->clut,
 		                 GET_TPAGE_DITHER(activeDrawEnv.tpage) || activeDrawEnv.dtd);
@@ -1235,7 +1244,7 @@ static int ProcessGouraudPoly(P_TAG *polyTag)
 
 		TriangulateQuad();
 
-		g_vertexIndex += 6;
+		s_gpu.vertexIndex += 6;
 
 #if defined(DEBUG_POLY_COUNT)
 		polygon_count++;
@@ -1260,14 +1269,14 @@ static int ProcessTileAndSprt(P_TAG *polyTag)
 
 		AddSplit(semiTrans, false);
 
-		GrVertex *firstVertex = &g_vertexBuffer[g_vertexIndex];
+		GrVertex *firstVertex = &s_gpu.vertexBuffer[s_gpu.vertexIndex];
 		MakeVertexRect(firstVertex, &poly->x0, poly->w, poly->h);
 		MakeTexcoordQuadZero(firstVertex, 0);
 		MakeColourQuad(firstVertex, shadeTexOn, &poly->r0, &poly->r0, &poly->r0, &poly->r0);
 
 		TriangulateQuad();
 
-		g_vertexIndex += 6;
+		s_gpu.vertexIndex += 6;
 
 #if defined(DEBUG_POLY_COUNT)
 		polygon_count++;
@@ -1280,14 +1289,14 @@ static int ProcessTileAndSprt(P_TAG *polyTag)
 
 		AddSplit(semiTrans, true);
 
-		GrVertex *firstVertex = &g_vertexBuffer[g_vertexIndex];
+		GrVertex *firstVertex = &s_gpu.vertexBuffer[s_gpu.vertexIndex];
 		MakeVertexRect(firstVertex, &poly->x0, poly->w, poly->h);
 		MakeTexcoordRect(firstVertex, &poly->u0, activeDrawEnv.tpage, poly->clut, poly->w, poly->h);
 		MakeColourQuad(firstVertex, shadeTexOn, &poly->r0, &poly->r0, &poly->r0, &poly->r0);
 
 		TriangulateQuad();
 
-		g_vertexIndex += 6;
+		s_gpu.vertexIndex += 6;
 
 #if defined(DEBUG_POLY_COUNT)
 		polygon_count++;
@@ -1300,14 +1309,14 @@ static int ProcessTileAndSprt(P_TAG *polyTag)
 
 		AddSplit(semiTrans, false);
 
-		GrVertex *firstVertex = &g_vertexBuffer[g_vertexIndex];
+		GrVertex *firstVertex = &s_gpu.vertexBuffer[s_gpu.vertexIndex];
 		MakeVertexRect(firstVertex, &poly->x0, 1, 1);
 		MakeTexcoordQuadZero(firstVertex, 0);
 		MakeColourQuad(firstVertex, true, &poly->r0, &poly->r0, &poly->r0, &poly->r0);
 
 		TriangulateQuad();
 
-		g_vertexIndex += 6;
+		s_gpu.vertexIndex += 6;
 
 #if defined(DEBUG_POLY_COUNT)
 		polygon_count++;
@@ -1320,14 +1329,14 @@ static int ProcessTileAndSprt(P_TAG *polyTag)
 
 		AddSplit(semiTrans, false);
 
-		GrVertex *firstVertex = &g_vertexBuffer[g_vertexIndex];
+		GrVertex *firstVertex = &s_gpu.vertexBuffer[s_gpu.vertexIndex];
 		MakeVertexRect(firstVertex, &poly->x0, 8, 8);
 		MakeTexcoordQuadZero(firstVertex, 0);
 		MakeColourQuad(firstVertex, true, &poly->r0, &poly->r0, &poly->r0, &poly->r0);
 
 		TriangulateQuad();
 
-		g_vertexIndex += 6;
+		s_gpu.vertexIndex += 6;
 
 #if defined(DEBUG_POLY_COUNT)
 		polygon_count++;
@@ -1340,14 +1349,14 @@ static int ProcessTileAndSprt(P_TAG *polyTag)
 
 		AddSplit(semiTrans, true);
 
-		GrVertex *firstVertex = &g_vertexBuffer[g_vertexIndex];
+		GrVertex *firstVertex = &s_gpu.vertexBuffer[s_gpu.vertexIndex];
 		MakeVertexRect(firstVertex, &poly->x0, 8, 8);
 		MakeTexcoordRect(firstVertex, &poly->u0, activeDrawEnv.tpage, poly->clut, 8, 8);
 		MakeColourQuad(firstVertex, shadeTexOn, &poly->r0, &poly->r0, &poly->r0, &poly->r0);
 
 		TriangulateQuad();
 
-		g_vertexIndex += 6;
+		s_gpu.vertexIndex += 6;
 
 #if defined(DEBUG_POLY_COUNT)
 		polygon_count++;
@@ -1360,14 +1369,14 @@ static int ProcessTileAndSprt(P_TAG *polyTag)
 
 		AddSplit(semiTrans, false);
 
-		GrVertex *firstVertex = &g_vertexBuffer[g_vertexIndex];
+		GrVertex *firstVertex = &s_gpu.vertexBuffer[s_gpu.vertexIndex];
 		MakeVertexRect(firstVertex, &poly->x0, 16, 16);
 		MakeTexcoordQuadZero(firstVertex, 0);
 		MakeColourQuad(firstVertex, true, &poly->r0, &poly->r0, &poly->r0, &poly->r0);
 
 		TriangulateQuad();
 
-		g_vertexIndex += 6;
+		s_gpu.vertexIndex += 6;
 
 #if defined(DEBUG_POLY_COUNT)
 		polygon_count++;
@@ -1380,14 +1389,14 @@ static int ProcessTileAndSprt(P_TAG *polyTag)
 
 		AddSplit(semiTrans, true);
 
-		GrVertex *firstVertex = &g_vertexBuffer[g_vertexIndex];
+		GrVertex *firstVertex = &s_gpu.vertexBuffer[s_gpu.vertexIndex];
 		MakeVertexRect(firstVertex, &poly->x0, 16, 16);
 		MakeTexcoordRect(firstVertex, &poly->u0, activeDrawEnv.tpage, poly->clut, 16, 16);
 		MakeColourQuad(firstVertex, shadeTexOn, &poly->r0, &poly->r0, &poly->r0, &poly->r0);
 
 		TriangulateQuad();
 
-		g_vertexIndex += 6;
+		s_gpu.vertexIndex += 6;
 
 #if defined(DEBUG_POLY_COUNT)
 		polygon_count++;
@@ -1527,16 +1536,16 @@ static int ProcessPsyXPrims(P_TAG *polyTag)
 	case 0x01:
 	{
 		DR_PSYX_TEX *psytex = (DR_PSYX_TEX *)polyTag;
-		overrideTexture = psytex->code[0] & 0xFFFFFF;
-		overrideTextureWidth = psytex->code[1] & 0xFFF;
-		overrideTextureHeight = psytex->code[1] >> 16 & 0xFFF;
+		s_gpu.overrideTexture = psytex->code[0] & 0xFFFFFF;
+		s_gpu.overrideTextureWidth = psytex->code[1] & 0xFFF;
+		s_gpu.overrideTextureHeight = psytex->code[1] >> 16 & 0xFFF;
 		return 2;
 	}
 	case 0x02:
 	{
 		// [A] Psy-X custom debug marker packet
 		DR_PSYX_DBGMARKER *psydbg = (DR_PSYX_DBGMARKER *)polyTag;
-		currentSplitDebugText = psydbg->text;
+		s_gpu.currentSplitDebugText = psydbg->text;
 		return 2;
 	}
 	}

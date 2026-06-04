@@ -40,7 +40,7 @@ int DrawSync(int mode)
 	NativeRenderer_UpdateVRAM();
 	NativeRenderer_ReadFramebufferDataToVRAM();
 
-	if (g_splitIndex > 0)
+	if (NativeGpu_HasPendingSplits())
 	{
 		DrawAllSplits();
 	}

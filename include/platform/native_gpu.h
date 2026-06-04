@@ -11,11 +11,11 @@
 #include <psx/libgte.h>
 #include <psx/libgpu.h>
 
-extern int g_splitIndex;
 extern DISPENV activeDispEnv;
 extern DRAWENV activeDrawEnv;
 extern int g_GPUDisabledState;
 
+int NativeGpu_HasPendingSplits(void);
 void ClearSplits(void);
 void DrawAllSplits(void);
 void ParsePrimitivesLinkedList(u32 *p, int singlePrimitive);
