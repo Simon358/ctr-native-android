@@ -32,6 +32,7 @@ set(GAME_SOURCES
     platform/native_log.c
     platform/native_memcard.c
     platform/native_renderer.c
+    platform/native_state.c
 )
 
 set(GAME_INCLUDES

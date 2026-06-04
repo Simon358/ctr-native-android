@@ -21,6 +21,7 @@ typedef s32 b32;
 #define NATIVE_AUDIO_XA_ZIGZAG_TAPS        29
 #define NATIVE_AUDIO_XA_ZIGZAG_PHASES      7
 #define NATIVE_AUDIO_XA_ZIGZAG_INPUTS      6
+// NOTE(aalhendi): Little-endian tag `CTRA` = CTR native Audio snapshot.
 #define NATIVE_AUDIO_STATE_MAGIC           0x41525443
 #define NATIVE_AUDIO_STATE_VERSION         1
 #define NATIVE_AUDIO_ARENA_ALIGN           16

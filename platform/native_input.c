@@ -15,6 +15,7 @@
 #define NATIVE_INPUT_AXIS_DEADZONE    500
 #define NATIVE_INPUT_MAP_FLAG_AXIS    0x4000
 #define NATIVE_INPUT_MAP_FLAG_INVERSE 0x8000
+// NOTE(aalhendi): Little-endian tag `CTRI` = CTR native Input snapshot.
 #define NATIVE_INPUT_STATE_MAGIC      0x49525443
 #define NATIVE_INPUT_STATE_VERSION    1
 
