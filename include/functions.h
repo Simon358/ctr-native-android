@@ -360,13 +360,7 @@ void MainInit_Drivers(struct GameTracker *gGT);
 void MainInit_JitPoolsNew(struct GameTracker *gGT);
 void MainInit_JitPoolsReset(struct GameTracker *gGT);
 
-void MainInit_PrimMem(struct GameTracker *gGT
-
-#ifdef USE_MOREPRIM
-                      ,
-                      int force
-#endif
-);
+void MainInit_PrimMem(struct GameTracker *gGT);
 
 void MainInit_OTMem(struct GameTracker *gGT);
 void MainInit_FinalizeInit(struct GameTracker *gGT);

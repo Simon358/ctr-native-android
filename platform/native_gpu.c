@@ -8,8 +8,6 @@
 
 #include <SDL3/SDL.h>
 
-#include "PsyX/PsyX_public.h"
-#include "PsyX/PsyX_globals.h"
 #include "platform/native_log.h"
 #include "platform/native_renderer.h"
 
@@ -19,6 +17,9 @@
 #include <string.h>
 
 void Platform_PollHostEvents(void);
+extern int g_cfg_bilinearFiltering;
+extern int g_dbg_emulatorPaused;
+extern int g_dbg_polygonSelected;
 
 #define NATIVE_GPU_LOG(fmt, ...)   Platform_Log("[CTR GPU] " fmt, ##__VA_ARGS__)
 #define NATIVE_GPU_ERROR(fmt, ...) Platform_LogError("[CTR GPU] [%s] - " fmt, __func__, ##__VA_ARGS__)
@@ -872,8 +873,6 @@ static void SetPSXMaskState(u32 code)
 	s_gpu.psxDrawMaskSet = (code & 1) != 0;
 }
 
-extern int g_dbg_polygonSelected;
-
 //
 // Draws all polygons after AggregatePTAG
 //
@@ -1008,9 +1007,6 @@ static int ProcessFlatLines(P_TAG *polyTag)
 
 		s_gpu.vertexIndex += 6;
 
-#if defined(DEBUG_POLY_COUNT)
-		polygon_count++;
-#endif
 		return 3;
 	}
 	case 0x8: // TODO (unused)
@@ -1034,9 +1030,6 @@ static int ProcessFlatLines(P_TAG *polyTag)
 			TriangulateQuad();
 
 			s_gpu.vertexIndex += 6;
-#if defined(DEBUG_POLY_COUNT)
-			polygon_count++;
-#endif
 		}
 
 		{
@@ -1054,9 +1047,6 @@ static int ProcessFlatLines(P_TAG *polyTag)
 			TriangulateQuad();
 
 			s_gpu.vertexIndex += 6;
-#if defined(DEBUG_POLY_COUNT)
-			polygon_count++;
-#endif
 		}
 
 		return 5;
@@ -1083,9 +1073,6 @@ static int ProcessFlatLines(P_TAG *polyTag)
 			TriangulateQuad();
 
 			s_gpu.vertexIndex += 6;
-#if defined(DEBUG_POLY_COUNT)
-			polygon_count++;
-#endif
 		}
 
 		{
@@ -1103,9 +1090,6 @@ static int ProcessFlatLines(P_TAG *polyTag)
 			TriangulateQuad();
 
 			s_gpu.vertexIndex += 6;
-#if defined(DEBUG_POLY_COUNT)
-			polygon_count++;
-#endif
 		}
 
 		{
@@ -1123,9 +1107,6 @@ static int ProcessFlatLines(P_TAG *polyTag)
 			TriangulateQuad();
 
 			s_gpu.vertexIndex += 6;
-#if defined(DEBUG_POLY_COUNT)
-			polygon_count++;
-#endif
 		}
 
 		return 6;
@@ -1163,9 +1144,6 @@ static int ProcessGouraudLines(P_TAG *polyTag)
 
 		s_gpu.vertexIndex += 6;
 
-#if defined(DEBUG_POLY_COUNT)
-		polygon_count++;
-#endif
 		return 4;
 	}
 	case 0x8:
@@ -1203,9 +1181,6 @@ static int ProcessFlatPoly(P_TAG *polyTag)
 
 		s_gpu.vertexIndex += 3;
 
-#if defined(DEBUG_POLY_COUNT)
-		polygon_count++;
-#endif
 		return 4;
 	}
 	case 0x4:
@@ -1225,10 +1200,6 @@ static int ProcessFlatPoly(P_TAG *polyTag)
 			MakeColourTriangle(firstVertex, shadeTexOn, &poly->r0, &poly->r0, &poly->r0);
 
 			s_gpu.vertexIndex += 3;
-
-#if defined(DEBUG_POLY_COUNT)
-			polygon_count++;
-#endif
 		}
 		return 7;
 	}
@@ -1246,9 +1217,6 @@ static int ProcessFlatPoly(P_TAG *polyTag)
 		TriangulateQuad();
 
 		s_gpu.vertexIndex += 6;
-#if defined(DEBUG_POLY_COUNT)
-		polygon_count++;
-#endif
 		return 5;
 	}
 	case 0xC:
@@ -1268,9 +1236,6 @@ static int ProcessFlatPoly(P_TAG *polyTag)
 
 		s_gpu.vertexIndex += 6;
 
-#if defined(DEBUG_POLY_COUNT)
-		polygon_count++;
-#endif
 		return 9;
 	}
 	}
@@ -1298,9 +1263,6 @@ static int ProcessGouraudPoly(P_TAG *polyTag)
 
 		s_gpu.vertexIndex += 3;
 
-#if defined(DEBUG_POLY_COUNT)
-		polygon_count++;
-#endif
 		return 6;
 	}
 	case 0x4:
@@ -1317,9 +1279,6 @@ static int ProcessGouraudPoly(P_TAG *polyTag)
 
 		s_gpu.vertexIndex += 3;
 
-#if defined(DEBUG_POLY_COUNT)
-		polygon_count++;
-#endif
 		return 9;
 	}
 	case 0x8:
@@ -1337,9 +1296,6 @@ static int ProcessGouraudPoly(P_TAG *polyTag)
 
 		s_gpu.vertexIndex += 6;
 
-#if defined(DEBUG_POLY_COUNT)
-		polygon_count++;
-#endif
 		return 8;
 	}
 	case 0xC:
@@ -1359,9 +1315,6 @@ static int ProcessGouraudPoly(P_TAG *polyTag)
 
 		s_gpu.vertexIndex += 6;
 
-#if defined(DEBUG_POLY_COUNT)
-		polygon_count++;
-#endif
 		return 12;
 	}
 	}
@@ -1391,9 +1344,6 @@ static int ProcessTileAndSprt(P_TAG *polyTag)
 
 		s_gpu.vertexIndex += 6;
 
-#if defined(DEBUG_POLY_COUNT)
-		polygon_count++;
-#endif
 		return 3;
 	}
 	case 0x64:
@@ -1411,9 +1361,6 @@ static int ProcessTileAndSprt(P_TAG *polyTag)
 
 		s_gpu.vertexIndex += 6;
 
-#if defined(DEBUG_POLY_COUNT)
-		polygon_count++;
-#endif
 		return 4;
 	}
 	case 0x68:
@@ -1431,9 +1378,6 @@ static int ProcessTileAndSprt(P_TAG *polyTag)
 
 		s_gpu.vertexIndex += 6;
 
-#if defined(DEBUG_POLY_COUNT)
-		polygon_count++;
-#endif
 		return 2;
 	}
 	case 0x70:
@@ -1451,9 +1395,6 @@ static int ProcessTileAndSprt(P_TAG *polyTag)
 
 		s_gpu.vertexIndex += 6;
 
-#if defined(DEBUG_POLY_COUNT)
-		polygon_count++;
-#endif
 		return 2;
 	}
 	case 0x74:
@@ -1471,9 +1412,6 @@ static int ProcessTileAndSprt(P_TAG *polyTag)
 
 		s_gpu.vertexIndex += 6;
 
-#if defined(DEBUG_POLY_COUNT)
-		polygon_count++;
-#endif
 		return 3;
 	}
 	case 0x78:
@@ -1491,9 +1429,6 @@ static int ProcessTileAndSprt(P_TAG *polyTag)
 
 		s_gpu.vertexIndex += 6;
 
-#if defined(DEBUG_POLY_COUNT)
-		polygon_count++;
-#endif
 		return 2;
 	}
 	case 0x7C:
@@ -1511,9 +1446,6 @@ static int ProcessTileAndSprt(P_TAG *polyTag)
 
 		s_gpu.vertexIndex += 6;
 
-#if defined(DEBUG_POLY_COUNT)
-		polygon_count++;
-#endif
 		return 3;
 	}
 	}

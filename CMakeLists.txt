@@ -63,7 +63,6 @@ set(GAME_SOURCES
 
 set(GAME_INCLUDES
     ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/externals/PsyCross/include
 )
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -msse -w -Wno-error -Wno-implicit-function-declaration -Wno-int-conversion -Wno-incompatible-pointer-types -g")

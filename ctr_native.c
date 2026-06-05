@@ -48,9 +48,6 @@ __declspec(dllimport) unsigned long __stdcall GetLastError(void);
 
 static int s_hostAltKeyState = 0;
 
-#define BUILD  926
-#define u_long u32
-
 #ifndef __GNUC__
 #define _Static_assert(x)
 #endif

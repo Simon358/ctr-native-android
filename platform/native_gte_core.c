@@ -332,9 +332,6 @@ int GTE_operator(int op)
 	{
 	case 0x00:
 	case 0x01:
-#ifdef GTE_LOG
-		GTELOG("%08x RTPS", op);
-#endif
 		h_over_sz3 = GTE_RotTransPers(0, lm);
 
 		C2_MAC0 = (int)(F((s64)C2_DQB + ((s64)C2_DQA * h_over_sz3)));
@@ -343,17 +340,11 @@ int GTE_operator(int op)
 		return 1;
 
 	case 0x06:
-#ifdef GTE_LOG
-		GTELOG("%08x NCLIP", op);
-#endif
 		C2_MAC0 = (int)(F((s64)(C2_SX0 * C2_SY1) + (C2_SX1 * C2_SY2) + (C2_SX2 * C2_SY0) - (C2_SX0 * C2_SY2) - (C2_SX1 * C2_SY0) - (C2_SX2 * C2_SY1)));
 		C2_FLAG = 0;
 		return 1;
 
 	case 0x0c:
-#ifdef GTE_LOG
-		GTELOG("%08x OP", op);
-#endif
 
 		C2_MAC1 = A1((s64)(C2_R22 * C2_IR3) - (C2_R33 * C2_IR2));
 		C2_MAC2 = A2((s64)(C2_R33 * C2_IR1) - (C2_R11 * C2_IR3));
@@ -364,9 +355,6 @@ int GTE_operator(int op)
 		return 1;
 
 	case 0x10:
-#ifdef GTE_LOG
-		GTELOG("%08x DPCS", op);
-#endif
 
 		C2_MAC1 = A1((C2_R << 16) + (C2_IR0 * Lm_B1(A1(((s64)C2_RFC << 12) - (C2_R << 16)), 0)));
 		C2_MAC2 = A2((C2_G << 16) + (C2_IR0 * Lm_B2(A2(((s64)C2_GFC << 12) - (C2_G << 16)), 0)));
@@ -383,9 +371,6 @@ int GTE_operator(int op)
 		return 1;
 
 	case 0x11:
-#ifdef GTE_LOG
-		GTELOG("%08x INTPL", op);
-#endif
 
 		C2_MAC1 = A1((C2_IR1 << 12) + (C2_IR0 * Lm_B1(A1(((s64)C2_RFC << 12) - (C2_IR1 << 12)), 0)));
 		C2_MAC2 = A2((C2_IR2 << 12) + (C2_IR0 * Lm_B2(A2(((s64)C2_GFC << 12) - (C2_IR2 << 12)), 0)));
@@ -402,9 +387,6 @@ int GTE_operator(int op)
 		return 1;
 
 	case 0x12:
-#ifdef GTE_LOG
-		GTELOG("%08x MVMVA", op);
-#endif
 
 		mx = GTE_MX(gteop(op));
 		v = GTE_V(gteop(op));
@@ -434,9 +416,6 @@ int GTE_operator(int op)
 		return 1;
 
 	case 0x13:
-#ifdef GTE_LOG
-		GTELOG("%08x NCDS", op);
-#endif
 
 		C2_MAC1 = A1((s64)(C2_L11 * C2_VX0) + (C2_L12 * C2_VY0) + (C2_L13 * C2_VZ0));
 		C2_MAC2 = A2((s64)(C2_L21 * C2_VX0) + (C2_L22 * C2_VY0) + (C2_L23 * C2_VZ0));
@@ -465,9 +444,6 @@ int GTE_operator(int op)
 		return 1;
 
 	case 0x14:
-#ifdef GTE_LOG
-		GTELOG("%08x CDP", op);
-#endif
 
 		C2_MAC1 = A1(/*int44*/ (s64)((s64)C2_RBK << 12) + (C2_LR1 * C2_IR1) + (C2_LR2 * C2_IR2) + (C2_LR3 * C2_IR3));
 		C2_MAC2 = A2(/*int44*/ (s64)((s64)C2_GBK << 12) + (C2_LG1 * C2_IR1) + (C2_LG2 * C2_IR2) + (C2_LG3 * C2_IR3));
@@ -490,9 +466,6 @@ int GTE_operator(int op)
 		return 1;
 
 	case 0x16:
-#ifdef GTE_LOG
-		GTELOG("%08x NCDT", op);
-#endif
 
 		for (v = 0; v < 3; v++)
 		{
@@ -524,9 +497,6 @@ int GTE_operator(int op)
 		return 1;
 
 	case 0x1b:
-#ifdef GTE_LOG
-		GTELOG("%08x NCCS", op);
-#endif
 
 		C2_MAC1 = A1((s64)(C2_L11 * C2_VX0) + (C2_L12 * C2_VY0) + (C2_L13 * C2_VZ0));
 		C2_MAC2 = A2((s64)(C2_L21 * C2_VX0) + (C2_L22 * C2_VY0) + (C2_L23 * C2_VZ0));
@@ -555,9 +525,6 @@ int GTE_operator(int op)
 		return 1;
 
 	case 0x1c:
-#ifdef GTE_LOG
-		GTELOG("%08x CC", op);
-#endif
 
 		C2_MAC1 = A1(/*int44*/ (s64)(((s64)C2_RBK) << 12) + (C2_LR1 * C2_IR1) + (C2_LR2 * C2_IR2) + (C2_LR3 * C2_IR3));
 		C2_MAC2 = A2(/*int44*/ (s64)(((s64)C2_GBK) << 12) + (C2_LG1 * C2_IR1) + (C2_LG2 * C2_IR2) + (C2_LG3 * C2_IR3));
@@ -580,9 +547,6 @@ int GTE_operator(int op)
 		return 1;
 
 	case 0x1e:
-#ifdef GTE_LOG
-		GTELOG("%08x NCS", op);
-#endif
 
 		C2_MAC1 = A1((s64)(C2_L11 * C2_VX0) + (C2_L12 * C2_VY0) + (C2_L13 * C2_VZ0));
 		C2_MAC2 = A2((s64)(C2_L21 * C2_VX0) + (C2_L22 * C2_VY0) + (C2_L23 * C2_VZ0));
@@ -605,9 +569,6 @@ int GTE_operator(int op)
 		return 1;
 
 	case 0x20:
-#ifdef GTE_LOG
-		GTELOG("%08x NCT", op);
-#endif
 
 		for (v = 0; v < 3; v++)
 		{
@@ -633,9 +594,6 @@ int GTE_operator(int op)
 		return 1;
 
 	case 0x28:
-#ifdef GTE_LOG
-		GTELOG("%08x SQR", op);
-#endif
 
 		C2_MAC1 = A1(C2_IR1 * C2_IR1);
 		C2_MAC2 = A2(C2_IR2 * C2_IR2);
@@ -646,9 +604,6 @@ int GTE_operator(int op)
 		return 1;
 
 	case 0x29:
-#ifdef GTE_LOG
-		GTELOG("%08x DPCL", op);
-#endif
 
 		C2_MAC1 = A1(((C2_R << 4) * C2_IR1) + (C2_IR0 * Lm_B1(A1(((s64)C2_RFC << 12) - ((C2_R << 4) * C2_IR1)), 0)));
 		C2_MAC2 = A2(((C2_G << 4) * C2_IR2) + (C2_IR0 * Lm_B2(A2(((s64)C2_GFC << 12) - ((C2_G << 4) * C2_IR2)), 0)));
@@ -665,9 +620,6 @@ int GTE_operator(int op)
 		return 1;
 
 	case 0x2a:
-#ifdef GTE_LOG
-		GTELOG("%08x DPCT", op);
-#endif
 
 		for (v = 0; v < 3; v++)
 		{
@@ -687,27 +639,18 @@ int GTE_operator(int op)
 		return 1;
 
 	case 0x2d:
-#ifdef GTE_LOG
-		GTELOG("%08x AVSZ3", op);
-#endif
 
 		C2_MAC0 = (int)(F((s64)(C2_ZSF3 * C2_SZ1) + (C2_ZSF3 * C2_SZ2) + (C2_ZSF3 * C2_SZ3)));
 		C2_OTZ = Lm_D(m_mac0, 1);
 		return 1;
 
 	case 0x2e:
-#ifdef GTE_LOG
-		GTELOG("%08x AVSZ4", op);
-#endif
 
 		C2_MAC0 = (int)(F((s64)(C2_ZSF4 * C2_SZ0) + (C2_ZSF4 * C2_SZ1) + (C2_ZSF4 * C2_SZ2) + (C2_ZSF4 * C2_SZ3)));
 		C2_OTZ = Lm_D(m_mac0, 1);
 		return 1;
 
 	case 0x30:
-#ifdef GTE_LOG
-		GTELOG("%08x RTPT", op);
-#endif
 
 		for (v = 0; v < 3; v++)
 			h_over_sz3 = GTE_RotTransPers(v, lm);
@@ -717,9 +660,6 @@ int GTE_operator(int op)
 		return 1;
 
 	case 0x3d:
-#ifdef GTE_LOG
-		GTELOG("%08x GPF", op);
-#endif
 
 		C2_MAC1 = A1(C2_IR0 * C2_IR1);
 		C2_MAC2 = A2(C2_IR0 * C2_IR2);
@@ -736,9 +676,6 @@ int GTE_operator(int op)
 		return 1;
 
 	case 0x3e:
-#ifdef GTE_LOG
-		GTELOG("%08x GPL", op);
-#endif
 
 		C2_MAC1 = A1(gte_shift(C2_MAC1, -m_sf) + (C2_IR0 * C2_IR1));
 		C2_MAC2 = A2(gte_shift(C2_MAC2, -m_sf) + (C2_IR0 * C2_IR2));
@@ -755,9 +692,6 @@ int GTE_operator(int op)
 		return 1;
 
 	case 0x3f:
-#ifdef GTE_LOG
-		GTELOG("%08x NCCT", op);
-#endif
 
 		for (v = 0; v < 3; v++)
 		{

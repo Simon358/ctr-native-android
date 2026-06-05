@@ -1,19 +1,21 @@
 # Third-Party Notices
 
-This project vendors and modifies third-party software. Keep this file with
-source and binary distributions of CTR Native.
+This project vendors third-party software and contains modified third-party
+derivatives. Keep this file with source and binary distributions of CTR Native.
 
 ## PsyCross / Psy-X
 
-Path: `externals/PsyCross`
+Source: <https://github.com/OpenDriver2/PsyCross>
 
-PsyCross provides the Psy-Q-compatible PS1 hardware abstraction layer used by
-CTR Native, including compatible GPU, GTE, SPU, CD, and controller library
-interfaces. CTR Native also ports some host-side behavior into its own native
-platform layer while preserving Psy-Q-shaped APIs.
+PsyCross provided the starting point for parts of CTR Native's
+Psy-Q-compatible PS1 hardware abstraction layer, including compatible GPU, GTE,
+SPU, CD, and controller library interfaces. CTR Native now owns those headers
+and native platform implementations in `include/` and `platform/` while
+preserving Psy-Q-shaped APIs.
 
 CTR Native contains project-owned derivatives of these PsyCross source files:
 
+- `include/psx/*.h` from `externals/PsyCross/include/psx/*.h`
 - `include/platform/native_gpu.h` from `externals/PsyCross/src/gpu/PsyX_GPU.h`
 - `include/platform/native_renderer_types.h` from
   `externals/PsyCross/include/PsyX/PsyX_render.h`

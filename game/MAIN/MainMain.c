@@ -32,8 +32,6 @@ static struct NativeReplaySchedulerFrameInfo MainReplayScheduler_FrameInfo(struc
 }
 #endif
 
-// #define FastBoot
-
 // NOTE(aalhendi): PSX path ASM-verified NTSC-U 926 0x8003c58c-0x8003cf7c.
 #ifdef CTR_NATIVE
 u32 CTR_Main(void)
@@ -304,37 +302,6 @@ u32 main(void)
 #endif
 			GAMEPAD_ProcessAnyoneVars(gGS);
 
-#ifdef FastBoot
-			// disable spawn
-			gGT->Debug_ToggleNormalSpawn = 0;
-
-			// disable maskgrab_init
-			*(int *)0x800671b0 = 0x3E00008;
-			*(int *)0x800671b4 = 0;
-
-			if (
-			    // first frame of spawn
-			    (sdata->gGT->elapsedEventTime == 0) ||
-
-			    // L2 tap
-			    (gGS->gamepad[0].buttonsTapped & BTN_L2))
-			{
-				gGT->hudFlags |= 1;
-
-				gGT->drivers[0]->posCurr.x = 0x2e3152;
-				gGT->drivers[0]->posCurr.y = 0x5f96;
-				gGT->drivers[0]->posCurr.z = 0xfff59bd1;
-				gGT->drivers[0]->angle = 0x5af;
-
-				gGT->drivers[0]->heldItemID = 9;
-
-				gGT->drivers[1]->posCurr.x = 0x2f8d79;
-				gGT->drivers[1]->posCurr.y = 0x5f70;
-				gGT->drivers[1]->posCurr.z = 0xffedde6f;
-				gGT->drivers[1]->angle = 0x5af;
-			}
-#endif
-
 			// Start new frame (ClearOTagR)
 			MainFrame_ResetDB(gGT);
 
@@ -603,22 +570,14 @@ void StateZero()
 		firstEntry[i].size = 2 * 0x800;
 #endif
 
-#ifndef FastBoot
 	// English=1
 	// PAL SCES02105 calls it multiple times
 	LOAD_LangFile((int)sdata->ptrBigfile1, 1);
 	GAMEPROG_NewGame_OnBoot();
 	gGT->overlayIndex_null_notUsed = 0;
-#endif
 
 	gGT->levelID = NAUGHTY_DOG_CRATE;
 	// gGT->levelID = OXIDE_TRUE_ENDING;
-
-#ifdef FastBoot
-	gGT->levelID = POLAR_PASS;
-	gGT->numPlyrCurrGame = 2;
-	gGT->numPlyrNextGame = 2;
-#endif
 
 	InitGeom();
 	SetGeomOffset(0x100, 0x78); // width/2, height/2
@@ -641,11 +600,9 @@ void StateZero()
 	PutDrawEnv(&gGT->db[1].drawEnv);
 	DrawSync(0);
 
-#ifndef FastBoot
 	// Load Intro TIM for "SCEA Presents" from VRAM file
 	LOAD_VramFile(sdata->ptrBigfile1, 0x1fd, NULL, &vramSize, -1);
 	MainInit_VRAMDisplay();
-#endif
 
 	// \SOUNDS\KART.HWL;1
 	// NOTE(aalhendi): ASM-verified NTSC-U 926 0x8003c8e0-0x8003c928 for startup HOWL/music/XA setup.
@@ -653,7 +610,6 @@ void StateZero()
 
 	VSyncCallback(MainDrawCb_Vsync);
 
-#if !defined(FastBoot)
 	Music_SetIntro();
 	CseqMusic_StopAll();
 	CseqMusic_Start(0, 0, NULL, 0, 0);
@@ -673,7 +629,6 @@ void StateZero()
 #endif
 		CDSYS_XAPauseAtEnd();
 	}
-#endif
 
 	DecalGlobal_Clear(gGT);
 

@@ -977,14 +977,6 @@ void NativeRenderer_SetupClipMode(const RECT16 *rect, int enable)
 	glScissor(crx, flipOffset - cry, crw, crh);
 }
 
-void PsyX_GetPSXWidescreenMappedViewport(struct _RECT16 *rect)
-{
-	rect->x = activeDispEnv.screen.x;
-	rect->y = activeDispEnv.screen.y;
-	rect->w = activeDispEnv.disp.w;
-	rect->h = activeDispEnv.disp.h;
-}
-
 static void NativeRenderer_SetShader(const ShaderID shader)
 {
 	if (s_previousShader != shader)

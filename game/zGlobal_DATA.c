@@ -28,7 +28,7 @@ int RB_Teeth_LInC();
 // usage of this macro is mainly because I'm too lazy to go through this file and manually recalculate all the values where s16 is expected instead of uint.
 // this is purely to reduce warnings in the compiler output. (i.e., the compiler was doing this implicitly). (literally 800 lines of warnings at
 // time-of-writing).
-#define AS(x) ((s16)x)
+#define AS(x)            ((s16)x)
 
 // Using visual studio, here are some regexes for finding and replacing candidates for "any hex value with 4 leading F's, and then wrapping it in 'AS(value)'"
 // FIND:            (?<!AS\()(?i:0x(?=ffff)[0-9abcdef]+)
