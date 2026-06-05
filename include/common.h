@@ -1,6 +1,10 @@
 #ifndef COMMON_H
 #define COMMON_H
 
+#if defined(CTR_NATIVE)
+#include <string.h>
+#endif
+
 // Not native host
 #ifndef CTR_NATIVE
 #include <gccHeaders.h>
@@ -73,5 +77,20 @@
 
 #include <functions.h>
 #include <gpu.h>
+
+#if defined(CTR_NATIVE)
+static inline void *CTR_PsyqMemmove(void *dest, const void *src, s32 count)
+{
+	// NOTE(aalhendi): Retail PSYQ memmove at NTSC-U 926 0x80077e38 returns
+	// immediately for signed lengths <= 0. Host libc takes size_t, so native
+	// must preserve the signed PSYQ contract for ASM-verified game code.
+	if (count <= 0)
+		return dest;
+
+	return memmove(dest, src, (size_t)count);
+}
+
+#define memmove(dest, src, count) CTR_PsyqMemmove((dest), (src), (s32)(count))
+#endif
 
 #endif
