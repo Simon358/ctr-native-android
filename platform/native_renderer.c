@@ -475,13 +475,14 @@ GLint u_psxTextureOutputStpLoc;
 	"	uniform sampler2D s_texture;\n"                              \
 	"	vec2 VRAM(vec2 uv) { return texture2D(s_texture, uv).rg; }\n"
 
-#define GPU_STP_PASS_FUNC                                          \
-	"	float stpWeight(vec2 rg) { return step(0.5, rg.y); }\n"      \
-	"	bool discardForSemiTransPass(vec2 rg, float stp) {\n"        \
-	"		if(rg.x + rg.y == 0.0) { return true; }\n"                  \
-	"		if(psxSemiTransPass == 1 && stp >= 0.5) { return true; }\n" \
-	"		if(psxSemiTransPass == 2 && stp < 0.5) { return true; }\n"  \
-	"		return false;\n"                                            \
+#define GPU_STP_PASS_FUNC                                                                                       \
+	"	float texelVisible(vec2 rg) { return float(rg.x + rg.y > 0.0); }\n"                                      \
+	"	float stpWeight(vec2 rg) { return step(0.5, rg.y); }\n"                                                  \
+	"	bool discardForSemiTransPass(float visible, float stpVisible, float nonStpVisible) {\n"                  \
+	"		if(visible < 0.5) { return true; }\n"                                                                  \
+	"		if(psxSemiTransPass == 1 && nonStpVisible < 0.5) { return true; }\n"                                  \
+	"		if(psxSemiTransPass == 2 && stpVisible < 0.5) { return true; }\n"                                     \
+	"		return false;\n"                                                                                       \
 	"	}\n"
 
 #define GPU_DITHERING                                             \
@@ -516,16 +517,30 @@ GLint u_psxTextureOutputStpLoc;
 	    "		vec2 C21 = samplePSX(pixel + vec2(1.0, 0.0));\n"                                                                                           \
 	    "		vec2 C12 = samplePSX(pixel + vec2(0.0, 1.0));\n"                                                                                           \
 	    "		vec2 C22 = samplePSX(pixel + vec2(1.0, 1.0));\n"                                                                                           \
-	    "		float ax1 = mix(float(C11.r + C11.g > 0.0), float(C21.r + C21.g > 0.0), frac.x);\n"                                                        \
-	    "		float ax2 = mix(float(C12.r + C12.g > 0.0), float(C22.r + C22.g > 0.0), frac.x);\n"                                                        \
+	    "		float v11 = texelVisible(C11);\n"                                                                                                          \
+	    "		float v21 = texelVisible(C21);\n"                                                                                                          \
+	    "		float v12 = texelVisible(C12);\n"                                                                                                          \
+	    "		float v22 = texelVisible(C22);\n"                                                                                                          \
+	    "		float s11 = v11 * stpWeight(C11);\n"                                                                                                       \
+	    "		float s21 = v21 * stpWeight(C21);\n"                                                                                                       \
+	    "		float s12 = v12 * stpWeight(C12);\n"                                                                                                       \
+	    "		float s22 = v22 * stpWeight(C22);\n"                                                                                                       \
+	    "		float n11 = v11 - s11;\n"                                                                                                                   \
+	    "		float n21 = v21 - s21;\n"                                                                                                                   \
+	    "		float n12 = v12 - s12;\n"                                                                                                                   \
+	    "		float n22 = v22 - s22;\n"                                                                                                                   \
+	    "		float ax1 = mix(v11, v21, frac.x);\n"                                                                                                      \
+	    "		float ax2 = mix(v12, v22, frac.x);\n"                                                                                                      \
 	    "		float axm = mix(ax1, ax2, frac.y);\n"                                                                                                      \
-	    "		if(axm < 0.5) { discard; }\n"                                                                                                              \
-	    "		float sx1 = mix(stpWeight(C11), stpWeight(C21), frac.x);\n"                                                                                \
-	    "		float sx2 = mix(stpWeight(C12), stpWeight(C22), frac.x);\n"                                                                                \
+	    "		float sx1 = mix(s11, s21, frac.x);\n"                                                                                                      \
+	    "		float sx2 = mix(s12, s22, frac.x);\n"                                                                                                      \
 	    "		float stp = mix(sx1, sx2, frac.y);\n"                                                                                                      \
+	    "		float nx1 = mix(n11, n21, frac.x);\n"                                                                                                      \
+	    "		float nx2 = mix(n12, n22, frac.x);\n"                                                                                                      \
+	    "		float nonStp = mix(nx1, nx2, frac.y);\n"                                                                                                   \
 	    "		vec2 rg = mix(mix(C11, C21, frac.x), mix(C12, C22, frac.x), frac.y);\n"                                                                    \
 	    "		sampledStp = stp;\n"                                                                                                                       \
-	    "		if(discardForSemiTransPass(rg, stp)) { discard; }\n"                                                                                       \
+	    "		if(discardForSemiTransPass(axm, stp, nonStp)) { discard; }\n"                                                                              \
 	    "		vec4 x1 = mix(lut(C11), lut(C21), frac.x);\n"                                                                                              \
 	    "		vec4 x2 = mix(lut(C12), lut(C22), frac.x);\n"                                                                                              \
 	    "		vec4 t = mix(x1, x2, frac.y);\n"                                                                                                           \
@@ -534,8 +549,9 @@ GLint u_psxTextureOutputStpLoc;
 	    "	}\n"                                                                                                                                        \
 	    "	vec4 nearestTextureSample(vec2 P) {\n"                                                                                                      \
 	    "		vec2 rg = samplePSX(P);\n"                                                                                                                 \
-	    "		sampledStp = stpWeight(rg);\n"                                                                                                             \
-	    "		if(discardForSemiTransPass(rg, sampledStp)) { discard; }\n"                                                                                \
+	    "		float visible = texelVisible(rg);\n"                                                                                                       \
+	    "		sampledStp = visible * stpWeight(rg);\n"                                                                                                   \
+	    "		if(discardForSemiTransPass(visible, sampledStp, visible - sampledStp)) { discard; }\n"                                                     \
 	    "		vec4 t = lut(rg);\n"                                                                                                                       \
 	    "		t.w = 1.0 - t.w;\n"                                                                                                                        \
 	    "		return t;\n"                                                                                                                               \
@@ -697,6 +713,7 @@ internal ShaderID NativeRenderer_Shader_Compile(const char *source, bool isPsxSh
 	glBindAttribLocation(program, a_position, "a_position");
 	glBindAttribLocation(program, a_texcoord, "a_texcoord");
 	glBindAttribLocation(program, a_color, "a_color");
+	glBindAttribLocation(program, a_extra, "a_extra");
 
 	glLinkProgram(program);
 	if (NativeRenderer_Shader_CheckProgramStatus(program) == 0)
@@ -945,11 +962,17 @@ internal void NativeRenderer_Ortho2D(float left, float right, float bottom, floa
 	glUniformMatrix4fv(u_projectionLoc, 1, GL_FALSE, ortho);
 }
 
-void NativeRenderer_SetupClipMode(const RECT16 *rect, int enable)
+void NativeRenderer_SetupClipMode(const RECT16 *rect, const DISPENV *displayEnv, int enable)
 {
+	if ((displayEnv->disp.w <= 0) || (displayEnv->disp.h <= 0))
+	{
+		NativeRenderer_SetScissorState(0);
+		return;
+	}
+
 	// [A] isinterlaced dirty hack for widescreen
-	const bool scissorOn = enable && (activeDispEnv.isinter || (rect->x - activeDispEnv.disp.x > 0 || rect->y - activeDispEnv.disp.y > 0 ||
-	                                                            rect->w < activeDispEnv.disp.w - 1 || rect->h < activeDispEnv.disp.h - 1));
+	const bool scissorOn = enable && (displayEnv->isinter || (rect->x - displayEnv->disp.x > 0 || rect->y - displayEnv->disp.y > 0 ||
+	                                                         rect->w < displayEnv->disp.w || rect->h < displayEnv->disp.h));
 
 	NativeRenderer_SetScissorState(scissorOn);
 
@@ -958,12 +981,12 @@ void NativeRenderer_SetupClipMode(const RECT16 *rect, int enable)
 
 	const float emuScreenAspect = 1.0f;
 
-	const float psxScreenWInv = 1.0f / (float)activeDispEnv.disp.w;
-	const float psxScreenHInv = 1.0f / (float)activeDispEnv.disp.h;
+	const float psxScreenWInv = 1.0f / (float)displayEnv->disp.w;
+	const float psxScreenHInv = 1.0f / (float)displayEnv->disp.h;
 
 	// first map to 0..1
-	float clipRectX = (float)(rect->x - activeDispEnv.disp.x) * psxScreenWInv;
-	float clipRectY = (float)(rect->y - activeDispEnv.disp.y) * psxScreenHInv;
+	float clipRectX = (float)(rect->x - displayEnv->disp.x) * psxScreenWInv;
+	float clipRectY = (float)(rect->y - displayEnv->disp.y) * psxScreenHInv;
 	float clipRectW = (float)(rect->w) * psxScreenWInv;
 	float clipRectH = (float)(rect->h) * psxScreenHInv;
 
@@ -1056,15 +1079,18 @@ void NativeRenderer_SetTexture(TextureID texture, TexFormat texFormat)
 		texture = s_whiteTexture;
 	}
 
-	if (s_lastBoundTexture == texture)
-	{
-		return;
-	}
-
 	if (texLoc >= 0)
 		glUniform1i(texLoc, 0);
 	if (lutLoc >= 0)
 		glUniform1i(lutLoc, 1);
+	if (u_bilinearFilterLoc >= 0)
+		glUniform1i(u_bilinearFilterLoc, g_cfg_bilinearFiltering);
+	NativeRenderer_SetPSXTextureSemiTransPass(0);
+
+	if (s_lastBoundTexture == texture)
+	{
+		return;
+	}
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
@@ -1073,10 +1099,6 @@ void NativeRenderer_SetTexture(TextureID texture, TexFormat texFormat)
 	glBindTexture(GL_TEXTURE_2D, s_rgLutTexture);
 
 	glActiveTexture(GL_TEXTURE0);
-
-	if (u_bilinearFilterLoc >= 0)
-		glUniform1i(u_bilinearFilterLoc, g_cfg_bilinearFiltering);
-	NativeRenderer_SetPSXTextureSemiTransPass(0);
 
 	s_lastBoundTexture = texture;
 }
@@ -1116,11 +1138,23 @@ internal void NativeRenderer_DestroyTexture(TextureID texture)
 	glDeleteTextures(1, &texture);
 }
 
+internal u16 NativeRenderer_PackRGB24ToPSX15(u8 r, u8 g, u8 b)
+{
+	return (u16)(((r >> 3) & 0x1f) | (((g >> 3) & 0x1f) << 5) | (((b >> 3) & 0x1f) << 10));
+}
+
+internal float NativeRenderer_PSXColorComponentFloat(u8 value)
+{
+	const u8 psx8 = (u8)((value >> 3) << 3);
+	return (float)psx8 / 255.0f;
+}
+
 void NativeRenderer_ClearVRAM(int x, int y, int w, int h, u8 r, u8 g, u8 b)
 {
 	s_vramNeedsUpdate = 1;
 
 	u16 *dst = vram + x + y * VRAM_WIDTH;
+	const u16 color = NativeRenderer_PackRGB24ToPSX15(r, g, b);
 
 	if (x + w > VRAM_WIDTH)
 		w = VRAM_WIDTH - x;
@@ -1134,7 +1168,7 @@ void NativeRenderer_ClearVRAM(int x, int y, int w, int h, u8 r, u8 g, u8 b)
 		u16 *tmp = dst;
 
 		for (int j = 0; j < w; j++)
-			*tmp++ = r | (g << 5) | (b << 11);
+			*tmp++ = color;
 
 		dst += VRAM_WIDTH;
 	}
@@ -1142,10 +1176,75 @@ void NativeRenderer_ClearVRAM(int x, int y, int w, int h, u8 r, u8 g, u8 b)
 
 void NativeRenderer_Clear(int x, int y, int w, int h, u8 r, u8 g, u8 b)
 {
+	if ((w <= 0) || (h <= 0) || (g_windowWidth <= 0) || (g_windowHeight <= 0))
+		return;
+
+	int displayX = activeDispEnv.disp.x;
+	int displayY = activeDispEnv.disp.y;
+	int displayW = activeDispEnv.disp.w;
+	int displayH = activeDispEnv.disp.h;
+
+	if ((displayW <= 0) || (displayH <= 0))
+	{
+		displayX = activeDrawEnv.clip.x;
+		displayY = activeDrawEnv.clip.y;
+		displayW = activeDrawEnv.clip.w;
+		displayH = activeDrawEnv.clip.h;
+	}
+
+	if ((displayW <= 0) || (displayH <= 0))
+		return;
+
+	const int clearRight = x + w;
+	const int clearBottom = y + h;
+	const int displayRight = displayX + displayW;
+	const int displayBottom = displayY + displayH;
+
+	const int overlapX = x > displayX ? x : displayX;
+	const int overlapY = y > displayY ? y : displayY;
+	const int overlapRight = clearRight < displayRight ? clearRight : displayRight;
+	const int overlapBottom = clearBottom < displayBottom ? clearBottom : displayBottom;
+
+	if ((overlapRight <= overlapX) || (overlapBottom <= overlapY))
+		return;
+
+	const int relX = overlapX - displayX;
+	const int relY = overlapY - displayY;
+	const int relRight = overlapRight - displayX;
+	const int relBottom = overlapBottom - displayY;
+
+	const int scissorX = (relX * g_windowWidth) / displayW;
+	const int scissorRight = (relRight * g_windowWidth + displayW - 1) / displayW;
+	const int scissorTop = (relY * g_windowHeight) / displayH;
+	const int scissorBottom = (relBottom * g_windowHeight + displayH - 1) / displayH;
+	const int scissorW = scissorRight - scissorX;
+	const int scissorH = scissorBottom - scissorTop;
+
+	if ((scissorW <= 0) || (scissorH <= 0))
+		return;
+
+	GLint previousScissorBox[4];
+	const GLboolean previousScissorEnabled = glIsEnabled(GL_SCISSOR_TEST);
+	glGetIntegerv(GL_SCISSOR_BOX, previousScissorBox);
+
 	s_framebufferNeedsUpdate = 1;
 
-	glClearColor(r / 255.0f, g / 255.0f, b / 255.0f, 0.0f);
+	glEnable(GL_SCISSOR_TEST);
+	glScissor(scissorX, g_windowHeight - scissorBottom, scissorW, scissorH);
+	glClearColor(NativeRenderer_PSXColorComponentFloat(r), NativeRenderer_PSXColorComponentFloat(g), NativeRenderer_PSXColorComponentFloat(b), 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
+
+	if (previousScissorEnabled)
+	{
+		glEnable(GL_SCISSOR_TEST);
+		glScissor(previousScissorBox[0], previousScissorBox[1], previousScissorBox[2], previousScissorBox[3]);
+	}
+	else
+	{
+		glDisable(GL_SCISSOR_TEST);
+	}
+
+	s_previousScissorState = previousScissorEnabled ? 1 : 0;
 }
 
 void NativeRenderer_SaveVRAM(const char *outputFileName, int x, int y, int width, int height, int bReadFromFrameBuffer)
@@ -1271,7 +1370,7 @@ internal void NativeRenderer_SetScissorState(int enable)
 	s_previousScissorState = enable;
 }
 
-void NativeRenderer_SetOffscreenState(const RECT16 *offscreenRect, int enable)
+void NativeRenderer_SetOffscreenState(const RECT16 *offscreenRect, const DISPENV *displayEnv, int enable)
 {
 	if (enable)
 	{
@@ -1281,7 +1380,9 @@ void NativeRenderer_SetOffscreenState(const RECT16 *offscreenRect, int enable)
 	else
 	{
 		// setup default viewport
-		NativeRenderer_Ortho2D(0, activeDispEnv.disp.w, activeDispEnv.disp.h, 0, -1.0f, 1.0f);
+		const int displayW = displayEnv->disp.w > 0 ? displayEnv->disp.w : 1;
+		const int displayH = displayEnv->disp.h > 0 ? displayEnv->disp.h : 1;
+		NativeRenderer_Ortho2D(0, displayW, displayH, 0, -1.0f, 1.0f);
 	}
 
 	if (s_previousOffscreenState == enable)
@@ -1292,7 +1393,7 @@ void NativeRenderer_SetOffscreenState(const RECT16 *offscreenRect, int enable)
 	if (enable)
 	{
 		// set storage size first
-		if (s_previousOffscreen.w != offscreenRect->w && s_previousOffscreen.h != offscreenRect->h)
+		if (s_previousOffscreen.w != offscreenRect->w || s_previousOffscreen.h != offscreenRect->h)
 		{
 			glBindTexture(GL_TEXTURE_2D, s_offscreenRenderTexture);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, offscreenRect->w, offscreenRect->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
@@ -1715,7 +1816,7 @@ void NativeRenderer_SetBlendMode(BlendMode blendMode)
 		glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ZERO);
 		break;
 	case BM_ADD_QUATER_SOURCE:
-		glBlendFuncSeparate(GL_CONSTANT_ALPHA, GL_ONE, GL_ONE, GL_ZERO);
+		glBlendFuncSeparate(GL_CONSTANT_COLOR, GL_ONE, GL_ONE, GL_ZERO);
 		break;
 	}
 

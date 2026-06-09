@@ -39,12 +39,11 @@ int DrawSync(int mode)
 	(void)mode;
 
 	NativeRenderer_UpdateVRAM();
-	NativeRenderer_ReadFramebufferDataToVRAM();
-
 	if (NativeGpu_HasPendingSplits())
 	{
 		DrawAllSplits();
 	}
+	NativeRenderer_ReadFramebufferDataToVRAM();
 
 	if (drawsync_callback != NULL)
 	{
@@ -227,7 +226,7 @@ void SetDrawEnv(DR_ENV *dr_env, DRAWENV *env)
 {
 	dr_env->code[0] = ((env->clip.y & 0x3FF) << 10) | (env->clip.x & 0x3FF) | 0xE3000000;
 	dr_env->code[1] = (((env->clip.y + env->clip.h - 1) & 0x3FF) << 10) | ((env->clip.x + env->clip.w - 1) & 0x3FF) | 0xE4000000;
-	dr_env->code[2] = ((env->ofs[1] & 0x3FF) << 11) | (env->ofs[0] & 0x7FF) | 0xE5000000;
+	dr_env->code[2] = ((env->ofs[1] & 0x7FF) << 11) | (env->ofs[0] & 0x7FF) | 0xE5000000;
 	dr_env->code[3] = 32 * (((256 - env->tw.h) >> 3) & 0x1F) | (((256 - env->tw.w) >> 3) & 0x1F) | (((env->tw.y >> 3) & 0x1F) << 15) |
 	                  (((env->tw.x >> 3) & 0x1F) << 10) | 0xE2000000;
 	dr_env->code[4] = ((env->dtd != 0) << 9) | ((env->dfe != 0) << 10) | (env->tpage & 0x1FF) | 0xE1000000;

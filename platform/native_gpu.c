@@ -56,6 +56,12 @@ internal short GetTPageBase(int tpage)
 	return (s16)((page & 0xf) | ((page & 0x10) ? 0x10 : 0));
 }
 
+internal s16 NativeGpu_SignExtend11(u32 value)
+{
+	value &= 0x7ff;
+	return (s16)((value ^ 0x400) - 0x400);
+}
+
 DISPENV activeDispEnv;
 DRAWENV activeDrawEnv;
 int g_GPUDisabledState = 0;
@@ -849,8 +855,8 @@ void DrawSplit(const GPUDrawSplit *split)
 	NativeRenderer_SetPSXTextureOutputSTP(split->psxTextureOutputSTP);
 
 	const bool drawOnScreen = split->drawenv.dfe;
-	NativeRenderer_SetupClipMode(&split->drawenv.clip, drawOnScreen);
-	NativeRenderer_SetOffscreenState(&split->drawenv.clip, !drawOnScreen);
+	NativeRenderer_SetupClipMode(&split->drawenv.clip, &split->dispenv, drawOnScreen);
+	NativeRenderer_SetOffscreenState(&split->drawenv.clip, &split->dispenv, !drawOnScreen);
 
 	if (split->psxTexturedSemiTrans)
 	{
@@ -1520,16 +1526,15 @@ internal int ProcessDrawEnv(P_TAG *polyTag)
 			activeDrawEnv.clip.w = code & 1023;
 			activeDrawEnv.clip.h = (code >> 10) & 1023;
 
-			activeDrawEnv.clip.w -= activeDrawEnv.clip.x;
-			activeDrawEnv.clip.h -= activeDrawEnv.clip.y;
+			activeDrawEnv.clip.w = activeDrawEnv.clip.w - activeDrawEnv.clip.x + 1;
+			activeDrawEnv.clip.h = activeDrawEnv.clip.h - activeDrawEnv.clip.y + 1;
 			break;
 		}
 		case 0x5:
 		{
 			// DR_OFFSET
-			// TODO
-			activeDrawEnv.ofs[0] = code & 2047;
-			activeDrawEnv.ofs[1] = (code >> 11) & 2047;
+			activeDrawEnv.ofs[0] = NativeGpu_SignExtend11(code);
+			activeDrawEnv.ofs[1] = NativeGpu_SignExtend11(code >> 11);
 			break;
 		}
 		case 0x6:
@@ -1575,12 +1580,12 @@ internal void ProcessDrawEnvCommand(u32 code)
 	case 0x4:
 		activeDrawEnv.clip.w = code & 1023;
 		activeDrawEnv.clip.h = (code >> 10) & 1023;
-		activeDrawEnv.clip.w -= activeDrawEnv.clip.x;
-		activeDrawEnv.clip.h -= activeDrawEnv.clip.y;
+		activeDrawEnv.clip.w = activeDrawEnv.clip.w - activeDrawEnv.clip.x + 1;
+		activeDrawEnv.clip.h = activeDrawEnv.clip.h - activeDrawEnv.clip.y + 1;
 		break;
 	case 0x5:
-		activeDrawEnv.ofs[0] = code & 2047;
-		activeDrawEnv.ofs[1] = (code >> 11) & 2047;
+		activeDrawEnv.ofs[0] = NativeGpu_SignExtend11(code);
+		activeDrawEnv.ofs[1] = NativeGpu_SignExtend11(code >> 11);
 		break;
 	case 0x6:
 		SetPSXMaskState(code);
@@ -1664,6 +1669,8 @@ int ParsePrimitive(P_TAG *polyTag)
 			rect.w = (s16)(rectSize & 0xffff);
 			rect.h = (s16)(rectSize >> 16);
 
+			if (NativeGpu_HasPendingSplits())
+				DrawAllSplits();
 			MoveImage(&rect, x, y);
 			primLength = 5;
 		}
@@ -1680,6 +1687,8 @@ int ParsePrimitive(P_TAG *polyTag)
 			rect.w = fill->w;
 			rect.h = fill->h;
 
+			if (NativeGpu_HasPendingSplits())
+				DrawAllSplits();
 			ClearImage(&rect, fill->r0, fill->g0, fill->b0);
 			primLength = 3;
 		}
