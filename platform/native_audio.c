@@ -1491,10 +1491,30 @@ internal void NativeAudio_ResetVoicePcmArenaNoLock(int markDirty)
 	NativeAudio_ArenaReset(&s_audio.voicePcmArena);
 	for (i = 0; i < NATIVE_AUDIO_SPU_VOICE_COUNT; i++)
 	{
+		int wasActive = s_audio.voices[i].active;
+
 		NativeAudio_FreeVoicePcm(&s_audio.voices[i]);
-		if (markDirty && s_audio.voices[i].active)
+		if (markDirty && wasActive)
 			s_audio.voices[i].sampleDirty = 1;
 	}
+}
+
+internal void NativeAudio_ReclaimVoicePcmArenaIfIdleNoLock(void)
+{
+	int i;
+
+	if (s_audio.voicePcmArena.used == 0)
+		return;
+
+	for (i = 0; i < NATIVE_AUDIO_SPU_VOICE_COUNT; i++)
+	{
+		struct NativeAudioVoice *voice = &s_audio.voices[i];
+
+		if (voice->active && voice->pcm != NULL && voice->sampleCount > 0 && voice->adsrPhase != NATIVE_AUDIO_ADSR_OFF)
+			return;
+	}
+
+	NativeAudio_ResetVoicePcmArenaNoLock(0);
 }
 
 internal int NativeAudio_PrepareVoicePcmBuffer(u32 addr, struct NativeAudioPcmBuffer *pcm, int *markerOut)
@@ -1527,13 +1547,6 @@ internal int NativeAudio_PrepareVoicePcmBuffer(u32 addr, struct NativeAudioPcmBu
 	return 1;
 }
 
-internal void NativeAudio_MarkVoiceSamplesDirty(void)
-{
-	int i;
-
-	for (i = 0; i < NATIVE_AUDIO_SPU_VOICE_COUNT; i++)
-		s_audio.voices[i].sampleDirty = 1;
-}
 
 internal void NativeAudio_WrapVoiceLoop(struct NativeAudioVoice *voice)
 {
@@ -1557,10 +1570,14 @@ internal int NativeAudio_UpdateVoiceSample(struct NativeAudioVoice *voice)
 	memset(&pcm, 0, sizeof(pcm));
 	if (!NativeAudio_PrepareVoicePcmBuffer(voice->attr.addr, &pcm, &arenaMarker))
 	{
-		NativeAudio_FreeVoicePcm(voice);
-		voice->active = 0;
-		voice->sampleDirty = 0;
-		return 0;
+		NativeAudio_ResetVoicePcmArenaNoLock(1);
+		if (!NativeAudio_PrepareVoicePcmBuffer(voice->attr.addr, &pcm, &arenaMarker))
+		{
+			NativeAudio_FreeVoicePcm(voice);
+			voice->active = 0;
+			voice->sampleDirty = 0;
+			return 0;
+		}
 	}
 
 	if (!NativeAudio_DecodeSpuSample(voice->attr.addr, voice->attr.loop_addr, &pcm, &loopStart, &loopEnd, &loopEnabled))
@@ -2528,6 +2545,7 @@ internal void NativeAudio_MixFrame(s16 *outLeft, s16 *outRight)
 	int reverbSendRight = 0;
 	int reverbWetLeft = 0;
 	int reverbWetRight = 0;
+	int voiceStopped = 0;
 	int i;
 
 	if (s_audio.xa.active && s_audio.xa.pcm != NULL)
@@ -2570,8 +2588,8 @@ internal void NativeAudio_MixFrame(s16 *outLeft, s16 *outRight)
 			int left;
 			int right;
 
-			if (voice->active && ((voice->pcm == NULL) || voice->sampleDirty))
-				NativeAudio_UpdateVoiceSample(voice);
+			if (voice->active && ((voice->pcm == NULL) || voice->sampleDirty) && !NativeAudio_UpdateVoiceSample(voice))
+				voiceStopped = 1;
 
 			if (!voice->active || voice->pcm == NULL || voice->sampleCount <= 0 || voice->adsrPhase == NATIVE_AUDIO_ADSR_OFF)
 				continue;
@@ -2579,6 +2597,8 @@ internal void NativeAudio_MixFrame(s16 *outLeft, s16 *outRight)
 			if (voice->attr.pitch == 0)
 			{
 				NativeAudio_AdsrAdvance(voice);
+				if (!voice->active || voice->adsrPhase == NATIVE_AUDIO_ADSR_OFF)
+					voiceStopped = 1;
 				continue;
 			}
 
@@ -2593,6 +2613,7 @@ internal void NativeAudio_MixFrame(s16 *outLeft, s16 *outRight)
 				else
 				{
 					NativeAudio_AdsrForceOff(voice);
+					voiceStopped = 1;
 					continue;
 				}
 			}
@@ -2608,6 +2629,8 @@ internal void NativeAudio_MixFrame(s16 *outLeft, s16 *outRight)
 				                      NativeAudio_ApplyVolume(sample, voice->attr.volume.right, NATIVE_AUDIO_DIRECT_VOL_MAX));
 			}
 			NativeAudio_AdsrAdvance(voice);
+			if (!voice->active || voice->adsrPhase == NATIVE_AUDIO_ADSR_OFF)
+				voiceStopped = 1;
 
 			stepFp = ((u32)voice->attr.pitch << NATIVE_AUDIO_FP_SHIFT) / 0x1000u;
 			voice->positionFp += stepFp;
@@ -2615,6 +2638,9 @@ internal void NativeAudio_MixFrame(s16 *outLeft, s16 *outRight)
 			if (voice->loopEnabled && ((voice->positionFp >> NATIVE_AUDIO_FP_SHIFT) >= (u64)voice->loopEnd))
 				NativeAudio_WrapVoiceLoop(voice);
 		}
+
+		if (voiceStopped)
+			NativeAudio_ReclaimVoicePcmArenaIfIdleNoLock();
 	}
 
 	NativeAudio_ReverbProcessNoLock(reverbSendLeft, reverbSendRight, &reverbWetLeft, &reverbWetRight);
@@ -2837,7 +2863,9 @@ u32 NativeAudio_SpuWrite(const u8 *addr, u32 size)
 	}
 
 	memcpy(&s_audio.spu.memory[wptrOfs], addr, size);
-	NativeAudio_MarkVoiceSamplesDirty();
+	// NOTE(aalhendi): SPU RAM writes invalidate all decoded voice PCM. Drop cached buffers
+	// so stale samples do not accumulate in the arena during long sessions.
+	NativeAudio_ResetVoicePcmArenaNoLock(1);
 
 	NativeAudio_UnlockOutput();
 
@@ -2949,6 +2977,8 @@ void NativeAudio_SpuSetKey(s32 on_off, u32 voice_bit)
 				NativeAudio_AdsrKeyOff(voice);
 		}
 	}
+
+	NativeAudio_ReclaimVoicePcmArenaIfIdleNoLock();
 
 	NativeAudio_UnlockOutput();
 }
