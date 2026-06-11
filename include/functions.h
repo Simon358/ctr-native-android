@@ -1100,7 +1100,7 @@ void Channel_DestroySelf(struct ChannelStats *stats);
 // int UI_ConvertY_2(int y, int const_0x200);
 // void UI_DrawNumCrystal(s16 x, s16 y, struct Driver* d);
 void UI_DrawLimitClock(s16 posX, s16 posY, s16 fontType);
-void AA_EndEvent_DisplayTime(s16 driverId, s16 param_2);
+void AA_EndEvent_DisplayTime(s16 driverId, s16 timeOffsetFrames);
 void UI_DrawPosSuffix(s16 posX, s16 posY, struct Driver *d, s16 flags);
 void UI_DrawRaceClock(u16 paramX, u16 paramY, u32 flags, struct Driver *driver);
 int DecalFont_GetLineWidth(char *str, s16 fontType);

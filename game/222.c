@@ -1,35 +1,73 @@
 #include <common.h>
 
-static int str_number222 = 0x20; // " \0"
+enum ArcadeAdventureEndMenuConstants
+{
+	AA_FIRST_CTR_TOKEN_BIT = 0x4c,
+	AA_FIRST_BOSS_REWARD_BIT = 0x5e,
+	AA_TROPHY_REWARD_BIT_OFFSET = 6,
+	AA_SCREEN_DEPTH = 0x200,
+	AA_BIG_NUM_TARGET_SCALE = 0x1e00,
+	AA_CTR_HUD_SLOT = 0x12,
+	AA_CTR_LETTER_BASE_SCALE = 0x800,
+	AA_CTR_LETTER_SCALE_BIAS_LOW = 0x401,
+	AA_CTR_LETTER_GROW_STEP = 0x400,
+	AA_CTR_LETTER_FLYIN_FRAMES = 8,
+	AA_CTR_LETTER_FLYOUT_FRAMES = 10,
+	AA_TOKEN_GROW_LIMIT = 0x2001,
+	AA_TOKEN_GROW_STEP = 0x200,
+	AA_TOKEN_AWARD_TEXT_FLY_FRAMES = 8,
+	AA_CTR_TEXT_FLYIN_START_FRAME = 140,
+	AA_CTR_TEXT_FLYOUT_START_FRAME = 230,
+	AA_CTR_TEXT_FLYOUT_AWARD_OFFSET = 50,
+	AA_CTR_ALREADY_UNLOCKED_FLYOUT_FRAME = 300,
+	AA_CONFIRM_BUTTON_MASK = BTN_CROSS_one | BTN_CIRCLE,
+	AA_MENU_READY_FLAG = 1,
+	AA_RACE_HUD_FLAG = 1,
+	AA_CUP_STANDINGS_HUD_FLAG = 4,
+	AA_RESULT_WAIT_FRAMES = CTR_SECONDS_TO_FRAMES(1),
+	AA_RESULT_MAX_FRAMES = CTR_SECONDS_TO_FRAMES(30),
+	AA_DRIVER_ICON_STAGGER_FRAMES = 10,
+	AA_DRIVER_ICON_SPACING = 56,
+	AA_DRIVER_ICON_EXIT_FRAME = 300,
+	AA_DRIVER_ICON_SCALE = 0x1000,
+	AA_DRIVER_ICON_GRAY_CHANNEL = 0x80,
+	AA_CONTINUE_DELAY_FRAMES = 110,
+	AA_CTR_LETTER_FALL_DELAY_FRAMES = 6,
+	AA_CTR_LETTER_FALL_MIN_Y = -300,
+	AA_CTR_LETTER_FALL_MIN_VEL_Y = -0x14,
+	AA_KEY_BOSS_COUNT = 4,
+	AA_OXIDE_SECOND_WIN_BOSS_ID = 5,
+	AA_OXIDE_REWARD_WORD = 3,
+	AA_OXIDE_FIRST_WIN_REWARD_BITS = 0x80004,
+	AA_OXIDE_SECOND_WIN_REWARD_BITS = 0x100008,
+	AA_HUD_ELEMENTS_PER_DRIVER = 0x14,
+	AA_TIME_DISPLAY_BIG_NUM_SLOT = 2,
+	AA_TIME_DISPLAY_SUFFIX_SLOT = 5,
+	AA_TIME_DISPLAY_SKIP_FRAME = 110,
+	AA_TIME_DISPLAY_LATE_FRAME = CTR_SECONDS_TO_FRAMES(10),
+	AA_TIME_DISPLAY_FLYIN_FRAMES = CTR_SECONDS_TO_FRAMES(1),
+	AA_TIME_DISPLAY_FLYOUT_FRAMES = 15,
+	AA_TIME_BOX_HEIGHT_7_LAPS = 0x49,
+	AA_TIME_BOX_HEIGHT_5_LAPS = 0x39,
+	AA_TIME_BOX_HEIGHT_DEFAULT = 0x44,
+};
+
+enum ArcadeAdventureEndMenuStringIds
+{
+	AA_STRING_TOTAL = 0xc4,
+	AA_STRING_PRESS_TO_CONTINUE = 0xc9,
+	AA_STRING_CTR_TOKEN_AWARDED = 0x16f,
+};
+
+global_variable s32 s_driverRankString222 = 0x20; // " \0"
 extern struct RectMenu menu222;
 extern struct RectMenu menu222_2P;
-
-// 3528
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x8009f704-0x800a06f8.
 void AA_EndEvent_DrawMenu(void)
 {
-	struct GameTracker *gGT;
-	struct Driver *driver;
-	struct UiElement2D *hudCTR;
-	struct AdvProgress *adv;
-	struct Instance *hudC;
-	struct Instance *hudT;
-	struct Instance *hudR;
-	struct Instance *hudToken;
-	struct UiElement3D *letter;
-
-	char i;
-	char tokenUnlock;
-	char numPlyr;
-	char totalPlyr;
-
 	s16 letterPos[2];
 	s16 txtPos[2];
-
-	s16 t;
-	s16 elapsedFrames;
-	s16 levSpawn;
 
 	s16 lerpStartX;
 	s16 txtStartX;
@@ -38,33 +76,28 @@ void AA_EndEvent_DrawMenu(void)
 	s16 txtEndX;
 	s16 lerpEndY;
 	s16 lerpFrames;
-	s16 currFrame;
-	int scaleDown;
-	u32 txtColor;
-	int bitIndex;
+	s32 rewardBit = -1;
 
-	bitIndex = -1;
-	gGT = sdata->gGT;
-	driver = gGT->drivers[0];
-	numPlyr = gGT->numPlyrCurrGame;
-	totalPlyr = numPlyr + gGT->numBotsNextGame;
-	adv = &sdata->advProgress;
-	hudC = sdata->ptrHudC;
-	hudT = sdata->ptrHudT;
-	hudR = sdata->ptrHudR;
+	struct GameTracker *gGT = sdata->gGT;
+	struct Driver *driver = gGT->drivers[0];
+	s32 numPlayers = gGT->numPlyrCurrGame;
+	s32 totalRacers = numPlayers + gGT->numBotsNextGame;
+	struct AdvProgress *adv = &sdata->advProgress;
+	struct Instance *hudC = sdata->ptrHudC;
+	struct Instance *hudT = sdata->ptrHudT;
+	struct Instance *hudR = sdata->ptrHudR;
 	struct Instance *hudLetters[3] = {hudC, hudT, hudR};
-	hudToken = sdata->ptrToken;
-	hudCTR = &data.hud_1P_P1[0x12];
+	struct Instance *hudToken = sdata->ptrToken;
+	struct UiElement2D *hudCTR = &data.hud_1P_P1[AA_CTR_HUD_SLOT];
 
-	elapsedFrames = sdata->framesSinceRaceEnded;
+	s32 elapsedFrames = sdata->framesSinceRaceEnded;
 
-	// count frames if hasn't been 30 seconds
-	if (elapsedFrames < 900)
+	if (elapsedFrames < AA_RESULT_MAX_FRAMES)
 		elapsedFrames++;
 
 	sdata->framesSinceRaceEnded = elapsedFrames;
 
-	if (driver->instBigNum->scale[0] != 0x1e00)
+	if (driver->instBigNum->scale[0] != AA_BIG_NUM_TARGET_SCALE)
 	{
 		struct Instance *instFruitDisp = driver->instFruitDisp;
 		CTR_SET_VEC3(instFruitDisp->scale, 0, 0, 0);
@@ -75,45 +108,46 @@ void AA_EndEvent_DrawMenu(void)
 	lerpEndY = 0;
 
 	// For trophy race, check 1st place
-	int boolWin = (driver->driverRank == 0);
-	int boolTokenAward = boolWin && (driver->PickupLetterHUD.numCollected == 3);
+	b32 didWin = (driver->driverRank == 0);
+	b32 didEarnCtrToken = didWin && (driver->PickupLetterHUD.numCollected == 3);
 
 	// If adventure mode
 	if ((gGT->gameMode1 & ADVENTURE_MODE) != 0)
 	{
-		if (boolTokenAward)
+		if (didEarnCtrToken)
 		{
 			// lerp C-T-R letters closer to center by 16 pixels
-			// default (unlocking and frames < 140) or (already unlocked and frames < 300)
+			// until the new-token or already-unlocked flyout phase starts
 			lerpStartX = hudCTR->x;
 			lerpStartY = hudCTR->y;
 			lerpEndX = lerpStartX + 0x10;
 			lerpEndY = lerpStartY + 0x10;
-			lerpFrames = 8;
-
+			lerpFrames = AA_CTR_LETTER_FLYIN_FRAMES;
 
 			// If you have not unlocked this CTR Token
-			bitIndex = gGT->levelID + 0x4c;
-			*(int *)&letterPos[0] = *(int *)&hudCTR[0];
-			int updateToken = 0;
-			int scaleLetters = 0;
-			int awardTextFrame = -1;
-			if (CHECK_ADV_BIT(adv->rewards, bitIndex) == 0)
+			rewardBit = gGT->levelID + AA_FIRST_CTR_TOKEN_BIT;
+			letterPos[0] = hudCTR->x;
+			letterPos[1] = hudCTR->y;
+			s32 letterScaleOffset;
+			b32 shouldDrawToken = false;
+			b32 shouldScaleLetters = false;
+			s32 tokenAwardTextFrame = -1;
+			if (CHECK_ADV_BIT(adv->rewards, rewardBit) == 0)
 			{
-				scaleDown = hudC->scale[0];
-				scaleDown -= (scaleDown < 0x800) ? 0x401 : 0x800;
-				scaleDown >>= 10;
-				updateToken = 1;
+				letterScaleOffset = hudC->scale[0];
+				letterScaleOffset -= (letterScaleOffset < AA_CTR_LETTER_BASE_SCALE) ? AA_CTR_LETTER_SCALE_BIAS_LOW : AA_CTR_LETTER_BASE_SCALE;
+				letterScaleOffset >>= 10;
+				shouldDrawToken = true;
 
 				// lerp letters off-screen
-				if (elapsedFrames > 230)
+				if (elapsedFrames > AA_CTR_TEXT_FLYOUT_START_FRAME)
 				{
 					// NOTE(aalhendi): Retail uses frames-50 for the awarded text, skipping most of the fly-out.
-					awardTextFrame = elapsedFrames - 50;
+					tokenAwardTextFrame = elapsedFrames - AA_CTR_TEXT_FLYOUT_AWARD_OFFSET;
 					txtStartX = 0x100;
 					txtEndX = -150;
-					elapsedFrames -= 230;
-					lerpFrames = 10;
+					elapsedFrames -= AA_CTR_TEXT_FLYOUT_START_FRAME;
+					lerpFrames = AA_CTR_LETTER_FLYOUT_FRAMES;
 
 					lerpStartX += 0x10;
 					lerpStartY += 0x50;
@@ -122,13 +156,13 @@ void AA_EndEvent_DrawMenu(void)
 				}
 
 				// lerp letters to center
-				else if (elapsedFrames > 140)
+				else if (elapsedFrames > AA_CTR_TEXT_FLYIN_START_FRAME)
 				{
-					elapsedFrames -= 140;
-					awardTextFrame = elapsedFrames;
+					elapsedFrames -= AA_CTR_TEXT_FLYIN_START_FRAME;
+					tokenAwardTextFrame = elapsedFrames;
 					txtStartX = 0x264;
 					txtEndX = 0x100;
-					scaleLetters = 1;
+					shouldScaleLetters = true;
 
 					lerpStartX += 0x10;
 					lerpStartY += 0x10;
@@ -138,20 +172,20 @@ void AA_EndEvent_DrawMenu(void)
 
 				UI_Lerp2D_Linear(&letterPos[0], lerpStartX, lerpStartY, lerpEndX, lerpEndY, elapsedFrames, lerpFrames);
 
-				if (scaleLetters)
+				if (shouldScaleLetters)
 				{
 					// NOTE(aalhendi): ASM-verified NTSC-U 926 0x8009fc48-0x8009fc50 for CTR token unlock SFX.
-					if (hudC->scale[0] == 0x800)
+					if (hudC->scale[0] == AA_CTR_LETTER_BASE_SCALE)
 						OtherFX_Play(0x67, 1);
 
 					// NOTE(aalhendi): Retail scales until X reaches target, with no separate scale cap.
 					if (letterPos[0] != hudCTR->x - 0x10)
 					{
-						for (i = 0; i < 3; i++)
+						for (s32 i = 0; i < 3; i++)
 						{
-							hudLetters[i]->scale[0] += 0x400;
-							hudLetters[i]->scale[1] += 0x400;
-							hudLetters[i]->scale[2] += 0x400;
+							hudLetters[i]->scale[0] += AA_CTR_LETTER_GROW_STEP;
+							hudLetters[i]->scale[1] += AA_CTR_LETTER_GROW_STEP;
+							hudLetters[i]->scale[2] += AA_CTR_LETTER_GROW_STEP;
 						}
 					}
 				}
@@ -164,15 +198,15 @@ void AA_EndEvent_DrawMenu(void)
 			// If you already have this CTR Token unlocked
 			else
 			{
-				if (elapsedFrames > 300)
+				if (elapsedFrames > AA_CTR_ALREADY_UNLOCKED_FLYOUT_FRAME)
 				{
-					elapsedFrames -= 300;
+					elapsedFrames -= AA_CTR_ALREADY_UNLOCKED_FLYOUT_FRAME;
 
 					lerpStartX = hudCTR->x + 0x10;
 					lerpStartY = hudCTR->y + 0x10;
 					lerpEndX = -400;
 					lerpEndY = lerpStartY;
-					lerpFrames = 10;
+					lerpFrames = AA_CTR_LETTER_FLYOUT_FRAMES;
 				}
 
 				UI_Lerp2D_Linear(&letterPos[0], lerpStartX, lerpStartY, lerpEndX, lerpEndY, elapsedFrames, lerpFrames);
@@ -181,36 +215,36 @@ void AA_EndEvent_DrawMenu(void)
 				lerpStartY = 0;
 				lerpEndY = 0;
 
-				scaleDown = 0;
+				letterScaleOffset = 0;
 			}
 
-			for (i = 0; i < 3; i++)
+			for (s32 i = 0; i < 3; i++)
 			{
-				hudLetters[i]->matrix.t[0] = UI_ConvertX_2(letterPos[0] + (scaleDown * (i * 12)) + (i * 29), 0x200);
-				hudLetters[i]->matrix.t[1] = UI_ConvertY_2(letterPos[1] - (i & 1), 0x200);
+				hudLetters[i]->matrix.t[0] = UI_ConvertX_2(letterPos[0] + (letterScaleOffset * (i * 12)) + (i * 29), AA_SCREEN_DEPTH);
+				hudLetters[i]->matrix.t[1] = UI_ConvertY_2(letterPos[1] - (i & 1), AA_SCREEN_DEPTH);
 			}
 
-			if (updateToken)
+			if (shouldDrawToken)
 			{
 				hudR->unk50 = 1;
 				hudToken->flags &= ~HIDE_MODEL;
 				hudToken->matrix.t[0] = hudT->matrix.t[0];
-				hudToken->matrix.t[1] = UI_ConvertY_2(letterPos[1] + 0x18, 0x200);
+				hudToken->matrix.t[1] = UI_ConvertY_2(letterPos[1] + 0x18, AA_SCREEN_DEPTH);
 
-				if ((awardTextFrame >= 0) && (hudToken->scale[0] < 0x2001))
+				if ((tokenAwardTextFrame >= 0) && (hudToken->scale[0] < AA_TOKEN_GROW_LIMIT))
 				{
-					hudToken->scale[0] += 0x200;
-					hudToken->scale[1] += 0x200;
-					hudToken->scale[2] += 0x200;
+					hudToken->scale[0] += AA_TOKEN_GROW_STEP;
+					hudToken->scale[1] += AA_TOKEN_GROW_STEP;
+					hudToken->scale[2] += AA_TOKEN_GROW_STEP;
 				}
 
-				if (awardTextFrame >= 0)
+				if (tokenAwardTextFrame >= 0)
 				{
-					UI_Lerp2D_Linear(&txtPos[0], txtStartX, 0xa6, txtEndX, 0xa6, awardTextFrame, 8);
+					UI_Lerp2D_Linear(&txtPos[0], txtStartX, 0xa6, txtEndX, 0xa6, tokenAwardTextFrame, AA_TOKEN_AWARD_TEXT_FLY_FRAMES);
 
-					txtColor = (gGT->timer & 1) ? 0xFFFF8003 : 0xFFFF8004;
+					s32 textColor = (gGT->timer & 1) ? (JUSTIFY_CENTER | RED) : (JUSTIFY_CENTER | WHITE);
 
-					DecalFont_DrawLine(sdata->lngStrings[0x16F], txtPos[0], txtPos[1], 1, txtColor);
+					DecalFont_DrawLine(sdata->lngStrings[AA_STRING_CTR_TOKEN_AWARDED], txtPos[0], txtPos[1], FONT_BIG, textColor);
 				}
 			}
 		}
@@ -220,22 +254,22 @@ void AA_EndEvent_DrawMenu(void)
 		{
 			driver->PickupLetterHUD.numCollected = 0;
 
-			// Do this for the first 30 seconds (900 frames).
-			if (elapsedFrames < 900)
+			// Do this for the first 30 seconds.
+			if (elapsedFrames < AA_RESULT_MAX_FRAMES)
 			{
-				for (i = 0; i < 3; i++)
+				for (s32 i = 0; i < 3; i++)
 				{
 					if (
 					    // letter is visible
 					    ((hudLetters[i]->flags & HIDE_MODEL) == 0) &&
 
 					    // delay letter (6 frames apart)
-					    (elapsedFrames > 6 * i) &&
+					    (elapsedFrames > AA_CTR_LETTER_FALL_DELAY_FRAMES * i) &&
 
 					    // letter not fully off-screen
-					    (-300 < hudLetters[i]->matrix.t[1]))
+					    (AA_CTR_LETTER_FALL_MIN_Y < hudLetters[i]->matrix.t[1]))
 					{
-						letter = hudLetters[i]->thread->object;
+						struct UiElement3D *letter = hudLetters[i]->thread->object;
 
 						// move X position (yes, C-Letter only, Naughty Dog bug?)
 						hudLetters[0]->matrix.t[0] += letter->vel[0];
@@ -243,7 +277,7 @@ void AA_EndEvent_DrawMenu(void)
 						// make the letter fall off the screen
 						hudLetters[i]->matrix.t[1] -= letter->vel[1];
 
-						if (-0x14 < letter->vel[1])
+						if (AA_CTR_LETTER_FALL_MIN_VEL_Y < letter->vel[1])
 						{
 							letter->vel[1] -= 2;
 						}
@@ -255,9 +289,9 @@ void AA_EndEvent_DrawMenu(void)
 
 	// If C-T-R token race, add requirement of C-T-R letters.
 	if ((gGT->gameMode2 & TOKEN_RACE) != 0)
-		boolWin = boolTokenAward;
+		didWin = didEarnCtrToken;
 
-	for (i = 0; i < numPlyr; i++)
+	for (s32 i = 0; i < numPlayers; i++)
 	{
 		// Draw how much time it took to finish laps and race
 		AA_EndEvent_DisplayTime(i, lerpEndY);
@@ -266,56 +300,58 @@ void AA_EndEvent_DrawMenu(void)
 	elapsedFrames = sdata->framesSinceRaceEnded;
 
 	// If it hasn't been 1 second from race ended
-	if (elapsedFrames < 30)
+	if (elapsedFrames < AA_RESULT_WAIT_FRAMES)
 		return;
 
 	// If there is one player
-	if (numPlyr == 1)
+	if (numPlayers == 1)
 	{
 		// start counting time 1 second after race ends
-		t = (elapsedFrames & 0xffff) - 30;
+		s32 driverIconFrame = (elapsedFrames & 0xffff) - AA_RESULT_WAIT_FRAMES;
 
 		if (
-		    // Every 0.5 seconds or so
-		    ((t % 10 & 0xffff) == 0) &&
+		    // Every 10 frames
+		    ((driverIconFrame % AA_DRIVER_ICON_STAGGER_FRAMES & 0xffff) == 0) &&
 
 		    // sdata->numIconsEOR is the number of icons being
 		    // drawn on the end-of-race menu in 1P mode
 
 		    // If you have not drawn all drivers yet
-		    (sdata->numIconsEOR < totalPlyr))
+		    (sdata->numIconsEOR < totalRacers))
 		{
 			// add an icon to draw
 			sdata->numIconsEOR++;
 		}
 
 		// loop through all the driver icons
-		for (i = 0; i < sdata->numIconsEOR; i++)
+		for (s32 i = 0; i < sdata->numIconsEOR; i++)
 		{
-			int iVar11 = gGT->pushBuffer[0].rect.x + (gGT->pushBuffer[0].rect.w - totalPlyr * 56 + 12) / 2 + (i * 56);
+			s32 driverIconTargetX =
+			    gGT->pushBuffer[0].rect.x + (gGT->pushBuffer[0].rect.w - totalRacers * AA_DRIVER_ICON_SPACING + 12) / 2 + (i * AA_DRIVER_ICON_SPACING);
+			s32 currFrame;
 
-			if (elapsedFrames + lerpEndY > 300)
+			if (elapsedFrames + lerpEndY > AA_DRIVER_ICON_EXIT_FRAME)
 			{
-				lerpStartX = iVar11;
+				lerpStartX = driverIconTargetX;
 				lerpEndX = -100;
-				currFrame = elapsedFrames + lerpEndY - 300;
+				currFrame = elapsedFrames + lerpEndY - AA_DRIVER_ICON_EXIT_FRAME;
 			}
 			else
 			{
 				lerpStartX = 0x218;
-				lerpEndX = iVar11;
-				currFrame = t;
+				lerpEndX = driverIconTargetX;
+				currFrame = driverIconFrame;
 			}
 
-			t -= 10;
+			driverIconFrame -= AA_DRIVER_ICON_STAGGER_FRAMES;
 
 			// interpolate fly-in
-			UI_Lerp2D_Linear(&letterPos[0], lerpStartX, 0x60, lerpEndX, 0x60, currFrame, 10);
+			UI_Lerp2D_Linear(&letterPos[0], lerpStartX, 0x60, lerpEndX, 0x60, currFrame, AA_DRIVER_ICON_STAGGER_FRAMES);
 
-			str_number222 = (char)i + '1';
+			s_driverRankString222 = (char)i + '1';
 
 			// print a single character, a number 1-8,
-			DecalFont_DrawLine((char *)&str_number222, letterPos[0] + 0x20, 0x5f, 2, 4);
+			DecalFont_DrawLine((char *)&s_driverRankString222, letterPos[0] + 0x20, 0x5f, FONT_SMALL, WHITE);
 
 			// Draw the driver's character icon
 			UI_DrawDriverIcon(
@@ -327,12 +363,12 @@ void AA_EndEvent_DrawMenu(void)
 			    // pointer to OT mem
 			    gGT->pushBuffer_UI.ptrOT,
 
-			    1, 0x1000, MakeColor(0x80, 0x80, 0x80).self);
+			    1, AA_DRIVER_ICON_SCALE, MakeColor(AA_DRIVER_ICON_GRAY_CHANNEL, AA_DRIVER_ICON_GRAY_CHANNEL, AA_DRIVER_ICON_GRAY_CHANNEL).self);
 		}
 	}
 
 	// 0x78 + 0x6e = 0xe6 (230) frames waited for Token Race
-	if ((elapsedFrames - lerpStartY) < 110)
+	if ((elapsedFrames - lerpStartY) < AA_CONTINUE_DELAY_FRAMES)
 		return;
 	if (
 	    // If you are in Adventure cup
@@ -342,13 +378,13 @@ void AA_EndEvent_DrawMenu(void)
 	    ((gGT->gameMode2 & CUP_ANY_KIND) != 0))
 	{
 		// but text near middle of screen
-		s16 posX = (numPlyr < 2) ? 0xbe : 100;
+		s16 pressContinueY = (numPlayers < 2) ? 0xbe : 100;
 
 		// PRESS * TO CONTINUE
-		DecalFont_DrawLine(sdata->lngStrings[0xC9], 0x100, posX, 1, 0xffff8000);
+		DecalFont_DrawLine(sdata->lngStrings[AA_STRING_PRESS_TO_CONTINUE], 0x100, pressContinueY, FONT_BIG, (JUSTIFY_CENTER | ORANGE));
 
 		// If you do not "Press X to continue"
-		if ((sdata->AnyPlayerTap & 0x50) == 0)
+		if ((sdata->AnyPlayerTap & AA_CONFIRM_BUTTON_MASK) == 0)
 			return;
 
 		// If you are here, it means you pressed X to continue
@@ -361,24 +397,24 @@ void AA_EndEvent_DrawMenu(void)
 		sdata->numIconsEOR = 1;
 
 		// Disable HUD
-		gGT->hudFlags &= 0xfe;
+		gGT->hudFlags &= ~AA_RACE_HUD_FLAG;
 
 		// Enable Cup Standings
-		gGT->hudFlags |= 4;
+		gGT->hudFlags |= AA_CUP_STANDINGS_HUD_FLAG;
 		return;
 	}
 
 	// if the menu is already drawing
-	if (sdata->menuReadyToPass & 1)
+	if (sdata->menuReadyToPass & AA_MENU_READY_FLAG)
 		return;
 
 	// If you're in Arcade mode
 	if ((gGT->gameMode1 & ARCADE_MODE) != 0)
 	{
-		RECTMENU_Show((numPlyr == 1) ? &menu222 : &menu222_2P);
+		RECTMENU_Show((numPlayers == 1) ? &menu222 : &menu222_2P);
 
 		// record that the menu is drawing
-		sdata->menuReadyToPass |= 1;
+		sdata->menuReadyToPass |= AA_MENU_READY_FLAG;
 		return;
 	}
 
@@ -387,10 +423,10 @@ void AA_EndEvent_DrawMenu(void)
 		return;
 
 	// PRESS * TO CONTINUE
-	DecalFont_DrawLine(sdata->lngStrings[0xc9], 0x100, 0xbe, 1, 0xffff8000);
+	DecalFont_DrawLine(sdata->lngStrings[AA_STRING_PRESS_TO_CONTINUE], 0x100, 0xbe, FONT_BIG, (JUSTIFY_CENTER | ORANGE));
 
 	// If you have not pressed X
-	if ((sdata->AnyPlayerTap & 0x50) == 0)
+	if ((sdata->AnyPlayerTap & AA_CONFIRM_BUTTON_MASK) == 0)
 		return;
 
 	// === If Pressed X ===
@@ -407,10 +443,10 @@ void AA_EndEvent_DrawMenu(void)
 		sdata->Loading.OnBegin.AddBitsConfig8 |= SPAWN_AT_BOSS;
 	}
 
-	if (!boolWin)
+	if (!didWin)
 	{
 		RECTMENU_Show(&data.menuRetryExit);
-		sdata->menuReadyToPass |= 1;
+		sdata->menuReadyToPass |= AA_MENU_READY_FLAG;
 		return;
 	}
 
@@ -420,19 +456,19 @@ void AA_EndEvent_DrawMenu(void)
 	sdata->numIconsEOR = 1;
 
 	// Load the levelID for Adventure Hub that you came from
-	levSpawn = gGT->prevLEV;
+	s16 levSpawn = gGT->prevLEV;
 
 	// If you are in boss mode
 	if (gGT->gameMode1 < 0)
 	{
-		// bitIndex of keys unlocked, and boss beaten
-		bitIndex = gGT->bossID + 0x5e;
+		// Reward bit of key unlocked, and boss beaten.
+		rewardBit = gGT->bossID + AA_FIRST_BOSS_REWARD_BIT;
 
-		// If the number of keys you have is less than 4
-		if (gGT->bossID < 4)
+		// If this is one of the four key-awarding bosses.
+		if (gGT->bossID < AA_KEY_BOSS_COUNT)
 		{
 			// only if first time beating boss
-			if (CHECK_ADV_BIT(adv->rewards, bitIndex) == 0)
+			if (CHECK_ADV_BIT(adv->rewards, rewardBit) == 0)
 			{
 				// Go to Podium after returning to Adventure Hub
 				gGT->podiumRewardID = STATIC_KEY; // key
@@ -455,22 +491,22 @@ void AA_EndEvent_DrawMenu(void)
 			gGT->podiumRewardID = STATIC_BIG1;
 
 			// assume oxide beaten 1st time
-			adv->rewards[3] |= 0x80004;
+			adv->rewards[AA_OXIDE_REWARD_WORD] |= AA_OXIDE_FIRST_WIN_REWARD_BITS;
 
 			// if beaten oxide 2nd time
-			if (gGT->bossID == 5)
+			if (gGT->bossID == AA_OXIDE_SECOND_WIN_BOSS_ID)
 			{
 				// beat 2nd time
-				adv->rewards[3] |= 0x100008;
+				adv->rewards[AA_OXIDE_REWARD_WORD] |= AA_OXIDE_SECOND_WIN_REWARD_BITS;
 			}
 		}
 	}
 
 	// if something needs unlocking
-	if (bitIndex > 0)
+	if (rewardBit > 0)
 	{
 		// Unlock reward
-		UNLOCK_ADV_BIT(adv->rewards, bitIndex);
+		UNLOCK_ADV_BIT(adv->rewards, rewardBit);
 	}
 
 	if (gGT->gameMode1 < 0)
@@ -481,11 +517,11 @@ void AA_EndEvent_DrawMenu(void)
 
 	// if trophy is not won,
 	// Dingo Bingo needs to win trophy and token in the same race
-	bitIndex = gGT->levelID + 6;
-	if (CHECK_ADV_BIT(adv->rewards, bitIndex) == 0)
+	rewardBit = gGT->levelID + AA_TROPHY_REWARD_BIT_OFFSET;
+	if (CHECK_ADV_BIT(adv->rewards, rewardBit) == 0)
 	{
 		// unlock tropy
-		UNLOCK_ADV_BIT(adv->rewards, bitIndex);
+		UNLOCK_ADV_BIT(adv->rewards, rewardBit);
 
 		// go to podium with trophy
 		gGT->podiumRewardID = STATIC_TROPHY;
@@ -495,76 +531,67 @@ void AA_EndEvent_DrawMenu(void)
 }
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800a06f8-0x800a0b38.
-void AA_EndEvent_DisplayTime(s16 driverId, s16 param_2)
+void AA_EndEvent_DisplayTime(s16 driverId, s16 timeOffsetFrames)
 {
-	struct GameTracker *gGT;
-	struct Driver *driver;
-	struct UiElement2D *hudArray;
-	struct UiElement2D *hud;
-	struct Instance *bigNum;
-	char numPlyr, tenseconds;
-	s16 framesElapsed;
 	s16 lerpStartY;
 	s16 lerpEndY;
 	s16 lerpStartX;
 	s16 lerpEndX;
-	s16 currFrame;
-	s16 width;
-	s16 endFrame;
+	s32 currFrame;
+	s32 endFrame;
 	s16 posXY[2];
-	s16 bigNumScale;
-	RECT r;
 
-	gGT = sdata->gGT;
-	driver = gGT->drivers[driverId];
+	struct GameTracker *gGT = sdata->gGT;
+	struct Driver *driver = gGT->drivers[driverId];
 
-	numPlyr = gGT->numPlyrCurrGame;
-	hudArray = data.hudStructPtr[numPlyr - 1];
-	hud = &hudArray[driverId * 0x14]; // to-do, use enum where 0x14 is number of hud
-	bigNum = driver->instBigNum;
+	s32 numPlayers = gGT->numPlyrCurrGame;
+	struct UiElement2D *hudArray = data.hudStructPtr[numPlayers - 1];
+	struct UiElement2D *hud = &hudArray[driverId * AA_HUD_ELEMENTS_PER_DRIVER];
+	struct Instance *bigNum = driver->instBigNum;
 
 	// Lap time box height
+	RECT timeBoxRect;
 	switch (gGT->numLaps)
 	{
 	// based on number of laps
 	case 7:
-		r.h = 0x49;
+		timeBoxRect.h = AA_TIME_BOX_HEIGHT_7_LAPS;
 		break;
 	case 5:
-		r.h = 0x39;
+		timeBoxRect.h = AA_TIME_BOX_HEIGHT_5_LAPS;
 		break;
 	default:
 		// default height for 1/3 laps.
-		r.h = 0x44;
+		timeBoxRect.h = AA_TIME_BOX_HEIGHT_DEFAULT;
 		break;
 	}
 
 	// increment counter for number of frames since the player ended the race
 	driver->framesSinceRaceEnded_forThisDriver++;
-	framesElapsed = driver->framesSinceRaceEnded_forThisDriver;
+	s32 framesElapsed = driver->framesSinceRaceEnded_forThisDriver;
 
 	if (
 	    // if player ended race less than 110 frames ago
-	    (framesElapsed < 110) &&
+	    (framesElapsed < AA_TIME_DISPLAY_SKIP_FRAME) &&
 
 	    // If you press Cross or Circle
-	    ((sdata->AnyPlayerTap & 0x50) != 0) &&
+	    ((sdata->AnyPlayerTap & AA_CONFIRM_BUTTON_MASK) != 0) &&
 
 	    // only one player
-	    (numPlyr == 1))
+	    (numPlayers == 1))
 	{
 		// Assume race ended 110 frames ago
-		framesElapsed = 110;
+		framesElapsed = AA_TIME_DISPLAY_SKIP_FRAME;
 		sdata->framesSinceRaceEnded = framesElapsed;
 		driver->framesSinceRaceEnded_forThisDriver = framesElapsed;
 
-		sdata->numIconsEOR = numPlyr + gGT->numBotsNextGame;
+		sdata->numIconsEOR = numPlayers + gGT->numBotsNextGame;
 
 		// clear gamepad input (for menus)
 		RECTMENU_ClearInput();
 	}
 
-	tenseconds = (framesElapsed + param_2 > 300);
+	b32 isLateDisplay = (framesElapsed + timeOffsetFrames > AA_TIME_DISPLAY_LATE_FRAME);
 
 	// === Draw BigNum ===
 
@@ -575,13 +602,13 @@ void AA_EndEvent_DisplayTime(s16 driverId, s16 param_2)
 		lerpEndY = -0x3d;
 
 	// If race ended more than 10 seconds ago.
-	if (tenseconds)
+	if (isLateDisplay)
 	{
-		currFrame = framesElapsed + param_2 - 300;
-		endFrame = 0xf;
+		currFrame = framesElapsed + timeOffsetFrames - AA_TIME_DISPLAY_LATE_FRAME;
+		endFrame = AA_TIME_DISPLAY_FLYOUT_FRAMES;
 
 		lerpStartX = -0xae;
-		lerpEndX = UI_ConvertX_2(-100, hud[2].z);
+		lerpEndX = UI_ConvertX_2(-100, hud[AA_TIME_DISPLAY_BIG_NUM_SLOT].z);
 		lerpStartY = lerpEndY;
 	}
 
@@ -589,10 +616,10 @@ void AA_EndEvent_DisplayTime(s16 driverId, s16 param_2)
 	else
 	{
 		currFrame = framesElapsed;
-		endFrame = 0x1e;
+		endFrame = AA_TIME_DISPLAY_FLYIN_FRAMES;
 
-		lerpStartX = UI_ConvertX_2(hud[2].x, hud[2].z);
-		lerpStartY = UI_ConvertY_2(hud[2].y, hud[2].z);
+		lerpStartX = UI_ConvertX_2(hud[AA_TIME_DISPLAY_BIG_NUM_SLOT].x, hud[AA_TIME_DISPLAY_BIG_NUM_SLOT].z);
+		lerpStartY = UI_ConvertY_2(hud[AA_TIME_DISPLAY_BIG_NUM_SLOT].y, hud[AA_TIME_DISPLAY_BIG_NUM_SLOT].z);
 		lerpEndX = -0xae;
 	}
 
@@ -602,9 +629,9 @@ void AA_EndEvent_DisplayTime(s16 driverId, s16 param_2)
 	bigNum->matrix.t[0] = posXY[0];
 	bigNum->matrix.t[1] = posXY[1];
 
-	// interpolate scale to 0x1e00
-	UI_Lerp2D_Linear(&posXY[0], hud[2].scale, 0, 0x1e00, 0, framesElapsed, 30);
-	bigNumScale = posXY[0];
+	// interpolate scale to the target big-number size
+	UI_Lerp2D_Linear(&posXY[0], hud[AA_TIME_DISPLAY_BIG_NUM_SLOT].scale, 0, AA_BIG_NUM_TARGET_SCALE, 0, framesElapsed, AA_TIME_DISPLAY_FLYIN_FRAMES);
+	s16 bigNumScale = posXY[0];
 
 	CTR_SET_VEC3(bigNum->scale, bigNumScale, bigNumScale, bigNumScale);
 
@@ -616,7 +643,7 @@ void AA_EndEvent_DisplayTime(s16 driverId, s16 param_2)
 	if (driverId == 0)
 		lerpEndY = 9;
 
-	if (tenseconds)
+	if (isLateDisplay)
 	{
 		lerpStartX = 0x78;
 		lerpStartY = lerpEndY;
@@ -624,8 +651,8 @@ void AA_EndEvent_DisplayTime(s16 driverId, s16 param_2)
 	}
 	else
 	{
-		lerpStartX = hud[5].x;
-		lerpStartY = hud[5].y;
+		lerpStartX = hud[AA_TIME_DISPLAY_SUFFIX_SLOT].x;
+		lerpStartY = hud[AA_TIME_DISPLAY_SUFFIX_SLOT].y;
 		lerpEndX = 0x78;
 	}
 
@@ -639,7 +666,7 @@ void AA_EndEvent_DisplayTime(s16 driverId, s16 param_2)
 	if (driverId == 0)
 		lerpEndY = 0x3e;
 
-	if (tenseconds)
+	if (isLateDisplay)
 	{
 		lerpStartX = 0x150;
 		lerpEndX = 0x27c;
@@ -656,15 +683,15 @@ void AA_EndEvent_DisplayTime(s16 driverId, s16 param_2)
 	UI_DrawRaceClock(posXY[0], posXY[1], 1, driver);
 
 	// "TOTAL"
-	width = DecalFont_GetLineWidth(sdata->lngStrings[0xc4], 1);
+	s16 totalTextWidth = DecalFont_GetLineWidth(sdata->lngStrings[AA_STRING_TOTAL], FONT_BIG);
 
-	r.x = (posXY[0] - width) + -6;
-	r.y = (posXY[1] - r.h) + 0xd;
-	r.w = width + 0x94;
-	r.h += 6;
+	timeBoxRect.x = (posXY[0] - totalTextWidth) + -6;
+	timeBoxRect.y = (posXY[1] - timeBoxRect.h) + 0xd;
+	timeBoxRect.w = totalTextWidth + 0x94;
+	timeBoxRect.h += 6;
 
 	// Draw 2D Menu rectangle background
-	RECTMENU_DrawInnerRect(&r, 4, gGT->backBuffer->otMem.startPlusFour);
+	RECTMENU_DrawInnerRect(&timeBoxRect, 4, gGT->backBuffer->otMem.startPlusFour);
 	return;
 }
 
