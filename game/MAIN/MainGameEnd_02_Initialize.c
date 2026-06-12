@@ -332,7 +332,7 @@ void MainGameEnd_Initialize(void)
 		{
 			MainGameEnd_UpdateBattlePointLimit(gGT);
 		}
-		else if ((gGT->gameMode1 & TIME_LIMIT) != 0)
+		else if ((gGT->gameMode1 & LIFE_LIMIT) != 0)
 		{
 			MainGameEnd_UpdateBattleLifeLimit(gGT);
 		}
