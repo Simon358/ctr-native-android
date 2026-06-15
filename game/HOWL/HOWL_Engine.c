@@ -136,7 +136,7 @@ void EngineSound_Player(struct Driver *driver)
 	u32 lr;
 	int engine = data.MetaDataCharacters[data.characterIDs[id]].engineID;
 
-	if (driver->unk47B == 0)
+	if (driver->engineSoundMode == ENGINE_SOUND_FADE_OUT)
 	{
 		driver->fill_3B6[0] = (driver->fill_3B6[0] * 0x177) >> 9;
 		driver->fill_3B6[1] = (driver->fill_3B6[1] * 3000 + 0x22400) >> 0xc;
@@ -144,7 +144,7 @@ void EngineSound_Player(struct Driver *driver)
 		volume = VehCalc_MapToRange(driver->fill_3B6[0], 0, driver->const_AccelSpeed_ClassStat, 0, 0xe6);
 		distortion = VehCalc_MapToRange(driver->fill_3B6[1], 0, driver->const_AccelSpeed_ClassStat, 0x3c, 200);
 	}
-	else if (driver->unk47B == 1)
+	else if (driver->engineSoundMode == ENGINE_SOUND_FADE_IN)
 	{
 		driver->fill_3B6[0] = (driver->fill_3B6[0] * 3000 + 0x322bc0) >> 0xc;
 		driver->fill_3B6[1] = (driver->fill_3B6[1] * 3000 + 0x22400) >> 0xc;

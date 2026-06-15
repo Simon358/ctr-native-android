@@ -561,13 +561,11 @@ void VehBirth_TireSprites(struct Thread *t)
 	d->tireColor = 0x2e808080;
 	d->unkSpeedValue1 = 0xa00;
 
-	// unused by decomp, but if this function is combined
-	// with retail code, the variable must be set to 2
-	d->unk47B = 2;
+	d->engineSoundMode = ENGINE_SOUND_DYNAMIC;
 
 	d->AxisAngle1_normalVec.y = 0x1000;
 	d->AxisAngle2_normalVec.y = 0x1000;
-	d->unk412 = 0x600;
+	d->reserved_0x412 = 0x600;
 	d->numFramesSpentSteering = 10000;
 
 	d->terrainMeta1 = VehAfterColl_GetTerrain(TERRAIN_NONE);

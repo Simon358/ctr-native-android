@@ -70,6 +70,13 @@ typedef enum RevEngineLockoutFlags : u8
 	REV_ENGINE_LOCKOUT_ALL = REV_ENGINE_LOCKOUT_PEDAL_HELD | REV_ENGINE_LOCKOUT_REV_DECAY,
 } RevEngineLockoutFlags;
 
+typedef enum EngineSoundMode : u8
+{
+	ENGINE_SOUND_FADE_OUT = 0,
+	ENGINE_SOUND_FADE_IN = 1,
+	ENGINE_SOUND_DYNAMIC = 2,
+} EngineSoundMode;
+
 enum RevEnginePackedStatusMask
 {
 	REV_ENGINE_PACKED_BUSY_MASK = 0x0200ffff,
@@ -197,10 +204,14 @@ enum PhysType
 	TURN_INPUT_DELAY_OFFSET = 0x43E,
 
 	// MetaPhys[16]
-	// Driver offset 0x440
+	PRE_TURBO = 0x16,
+	// Driver offset
+	PRE_TURBO_OFFSET = 0x440,
 
 	// MetaPhys[17]
-	// Driver offset 0x442
+	TERMINAL_VELOCITY = 0x17,
+	// Driver offset
+	TERMINAL_VELOCITY_OFFSET = 0x442,
 
 	// MetaPhys[18]
 	TERRAIN_FRICTION_BOOST = 0x18,
@@ -208,19 +219,29 @@ enum PhysType
 	TERRAIN_FRICTION_BOOST_OFFSET = 0x444,
 
 	// MetaPhys[19]
-	// Driver offset 0x446
+	STEER_ACCEL_STAGE4_FIRST_FRAME = 0x19,
+	// Driver offset
+	STEER_ACCEL_STAGE4_FIRST_FRAME_OFFSET = 0x446,
 
 	// MetaPhys[1A]
-	// Driver offset 0x447
+	STEER_ACCEL_STAGE2_FIRST_FRAME = 0x1A,
+	// Driver offset
+	STEER_ACCEL_STAGE2_FIRST_FRAME_OFFSET = 0x447,
 
 	// MetaPhys[1B]
-	// Driver offset 0x448
+	STEER_ACCEL_STAGE2_FRAME_LENGTH = 0x1B,
+	// Driver offset
+	STEER_ACCEL_STAGE2_FRAME_LENGTH_OFFSET = 0x448,
 
 	// MetaPhys[1C]
-	// Driver offset 0x44A
+	STEER_ACCEL_STAGE1_MAX_STEER = 0x1C,
+	// Driver offset
+	STEER_ACCEL_STAGE1_MAX_STEER_OFFSET = 0x44A,
 
 	// MetaPhys[1D]
-	// Driver offset 0x44C
+	STEER_ACCEL_STAGE1_MIN_STEER = 0x1D,
+	// Driver offset
+	STEER_ACCEL_STAGE1_MIN_STEER_OFFSET = 0x44C,
 
 	// MetaPhys[1E]
 	STEER_ACCEL_TURN_VEL_SCALE = 0x1E,
@@ -233,10 +254,14 @@ enum PhysType
 	STEER_ACCEL_TURN_VEL_LIMIT_OFFSET = 0x450,
 
 	// MetaPhys[20]
-	// Driver offset 0x452
+	MODEL_ROT_VEL_MAX = 0x20,
+	// Driver offset
+	MODEL_ROT_VEL_MAX_OFFSET = 0x452,
 
 	// MetaPhys[21]
-	// Driver offset 0x454
+	MODEL_ROT_VEL_MIN = 0x21,
+	// Driver offset
+	MODEL_ROT_VEL_MIN_OFFSET = 0x454,
 
 	// MetaPhys[22]
 	MODEL_TURN_COUNTER_STEER_STRENGTH = 0x22,
@@ -259,16 +284,24 @@ enum PhysType
 	MODEL_TURN_VELOCITY_LERP_OFFSET = 0x45A,
 
 	// MetaPhys[26] Kart Turn Animation (speed?)
-	// Driver offset 0x45C
+	TURN_RESIST_MIN = 0x26,
+	// Driver offset
+	TURN_RESIST_MIN_OFFSET = 0x45C,
 
 	// MetaPhys[27]
-	// Driver offset 0x45D
+	TURN_RESIST_MAX = 0x27,
+	// Driver offset
+	TURN_RESIST_MAX_OFFSET = 0x45D,
 
 	// MetaPhys[28]
-	// Driver offset 0x45E
+	STEER_VEL_DRIFT_SWITCH_WAY = 0x28,
+	// Driver offset
+	STEER_VEL_DRIFT_SWITCH_WAY_OFFSET = 0x45E,
 
 	// MetaPhys[29]
-	// Driver offset 0x45F
+	STEER_VEL_DRIFT_STANDARD = 0x29,
+	// Driver offset
+	STEER_VEL_DRIFT_STANDARD_OFFSET = 0x45F,
 
 	// MetaPhys[2A]
 	DRIFT_TURN_BASE = 0x2A,
@@ -286,7 +319,9 @@ enum PhysType
 	DRIFT_TURN_RAMP_FRAMES_OFFSET = 0x462,
 
 	// MetaPhys[2D]
-	// Driver offset 0x463
+	DRIFT_FRAMES_TILL_SPINOUT = 0x2D,
+	// Driver offset
+	DRIFT_FRAMES_TILL_SPINOUT_OFFSET = 0x463,
 
 	// MetaPhys[2E]
 	DRIFT_SPIN_RATE_ACCEL = 0x2E,
@@ -299,7 +334,9 @@ enum PhysType
 	DRIFT_SPIN_RATE_DECEL_OFFSET = 0x466,
 
 	// MetaPhys[30]
-	// Driver offset 0x468
+	DRIFT_CAMERA_SPIN_RATE = 0x30,
+	// Driver offset
+	DRIFT_CAMERA_SPIN_RATE_OFFSET = 0x468,
 
 	// MetaPhys[31]
 	DRIFT_CAMERA_LERP_STEP = 0x31,
@@ -312,10 +349,14 @@ enum PhysType
 	DRIFT_RELEASE_TURN_ASSIST_FRAMES_OFFSET = 0x46B,
 
 	// MetaPhys[33]
-	// Driver offset 0x46C
+	METAPHYS_33 = 0x33,
+	// Driver offset
+	METAPHYS_33_OFFSET = 0x46C,
 
 	// MetaPhys[34]
-	// Driver offset 0x46E
+	METAPHYS_34 = 0x34,
+	// Driver offset
+	METAPHYS_34_OFFSET = 0x46E,
 
 	// MetaPhys[35]
 	DRIFT_TURN_SAME_DIRECTION_ANGLE = 0x35,
@@ -547,8 +588,8 @@ struct BotPhysics
 	// 0xc, Driver + 0x5c8
 	int squishCooldown; // retail uses both halfword and word operations on this slot
 
-	// 0x10, Driver + 0x5cc
-	int unk5cc;
+	// 0x10, Driver + 0x5cc - retail reset-only slot, no known consumer
+	int reserved_0x5cc;
 
 	// 0x14, Driver + 0x5d0
 	int speedY;
@@ -571,7 +612,7 @@ struct BotData
 	struct Item item;
 
 	// 0x5a0, offset in `struct BotData` == 0x8
-	int unk5a0;
+	int reserved_0x5a0;
 
 	// 0x5a4, offset in `struct BotData` == 0xc
 	struct NavFrame *botNavFrame;
@@ -580,7 +621,7 @@ struct BotData
 	int navProgressRemainder;
 
 	// 0x5ac
-	int unk5ac;
+	int reserved_0x5ac;
 
 	// 0x5b0
 	// u32 BotFlags plus other AI-only state bits.
@@ -655,7 +696,7 @@ struct BotData
 	u8 desiredPath_BossOnly;
 
 	// 0x628
-	int unk628;
+	int reserved_0x628;
 };
 
 // for Players, AIs and Ghosts
@@ -727,7 +768,7 @@ struct Driver
 	// 0x3C
 	s16 noItemTimer;
 	// 0x3E
-	s16 unknown_noitemtimer_laptime;
+	s16 padding_0x3e;
 	// 0x40
 	int lapTime;
 	// 0x44
@@ -986,7 +1027,7 @@ struct Driver
 	SVec3 AxisAngle4_normalVec;
 
 	// 0x37e
-	s16 unk37e;
+	s16 padding_0x37e;
 
 	// 0x380
 	char normalVecID;
@@ -1205,13 +1246,15 @@ struct Driver
 	// when jumping and when hitting ground
 	s16 jumpSquishStretch;
 
-	s16 unk40E;
+	// Retail clears this during SlamWall init; no known consumer.
+	s16 reserved_0x40e;
 
 	// 0x410
 	// used to calculate the other ^^
 	s16 jumpSquishStretch2;
 
-	s16 unk412;
+	// Retail initializes this to 0x600 during VehBirth; no known consumer.
+	s16 reserved_0x412;
 
 	// 0x414 (physics/terrain related)
 	s16 terrainFrictionTimer;
@@ -1286,7 +1329,7 @@ struct Driver
 	s16 const_TurnInputDelay; // OK
 
 	// 0x440 - 0x16
-	s16 const_unk440;
+	s16 const_PreTurbo;
 
 	// 0x442 - 0x17
 	s16 const_TerminalVelocity; // OK
@@ -1336,7 +1379,7 @@ struct Driver
 	u8 const_ModelTurnNegativeReturnStrength;
 	u8 const_ModelTurnVelocityLerp;
 
-	char unk45b; // unused? skips straight to 0x45c
+	char padding_0x45b;
 
 	// 0x45c, 0x45d - 0x26, 0x27
 	// resist turning at low speed
@@ -1368,8 +1411,8 @@ struct Driver
 	u8 const_DriftReleaseTurnAssistFrames;
 
 	// 0x46C, 0x46E, 0x470, 0x472, 0x474 - 0x33, 0x34, 0x35, 0x36, 0x37
-	s16 unk46c;
-	s16 unk46e;
+	s16 const_MetaPhys33;
+	s16 const_MetaPhys34;
 	s16 const_DriftTurnSameDirectionAngle;
 	s16 const_DriftTurnOppositeDirectionAngle;
 	s16 const_DriftTurnAngleScale;
@@ -1381,7 +1424,7 @@ struct Driver
 	u8 const_DriftBoostDurationFrames;
 	u8 const_DriftBoostAxisKickRate;
 
-	char unk47B; // unused? metaphys skips straight to 0x47C
+	EngineSoundMode engineSoundMode;
 
 	// 0x47C, 0x47E, 0x480 - 0x3D, 0x3E, 0x3F
 	s16 const_CollisionWeight;
@@ -1828,7 +1871,7 @@ struct Driver
 
 	// 0x634
 	s16 ghostBoolStarted;
-	s16 unk636;
+	s16 ghostPadding_0x636;
 
 	// 0x638
 	// end of ghost struct (as determined by memset)
@@ -1874,14 +1917,17 @@ _Static_assert(offsetof(struct BotPhysics, simpTurnState) == 0x6);
 _Static_assert(offsetof(struct BotPhysics, turboMeter) == 0x8);
 _Static_assert(offsetof(struct BotPhysics, fireLevel) == 0xa);
 _Static_assert(offsetof(struct BotPhysics, squishCooldown) == 0xc);
-_Static_assert(offsetof(struct BotPhysics, unk5cc) == 0x10);
+_Static_assert(offsetof(struct BotPhysics, reserved_0x5cc) == 0x10);
 _Static_assert(offsetof(struct BotPhysics, speedY) == 0x14);
 _Static_assert(offsetof(struct BotPhysics, speedLinear) == 0x18);
 _Static_assert(offsetof(struct BotPhysics, accelAxis) == 0x1c);
 _Static_assert(offsetof(struct BotPhysics, velAxis) == 0x28);
 _Static_assert(sizeof(struct BotData) == 0x94);
 _Static_assert(offsetof(struct BotData, aiPhysics) == 0x24);
+_Static_assert(offsetof(struct BotData, reserved_0x5a0) == 0x8);
+_Static_assert(offsetof(struct BotData, reserved_0x5ac) == 0x14);
 _Static_assert(offsetof(struct BotData, ai_quadblock_checkpointIndex) == 0x72);
+_Static_assert(offsetof(struct BotData, reserved_0x628) == 0x90);
 _Static_assert(offsetof(struct BotData, estimateNavFrame) == 0x74);
 _Static_assert(offsetof(struct BotData, estimatePos) == 0x74);
 _Static_assert(offsetof(struct BotData, estimateFlags) == 0x82);
@@ -1940,6 +1986,7 @@ _Static_assert(FORCED_JUMP_LOW == 1);
 _Static_assert(FORCED_JUMP_HIGH == 2);
 _Static_assert(sizeof(RevEngineChargeState) == 0x1);
 _Static_assert(sizeof(RevEngineLockoutFlags) == 0x1);
+_Static_assert(sizeof(EngineSoundMode) == 0x1);
 
 _Static_assert(offsetof(struct Driver, ghostTape) == DRIVER_NTSC_RETAIL_SIZE);
 _Static_assert(sizeof(((struct Driver *)0)->funcPtrs) == DRIVER_FUNC_COUNT * sizeof(DriverFunc));
@@ -1957,6 +2004,7 @@ _Static_assert(offsetof(struct Driver, stepFlagSet) == 0xbc);
 _Static_assert(sizeof(((struct Driver *)0)->stepFlagSet) == 0x4);
 _Static_assert(sizeof(((struct Driver *)0)->spsHitPosRaw) == 0x8);
 _Static_assert(sizeof(((struct Driver *)0)->spsNormalVecRaw) == 0x8);
+_Static_assert(offsetof(struct Driver, padding_0x3e) == 0x3e);
 _Static_assert(offsetof(struct Driver, actionsFlagSet) == 0x2c8);
 _Static_assert(offsetof(struct Driver, actionsFlagSetPrevFrame) == 0x2cc);
 _Static_assert(offsetof(struct Driver, forcedJumpType) == 0x366);
@@ -1964,6 +2012,7 @@ _Static_assert(offsetof(struct Driver, AxisAngle2_normalVec) == 0x368);
 _Static_assert(offsetof(struct Driver, speedometerNeedleValue) == 0x36e);
 _Static_assert(offsetof(struct Driver, AxisAngle3_normalVec) == 0x370);
 _Static_assert(offsetof(struct Driver, AxisAngle4_normalVec) == 0x378);
+_Static_assert(offsetof(struct Driver, padding_0x37e) == 0x37e);
 _Static_assert(offsetof(struct Driver, failedBoostExhaustTimer) == 0x381);
 _Static_assert(offsetof(struct Driver, terrainScaledBaseSpeed) == 0x3c4);
 _Static_assert(offsetof(struct Driver, turnWobbleAngle) == 0x3d4);
@@ -1976,29 +2025,39 @@ _Static_assert(offsetof(struct Driver, wallRubTimer) == 0x3fe);
 _Static_assert(offsetof(struct Driver, vShiftStartGuardTimer) == 0x406);
 _Static_assert(offsetof(struct Driver, vShiftWindowTimer) == 0x408);
 _Static_assert(offsetof(struct Driver, vShiftCount) == 0x40a);
+_Static_assert(offsetof(struct Driver, reserved_0x40e) == 0x40e);
+_Static_assert(offsetof(struct Driver, reserved_0x412) == 0x412);
+_Static_assert(offsetof(struct Driver, const_PreTurbo) == 0x440);
 _Static_assert(offsetof(struct Driver, const_SteerAccelTurnVelScale) == 0x44e);
 _Static_assert(offsetof(struct Driver, const_SteerAccelTurnVelLimit) == 0x450);
 _Static_assert(offsetof(struct Driver, const_ModelTurnCounterSteerStrength) == 0x457);
 _Static_assert(offsetof(struct Driver, const_ModelTurnReturnStrength) == 0x458);
 _Static_assert(offsetof(struct Driver, const_ModelTurnNegativeReturnStrength) == 0x459);
 _Static_assert(offsetof(struct Driver, const_ModelTurnVelocityLerp) == 0x45a);
+_Static_assert(offsetof(struct Driver, padding_0x45b) == 0x45b);
 _Static_assert(offsetof(struct Driver, const_DriftTurnBase) == 0x460);
 _Static_assert(offsetof(struct Driver, const_DriftTurnStartupScale) == 0x461);
 _Static_assert(offsetof(struct Driver, const_DriftTurnRampFrames) == 0x462);
+_Static_assert(offsetof(struct Driver, const_Drifting_FramesTillSpinout) == 0x463);
 _Static_assert(offsetof(struct Driver, const_DriftSpinRateAccel) == 0x464);
 _Static_assert(offsetof(struct Driver, const_DriftSpinRateDecel) == 0x466);
+_Static_assert(offsetof(struct Driver, const_Drifting_CameraSpinRate) == 0x468);
 _Static_assert(offsetof(struct Driver, const_DriftCameraLerpStep) == 0x46a);
 _Static_assert(offsetof(struct Driver, const_DriftReleaseTurnAssistFrames) == 0x46b);
+_Static_assert(offsetof(struct Driver, const_MetaPhys33) == 0x46c);
+_Static_assert(offsetof(struct Driver, const_MetaPhys34) == 0x46e);
 _Static_assert(offsetof(struct Driver, const_DriftTurnSameDirectionAngle) == 0x470);
 _Static_assert(offsetof(struct Driver, const_DriftTurnOppositeDirectionAngle) == 0x472);
 _Static_assert(offsetof(struct Driver, const_DriftTurnAngleScale) == 0x474);
 _Static_assert(offsetof(struct Driver, const_turboFullBarReserveGain) == 0x478);
 _Static_assert(offsetof(struct Driver, const_DriftBoostDurationFrames) == 0x479);
 _Static_assert(offsetof(struct Driver, const_DriftBoostAxisKickRate) == 0x47a);
+_Static_assert(offsetof(struct Driver, engineSoundMode) == 0x47b);
 _Static_assert(offsetof(struct Driver, checkpoint) == 0x494);
 _Static_assert(offsetof(struct Driver, checkpoint.branchChoiceIndex) == 0x494);
 _Static_assert(offsetof(struct Driver, checkpoint.currentIndex) == 0x495);
 _Static_assert(offsetof(struct Driver, numTimesWumpa) == 0x569);
+_Static_assert(offsetof(struct Driver, ghostPadding_0x636) == 0x636);
 _Static_assert(offsetof(struct Driver, KartStates.RevEngine.overRevTimerMS) == 0x58c);
 _Static_assert(offsetof(struct Driver, KartStates.RevEngine.releaseCooldownTimerMS) == 0x58e);
 _Static_assert(offsetof(struct Driver, KartStates.RevEngine.emptyCooldownTimerMS) == 0x590);

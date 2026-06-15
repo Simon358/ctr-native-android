@@ -2061,7 +2061,7 @@ void VehPhysProc_SlamWall_Init(struct Thread *t, struct Driver *d)
 	d->reserves = 0;
 	d->distanceFromGround = 0;
 	d->jumpSquishStretch = 0;
-	d->unk40E = 0;
+	d->reserved_0x40e = 0;
 	d->jumpSquishStretch2 = 0;
 
 	// all ints set to zero

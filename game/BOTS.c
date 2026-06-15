@@ -626,7 +626,7 @@ void BOTS_MaskGrab(struct Thread *botThread)
 
 	bot->botData.aiPhysics.mulDrift = 0;
 	bot->botData.aiPhysics.squishCooldown = 0;
-	bot->botData.aiPhysics.unk5cc = 0;
+	bot->botData.aiPhysics.reserved_0x5cc = 0;
 	bot->botData.aiPhysics.speedY = 0;
 	bot->botData.aiPhysics.speedLinear = 0;
 	CTR_SET_VEC3(bot->botData.aiPhysics.velAxis, 0, 0, 0);
@@ -2695,7 +2695,7 @@ u32 BOTS_ChangeState(struct Driver *driverVictim, int damageType, struct Driver 
 			{
 				driverVictim->reserves = 0;
 				driverVictim->turbo_outsideTimer = 0;
-				driverVictim->botData.aiPhysics.unk5cc = 0;
+				driverVictim->botData.aiPhysics.reserved_0x5cc = 0;
 
 				int newSpeed;
 
@@ -2733,7 +2733,7 @@ u32 BOTS_ChangeState(struct Driver *driverVictim, int damageType, struct Driver 
 		driverVictim->botData.aiDamageState = BOTS_DAMAGE_STATE_BLAST;
 		driverVictim->reserves = 0;
 		driverVictim->turbo_outsideTimer = 0;
-		driverVictim->botData.aiPhysics.unk5cc = 0;
+		driverVictim->botData.aiPhysics.reserved_0x5cc = 0;
 		driverVictim->botData.aiPhysics.speedY = sdata->AI_VelY_WhenBlasted_0x3000;
 
 		if ((driverVictim->botData.botFlags & BOT_FLAG_DAMAGE_ACTIVE) == 0)
@@ -2770,7 +2770,7 @@ u32 BOTS_ChangeState(struct Driver *driverVictim, int damageType, struct Driver 
 		driverVictim->squishTimer = 0xf00;
 		driverVictim->reserves = 0;
 		driverVictim->turbo_outsideTimer = 0;
-		driverVictim->botData.aiPhysics.unk5cc = 0;
+		driverVictim->botData.aiPhysics.reserved_0x5cc = 0;
 		driverVictim->botData.aiPhysics.speedY = 0;
 		driverVictim->botData.ai_progress_cooldown = 0;
 		driverVictim->botData.aiPhysics.speedLinear = CTR_MipsSra(driverVictim->botData.aiPhysics.speedLinear, 1);
@@ -2780,7 +2780,7 @@ u32 BOTS_ChangeState(struct Driver *driverVictim, int damageType, struct Driver 
 		driverVictim->botData.aiPhysics.turboMeter = 0;
 		driverVictim->botData.aiPhysics.speedLinear = 0;
 		driverVictim->botData.aiPhysics.speedY = 0;
-		driverVictim->botData.aiPhysics.unk5cc = 0;
+		driverVictim->botData.aiPhysics.reserved_0x5cc = 0;
 		driverVictim->instSelf->flags |= 0x80;
 		driverVictim->botData.aiPhysics.rotXZ = 0xd20;
 		driverVictim->botData.aiDamageState = BOTS_DAMAGE_STATE_MASK_GRAB;
@@ -2903,7 +2903,7 @@ void BOTS_GotoStartingLine(struct Driver *d)
 	// get position where driver should spawn
 	u8 spawnPos = sdata->kartSpawnOrderArray[d->driverID];
 
-	d->botData.aiPhysics.unk5cc = 0;
+	d->botData.aiPhysics.reserved_0x5cc = 0;
 	d->botData.aiPhysics.speedY = 0;
 	d->botData.aiPhysics.speedLinear = 0;
 	CTR_SET_VEC3(d->botData.aiPhysics.accelAxis, 0, 0, 0);
