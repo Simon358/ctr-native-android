@@ -33,6 +33,86 @@ force_inline u32 CtrGpu_PrimToOTLink24(const void *prim)
 	return (u32)(addr & 0xffffffu);
 }
 
+force_inline u32 CtrGpu_PackColorCode(u32 color, u32 code)
+{
+	return (color & 0xffffff) | (code << 24);
+}
+
+force_inline void CtrGpu_WriteColorCode(u_char *r, u32 colorCode)
+{
+	r[0] = (u_char)colorCode;
+	r[1] = (u_char)(colorCode >> 8);
+	r[2] = (u_char)(colorCode >> 16);
+	r[3] = (u_char)(colorCode >> 24);
+}
+
+force_inline void CtrGpu_WritePackedXY(VERTTYPE *x, u32 xy)
+{
+	x[0] = (VERTTYPE)xy;
+	x[1] = (VERTTYPE)(xy >> 16);
+}
+
+force_inline void CtrGpu_WritePackedUV(u_char *u, u16 uv)
+{
+	u[0] = (u_char)uv;
+	u[1] = (u_char)(uv >> 8);
+}
+
+force_inline void CtrGpu_WritePackedUVWord(u_char *u, u32 uvTpage)
+{
+	u[0] = (u_char)uvTpage;
+	u[1] = (u_char)(uvTpage >> 8);
+	u[2] = (u_char)(uvTpage >> 16);
+	u[3] = (u_char)(uvTpage >> 24);
+}
+
+_Static_assert(sizeof(POLY_FT4) == 0x28);
+_Static_assert(offsetof(POLY_FT4, tag) == 0x00);
+_Static_assert(offsetof(POLY_FT4, r0) == 0x04);
+_Static_assert(offsetof(POLY_FT4, code) == 0x07);
+_Static_assert(offsetof(POLY_FT4, x0) == 0x08);
+_Static_assert(offsetof(POLY_FT4, u0) == 0x0C);
+_Static_assert(offsetof(POLY_FT4, x1) == 0x10);
+_Static_assert(offsetof(POLY_FT4, u1) == 0x14);
+_Static_assert(offsetof(POLY_FT4, x2) == 0x18);
+_Static_assert(offsetof(POLY_FT4, u2) == 0x1C);
+_Static_assert(offsetof(POLY_FT4, x3) == 0x20);
+_Static_assert(offsetof(POLY_FT4, u3) == 0x24);
+
+_Static_assert(sizeof(POLY_GT4) == 0x34);
+_Static_assert(offsetof(POLY_GT4, tag) == 0x00);
+_Static_assert(offsetof(POLY_GT4, r0) == 0x04);
+_Static_assert(offsetof(POLY_GT4, code) == 0x07);
+_Static_assert(offsetof(POLY_GT4, x0) == 0x08);
+_Static_assert(offsetof(POLY_GT4, u0) == 0x0C);
+_Static_assert(offsetof(POLY_GT4, r1) == 0x10);
+_Static_assert(offsetof(POLY_GT4, x1) == 0x14);
+_Static_assert(offsetof(POLY_GT4, u1) == 0x18);
+_Static_assert(offsetof(POLY_GT4, r2) == 0x1C);
+_Static_assert(offsetof(POLY_GT4, x2) == 0x20);
+_Static_assert(offsetof(POLY_GT4, u2) == 0x24);
+_Static_assert(offsetof(POLY_GT4, r3) == 0x28);
+_Static_assert(offsetof(POLY_GT4, x3) == 0x2C);
+_Static_assert(offsetof(POLY_GT4, u3) == 0x30);
+
+struct CtrGpuDrawModePacket
+{
+	u32 tag;
+	u32 drawMode;
+	u32 terminator;
+};
+
+_Static_assert(sizeof(struct CtrGpuDrawModePacket) == 0x0C);
+_Static_assert(offsetof(struct CtrGpuDrawModePacket, tag) == 0x00);
+_Static_assert(offsetof(struct CtrGpuDrawModePacket, drawMode) == 0x04);
+_Static_assert(offsetof(struct CtrGpuDrawModePacket, terminator) == 0x08);
+
+force_inline void CtrGpu_LinkPacket24(u_long *ot, u32 *packetTag, const void *packet, u32 tag)
+{
+	*packetTag = (u32)*ot | tag;
+	*ot = (u_long)CtrGpu_PrimToOTLink24(packet);
+}
+
 force_inline void CtrGpu_LinkPrimToOT(u_long *ot, const void *prim)
 {
 	*ot = CtrGpu_PrimToOTLink(prim);

@@ -228,12 +228,12 @@ static void VehGroundShadow_BuildProjectionPoints(struct VehGroundShadowEntry *e
 	points[8][2] = (s16)(baseZ - local[0][2]);
 }
 
-static void VehGroundShadow_WriteUv(u32 *dst, const struct TextureLayout *tex)
+static void VehGroundShadow_WriteUv(POLY_FT4 *poly, const struct TextureLayout *tex)
 {
-	dst[3] = VehGroundShadow_ReadWord(tex, 0x00);
-	dst[5] = VehGroundShadow_ReadWord(tex, 0x04);
-	*(u16 *)(void *)&dst[7] = *(const u16 *)(const void *)((const char *)tex + 0x08);
-	*(u16 *)(void *)&dst[9] = *(const u16 *)(const void *)((const char *)tex + 0x0a);
+	CtrGpu_WritePackedUVWord(&poly->u0, VehGroundShadow_ReadWord(tex, 0x00));
+	CtrGpu_WritePackedUVWord(&poly->u1, VehGroundShadow_ReadWord(tex, 0x04));
+	CtrGpu_WritePackedUV(&poly->u2, *(const u16 *)(const void *)((const char *)tex + 0x08));
+	CtrGpu_WritePackedUV(&poly->u3, *(const u16 *)(const void *)((const char *)tex + 0x0a));
 }
 
 static void VehGroundShadow_EmitQuad(u32 **primCursor, u_long *otBase, const struct TextureLayout *texture, u32 color, u32 sxy[VEH_GROUND_SHADOW_NUM_POINTS],
@@ -245,7 +245,7 @@ static void VehGroundShadow_EmitQuad(u32 **primCursor, u_long *otBase, const str
 	    {4, 0, 3, 2},
 	    {4, 0, 5, 6},
 	};
-	u32 *prim = *primCursor;
+	POLY_FT4 *poly = (POLY_FT4 *)*primCursor;
 	int depthIndex = (depth >> 8) + depthBias;
 	u_long *ot;
 
@@ -254,18 +254,18 @@ static void VehGroundShadow_EmitQuad(u32 **primCursor, u_long *otBase, const str
 	else if (depthIndex > 0x3ff)
 		depthIndex = 0x3ff;
 
-	prim[1] = color;
-	prim[2] = sxy[quadPointIndex[quadIndex][0]];
-	prim[4] = sxy[quadPointIndex[quadIndex][1]];
-	prim[6] = sxy[quadPointIndex[quadIndex][2]];
-	prim[8] = sxy[quadPointIndex[quadIndex][3]];
-	VehGroundShadow_WriteUv(prim, texture);
+	CtrGpu_WriteColorCode(&poly->r0, color);
+	CtrGpu_WritePackedXY(&poly->x0, sxy[quadPointIndex[quadIndex][0]]);
+	CtrGpu_WritePackedXY(&poly->x1, sxy[quadPointIndex[quadIndex][1]]);
+	CtrGpu_WritePackedXY(&poly->x2, sxy[quadPointIndex[quadIndex][2]]);
+	CtrGpu_WritePackedXY(&poly->x3, sxy[quadPointIndex[quadIndex][3]]);
+	VehGroundShadow_WriteUv(poly, texture);
 
 	ot = &otBase[depthIndex];
-	prim[0] = (u32)*ot | 0x09000000;
-	*ot = (u_long)VehGroundShadow_Ptr24(prim);
+	poly->tag = (u32)*ot | 0x09000000;
+	*ot = (u_long)VehGroundShadow_Ptr24(poly);
 
-	*primCursor = prim + 10;
+	*primCursor = (u32 *)(poly + 1);
 }
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x8005b720-0x8005c120.

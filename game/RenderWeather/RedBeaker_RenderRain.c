@@ -10,6 +10,13 @@ struct RedBeakerRng
 	s32 z;
 };
 
+_Static_assert(sizeof(LINE_G2) == 0x14);
+_Static_assert(offsetof(LINE_G2, tag) == 0x00);
+_Static_assert(offsetof(LINE_G2, r0) == 0x04);
+_Static_assert(offsetof(LINE_G2, x0) == 0x08);
+_Static_assert(offsetof(LINE_G2, r1) == 0x0C);
+_Static_assert(offsetof(LINE_G2, x1) == 0x10);
+
 static u32 RedBeaker_ReadWord(const void *base, int offset)
 {
 	return *(const u32 *)(const void *)((const char *)base + offset);
@@ -23,11 +30,6 @@ static s16 RedBeaker_ReadS16(const void *base, int offset)
 static s8 RedBeaker_ReadS8(const void *base, int offset)
 {
 	return *(const s8 *)(const void *)((const char *)base + offset);
-}
-
-static u32 RedBeaker_Ptr24(const void *ptr)
-{
-	return CtrGpu_PrimToOTLink24(ptr);
 }
 
 static u32 RedBeaker_NextRngByte(u32 *state0, u32 *state1)
@@ -72,32 +74,26 @@ static int RedBeaker_IsVisible(u32 gteFlag, u32 sxy0, u32 sxy1, u32 screenBounds
 	return (s32)(bounds << 16) >= 0;
 }
 
-static void RedBeaker_LinkPrimitive(u32 *prim, u_long *ot, u32 tag)
-{
-	prim[0] = (u32)*ot | tag;
-	*ot = (u_long)RedBeaker_Ptr24(prim);
-}
-
 static void RedBeaker_EmitLine(u32 **primCursor, u_long *ot, u32 color)
 {
-	u32 *prim = *primCursor;
+	LINE_G2 *line = (LINE_G2 *)*primCursor;
 
-	prim[1] = 0x52000000;
-	prim[2] = MFC2(12);
-	prim[3] = color;
-	prim[4] = MFC2(13);
-	RedBeaker_LinkPrimitive(prim, ot, 0x04000000);
-	*primCursor = prim + 5;
+	CtrGpu_WriteColorCode(&line->r0, 0x52000000);
+	CtrGpu_WritePackedXY(&line->x0, MFC2(12));
+	CtrGpu_WriteColorCode(&line->r1, color);
+	CtrGpu_WritePackedXY(&line->x1, MFC2(13));
+	CtrGpu_LinkPacket24(ot, &line->tag, line, 0x04000000);
+	*primCursor = (u32 *)(line + 1);
 }
 
 static void RedBeaker_EmitDrawMode(u32 **primCursor, u_long *ot, u32 drawMode)
 {
-	u32 *prim = *primCursor;
+	struct CtrGpuDrawModePacket *packet = (struct CtrGpuDrawModePacket *)*primCursor;
 
-	prim[1] = drawMode;
-	prim[2] = 0;
-	RedBeaker_LinkPrimitive(prim, ot, 0x02000000);
-	*primCursor = prim + 3;
+	packet->drawMode = drawMode;
+	packet->terminator = 0;
+	CtrGpu_LinkPacket24(ot, &packet->tag, packet, 0x02000000);
+	*primCursor = (u32 *)(packet + 1);
 }
 
 static void RedBeaker_RenderPass(u32 **primCursor, u_long *ot, u32 color, u32 drawMode, s32 frameCount, u32 scrollXY, u32 nextScrollXY, s32 scrollZ,

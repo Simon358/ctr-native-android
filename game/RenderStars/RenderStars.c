@@ -1,14 +1,13 @@
 #include <common.h>
 
+_Static_assert(sizeof(TILE_1) == 0x0C);
+_Static_assert(offsetof(TILE_1, tag) == 0x00);
+_Static_assert(offsetof(TILE_1, r0) == 0x04);
+_Static_assert(offsetof(TILE_1, x0) == 0x08);
+
 static s32 RenderStars_MulLowShift(s32 value, s32 scale)
 {
 	return (s32)(u32)((s64)value * (s64)scale) >> 12;
-}
-
-static void RenderStars_LinkPrimitive(u32 *prim, u_long *ot, u32 tag)
-{
-	prim[0] = *ot | tag;
-	*ot = (u_long)CtrGpu_PrimToOTLink24(prim);
 }
 
 static u32 RenderStars_NextRngSelfOr(u32 *state0, u32 *state1)
@@ -170,10 +169,12 @@ void RenderStars(struct PushBuffer *pb, struct PrimMem *primMem, struct Stars *s
 
 			if (RenderStars_IsVisible(gteFlag, sxy))
 			{
-				prim[1] = color;
-				prim[2] = sxy;
-				RenderStars_LinkPrimitive(prim, ot, 0x02000000);
-				prim += 3;
+				TILE_1 *star = (TILE_1 *)prim;
+
+				CtrGpu_WriteColorCode(&star->r0, color);
+				CtrGpu_WritePackedXY(&star->x0, sxy);
+				CtrGpu_LinkPacket24(ot, &star->tag, star, 0x02000000);
+				prim = (u32 *)(star + 1);
 			}
 
 			starIndex--;
@@ -181,10 +182,11 @@ void RenderStars(struct PushBuffer *pb, struct PrimMem *primMem, struct Stars *s
 
 		// Retail emits a length-2 draw-env packet: E1 tpage followed by a
 		// zero terminator word.
-		prim[1] = 0xe1000a20;
-		prim[2] = 0;
-		RenderStars_LinkPrimitive(prim, ot, 0x02000000);
-		prim += 3;
+		struct CtrGpuDrawModePacket *drawMode = (struct CtrGpuDrawModePacket *)prim;
+		drawMode->drawMode = 0xe1000a20;
+		drawMode->terminator = 0;
+		CtrGpu_LinkPacket24(ot, &drawMode->tag, drawMode, 0x02000000);
+		prim = (u32 *)(drawMode + 1);
 	}
 
 	primMem->cursor = prim;

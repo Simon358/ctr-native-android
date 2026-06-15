@@ -9,14 +9,16 @@ struct RenderWeatherTrigPair
 	s32 cos;
 };
 
+_Static_assert(sizeof(LINE_G2) == 0x14);
+_Static_assert(offsetof(LINE_G2, tag) == 0x00);
+_Static_assert(offsetof(LINE_G2, r0) == 0x04);
+_Static_assert(offsetof(LINE_G2, x0) == 0x08);
+_Static_assert(offsetof(LINE_G2, r1) == 0x0C);
+_Static_assert(offsetof(LINE_G2, x1) == 0x10);
+
 static u32 RenderWeather_ReadWord(const void *base, int offset)
 {
 	return *(const u32 *)(const void *)((const char *)base + offset);
-}
-
-static u32 RenderWeather_Ptr24(const void *ptr)
-{
-	return CtrGpu_PrimToOTLink24(ptr);
 }
 
 static struct RenderWeatherTrigPair RenderWeather_TrigAngleSinCos(int angle)
@@ -90,12 +92,6 @@ static int RenderWeather_IsVisible(u32 gteFlag, u32 sxy0, u32 sxy1, u32 screenBo
 		return 0;
 
 	return (s32)(bounds << 16) >= 0;
-}
-
-static void RenderWeather_LinkPrimitive(u32 *prim, u_long *ot, u32 tag)
-{
-	prim[0] = (u32)*ot | tag;
-	*ot = (u_long)RenderWeather_Ptr24(prim);
 }
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x8006f9a8-0x8006fe08
@@ -287,12 +283,14 @@ void RenderWeather(struct PushBuffer *pb, struct PrimMem *primMem, struct RainBu
 
 				if (RenderWeather_IsVisible(gteFlag, sxy0, sxy1, screenBounds))
 				{
-					prim[1] = *scratchColorTop;
-					prim[3] = *scratchColorBottom;
-					prim[2] = sxy0;
-					prim[4] = sxy1;
-					RenderWeather_LinkPrimitive(prim, ot, 0x04000000);
-					prim += 5;
+					LINE_G2 *line = (LINE_G2 *)prim;
+
+					CtrGpu_WriteColorCode(&line->r0, *scratchColorTop);
+					CtrGpu_WritePackedXY(&line->x0, sxy0);
+					CtrGpu_WriteColorCode(&line->r1, *scratchColorBottom);
+					CtrGpu_WritePackedXY(&line->x1, sxy1);
+					CtrGpu_LinkPacket24(ot, &line->tag, line, 0x04000000);
+					prim = (u32 *)(line + 1);
 				}
 
 				continue;
@@ -302,10 +300,11 @@ void RenderWeather(struct PushBuffer *pb, struct PrimMem *primMem, struct RainBu
 		RenderWeather_NextRng(&state0, &state1, &rngXY, &rngZ);
 	}
 
-	prim[1] = fillMode;
-	prim[2] = 0;
-	RenderWeather_LinkPrimitive(prim, ot, 0x02000000);
-	prim += 3;
+	struct CtrGpuDrawModePacket *drawMode = (struct CtrGpuDrawModePacket *)prim;
+	drawMode->drawMode = fillMode;
+	drawMode->terminator = 0;
+	CtrGpu_LinkPacket24(ot, &drawMode->tag, drawMode, 0x02000000);
+	prim = (u32 *)(drawMode + 1);
 
 	primMem->cursor = prim;
 }

@@ -195,6 +195,92 @@ _Static_assert(offsetof(struct RenderBucketSplitVertex, splitDist) == 0xe);
 _Static_assert(offsetof(struct RenderBucketSplitVertex, sxy) == 0x10);
 _Static_assert(offsetof(struct RenderBucketSplitVertex, sz) == 0x14);
 
+struct RenderBucketGhostMaskPacket
+{
+	u32 tag;
+	u32 drawMode;
+	u32 pad;
+	u32 colorAndCode;
+	u32 xy0;
+	u32 xy1;
+	u32 xy2;
+};
+
+struct RenderBucketTaglessG3
+{
+	u32 color0AndCode;
+	u32 xy0;
+	u32 color1;
+	u32 xy1;
+	u32 color2;
+	u32 xy2;
+};
+
+struct RenderBucketTaglessGT3
+{
+	u32 color0AndCode;
+	u32 xy0;
+	u32 uv0;
+	u32 color1;
+	u32 xy1;
+	u32 uv1;
+	u32 color2;
+	u32 xy2;
+	u32 uv2;
+};
+
+struct RenderBucketGhostFlatPacket
+{
+	struct RenderBucketGhostMaskPacket mask;
+	u32 drawMode;
+	u32 pad;
+	struct RenderBucketTaglessG3 body;
+};
+
+struct RenderBucketGhostTexturedPacket
+{
+	struct RenderBucketGhostMaskPacket mask;
+	struct RenderBucketTaglessGT3 body;
+};
+
+_Static_assert(sizeof(struct RenderBucketGhostMaskPacket) == 0x1C);
+_Static_assert(offsetof(struct RenderBucketGhostMaskPacket, tag) == 0x00);
+_Static_assert(offsetof(struct RenderBucketGhostMaskPacket, drawMode) == 0x04);
+_Static_assert(offsetof(struct RenderBucketGhostMaskPacket, pad) == 0x08);
+_Static_assert(offsetof(struct RenderBucketGhostMaskPacket, colorAndCode) == 0x0C);
+_Static_assert(offsetof(struct RenderBucketGhostMaskPacket, xy0) == 0x10);
+_Static_assert(offsetof(struct RenderBucketGhostMaskPacket, xy1) == 0x14);
+_Static_assert(offsetof(struct RenderBucketGhostMaskPacket, xy2) == 0x18);
+
+_Static_assert(sizeof(struct RenderBucketTaglessG3) == 0x18);
+_Static_assert(offsetof(struct RenderBucketTaglessG3, color0AndCode) == 0x00);
+_Static_assert(offsetof(struct RenderBucketTaglessG3, xy0) == 0x04);
+_Static_assert(offsetof(struct RenderBucketTaglessG3, color1) == 0x08);
+_Static_assert(offsetof(struct RenderBucketTaglessG3, xy1) == 0x0C);
+_Static_assert(offsetof(struct RenderBucketTaglessG3, color2) == 0x10);
+_Static_assert(offsetof(struct RenderBucketTaglessG3, xy2) == 0x14);
+
+_Static_assert(sizeof(struct RenderBucketTaglessGT3) == 0x24);
+_Static_assert(offsetof(struct RenderBucketTaglessGT3, color0AndCode) == 0x00);
+_Static_assert(offsetof(struct RenderBucketTaglessGT3, xy0) == 0x04);
+_Static_assert(offsetof(struct RenderBucketTaglessGT3, uv0) == 0x08);
+_Static_assert(offsetof(struct RenderBucketTaglessGT3, color1) == 0x0C);
+_Static_assert(offsetof(struct RenderBucketTaglessGT3, xy1) == 0x10);
+_Static_assert(offsetof(struct RenderBucketTaglessGT3, uv1) == 0x14);
+_Static_assert(offsetof(struct RenderBucketTaglessGT3, color2) == 0x18);
+_Static_assert(offsetof(struct RenderBucketTaglessGT3, xy2) == 0x1C);
+_Static_assert(offsetof(struct RenderBucketTaglessGT3, uv2) == 0x20);
+
+_Static_assert(sizeof(struct RenderBucketGhostFlatPacket) == 0x3C);
+_Static_assert(offsetof(struct RenderBucketGhostFlatPacket, mask) == 0x00);
+_Static_assert(offsetof(struct RenderBucketGhostFlatPacket, drawMode) == 0x1C);
+_Static_assert(offsetof(struct RenderBucketGhostFlatPacket, pad) == 0x20);
+_Static_assert(offsetof(struct RenderBucketGhostFlatPacket, body) == 0x24);
+
+_Static_assert(sizeof(struct RenderBucketGhostTexturedPacket) == 0x40);
+_Static_assert(offsetof(struct RenderBucketGhostTexturedPacket, mask) == 0x00);
+_Static_assert(offsetof(struct RenderBucketGhostTexturedPacket, body) == 0x1C);
+
 #define RB_RETAIL_INST_FUNC3_SPLIT_WHITE  ((u32)0x8006d404U)
 #define RB_RETAIL_INST_FUNC3_SPLIT_INTERP ((u32)0x8006d428U)
 
@@ -2865,7 +2951,7 @@ static int RenderBucket_DrawInstPrim_GhostAtRange(struct RenderBucketDrawContext
 {
 	u_long *otEntry;
 	int alpha = ctx->idpp->alphaScale;
-	u32 *p;
+	struct RenderBucketGhostMaskPacket *mask;
 
 	otEntry = RenderBucket_GetNormalOTEntry(activeRange, depthMac0);
 	if (otEntry == 0)
@@ -2887,44 +2973,47 @@ static int RenderBucket_DrawInstPrim_GhostAtRange(struct RenderBucketDrawContext
 
 	gte_dpct();
 
-	p = (u32 *)ctx->primMem->cursor;
-	p[1] = 0xe1000a40;
-	p[2] = 0;
-	p[3] = *CTR_SCRATCHPAD_PTR(u32, 0x124);
-	p[4] = (u32)MFC2(12);
-	p[5] = (u32)MFC2(13);
-	p[6] = (u32)MFC2(14);
+	mask = (struct RenderBucketGhostMaskPacket *)ctx->primMem->cursor;
+	mask->drawMode = 0xe1000a40;
+	mask->pad = 0;
+	mask->colorAndCode = *CTR_SCRATCHPAD_PTR(u32, 0x124);
+	mask->xy0 = (u32)MFC2(12);
+	mask->xy1 = (u32)MFC2(13);
+	mask->xy2 = (u32)MFC2(14);
 
 	if (tex == 0)
 	{
-		p[7] = 0xe1000a20;
-		p[8] = 0;
-		p[9] = 0x32000000 | (u32)MFC2(20);
-		p[10] = (u32)MFC2(12);
-		p[11] = (u32)MFC2(21);
-		p[12] = (u32)MFC2(13);
-		p[13] = (u32)MFC2(22);
-		p[14] = (u32)MFC2(14);
+		struct RenderBucketGhostFlatPacket *packet = (struct RenderBucketGhostFlatPacket *)mask;
 
-		RenderBucket_LinkPrimRaw(otEntry, p, 0x0e000000);
-		ctx->primMem->cursor = (char *)p + 0x3c;
+		packet->drawMode = 0xe1000a20;
+		packet->pad = 0;
+		packet->body.color0AndCode = 0x32000000 | (u32)MFC2(20);
+		packet->body.xy0 = (u32)MFC2(12);
+		packet->body.color1 = (u32)MFC2(21);
+		packet->body.xy1 = (u32)MFC2(13);
+		packet->body.color2 = (u32)MFC2(22);
+		packet->body.xy2 = (u32)MFC2(14);
+
+		RenderBucket_LinkPrimRaw(otEntry, packet, 0x0e000000);
+		ctx->primMem->cursor = packet + 1;
 	}
 	else
 	{
+		struct RenderBucketGhostTexturedPacket *packet = (struct RenderBucketGhostTexturedPacket *)mask;
 		u32 texWord1 = (*(u32 *)&tex->u1 & ~0x00600000U) | 0x00200000U;
 
-		p[7] = 0x36000000 | (u32)MFC2(20);
-		p[8] = (u32)MFC2(12);
-		p[9] = *(u32 *)&tex->u0;
-		p[10] = (u32)MFC2(21);
-		p[11] = (u32)MFC2(13);
-		p[12] = texWord1;
-		p[13] = (u32)MFC2(22);
-		p[14] = (u32)MFC2(14);
-		p[15] = *(u32 *)&tex->u2;
+		packet->body.color0AndCode = 0x36000000 | (u32)MFC2(20);
+		packet->body.xy0 = (u32)MFC2(12);
+		packet->body.uv0 = *(u32 *)&tex->u0;
+		packet->body.color1 = (u32)MFC2(21);
+		packet->body.xy1 = (u32)MFC2(13);
+		packet->body.uv1 = texWord1;
+		packet->body.color2 = (u32)MFC2(22);
+		packet->body.xy2 = (u32)MFC2(14);
+		packet->body.uv2 = *(u32 *)&tex->u2;
 
-		RenderBucket_LinkPrimRaw(otEntry, p, 0x0f000000);
-		ctx->primMem->cursor = (char *)p + 0x40;
+		RenderBucket_LinkPrimRaw(otEntry, packet, 0x0f000000);
+		ctx->primMem->cursor = packet + 1;
 	}
 
 	return 0;
@@ -3223,7 +3312,7 @@ static int RenderBucket_DrawSplitPrimitiveGhostAtRange(struct RenderBucketDrawCo
 {
 	u_long *otEntry;
 	int alpha = ctx->idpp->alphaScale;
-	u32 *p;
+	struct RenderBucketGhostMaskPacket *mask;
 
 	otEntry = RenderBucket_GetNormalOTEntry(activeRange, depthMac0);
 	if (otEntry == 0)
@@ -3244,46 +3333,49 @@ static int RenderBucket_DrawSplitPrimitiveGhostAtRange(struct RenderBucketDrawCo
 
 	// NOTE(aalhendi): Source-backs generated-split use of retail 0x8006d670:
 	// same ghost primitive packet, but generated vertices supply SXY and UV.
-	p = (u32 *)ctx->primMem->cursor;
-	p[1] = 0xe1000a40;
-	p[2] = 0;
-	p[3] = *CTR_SCRATCHPAD_PTR(u32, 0x124);
-	p[4] = v0->sxy;
-	p[5] = v1->sxy;
-	p[6] = v2->sxy;
+	mask = (struct RenderBucketGhostMaskPacket *)ctx->primMem->cursor;
+	mask->drawMode = 0xe1000a40;
+	mask->pad = 0;
+	mask->colorAndCode = *CTR_SCRATCHPAD_PTR(u32, 0x124);
+	mask->xy0 = v0->sxy;
+	mask->xy1 = v1->sxy;
+	mask->xy2 = v2->sxy;
 
 	if (tex == 0)
 	{
-		p[7] = 0xe1000a20;
-		p[8] = 0;
-		p[9] = 0x32000000 | (u32)MFC2(20);
-		p[10] = v0->sxy;
-		p[11] = (u32)MFC2(21);
-		p[12] = v1->sxy;
-		p[13] = (u32)MFC2(22);
-		p[14] = v2->sxy;
+		struct RenderBucketGhostFlatPacket *packet = (struct RenderBucketGhostFlatPacket *)mask;
 
-		RenderBucket_LinkPrimRaw(otEntry, p, 0x0e000000);
-		ctx->primMem->cursor = (char *)p + 0x3c;
+		packet->drawMode = 0xe1000a20;
+		packet->pad = 0;
+		packet->body.color0AndCode = 0x32000000 | (u32)MFC2(20);
+		packet->body.xy0 = v0->sxy;
+		packet->body.color1 = (u32)MFC2(21);
+		packet->body.xy1 = v1->sxy;
+		packet->body.color2 = (u32)MFC2(22);
+		packet->body.xy2 = v2->sxy;
+
+		RenderBucket_LinkPrimRaw(otEntry, packet, 0x0e000000);
+		ctx->primMem->cursor = packet + 1;
 	}
 	else
 	{
+		struct RenderBucketGhostTexturedPacket *packet = (struct RenderBucketGhostTexturedPacket *)mask;
 		u32 texWord0 = RenderBucket_TextureWordWithSplitUv(*(u32 *)&tex->u0, v0->uv);
 		u32 texWord1 = RenderBucket_TextureWordWithSplitUv((*(u32 *)&tex->u1 & ~0x00600000U) | 0x00200000U, v1->uv);
 		u32 texWord2 = RenderBucket_TextureWordWithSplitUv(*(u32 *)&tex->u2, v2->uv);
 
-		p[7] = 0x36000000 | (u32)MFC2(20);
-		p[8] = v0->sxy;
-		p[9] = texWord0;
-		p[10] = (u32)MFC2(21);
-		p[11] = v1->sxy;
-		p[12] = texWord1;
-		p[13] = (u32)MFC2(22);
-		p[14] = v2->sxy;
-		p[15] = texWord2;
+		packet->body.color0AndCode = 0x36000000 | (u32)MFC2(20);
+		packet->body.xy0 = v0->sxy;
+		packet->body.uv0 = texWord0;
+		packet->body.color1 = (u32)MFC2(21);
+		packet->body.xy1 = v1->sxy;
+		packet->body.uv1 = texWord1;
+		packet->body.color2 = (u32)MFC2(22);
+		packet->body.xy2 = v2->sxy;
+		packet->body.uv2 = texWord2;
 
-		RenderBucket_LinkPrimRaw(otEntry, p, 0x0f000000);
-		ctx->primMem->cursor = (char *)p + 0x40;
+		RenderBucket_LinkPrimRaw(otEntry, packet, 0x0f000000);
+		ctx->primMem->cursor = packet + 1;
 	}
 
 	return 0;

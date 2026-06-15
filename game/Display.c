@@ -1,5 +1,30 @@
 #include <common.h>
 
+struct DisplayBlurFlatPacket
+{
+	u32 tag;
+	u32 drawModeStart;
+	u32 maskBitEnable;
+	u32 colorAndCode;
+	u32 xy0;
+	u32 xy1;
+	u32 xy2;
+	u32 xy3;
+	u32 drawModeEnd;
+	u32 maskBitDisable;
+};
+
+_Static_assert(sizeof(struct DisplayBlurFlatPacket) == 0x28);
+_Static_assert(offsetof(struct DisplayBlurFlatPacket, tag) == 0x00);
+_Static_assert(offsetof(struct DisplayBlurFlatPacket, drawModeStart) == 0x04);
+_Static_assert(offsetof(struct DisplayBlurFlatPacket, maskBitEnable) == 0x08);
+_Static_assert(offsetof(struct DisplayBlurFlatPacket, colorAndCode) == 0x0C);
+_Static_assert(offsetof(struct DisplayBlurFlatPacket, xy0) == 0x10);
+_Static_assert(offsetof(struct DisplayBlurFlatPacket, xy1) == 0x14);
+_Static_assert(offsetof(struct DisplayBlurFlatPacket, xy2) == 0x18);
+_Static_assert(offsetof(struct DisplayBlurFlatPacket, xy3) == 0x1C);
+_Static_assert(offsetof(struct DisplayBlurFlatPacket, drawModeEnd) == 0x20);
+_Static_assert(offsetof(struct DisplayBlurFlatPacket, maskBitDisable) == 0x24);
 
 static u32 DISPLAY_Blur_Ptr24(const void *ptr)
 {
@@ -9,11 +34,6 @@ static u32 DISPLAY_Blur_Ptr24(const void *ptr)
 static u32 DISPLAY_Blur_PackS16Pair(int x, int y)
 {
 	return ((u32)(u16)x) | ((u32)(u16)y << 16);
-}
-
-static void DISPLAY_Blur_WriteLo16(u32 *word, u16 value)
-{
-	*(u16 *)word = value;
 }
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80023a40-0x80023d4c
@@ -85,19 +105,20 @@ u32 *DISPLAY_Blur_SubFunc(u32 *prim, s16 *tile)
 	int dstW = tile[6];
 	int dstH = tile[7];
 	u32 tpage = (((u32)srcY & 0x100) >> 4) | (((u32)srcX & 0x3ff) >> 6) | 0x100 | (((u32)srcY & 0x200) << 2);
+	POLY_FT4 *poly = (POLY_FT4 *)prim;
 
-	prim[3] = u0 | v0;
-	prim[2] = DISPLAY_Blur_PackS16Pair(dstX, dstY);
-	prim[4] = DISPLAY_Blur_PackS16Pair(dstX + dstW, dstY);
-	prim[6] = DISPLAY_Blur_PackS16Pair(dstX, dstY + dstH);
-	prim[8] = DISPLAY_Blur_PackS16Pair(dstX + dstW, dstY + dstH);
-	DISPLAY_Blur_WriteLo16(&prim[7], (u16)(u0 | v1));
-	DISPLAY_Blur_WriteLo16(&prim[9], (u16)(u1 | v1));
-	*(u8 *)((u8 *)prim + 7) = 0x2f;
-	prim[0] = DISPLAY_Blur_Ptr24(prim + 10) | 0x09000000;
-	prim[5] = u1 | v0 | (tpage << 16);
+	CtrGpu_WritePackedUVWord(&poly->u0, u0 | v0);
+	CtrGpu_WritePackedXY(&poly->x0, DISPLAY_Blur_PackS16Pair(dstX, dstY));
+	CtrGpu_WritePackedXY(&poly->x1, DISPLAY_Blur_PackS16Pair(dstX + dstW, dstY));
+	CtrGpu_WritePackedXY(&poly->x2, DISPLAY_Blur_PackS16Pair(dstX, dstY + dstH));
+	CtrGpu_WritePackedXY(&poly->x3, DISPLAY_Blur_PackS16Pair(dstX + dstW, dstY + dstH));
+	CtrGpu_WritePackedUV(&poly->u2, (u16)(u0 | v1));
+	CtrGpu_WritePackedUV(&poly->u3, (u16)(u1 | v1));
+	poly->code = 0x2f;
+	poly->tag = DISPLAY_Blur_Ptr24(poly + 1) | 0x09000000;
+	CtrGpu_WritePackedUVWord(&poly->u1, u1 | v0 | (tpage << 16));
 
-	return prim + 10;
+	return (u32 *)(poly + 1);
 }
 
 
@@ -115,25 +136,26 @@ void DISPLAY_Blur_Main(struct PushBuffer *pb, int strength)
 
 	if (strength < 1 || (((gGT->db[1 - gGT->swapchainIndex].blurCameraMask >> (cameraID & 0x1f)) & 1) == 0))
 	{
+		struct DisplayBlurFlatPacket *packet = (struct DisplayBlurFlatPacket *)prim;
 		int x = pb->rect.x;
 		int y = pb->rect.y;
 		int w = pb->rect.w;
 		int h = pb->rect.h;
 
-		prim[8] = 0xe1000a00;
-		prim[1] = 0xe1000a20;
-		prim[2] = 0xe6000001;
-		prim[9] = 0xe6000000;
-		prim[4] = DISPLAY_Blur_PackS16Pair(x, y);
-		prim[5] = DISPLAY_Blur_PackS16Pair(x + w, y);
-		prim[6] = DISPLAY_Blur_PackS16Pair(x, y + h);
-		prim[7] = DISPLAY_Blur_PackS16Pair(x + w, y + h);
-		prim[3] = (strength < 0) ? 0x2affffff : 0x2a000000;
+		packet->drawModeEnd = 0xe1000a00;
+		packet->drawModeStart = 0xe1000a20;
+		packet->maskBitEnable = 0xe6000001;
+		packet->maskBitDisable = 0xe6000000;
+		packet->xy0 = DISPLAY_Blur_PackS16Pair(x, y);
+		packet->xy1 = DISPLAY_Blur_PackS16Pair(x + w, y);
+		packet->xy2 = DISPLAY_Blur_PackS16Pair(x, y + h);
+		packet->xy3 = DISPLAY_Blur_PackS16Pair(x + w, y + h);
+		packet->colorAndCode = (strength < 0) ? 0x2affffff : 0x2a000000;
 
 		ot = gGT->otSwapchainDB[gGT->swapchainIndex];
-		prim[0] = (u32)*ot | 0x09000000;
-		*ot = (u_long)DISPLAY_Blur_Ptr24(prim);
-		nextPrim = prim + 10;
+		packet->tag = (u32)*ot | 0x09000000;
+		*ot = (u_long)DISPLAY_Blur_Ptr24(packet);
+		nextPrim = (u32 *)(packet + 1);
 	}
 	else
 	{
@@ -173,7 +195,7 @@ void DISPLAY_Blur_Main(struct PushBuffer *pb, int strength)
 		scratch[3] = pb->rect.h - (insetY * 2);
 
 		nextPrim = DISPLAY_Blur_SubFunc(prim, scratch);
-		nextPrim[-10] = oldTag | 0x09000000;
+		((POLY_FT4 *)nextPrim - 1)->tag = oldTag | 0x09000000;
 	}
 
 	backBuffer->primMem.cursor = nextPrim;

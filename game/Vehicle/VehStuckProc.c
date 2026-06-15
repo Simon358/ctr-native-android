@@ -1235,6 +1235,42 @@ struct VehWarpDustProjected
 	u32 depth;
 };
 
+struct VehWarpDustG4Body
+{
+	u32 color0AndCode;
+	u32 xy0;
+	u32 color1;
+	u32 xy1;
+	u32 color2;
+	u32 xy2;
+	u32 color3;
+	u32 xy3;
+};
+
+struct VehWarpDustPacket
+{
+	u32 tag;
+	u32 drawMode;
+	struct VehWarpDustG4Body leftStrip;
+	struct VehWarpDustG4Body rightStrip;
+};
+
+_Static_assert(sizeof(struct VehWarpDustG4Body) == 0x20);
+_Static_assert(offsetof(struct VehWarpDustG4Body, color0AndCode) == 0x00);
+_Static_assert(offsetof(struct VehWarpDustG4Body, xy0) == 0x04);
+_Static_assert(offsetof(struct VehWarpDustG4Body, color1) == 0x08);
+_Static_assert(offsetof(struct VehWarpDustG4Body, xy1) == 0x0C);
+_Static_assert(offsetof(struct VehWarpDustG4Body, color2) == 0x10);
+_Static_assert(offsetof(struct VehWarpDustG4Body, xy2) == 0x14);
+_Static_assert(offsetof(struct VehWarpDustG4Body, color3) == 0x18);
+_Static_assert(offsetof(struct VehWarpDustG4Body, xy3) == 0x1C);
+
+_Static_assert(sizeof(struct VehWarpDustPacket) == 0x48);
+_Static_assert(offsetof(struct VehWarpDustPacket, tag) == 0x00);
+_Static_assert(offsetof(struct VehWarpDustPacket, drawMode) == 0x04);
+_Static_assert(offsetof(struct VehWarpDustPacket, leftStrip) == 0x08);
+_Static_assert(offsetof(struct VehWarpDustPacket, rightStrip) == 0x28);
+
 static s16 VehWarpDust_AddHalf(s16 value, int delta)
 {
 	return (s16)CTR_MipsAddLo((u16)value, delta);
@@ -1269,30 +1305,32 @@ static void VehWarpDust_Project(SVECTOR *point, int offsetX, int offsetY, int of
 
 static void VehWarpDust_EmitSegment(u32 **primCursor, struct PushBuffer *pb, const struct VehWarpDustProjected *prev, const struct VehWarpDustProjected *curr)
 {
-	u32 *prim = *primCursor;
+	struct VehWarpDustPacket *packet = (struct VehWarpDustPacket *)*primCursor;
 	u_long *ot = pb->ptrOT + CTR_MipsSra((s32)curr->depth, 6);
 
-	prim[1] = 0xe1000a20;
-	prim[2] = 0x3a000000;
-	prim[3] = curr->sxy0;
-	prim[4] = 0x007f1f3f;
-	prim[5] = curr->sxy1;
-	prim[6] = 0;
-	prim[7] = prev->sxy0;
-	prim[8] = 0x007f1f3f;
-	prim[9] = prev->sxy1;
-	prim[10] = 0x3a000000;
-	prim[11] = curr->sxy2;
-	prim[12] = 0x007f1f3f;
-	prim[13] = curr->sxy1;
-	prim[14] = 0;
-	prim[15] = prev->sxy2;
-	prim[16] = 0x007f1f3f;
-	prim[17] = prev->sxy1;
+	packet->drawMode = 0xe1000a20;
 
-	prim[0] = (u32)*ot | 0x11000000;
-	*ot = (u_long)VehWarpDust_Ptr24(prim);
-	*primCursor = prim + 18;
+	packet->leftStrip.color0AndCode = 0x3a000000;
+	packet->leftStrip.xy0 = curr->sxy0;
+	packet->leftStrip.color1 = 0x007f1f3f;
+	packet->leftStrip.xy1 = curr->sxy1;
+	packet->leftStrip.color2 = 0;
+	packet->leftStrip.xy2 = prev->sxy0;
+	packet->leftStrip.color3 = 0x007f1f3f;
+	packet->leftStrip.xy3 = prev->sxy1;
+
+	packet->rightStrip.color0AndCode = 0x3a000000;
+	packet->rightStrip.xy0 = curr->sxy2;
+	packet->rightStrip.color1 = 0x007f1f3f;
+	packet->rightStrip.xy1 = curr->sxy1;
+	packet->rightStrip.color2 = 0;
+	packet->rightStrip.xy2 = prev->sxy2;
+	packet->rightStrip.color3 = 0x007f1f3f;
+	packet->rightStrip.xy3 = prev->sxy1;
+
+	packet->tag = (u32)*ot | 0x11000000;
+	*ot = (u_long)VehWarpDust_Ptr24(packet);
+	*primCursor = (u32 *)(packet + 1);
 }
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80068644-0x80068be8.

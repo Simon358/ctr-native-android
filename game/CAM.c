@@ -8,6 +8,41 @@ struct CAMSkyboxGlowGradient
 	u32 colorTo;
 };
 
+_Static_assert(sizeof(POLY_G3) == 0x1C);
+_Static_assert(offsetof(POLY_G3, tag) == 0x00);
+_Static_assert(offsetof(POLY_G3, r0) == 0x04);
+_Static_assert(offsetof(POLY_G3, x0) == 0x08);
+_Static_assert(offsetof(POLY_G3, r1) == 0x0C);
+_Static_assert(offsetof(POLY_G3, x1) == 0x10);
+_Static_assert(offsetof(POLY_G3, r2) == 0x14);
+_Static_assert(offsetof(POLY_G3, x2) == 0x18);
+
+_Static_assert(sizeof(POLY_G4) == 0x24);
+_Static_assert(offsetof(POLY_G4, tag) == 0x00);
+_Static_assert(offsetof(POLY_G4, r0) == 0x04);
+_Static_assert(offsetof(POLY_G4, x0) == 0x08);
+_Static_assert(offsetof(POLY_G4, r1) == 0x0C);
+_Static_assert(offsetof(POLY_G4, x1) == 0x10);
+_Static_assert(offsetof(POLY_G4, r2) == 0x14);
+_Static_assert(offsetof(POLY_G4, x2) == 0x18);
+_Static_assert(offsetof(POLY_G4, r3) == 0x1C);
+_Static_assert(offsetof(POLY_G4, x3) == 0x20);
+
+_Static_assert(sizeof(POLY_F3) == 0x14);
+_Static_assert(offsetof(POLY_F3, tag) == 0x00);
+_Static_assert(offsetof(POLY_F3, r0) == 0x04);
+_Static_assert(offsetof(POLY_F3, x0) == 0x08);
+_Static_assert(offsetof(POLY_F3, x1) == 0x0C);
+_Static_assert(offsetof(POLY_F3, x2) == 0x10);
+
+_Static_assert(sizeof(POLY_F4) == 0x18);
+_Static_assert(offsetof(POLY_F4, tag) == 0x00);
+_Static_assert(offsetof(POLY_F4, r0) == 0x04);
+_Static_assert(offsetof(POLY_F4, x0) == 0x08);
+_Static_assert(offsetof(POLY_F4, x1) == 0x0C);
+_Static_assert(offsetof(POLY_F4, x2) == 0x10);
+_Static_assert(offsetof(POLY_F4, x3) == 0x14);
+
 enum
 {
 	CAM_FOLLOW_DRIVER_QUAD_FLAGS_SKIP_TERRAIN_HEIGHT = 0x4100,
@@ -79,65 +114,65 @@ static int CAM_SkyboxGlow_CalcTilt(struct PushBuffer *pb)
 
 static void CAM_SkyboxGlow_EmitG3(struct PrimMem *primMem, u_long *ot, u32 color0, u32 xy0, u32 color1, u32 xy1, u32 color2, u32 xy2)
 {
-	u32 *prim = primMem->cursor;
+	POLY_G3 *poly = primMem->cursor;
 
-	prim[1] = (color0 & 0xffffff) | 0x30000000;
-	prim[2] = xy0;
-	prim[3] = color1 & 0xffffff;
-	prim[4] = xy1;
-	prim[5] = color2 & 0xffffff;
-	prim[6] = xy2;
-	prim[0] = *ot | 0x06000000;
-	*ot = CAM_SkyboxGlow_PrimAddr(prim);
+	CtrGpu_WriteColorCode(&poly->r0, CtrGpu_PackColorCode(color0, 0x30));
+	CtrGpu_WritePackedXY(&poly->x0, xy0);
+	CtrGpu_WriteColorCode(&poly->r1, color1 & 0xffffff);
+	CtrGpu_WritePackedXY(&poly->x1, xy1);
+	CtrGpu_WriteColorCode(&poly->r2, color2 & 0xffffff);
+	CtrGpu_WritePackedXY(&poly->x2, xy2);
+	poly->tag = *ot | 0x06000000;
+	*ot = CAM_SkyboxGlow_PrimAddr(poly);
 
-	primMem->cursor = prim + 7;
+	primMem->cursor = poly + 1;
 }
 
 static void CAM_SkyboxGlow_EmitG4(struct PrimMem *primMem, u_long *ot, u32 color0, u32 xy0, u32 color1, u32 xy1, u32 color2, u32 xy2, u32 color3, u32 xy3)
 {
-	u32 *prim = primMem->cursor;
+	POLY_G4 *poly = primMem->cursor;
 
-	prim[1] = (color0 & 0xffffff) | 0x38000000;
-	prim[2] = xy0;
-	prim[3] = color1 & 0xffffff;
-	prim[4] = xy1;
-	prim[5] = color2 & 0xffffff;
-	prim[6] = xy2;
-	prim[7] = color3 & 0xffffff;
-	prim[8] = xy3;
-	prim[0] = *ot | 0x08000000;
-	*ot = CAM_SkyboxGlow_PrimAddr(prim);
+	CtrGpu_WriteColorCode(&poly->r0, CtrGpu_PackColorCode(color0, 0x38));
+	CtrGpu_WritePackedXY(&poly->x0, xy0);
+	CtrGpu_WriteColorCode(&poly->r1, color1 & 0xffffff);
+	CtrGpu_WritePackedXY(&poly->x1, xy1);
+	CtrGpu_WriteColorCode(&poly->r2, color2 & 0xffffff);
+	CtrGpu_WritePackedXY(&poly->x2, xy2);
+	CtrGpu_WriteColorCode(&poly->r3, color3 & 0xffffff);
+	CtrGpu_WritePackedXY(&poly->x3, xy3);
+	poly->tag = *ot | 0x08000000;
+	*ot = CAM_SkyboxGlow_PrimAddr(poly);
 
-	primMem->cursor = prim + 9;
+	primMem->cursor = poly + 1;
 }
 
 static void CAM_SkyboxGlow_EmitF3(struct PrimMem *primMem, u_long *ot, u32 color, u32 xy0, u32 xy1, u32 xy2)
 {
-	u32 *prim = primMem->cursor;
+	POLY_F3 *poly = primMem->cursor;
 
-	prim[1] = (color & 0xffffff) | 0x20000000;
-	prim[2] = xy0;
-	prim[3] = xy1;
-	prim[4] = xy2;
-	prim[0] = *ot | 0x04000000;
-	*ot = CAM_SkyboxGlow_PrimAddr(prim);
+	CtrGpu_WriteColorCode(&poly->r0, CtrGpu_PackColorCode(color, 0x20));
+	CtrGpu_WritePackedXY(&poly->x0, xy0);
+	CtrGpu_WritePackedXY(&poly->x1, xy1);
+	CtrGpu_WritePackedXY(&poly->x2, xy2);
+	poly->tag = *ot | 0x04000000;
+	*ot = CAM_SkyboxGlow_PrimAddr(poly);
 
-	primMem->cursor = prim + 5;
+	primMem->cursor = poly + 1;
 }
 
 static void CAM_SkyboxGlow_EmitF4(struct PrimMem *primMem, u_long *ot, u32 color, u32 xy0, u32 xy1, u32 xy2, u32 xy3)
 {
-	u32 *prim = primMem->cursor;
+	POLY_F4 *poly = primMem->cursor;
 
-	prim[1] = (color & 0xffffff) | 0x28000000;
-	prim[2] = xy0;
-	prim[3] = xy1;
-	prim[4] = xy2;
-	prim[5] = xy3;
-	prim[0] = *ot | 0x05000000;
-	*ot = CAM_SkyboxGlow_PrimAddr(prim);
+	CtrGpu_WriteColorCode(&poly->r0, CtrGpu_PackColorCode(color, 0x28));
+	CtrGpu_WritePackedXY(&poly->x0, xy0);
+	CtrGpu_WritePackedXY(&poly->x1, xy1);
+	CtrGpu_WritePackedXY(&poly->x2, xy2);
+	CtrGpu_WritePackedXY(&poly->x3, xy3);
+	poly->tag = *ot | 0x05000000;
+	*ot = CAM_SkyboxGlow_PrimAddr(poly);
 
-	primMem->cursor = prim + 6;
+	primMem->cursor = poly + 1;
 }
 
 static int CAM_SkyboxGlow_HasClearGradient(int gradientIndex)

@@ -531,6 +531,34 @@ struct ParticleRenderListMatrix
 	u32 r33;
 };
 
+struct ParticleSpecialLineBody
+{
+	u32 color0AndCode;
+	u32 xy0;
+	u32 color1;
+	u32 xy1;
+};
+
+struct ParticleSpecialPacket
+{
+	u32 tag;
+	u32 drawMode;
+	u32 pad;
+	struct ParticleSpecialLineBody line;
+};
+
+_Static_assert(sizeof(struct ParticleSpecialLineBody) == 0x10);
+_Static_assert(offsetof(struct ParticleSpecialLineBody, color0AndCode) == 0x00);
+_Static_assert(offsetof(struct ParticleSpecialLineBody, xy0) == 0x04);
+_Static_assert(offsetof(struct ParticleSpecialLineBody, color1) == 0x08);
+_Static_assert(offsetof(struct ParticleSpecialLineBody, xy1) == 0x0C);
+
+_Static_assert(sizeof(struct ParticleSpecialPacket) == 0x1C);
+_Static_assert(offsetof(struct ParticleSpecialPacket, tag) == 0x00);
+_Static_assert(offsetof(struct ParticleSpecialPacket, drawMode) == 0x04);
+_Static_assert(offsetof(struct ParticleSpecialPacket, pad) == 0x08);
+_Static_assert(offsetof(struct ParticleSpecialPacket, line) == 0x0C);
+
 static struct ParticleRenderListTrig Particle_RenderList_ReadTrig(s32 angle)
 {
 	struct TrigTable trigApprox = data.trigApprox[angle & 0x3ff];
@@ -565,10 +593,10 @@ static struct ParticleRenderListTrig Particle_RenderList_ReadTrig(s32 angle)
 	return trig;
 }
 
-static void Particle_RenderList_LinkPrimitive(u32 *prim, u_long *ot, u32 tag)
+static void Particle_RenderList_LinkPrimitive(u32 *tagWord, const void *packet, u_long *ot, u32 tag)
 {
-	prim[0] = (u32)*ot | tag;
-	*ot = (u_long)Particle_RenderList_Ptr24(prim);
+	*tagWord = (u32)*ot | tag;
+	*ot = (u_long)Particle_RenderList_Ptr24(packet);
 }
 
 static void Particle_RenderList_LinkAndAdvance(u32 **primCursor, u32 **payloadCursor, struct Particle *particle, struct InstDrawPerPlayer *idpp,
@@ -605,20 +633,24 @@ static void Particle_RenderList_LinkAndAdvance(u32 **primCursor, u32 **payloadCu
 
 	if ((flagsSetColor & 0x1000) != 0)
 	{
-		Particle_RenderList_LinkPrimitive(prim, &otBase[otIndex], 0x06000000);
-		*primCursor = prim + 7;
+		struct ParticleSpecialPacket *packet = (struct ParticleSpecialPacket *)prim;
+
+		Particle_RenderList_LinkPrimitive(&packet->tag, packet, &otBase[otIndex], 0x06000000);
+		*primCursor = (u32 *)(packet + 1);
 		*payloadCursor += 7;
 	}
 	else
 	{
-		Particle_RenderList_LinkPrimitive(prim, &otBase[otIndex], 0x09000000);
-		*primCursor = prim + 10;
+		POLY_FT4 *poly = (POLY_FT4 *)prim;
+
+		Particle_RenderList_LinkPrimitive(&poly->tag, poly, &otBase[otIndex], 0x09000000);
+		*primCursor = (u32 *)(poly + 1);
 		*payloadCursor += 10;
 	}
 }
 
-static void Particle_RenderList_WriteSpecialPrimitive(u32 *prim, struct Particle *particle, u16 flagsAxis, u16 flagsSetColor, u32 color, u32 *scratch,
-                                                      s32 *scratchDepth)
+static void Particle_RenderList_WriteSpecialPrimitive(struct ParticleSpecialPacket *packet, struct Particle *particle, u16 flagsAxis, u16 flagsSetColor,
+                                                      u32 color, u32 *scratch, s32 *scratchDepth)
 {
 	CTC2(scratch[0], 0);
 	CTC2(scratch[1], 1);
@@ -655,20 +687,20 @@ static void Particle_RenderList_WriteSpecialPrimitive(u32 *prim, struct Particle
 
 	if ((flagsSetColor & 0x2000) != 0)
 	{
-		prim[5] = color;
-		prim[3] = particle->axis[10].startVal;
+		packet->line.color1 = color;
+		packet->line.color0AndCode = particle->axis[10].startVal;
 	}
 	else
 	{
-		prim[3] = color;
-		prim[5] = particle->axis[10].startVal;
+		packet->line.color0AndCode = color;
+		packet->line.color1 = particle->axis[10].startVal;
 	}
 
 	*(u32 *)(void *)&particle->axis[10].velocity = color;
-	prim[1] = 0xe1000a00 | (flagsSetColor & 0x60);
-	prim[2] = 0;
-	prim[4] = MFC2(12);
-	prim[6] = MFC2(13);
+	packet->drawMode = 0xe1000a00 | (flagsSetColor & 0x60);
+	packet->pad = 0;
+	packet->line.xy0 = MFC2(12);
+	packet->line.xy1 = MFC2(13);
 	*scratchDepth = (s32)MFC2(17);
 }
 
@@ -860,7 +892,7 @@ static struct ParticleRenderListMatrix Particle_RenderList_BuildNormalMatrix(str
 	return matrix;
 }
 
-static void Particle_RenderList_WriteNormalPrimitive(u32 *prim, struct Icon *icon, u16 flagsAxis, u16 flagsSetColor, u32 color,
+static void Particle_RenderList_WriteNormalPrimitive(POLY_FT4 *poly, struct Icon *icon, u16 flagsAxis, u16 flagsSetColor, u32 color,
                                                      struct ParticleRenderListMatrix *matrix, s32 *scratchDepth)
 {
 	s32 width;
@@ -875,11 +907,11 @@ static void Particle_RenderList_WriteNormalPrimitive(u32 *prim, struct Icon *ico
 	CTC2(matrix->r31r32, 3);
 	CTC2(matrix->r33, 4);
 
-	prim[1] = color | 0x2c000000;
-	prim[3] = Particle_RenderList_ReadWord(icon, 0x14);
-	prim[5] = (Particle_RenderList_ReadWord(icon, 0x18) & 0xff9fffff) | ((u32)(flagsSetColor & 0x60) << 16);
-	*(u16 *)(void *)&prim[7] = *(u16 *)(void *)((char *)icon + 0x1c);
-	*(u16 *)(void *)&prim[9] = *(u16 *)(void *)((char *)icon + 0x1e);
+	CtrGpu_WriteColorCode(&poly->r0, color | 0x2c000000);
+	CtrGpu_WritePackedUVWord(&poly->u0, Particle_RenderList_ReadWord(icon, 0x14));
+	CtrGpu_WritePackedUVWord(&poly->u1, (Particle_RenderList_ReadWord(icon, 0x18) & 0xff9fffff) | ((u32)(flagsSetColor & 0x60) << 16));
+	CtrGpu_WritePackedUV(&poly->u2, *(u16 *)(void *)((char *)icon + 0x1c));
+	CtrGpu_WritePackedUV(&poly->u3, *(u16 *)(void *)((char *)icon + 0x1e));
 
 	width = (Particle_RenderList_ReadByte(icon, 0x18) - Particle_RenderList_ReadByte(icon, 0x14)) + 1;
 	height = (Particle_RenderList_ReadByte(icon, 0x1d) - Particle_RenderList_ReadByte(icon, 0x15)) + 1;
@@ -898,23 +930,23 @@ static void Particle_RenderList_WriteNormalPrimitive(u32 *prim, struct Icon *ico
 
 	MTC2(input, 0);
 	gte_rtps_b();
-	prim[2] = MFC2(14);
+	CtrGpu_WritePackedXY(&poly->x0, MFC2(14));
 	*scratchDepth = (s32)MFC2(19);
 
 	input = Particle_RenderList_PackXY(halfWidth, -halfHeight);
 	MTC2(input, 0);
 	gte_rtps_b();
-	prim[4] = MFC2(14);
+	CtrGpu_WritePackedXY(&poly->x1, MFC2(14));
 
 	input = Particle_RenderList_PackXY(-halfWidth, halfHeight);
 	MTC2(input, 0);
 	gte_rtps_b();
-	prim[6] = MFC2(14);
+	CtrGpu_WritePackedXY(&poly->x2, MFC2(14));
 
 	input = Particle_RenderList_PackXY(halfWidth, halfHeight);
 	MTC2(input, 0);
 	gte_rtps_b();
-	prim[8] = MFC2(14);
+	CtrGpu_WritePackedXY(&poly->x3, MFC2(14));
 }
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x8003f590-0x80040308
@@ -1065,7 +1097,8 @@ void Particle_RenderList(struct PushBuffer *pb, void *particleList)
 
 			if ((flagsSetColor & 0x1000) != 0)
 			{
-				Particle_RenderList_WriteSpecialPrimitive(prim, particle, flagsAxis, flagsSetColor, color, scratch, scratchDepth);
+				Particle_RenderList_WriteSpecialPrimitive((struct ParticleSpecialPacket *)prim, particle, flagsAxis, flagsSetColor, color, scratch,
+				                                          scratchDepth);
 				Particle_RenderList_LinkAndAdvance(&primCursor, &payloadCursor, particle, idpp, flagsSetColor, *scratchDepth, *scratchOT);
 				prim = primCursor;
 				goto next_particle;
@@ -1073,7 +1106,7 @@ void Particle_RenderList(struct PushBuffer *pb, void *particleList)
 
 			struct ParticleRenderListMatrix matrix = Particle_RenderList_BuildNormalMatrix(particle, flagsAxis);
 
-			Particle_RenderList_WriteNormalPrimitive(prim, icon, flagsAxis, flagsSetColor, color, &matrix, scratchDepth);
+			Particle_RenderList_WriteNormalPrimitive((POLY_FT4 *)prim, icon, flagsAxis, flagsSetColor, color, &matrix, scratchDepth);
 			Particle_RenderList_LinkAndAdvance(&primCursor, &payloadCursor, particle, idpp, flagsSetColor, *scratchDepth, *scratchOT);
 			prim = primCursor;
 

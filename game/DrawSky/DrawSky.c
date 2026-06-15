@@ -55,18 +55,18 @@ static void DrawSky_LoadFaceVertices(struct DrawSkyContext *ctx, const struct Sk
 
 static void DrawSky_EmitPrimitive(u32 **primCursor, u_long *ot)
 {
-	u32 *prim = *primCursor;
+	POLY_G3 *poly = (POLY_G3 *)*primCursor;
 
-	prim[1] = MFC2(20);
-	prim[2] = MFC2(12);
-	prim[3] = MFC2(21);
-	prim[4] = MFC2(13);
-	prim[5] = MFC2(22);
-	prim[6] = MFC2(14);
-	prim[0] = (u32)*ot | 0x06000000;
-	*ot = (u_long)DrawSky_Ptr24(prim);
+	CtrGpu_WriteColorCode(&poly->r0, MFC2(20));
+	CtrGpu_WritePackedXY(&poly->x0, MFC2(12));
+	CtrGpu_WriteColorCode(&poly->r1, MFC2(21));
+	CtrGpu_WritePackedXY(&poly->x1, MFC2(13));
+	CtrGpu_WriteColorCode(&poly->r2, MFC2(22));
+	CtrGpu_WritePackedXY(&poly->x2, MFC2(14));
+	poly->tag = (u32)*ot | 0x06000000;
+	*ot = (u_long)DrawSky_Ptr24(poly);
 
-	*primCursor = prim + 7;
+	*primCursor = (u32 *)(poly + 1);
 }
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80069cc4-0x80069e70

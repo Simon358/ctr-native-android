@@ -129,16 +129,16 @@ static int DrawConfetti_BoundsVisible(u32 sxy0, u32 sxy1, u32 sxy2, u32 sxy3, u3
 	return (s32)(bounds << 16) >= 0;
 }
 
-static void DrawConfetti_LinkPrimitive(u32 *prim, u_long *ot)
+static void DrawConfetti_LinkPrimitive(POLY_F4 *poly, u_long *ot)
 {
-	prim[0] = (u32)*ot | 0x05000000;
-	*ot = (u_long)DrawConfetti_Ptr24(prim);
+	poly->tag = (u32)*ot | 0x05000000;
+	*ot = (u_long)DrawConfetti_Ptr24(poly);
 }
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80069ffc-0x8006a4c4
 void DrawConfetti(struct PushBuffer *pb, struct PrimMem *primMem, void *confetti, int frameTimer, int gameMode1)
 {
-	u32 *prim = (u32 *)primMem->cursor;
+	POLY_F4 *prim = primMem->cursor;
 	u8 *scratchColorTable = CTR_SCRATCHPAD_PTR(u8, 0x58);
 	u32 *scratchRemaining = CTR_SCRATCHPAD_PTR(u32, 0x30);
 	u32 *scratchColor = CTR_SCRATCHPAD_PTR(u32, 0x34);
@@ -311,7 +311,7 @@ void DrawConfetti(struct PushBuffer *pb, struct PrimMem *primMem, void *confetti
 		flag0 = CFC2(31);
 		sxy1 = MFC2(13);
 		sxy2 = MFC2(14);
-		prim[2] = sxy0;
+		CtrGpu_WritePackedXY(&prim->x0, sxy0);
 
 		MTC2(xy3, 0);
 		MTC2((u32)z3, 1);
@@ -330,15 +330,15 @@ void DrawConfetti(struct PushBuffer *pb, struct PrimMem *primMem, void *confetti
 					u32 depth;
 					u_long *ot;
 
-					prim[3] = MFC2(12);
-					prim[4] = MFC2(13);
-					prim[5] = MFC2(14);
+					CtrGpu_WritePackedXY(&prim->x1, MFC2(12));
+					CtrGpu_WritePackedXY(&prim->x2, MFC2(13));
+					CtrGpu_WritePackedXY(&prim->x3, MFC2(14));
 					depth = MFC2(24);
-					prim[1] = *scratchColor;
+					CtrGpu_WriteColorCode(&prim->r0, *scratchColor);
 					ot = (u_long *)(void *)((char *)otBase + ((depth >> 18) << 2));
 					DrawConfetti_LinkPrimitive(prim, ot);
 					particleCount = *scratchRemaining;
-					prim += 6;
+					prim++;
 					continue;
 				}
 			}

@@ -155,35 +155,38 @@ static void Torch_WriteUvPair(int uvOffset, int pointOffset)
 	Torch_ScratchWriteU8(uvOffset + 1, (u8)v);
 }
 
-static void Torch_LinkPrimitive(u32 *prim, u_long *ot, u32 tag)
+static void Torch_LinkPrimitive(u32 *tagWord, const void *packet, u_long *ot, u32 tag)
 {
-	prim[0] = (u32)*ot | tag;
-	*ot = (u_long)Torch_Ptr24(prim);
+	*tagWord = (u32)*ot | tag;
+	*ot = (u_long)Torch_Ptr24(packet);
 }
 
 static u32 *Torch_EmitFT3(u32 *prim, u_long *ot, struct TorchPointSource uv0, struct TorchPointSource uv1, struct TorchPointSource uv2,
                           struct TorchPointSource xy0, struct TorchPointSource xy1, struct TorchPointSource xy2)
 {
+	POLY_FT3 *poly = (POLY_FT3 *)prim;
+
 	Torch_WriteUvPair(0x5c, uv0.ring + uv0.point);
 	Torch_WriteUvPair(0x60, uv1.ring + uv1.point);
 	Torch_WriteUvPair(0x64, uv2.ring + uv2.point);
 
-	prim[1] = Torch_ScratchReadWord(0x44) | 0x24000000;
-	prim[2] = Torch_ScratchReadWord(xy0.ring + xy0.point);
-	prim[3] = Torch_ScratchReadWord(0x5c);
-	prim[4] = Torch_ScratchReadWord(xy1.ring + xy1.point);
-	prim[5] = Torch_ScratchReadWord(0x60);
-	prim[6] = Torch_ScratchReadWord(xy2.ring + xy2.point);
-	prim[7] = Torch_ScratchReadWord(0x64);
-	Torch_LinkPrimitive(prim, ot, 0x07000000);
+	CtrGpu_WriteColorCode(&poly->r0, Torch_ScratchReadWord(0x44) | 0x24000000);
+	CtrGpu_WritePackedXY(&poly->x0, Torch_ScratchReadWord(xy0.ring + xy0.point));
+	CtrGpu_WritePackedUVWord(&poly->u0, Torch_ScratchReadWord(0x5c));
+	CtrGpu_WritePackedXY(&poly->x1, Torch_ScratchReadWord(xy1.ring + xy1.point));
+	CtrGpu_WritePackedUVWord(&poly->u1, Torch_ScratchReadWord(0x60));
+	CtrGpu_WritePackedXY(&poly->x2, Torch_ScratchReadWord(xy2.ring + xy2.point));
+	CtrGpu_WritePackedUVWord(&poly->u2, Torch_ScratchReadWord(0x64));
+	Torch_LinkPrimitive(&poly->tag, poly, ot, 0x07000000);
 
-	return prim + 8;
+	return (u32 *)(poly + 1);
 }
 
 static u32 *Torch_EmitFT4(u32 *prim, u_long *ot, struct TorchPointSource uv0, struct TorchPointSource uv1, struct TorchPointSource uv2,
                           struct TorchPointSource uv3, struct TorchPointSource xy0, struct TorchPointSource xy1, struct TorchPointSource xy2,
                           struct TorchPointSource xy3)
 {
+	POLY_FT4 *poly = (POLY_FT4 *)prim;
 	u32 uv23;
 
 	Torch_WriteUvPair(0x5c, uv0.ring + uv0.point);
@@ -192,18 +195,18 @@ static u32 *Torch_EmitFT4(u32 *prim, u_long *ot, struct TorchPointSource uv0, st
 	Torch_WriteUvPair(0x66, uv3.ring + uv3.point);
 	uv23 = Torch_ScratchReadWord(0x64);
 
-	prim[1] = Torch_ScratchReadWord(0x44) | 0x2c000000;
-	prim[2] = Torch_ScratchReadWord(xy0.ring + xy0.point);
-	prim[3] = Torch_ScratchReadWord(0x5c);
-	prim[4] = Torch_ScratchReadWord(xy1.ring + xy1.point);
-	prim[5] = Torch_ScratchReadWord(0x60);
-	prim[6] = Torch_ScratchReadWord(xy2.ring + xy2.point);
-	prim[7] = uv23;
-	prim[8] = Torch_ScratchReadWord(xy3.ring + xy3.point);
-	prim[9] = uv23 >> 16;
-	Torch_LinkPrimitive(prim, ot, 0x09000000);
+	CtrGpu_WriteColorCode(&poly->r0, Torch_ScratchReadWord(0x44) | 0x2c000000);
+	CtrGpu_WritePackedXY(&poly->x0, Torch_ScratchReadWord(xy0.ring + xy0.point));
+	CtrGpu_WritePackedUVWord(&poly->u0, Torch_ScratchReadWord(0x5c));
+	CtrGpu_WritePackedXY(&poly->x1, Torch_ScratchReadWord(xy1.ring + xy1.point));
+	CtrGpu_WritePackedUVWord(&poly->u1, Torch_ScratchReadWord(0x60));
+	CtrGpu_WritePackedXY(&poly->x2, Torch_ScratchReadWord(xy2.ring + xy2.point));
+	CtrGpu_WritePackedUVWord(&poly->u2, uv23);
+	CtrGpu_WritePackedXY(&poly->x3, Torch_ScratchReadWord(xy3.ring + xy3.point));
+	CtrGpu_WritePackedUVWord(&poly->u3, uv23 >> 16);
+	Torch_LinkPrimitive(&poly->tag, poly, ot, 0x09000000);
 
-	return prim + 10;
+	return (u32 *)(poly + 1);
 }
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x8004b914-0x8004b94c

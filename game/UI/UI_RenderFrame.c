@@ -1126,44 +1126,37 @@ void UI_RenderFrame_Wumpa3D_2P3P4P(struct GameTracker *gGT)
 		s16 posX = hud[3].x + wumpaPushBuffer->rect.x - (viewport->w >> 1);
 		s16 posY = hud[3].y + wumpaPushBuffer->rect.y - (viewport->h >> 1);
 
-		u32 *prim = (u32 *)gGT->backBuffer->primMem.cursor;
+		POLY_FT4 *prim = (POLY_FT4 *)gGT->backBuffer->primMem.cursor;
+		u8 u0 = (u8)(viewport->x & 0x3f);
+		u8 v0 = (u8)viewport->y;
+		u8 u1 = u0 + (u8)viewport->w;
+		u8 v1 = v0 + (u8)viewport->h;
 
-		*(u8 *)((u8 *)prim + 3) = 9;
-		*(u8 *)((u8 *)prim + 7) = 0x2c;
-		*(u8 *)((u8 *)prim + 6) = 0x80;
-		*(u8 *)((u8 *)prim + 5) = 0x80;
-		*(u8 *)((u8 *)prim + 4) = 0x80;
+		prim->tag = 0x09000000;
+		CtrGpu_WriteColorCode(&prim->r0, 0x2c808080);
 
-		*(s16 *)((u8 *)prim + 0x08) = posX;
-		*(s16 *)((u8 *)prim + 0x0a) = posY;
-		*(s16 *)((u8 *)prim + 0x12) = posY;
-		*(s16 *)((u8 *)prim + 0x18) = posX;
-		*(s16 *)((u8 *)prim + 0x10) = posX + viewport->w;
-		*(s16 *)((u8 *)prim + 0x1a) = posY + viewport->h;
-		*(s16 *)((u8 *)prim + 0x20) = posX + viewport->w;
-		*(s16 *)((u8 *)prim + 0x22) = posY + viewport->h;
+		CtrGpu_WritePackedXY(&prim->x0, (u16)posX | ((u32)(u16)posY << 16));
+		CtrGpu_WritePackedXY(&prim->x1, (u16)(posX + viewport->w) | ((u32)(u16)posY << 16));
+		CtrGpu_WritePackedXY(&prim->x2, (u16)posX | ((u32)(u16)(posY + viewport->h) << 16));
+		CtrGpu_WritePackedXY(&prim->x3, (u16)(posX + viewport->w) | ((u32)(u16)(posY + viewport->h) << 16));
 
-		*(u8 *)((u8 *)prim + 0x0c) = viewport->x & 0x3f;
-		*(u8 *)((u8 *)prim + 0x0d) = viewport->y;
-		*(u8 *)((u8 *)prim + 0x14) = *(u8 *)((u8 *)prim + 0x0c) + (u8)viewport->w;
-		*(u8 *)((u8 *)prim + 0x15) = *(u8 *)((u8 *)prim + 0x0d);
-		*(u8 *)((u8 *)prim + 0x1c) = *(u8 *)((u8 *)prim + 0x0c);
-		*(u8 *)((u8 *)prim + 0x1d) = *(u8 *)((u8 *)prim + 0x0d) + (u8)viewport->h;
-		*(u8 *)((u8 *)prim + 0x24) = *(u8 *)((u8 *)prim + 0x0c) + (u8)viewport->w;
-		*(u8 *)((u8 *)prim + 0x25) = *(u8 *)((u8 *)prim + 0x0d) + (u8)viewport->h;
+		CtrGpu_WritePackedUV(&prim->u0, (u16)u0 | ((u16)v0 << 8));
+		CtrGpu_WritePackedUV(&prim->u1, (u16)u1 | ((u16)v0 << 8));
+		CtrGpu_WritePackedUV(&prim->u2, (u16)u0 | ((u16)v1 << 8));
+		CtrGpu_WritePackedUV(&prim->u3, (u16)u1 | ((u16)v1 << 8));
 
 		u16 tpage = (u16)(((viewport->y & 0x100) >> 4) | ((viewport->x & 0x3ff) >> 6) | 0x100 | ((viewport->y & 0x200) << 2));
-		*(u16 *)((u8 *)prim + 0x16) = tpage;
+		prim->tpage = tpage;
 
 		if (driver->numWumpas >= 10)
 		{
 			u8 shineColor = sdata->wumpaShineColor1[0][0];
-			*(u8 *)((u8 *)prim + 6) = shineColor;
-			*(u8 *)((u8 *)prim + 5) = shineColor;
-			*(u8 *)((u8 *)prim + 4) = shineColor;
+			prim->r0 = shineColor;
+			prim->g0 = shineColor;
+			prim->b0 = shineColor;
 		}
 
-		gGT->backBuffer->primMem.cursor = prim + 10;
+		gGT->backBuffer->primMem.cursor = prim + 1;
 		AddPrim(gGT->pushBuffer_UI.ptrOT, prim);
 	}
 }

@@ -1,6 +1,5 @@
 #include <common.h>
 
-
 static inline u32 FLARE_Ptr24(const void *ptr)
 {
 	return CtrGpu_PrimToOTLink24(ptr);
@@ -21,20 +20,20 @@ static inline void FLARE_LoadGridRow(s16 y)
 	MTC2(0, 5);
 }
 
-static inline void FLARE_WriteTexture(u32 *prim, struct Icon *icon, u32 texWord1)
+static inline void FLARE_WriteTexture(POLY_GT4 *poly, struct Icon *icon, u32 texWord1)
 {
-	prim[3] = *(u32 *)&icon->texLayout.u0;
-	prim[6] = texWord1;
-	*(u16 *)&prim[9] = *(u16 *)&icon->texLayout.u2;
-	*(u16 *)&prim[12] = *(u16 *)&icon->texLayout.u3;
+	CtrGpu_WritePackedUVWord(&poly->u0, *(u32 *)&icon->texLayout.u0);
+	CtrGpu_WritePackedUVWord(&poly->u1, texWord1);
+	CtrGpu_WritePackedUV(&poly->u2, *(u16 *)&icon->texLayout.u2);
+	CtrGpu_WritePackedUV(&poly->u3, *(u16 *)&icon->texLayout.u3);
 }
 
-static inline void FLARE_WriteColors(u32 *prim)
+static inline void FLARE_WriteColors(POLY_GT4 *poly)
 {
-	prim[1] = 0x3e000000;
-	prim[4] = 0;
-	prim[7] = 0;
-	prim[10] = 0x007f7f7f;
+	CtrGpu_WriteColorCode(&poly->r0, 0x3e000000);
+	CtrGpu_WriteColorCode(&poly->r1, 0);
+	CtrGpu_WriteColorCode(&poly->r2, 0);
+	CtrGpu_WriteColorCode(&poly->r3, 0x007f7f7f);
 }
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80024c4c-0x80025138.
@@ -53,8 +52,8 @@ void FLARE_ThTick(struct Thread *th)
 		return;
 	}
 
-	u32 *prim = gGT->backBuffer->primMem.cursor;
-	if (prim + 0x34 >= (u32 *)gGT->backBuffer->primMem.guardEnd)
+	POLY_GT4 *prim = gGT->backBuffer->primMem.cursor;
+	if ((char *)(prim + 4) >= (char *)gGT->backBuffer->primMem.guardEnd)
 		return;
 
 	PushBuffer_SetPsyqGeom(pb);
@@ -123,33 +122,33 @@ void FLARE_ThTick(struct Thread *th)
 		return;
 
 	u32 texWord1 = (*(u32 *)&icon->texLayout.u1 & 0xff9fffff) | 0x00200000;
-	u32 *p0 = prim;
-	u32 *p1 = prim + 0xd;
-	u32 *p2 = prim + 0x1a;
-	u32 *p3 = prim + 0x27;
+	POLY_GT4 *p0 = prim;
+	POLY_GT4 *p1 = prim + 1;
+	POLY_GT4 *p2 = prim + 2;
+	POLY_GT4 *p3 = prim + 3;
 
 	FLARE_LoadGridRow(-409);
 	gte_rtpt();
 	FLARE_WriteTexture(p0, icon, texWord1);
 	FLARE_WriteTexture(p1, icon, texWord1);
-	p0[2] = MFC2(12);
-	p0[5] = MFC2(13);
-	p1[5] = MFC2(13);
-	p1[2] = MFC2(14);
+	CtrGpu_WritePackedXY(&p0->x0, MFC2(12));
+	CtrGpu_WritePackedXY(&p0->x1, MFC2(13));
+	CtrGpu_WritePackedXY(&p1->x1, MFC2(13));
+	CtrGpu_WritePackedXY(&p1->x0, MFC2(14));
 
 	FLARE_LoadGridRow(0);
 	gte_rtpt();
 	FLARE_WriteColors(p0);
 	FLARE_WriteColors(p1);
 	FLARE_WriteTexture(p2, icon, texWord1);
-	p0[8] = MFC2(12);
-	p0[11] = MFC2(13);
-	p1[8] = MFC2(13);
-	p1[11] = MFC2(14);
-	p2[2] = MFC2(12);
-	p2[5] = MFC2(13);
-	p3[5] = MFC2(13);
-	p3[2] = MFC2(14);
+	CtrGpu_WritePackedXY(&p0->x2, MFC2(12));
+	CtrGpu_WritePackedXY(&p0->x3, MFC2(13));
+	CtrGpu_WritePackedXY(&p1->x2, MFC2(13));
+	CtrGpu_WritePackedXY(&p1->x3, MFC2(14));
+	CtrGpu_WritePackedXY(&p2->x0, MFC2(12));
+	CtrGpu_WritePackedXY(&p2->x1, MFC2(13));
+	CtrGpu_WritePackedXY(&p3->x1, MFC2(13));
+	CtrGpu_WritePackedXY(&p3->x0, MFC2(14));
 	s32 depth = MFC2(18);
 
 	FLARE_LoadGridRow(409);
@@ -157,10 +156,10 @@ void FLARE_ThTick(struct Thread *th)
 	FLARE_WriteColors(p2);
 	FLARE_WriteColors(p3);
 	FLARE_WriteTexture(p3, icon, texWord1);
-	p2[8] = MFC2(12);
-	p2[11] = MFC2(13);
-	p3[8] = MFC2(13);
-	p3[11] = MFC2(14);
+	CtrGpu_WritePackedXY(&p2->x2, MFC2(12));
+	CtrGpu_WritePackedXY(&p2->x3, MFC2(13));
+	CtrGpu_WritePackedXY(&p3->x2, MFC2(13));
+	CtrGpu_WritePackedXY(&p3->x3, MFC2(14));
 
 	depth = (depth >> 8) - 2;
 	if (depth < 0)
@@ -169,13 +168,13 @@ void FLARE_ThTick(struct Thread *th)
 		depth = 0x3ff;
 
 	u_long *ot = &pb->ptrOT[depth];
-	p0[0] = FLARE_Ptr24(p1) | 0x0c000000;
-	p1[0] = FLARE_Ptr24(p2) | 0x0c000000;
-	p2[0] = FLARE_Ptr24(p3) | 0x0c000000;
-	p3[0] = *ot | 0x0c000000;
+	p0->tag = FLARE_Ptr24(p1) | 0x0c000000;
+	p1->tag = FLARE_Ptr24(p2) | 0x0c000000;
+	p2->tag = FLARE_Ptr24(p3) | 0x0c000000;
+	p3->tag = *ot | 0x0c000000;
 	*ot = FLARE_Ptr24(p0);
 
-	gGT->backBuffer->primMem.cursor = prim + 0x34;
+	gGT->backBuffer->primMem.cursor = prim + 4;
 }
 
 

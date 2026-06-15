@@ -2610,10 +2610,12 @@ static int DrawLevelOvr1P_ShouldSetSemiTransFromTpage(u16 tpage)
 	return (tpage & 0x60) != 0x60;
 }
 
-static void DrawLevelOvr1P_AddRawPrimToOt(struct PrimMem *primMem, u32 *primWords, u32 wordCount, u_long *otEntry)
+static void DrawLevelOvr1P_AddRawPrimToOt(struct PrimMem *primMem, void *packet, u32 wordCount, u_long *otEntry)
 {
-	primWords[0] = ((u32)*otEntry & 0x00ffffff) | (wordCount << 24);
-	*otEntry = (u32)(uintptr_t)primWords & 0x00ffffff;
+	u32 *packetTag = packet;
+
+	*packetTag = ((u32)*otEntry & 0x00ffffff) | (wordCount << 24);
+	*otEntry = (u32)(uintptr_t)packet & 0x00ffffff;
 	// NOTE(aalhendi): Retail keeps the overlay primitive count in `sp`, seeded
 	// from PrimMem+0x14 and stored back at the epilogue.
 	primMem->primitiveCount++;
@@ -2629,6 +2631,29 @@ static u32 DrawLevelOvr1P_GetProjectedColorWord(const struct DrawLevelOvr1PScrat
 	return *(const u32 *)&projected->color_hi[0];
 }
 
+static void DrawLevelOvr1P_WriteProjectedGT3(POLY_GT3 *poly, const struct DrawLevelOvr1PScratchVertex *projected, const int *indices, u32 code, u32 uv0,
+                                             u32 uv1, u32 uv2)
+{
+	CtrGpu_WriteColorCode(&poly->r0, DrawLevelOvr1P_GetProjectedColorCode(&projected[indices[0]], code));
+	CtrGpu_WritePackedXY(&poly->x0, DrawLevelOvr1P_PackProjectedSxy(&projected[indices[0]]));
+	CtrGpu_WritePackedUVWord(&poly->u0, uv0);
+	CtrGpu_WriteColorCode(&poly->r1, DrawLevelOvr1P_GetProjectedColorCode(&projected[indices[1]], 0));
+	CtrGpu_WritePackedXY(&poly->x1, DrawLevelOvr1P_PackProjectedSxy(&projected[indices[1]]));
+	CtrGpu_WritePackedUVWord(&poly->u1, uv1);
+	CtrGpu_WriteColorCode(&poly->r2, DrawLevelOvr1P_GetProjectedColorCode(&projected[indices[2]], 0));
+	CtrGpu_WritePackedXY(&poly->x2, DrawLevelOvr1P_PackProjectedSxy(&projected[indices[2]]));
+	CtrGpu_WritePackedUVWord(&poly->u2, uv2);
+}
+
+static void DrawLevelOvr1P_WriteProjectedGT4(POLY_GT4 *poly, const struct DrawLevelOvr1PScratchVertex *projected, const int *indices, u32 code, u32 uv0,
+                                             u32 uv1, u32 uv2)
+{
+	DrawLevelOvr1P_WriteProjectedGT3((POLY_GT3 *)poly, projected, indices, code, uv0, uv1, uv2);
+	CtrGpu_WriteColorCode(&poly->r3, DrawLevelOvr1P_GetProjectedColorCode(&projected[indices[3]], 0));
+	CtrGpu_WritePackedXY(&poly->x3, DrawLevelOvr1P_PackProjectedSxy(&projected[indices[3]]));
+	CtrGpu_WritePackedUVWord(&poly->u3, uv2 >> 16);
+}
+
 static u32 DrawLevelOvr1P_SelectRawPrimitiveCode(u32 uv1Word, u32 semiTransCode, u32 opaqueCode)
 {
 	return ((uv1Word & 0x00600000) != 0x00600000) ? semiTransCode : opaqueCode;
@@ -2638,8 +2663,8 @@ static int DrawLevelOvr1P_EmitPreparedProjectedQuadRawCodeAtOtEntry(struct PushB
                                                                     const struct DrawLevelOvr1PScratchVertex *projected, const int *indices,
                                                                     const struct TextureLayout *texture, u_long *otEntry, int primCodeOverride)
 {
-	u32 *prim;
-	void *nextPrim;
+	POLY_GT4 *prim;
+	POLY_GT4 *nextPrim;
 	u32 code;
 	u32 uv0 = 0;
 	u32 uv1 = 0;
@@ -2649,7 +2674,7 @@ static int DrawLevelOvr1P_EmitPreparedProjectedQuadRawCodeAtOtEntry(struct PushB
 	(void)block;
 
 	prim = primMem->cursor;
-	nextPrim = (u8 *)prim + sizeof(POLY_GT4);
+	nextPrim = prim + 1;
 
 	DrawLevelOvr1P_StoreProjectedDirectUvScratch(projected, indices, 4);
 	uv0 = *CTR_SCRATCHPAD_PTR(u32, 0x1a0);
@@ -2661,18 +2686,7 @@ static int DrawLevelOvr1P_EmitPreparedProjectedQuadRawCodeAtOtEntry(struct PushB
 	(void)texture;
 	code = primCodeOverride >= 0 ? (u32)primCodeOverride : DrawLevelOvr1P_SelectRawPrimitiveCode(uv1, 0x3e, 0x3c);
 
-	prim[1] = DrawLevelOvr1P_GetProjectedColorCode(&projected[indices[0]], code);
-	prim[2] = DrawLevelOvr1P_PackProjectedSxy(&projected[indices[0]]);
-	prim[3] = uv0;
-	prim[4] = DrawLevelOvr1P_GetProjectedColorCode(&projected[indices[1]], 0);
-	prim[5] = DrawLevelOvr1P_PackProjectedSxy(&projected[indices[1]]);
-	prim[6] = uv1;
-	prim[7] = DrawLevelOvr1P_GetProjectedColorCode(&projected[indices[2]], 0);
-	prim[8] = DrawLevelOvr1P_PackProjectedSxy(&projected[indices[2]]);
-	prim[9] = uv2;
-	prim[10] = DrawLevelOvr1P_GetProjectedColorCode(&projected[indices[3]], 0);
-	prim[11] = DrawLevelOvr1P_PackProjectedSxy(&projected[indices[3]]);
-	prim[12] = uv2 >> 16;
+	DrawLevelOvr1P_WriteProjectedGT4(prim, projected, indices, code, uv0, uv1, uv2);
 	DrawLevelOvr1P_AddRawPrimToOt(primMem, prim, 12, otEntry);
 	primMem->cursor = nextPrim;
 	return 1;
@@ -2707,8 +2721,8 @@ static int DrawLevelOvr1P_EmitPreparedProjectedTriRawCodeAtOtEntry(struct PushBu
                                                                    const struct DrawLevelOvr1PScratchVertex *projected, const int *indices,
                                                                    const struct TextureLayout *texture, u_long *otEntry, int primCodeOverride)
 {
-	u32 *prim;
-	void *nextPrim;
+	POLY_GT3 *prim;
+	POLY_GT3 *nextPrim;
 	u32 code;
 	u32 uv0 = 0;
 	u32 uv1 = 0;
@@ -2718,7 +2732,7 @@ static int DrawLevelOvr1P_EmitPreparedProjectedTriRawCodeAtOtEntry(struct PushBu
 	(void)block;
 
 	prim = primMem->cursor;
-	nextPrim = (u8 *)prim + sizeof(POLY_GT3);
+	nextPrim = prim + 1;
 
 	DrawLevelOvr1P_StoreProjectedDirectUvScratch(projected, indices, 3);
 	uv0 = *CTR_SCRATCHPAD_PTR(u32, 0x1a0);
@@ -2730,15 +2744,7 @@ static int DrawLevelOvr1P_EmitPreparedProjectedTriRawCodeAtOtEntry(struct PushBu
 	(void)texture;
 	code = primCodeOverride >= 0 ? (u32)primCodeOverride : DrawLevelOvr1P_SelectRawPrimitiveCode(uv1, 0x36, 0x34);
 
-	prim[1] = DrawLevelOvr1P_GetProjectedColorCode(&projected[indices[0]], code);
-	prim[2] = DrawLevelOvr1P_PackProjectedSxy(&projected[indices[0]]);
-	prim[3] = uv0;
-	prim[4] = DrawLevelOvr1P_GetProjectedColorCode(&projected[indices[1]], 0);
-	prim[5] = DrawLevelOvr1P_PackProjectedSxy(&projected[indices[1]]);
-	prim[6] = uv1;
-	prim[7] = DrawLevelOvr1P_GetProjectedColorCode(&projected[indices[2]], 0);
-	prim[8] = DrawLevelOvr1P_PackProjectedSxy(&projected[indices[2]]);
-	prim[9] = uv2;
+	DrawLevelOvr1P_WriteProjectedGT3(prim, projected, indices, code, uv0, uv1, uv2);
 	DrawLevelOvr1P_AddRawPrimToOt(primMem, prim, 9, otEntry);
 	primMem->cursor = nextPrim;
 	return 1;
@@ -3151,6 +3157,27 @@ static u32 DrawLevelOvr1P_StoreClipRecordUvScratch(const struct DrawLevelOvr1PSc
 	return *CTR_SCRATCHPAD_PTR(u32, scratchOffset);
 }
 
+static void DrawLevelOvr1P_WriteClipRecordGT3(POLY_GT3 *poly, const struct DrawLevelOvr1PScratchVertex *emit, u32 code, u32 uv0, u32 uv1, u32 uv2)
+{
+	CtrGpu_WriteColorCode(&poly->r0, DrawLevelOvr1P_GetClipRecordColorCode(&emit[0], code));
+	CtrGpu_WritePackedXY(&poly->x0, DrawLevelOvr1P_PackProjectedSxy(&emit[0]));
+	CtrGpu_WritePackedUVWord(&poly->u0, uv0);
+	CtrGpu_WriteColorCode(&poly->r1, DrawLevelOvr1P_GetClipRecordColorCode(&emit[1], 0));
+	CtrGpu_WritePackedXY(&poly->x1, DrawLevelOvr1P_PackProjectedSxy(&emit[1]));
+	CtrGpu_WritePackedUVWord(&poly->u1, uv1);
+	CtrGpu_WriteColorCode(&poly->r2, DrawLevelOvr1P_GetClipRecordColorCode(&emit[2], 0));
+	CtrGpu_WritePackedXY(&poly->x2, DrawLevelOvr1P_PackProjectedSxy(&emit[2]));
+	CtrGpu_WritePackedUVWord(&poly->u2, uv2);
+}
+
+static void DrawLevelOvr1P_WriteClipRecordGT4(POLY_GT4 *poly, const struct DrawLevelOvr1PScratchVertex *emit, u32 code, u32 uv0, u32 uv1, u32 uv2)
+{
+	DrawLevelOvr1P_WriteClipRecordGT3((POLY_GT3 *)poly, emit, code, uv0, uv1, uv2);
+	CtrGpu_WriteColorCode(&poly->r3, DrawLevelOvr1P_GetClipRecordColorCode(&emit[3], 0));
+	CtrGpu_WritePackedXY(&poly->x3, DrawLevelOvr1P_PackProjectedSxy(&emit[3]));
+	CtrGpu_WritePackedUVWord(&poly->u3, DrawLevelOvr1P_GetClipRecordSignedUvWord(&emit[3]));
+}
+
 static void DrawLevelOvr1P_SetClipRecordSourceDelta(struct DrawLevelOvr1PScratchVertex *projected, s16 delta)
 {
 	*(s16 *)&projected->clipNear = delta;
@@ -3229,8 +3256,8 @@ static int Ovr226_800aad44_EmitClipRecordGT4(struct PushBuffer *pb, struct PrimM
 {
 	struct DrawLevelOvr1PScratchVertex emit[4];
 	int emitIndices[4] = {0, 1, 2, 3};
-	u32 *prim;
-	void *nextPrim;
+	POLY_GT4 *prim;
+	POLY_GT4 *nextPrim;
 	int fallbackIndices[3] = {indices[1], indices[3], indices[2]};
 	s32 nclip;
 	u32 code;
@@ -3254,24 +3281,13 @@ static int Ovr226_800aad44_EmitClipRecordGT4(struct PushBuffer *pb, struct PrimM
 
 	// NOTE(aalhendi): Retail relies on the 0x800aa848 per-record 0xd68 prim reserve.
 	prim = primMem->cursor;
-	nextPrim = (u8 *)prim + sizeof(POLY_GT4);
+	nextPrim = prim + 1;
 	uv0 = DrawLevelOvr1P_StoreClipRecordUvScratch(&emit[0], 0x1a0);
 	uv1 = DrawLevelOvr1P_StoreClipRecordUvScratch(&emit[1], 0x1a4);
 	uv2 = DrawLevelOvr1P_StoreClipRecordUvScratch(&emit[2], 0x1a8);
 	code = DrawLevelOvr1P_SelectRawPrimitiveCode(uv1, 0x3e, 0x3c);
 
-	prim[1] = DrawLevelOvr1P_GetClipRecordColorCode(&emit[0], code);
-	prim[2] = DrawLevelOvr1P_PackProjectedSxy(&emit[0]);
-	prim[3] = uv0;
-	prim[4] = DrawLevelOvr1P_GetClipRecordColorCode(&emit[1], 0);
-	prim[5] = DrawLevelOvr1P_PackProjectedSxy(&emit[1]);
-	prim[6] = uv1;
-	prim[7] = DrawLevelOvr1P_GetClipRecordColorCode(&emit[2], 0);
-	prim[8] = DrawLevelOvr1P_PackProjectedSxy(&emit[2]);
-	prim[9] = uv2;
-	prim[10] = DrawLevelOvr1P_GetClipRecordColorCode(&emit[3], 0);
-	prim[11] = DrawLevelOvr1P_PackProjectedSxy(&emit[3]);
-	prim[12] = DrawLevelOvr1P_GetClipRecordSignedUvWord(&emit[3]);
+	DrawLevelOvr1P_WriteClipRecordGT4(prim, emit, code, uv0, uv1, uv2);
 	DrawLevelOvr1P_AddRawPrimToOt(primMem, prim, 12, otEntry);
 	primMem->cursor = nextPrim;
 	return 1;
@@ -3283,8 +3299,8 @@ static int Ovr226_800aac00_EmitClipRecordGT3(struct PushBuffer *pb, struct PrimM
 {
 	struct DrawLevelOvr1PScratchVertex emit[3];
 	int emitIndices[3] = {0, 1, 2};
-	u32 *prim;
-	void *nextPrim;
+	POLY_GT3 *prim;
+	POLY_GT3 *nextPrim;
 	s32 nclip;
 	u32 code;
 	u32 uv0;
@@ -3301,21 +3317,13 @@ static int Ovr226_800aac00_EmitClipRecordGT3(struct PushBuffer *pb, struct PrimM
 
 	// NOTE(aalhendi): Retail relies on the 0x800aa848 per-record 0xd68 prim reserve.
 	prim = primMem->cursor;
-	nextPrim = (u8 *)prim + sizeof(POLY_GT3);
+	nextPrim = prim + 1;
 	uv0 = DrawLevelOvr1P_StoreClipRecordUvScratch(&emit[0], 0x1a0);
 	uv1 = DrawLevelOvr1P_StoreClipRecordUvScratch(&emit[1], 0x1a4);
 	uv2 = DrawLevelOvr1P_StoreClipRecordUvScratch(&emit[2], 0x1a8);
 	code = DrawLevelOvr1P_SelectRawPrimitiveCode(uv1, 0x36, 0x34);
 
-	prim[1] = DrawLevelOvr1P_GetClipRecordColorCode(&emit[0], code);
-	prim[2] = DrawLevelOvr1P_PackProjectedSxy(&emit[0]);
-	prim[3] = uv0;
-	prim[4] = DrawLevelOvr1P_GetClipRecordColorCode(&emit[1], 0);
-	prim[5] = DrawLevelOvr1P_PackProjectedSxy(&emit[1]);
-	prim[6] = uv1;
-	prim[7] = DrawLevelOvr1P_GetClipRecordColorCode(&emit[2], 0);
-	prim[8] = DrawLevelOvr1P_PackProjectedSxy(&emit[2]);
-	prim[9] = uv2;
+	DrawLevelOvr1P_WriteClipRecordGT3(prim, emit, code, uv0, uv1, uv2);
 	DrawLevelOvr1P_AddRawPrimToOt(primMem, prim, 9, otEntry);
 	primMem->cursor = nextPrim;
 	return 1;
@@ -5132,8 +5140,8 @@ static int Ovr226_800a4034_EmitGround4x1GT3Raw(struct PushBuffer *pb, struct Pri
 {
 	int triIndices[3];
 	u_long *otEntry = Ovr226_800a4158_ResolveGround4x1DirectOtEntry(pb, inheritedOtIndex);
-	u32 *prim;
-	void *nextPrim;
+	POLY_GT3 *prim;
+	POLY_GT3 *nextPrim;
 	u32 uv0;
 	u32 uv1;
 	u32 uv2;
@@ -5159,7 +5167,7 @@ static int Ovr226_800a4034_EmitGround4x1GT3Raw(struct PushBuffer *pb, struct Pri
 	}
 
 	prim = primMem->cursor;
-	nextPrim = (u8 *)prim + sizeof(POLY_GT3);
+	nextPrim = prim + 1;
 
 	DrawLevelOvr1P_StoreProjectedDirectUvScratch(projected, triIndices, 3);
 	uv0 = *CTR_SCRATCHPAD_PTR(u32, 0x1a0);
@@ -5167,15 +5175,7 @@ static int Ovr226_800a4034_EmitGround4x1GT3Raw(struct PushBuffer *pb, struct Pri
 	uv2 = *CTR_SCRATCHPAD_PTR(u32, 0x1a8);
 	code = DrawLevelOvr1P_SelectRawPrimitiveCode(uv1, 0x36, 0x34);
 
-	prim[1] = DrawLevelOvr1P_GetProjectedColorCode(&projected[triIndices[0]], code);
-	prim[2] = DrawLevelOvr1P_PackProjectedSxy(&projected[triIndices[0]]);
-	prim[3] = uv0;
-	prim[4] = DrawLevelOvr1P_GetProjectedColorCode(&projected[triIndices[1]], 0);
-	prim[5] = DrawLevelOvr1P_PackProjectedSxy(&projected[triIndices[1]]);
-	prim[6] = uv1;
-	prim[7] = DrawLevelOvr1P_GetProjectedColorCode(&projected[triIndices[2]], 0);
-	prim[8] = DrawLevelOvr1P_PackProjectedSxy(&projected[triIndices[2]]);
-	prim[9] = uv2;
+	DrawLevelOvr1P_WriteProjectedGT3(prim, projected, triIndices, code, uv0, uv1, uv2);
 	DrawLevelOvr1P_AddRawPrimToOt(primMem, prim, 9, otEntry);
 	primMem->cursor = nextPrim;
 	return 1;
@@ -5186,8 +5186,8 @@ static int Ovr226_800a40b8_EmitGround4x1GT4Raw(struct PushBuffer *pb, struct Pri
                                                int inheritedOtIndex)
 {
 	u_long *otEntry = Ovr226_800a4158_ResolveGround4x1DirectOtEntry(pb, inheritedOtIndex);
-	u32 *prim;
-	void *nextPrim;
+	POLY_GT4 *prim;
+	POLY_GT4 *nextPrim;
 	u32 uv0;
 	u32 uv1;
 	u32 uv2;
@@ -5200,7 +5200,7 @@ static int Ovr226_800a40b8_EmitGround4x1GT4Raw(struct PushBuffer *pb, struct Pri
 		return 1;
 
 	prim = primMem->cursor;
-	nextPrim = (u8 *)prim + sizeof(POLY_GT4);
+	nextPrim = prim + 1;
 
 	DrawLevelOvr1P_StoreProjectedDirectUvScratch(projected, indices, 4);
 	uv0 = *CTR_SCRATCHPAD_PTR(u32, 0x1a0);
@@ -5208,18 +5208,7 @@ static int Ovr226_800a40b8_EmitGround4x1GT4Raw(struct PushBuffer *pb, struct Pri
 	uv2 = *CTR_SCRATCHPAD_PTR(u32, 0x1a8);
 	code = DrawLevelOvr1P_SelectRawPrimitiveCode(uv1, 0x3e, 0x3c);
 
-	prim[1] = DrawLevelOvr1P_GetProjectedColorCode(&projected[indices[0]], code);
-	prim[2] = DrawLevelOvr1P_PackProjectedSxy(&projected[indices[0]]);
-	prim[3] = uv0;
-	prim[4] = DrawLevelOvr1P_GetProjectedColorCode(&projected[indices[1]], 0);
-	prim[5] = DrawLevelOvr1P_PackProjectedSxy(&projected[indices[1]]);
-	prim[6] = uv1;
-	prim[7] = DrawLevelOvr1P_GetProjectedColorCode(&projected[indices[2]], 0);
-	prim[8] = DrawLevelOvr1P_PackProjectedSxy(&projected[indices[2]]);
-	prim[9] = uv2;
-	prim[10] = DrawLevelOvr1P_GetProjectedColorCode(&projected[indices[3]], 0);
-	prim[11] = DrawLevelOvr1P_PackProjectedSxy(&projected[indices[3]]);
-	prim[12] = uv2 >> 16;
+	DrawLevelOvr1P_WriteProjectedGT4(prim, projected, indices, code, uv0, uv1, uv2);
 	DrawLevelOvr1P_AddRawPrimToOt(primMem, prim, 12, otEntry);
 	primMem->cursor = nextPrim;
 	return 1;
@@ -9070,8 +9059,8 @@ static int Ovr226_800a27dc_EmitWaterListGT3Raw(struct PushBuffer *pb, struct Pri
                                                u_long *inheritedOtEntry)
 {
 	int triIndices[3];
-	u32 *prim;
-	void *nextPrim;
+	POLY_GT3 *prim;
+	POLY_GT3 *nextPrim;
 	u32 uv0;
 	u32 uv1;
 	u32 uv2;
@@ -9099,21 +9088,13 @@ static int Ovr226_800a27dc_EmitWaterListGT3Raw(struct PushBuffer *pb, struct Pri
 		return 1;
 
 	prim = primMem->cursor;
-	nextPrim = (u8 *)prim + sizeof(POLY_GT3);
+	nextPrim = prim + 1;
 	DrawLevelOvr1P_StoreProjectedDirectUvScratch(projected, triIndices, 3);
 	uv0 = *CTR_SCRATCHPAD_PTR(u32, 0x1a0);
 	uv1 = *CTR_SCRATCHPAD_PTR(u32, 0x1a4);
 	uv2 = *CTR_SCRATCHPAD_PTR(u32, 0x1a8);
 
-	prim[1] = DrawLevelOvr1P_GetProjectedColorCode(&projected[triIndices[0]], 0x36);
-	prim[2] = DrawLevelOvr1P_PackProjectedSxy(&projected[triIndices[0]]);
-	prim[3] = uv0;
-	prim[4] = DrawLevelOvr1P_GetProjectedColorCode(&projected[triIndices[1]], 0);
-	prim[5] = DrawLevelOvr1P_PackProjectedSxy(&projected[triIndices[1]]);
-	prim[6] = uv1;
-	prim[7] = DrawLevelOvr1P_GetProjectedColorCode(&projected[triIndices[2]], 0);
-	prim[8] = DrawLevelOvr1P_PackProjectedSxy(&projected[triIndices[2]]);
-	prim[9] = uv2;
+	DrawLevelOvr1P_WriteProjectedGT3(prim, projected, triIndices, 0x36, uv0, uv1, uv2);
 	DrawLevelOvr1P_AddRawPrimToOt(primMem, prim, 9, inheritedOtEntry);
 	primMem->cursor = nextPrim;
 	return 1;
@@ -9122,8 +9103,8 @@ static int Ovr226_800a27dc_EmitWaterListGT3Raw(struct PushBuffer *pb, struct Pri
 static int Ovr226_800a2850_EmitWaterListGT4Raw(struct PushBuffer *pb, struct PrimMem *primMem, const struct QuadBlock *block,
                                                const struct DrawLevelOvr1PScratchVertex *projected, const int *indices, int faceIndex, u_long *inheritedOtEntry)
 {
-	u32 *prim;
-	void *nextPrim;
+	POLY_GT4 *prim;
+	POLY_GT4 *nextPrim;
 	u32 uv0;
 	u32 uv1;
 	u32 uv2;
@@ -9136,24 +9117,13 @@ static int Ovr226_800a2850_EmitWaterListGT4Raw(struct PushBuffer *pb, struct Pri
 		return 1;
 
 	prim = primMem->cursor;
-	nextPrim = (u8 *)prim + sizeof(POLY_GT4);
+	nextPrim = prim + 1;
 	DrawLevelOvr1P_StoreProjectedDirectUvScratch(projected, indices, 4);
 	uv0 = *CTR_SCRATCHPAD_PTR(u32, 0x1a0);
 	uv1 = *CTR_SCRATCHPAD_PTR(u32, 0x1a4);
 	uv2 = *CTR_SCRATCHPAD_PTR(u32, 0x1a8);
 
-	prim[1] = DrawLevelOvr1P_GetProjectedColorCode(&projected[indices[0]], 0x3e);
-	prim[2] = DrawLevelOvr1P_PackProjectedSxy(&projected[indices[0]]);
-	prim[3] = uv0;
-	prim[4] = DrawLevelOvr1P_GetProjectedColorCode(&projected[indices[1]], 0);
-	prim[5] = DrawLevelOvr1P_PackProjectedSxy(&projected[indices[1]]);
-	prim[6] = uv1;
-	prim[7] = DrawLevelOvr1P_GetProjectedColorCode(&projected[indices[2]], 0);
-	prim[8] = DrawLevelOvr1P_PackProjectedSxy(&projected[indices[2]]);
-	prim[9] = uv2;
-	prim[10] = DrawLevelOvr1P_GetProjectedColorCode(&projected[indices[3]], 0);
-	prim[11] = DrawLevelOvr1P_PackProjectedSxy(&projected[indices[3]]);
-	prim[12] = uv2 >> 16;
+	DrawLevelOvr1P_WriteProjectedGT4(prim, projected, indices, 0x3e, uv0, uv1, uv2);
 	DrawLevelOvr1P_AddRawPrimToOt(primMem, prim, 12, inheritedOtEntry);
 	primMem->cursor = nextPrim;
 	return 1;

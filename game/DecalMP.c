@@ -174,18 +174,18 @@ void DecalMP_03(struct GameTracker *gGT)
 			                              (s16)(texY - (s16)(entry->pb.renderBucketScreenPos >> 16)), 0, 0, 0, 0, 1);
 		}
 
-		u32 *prim = gGT->backBuffer->primMem.cursor;
-		*(u8 *)((char *)prim + 7) = 0x2d;
+		POLY_FT4 *poly = gGT->backBuffer->primMem.cursor;
+		poly->code = 0x2d;
 
 		s16 x = entry->pb.rect.x;
 		s16 y = entry->pb.rect.y;
 		s16 w = entry->pb.rect.w;
 		s16 h = entry->pb.rect.h;
 
-		prim[2] = (u16)x | ((u32)(u16)y << 16);
-		prim[4] = (u16)(x + w) | ((u32)(u16)y << 16);
-		prim[6] = (u16)x | ((u32)(u16)(y + h) << 16);
-		prim[8] = (u16)(x + w) | ((u32)(u16)(y + h) << 16);
+		CtrGpu_WritePackedXY(&poly->x0, (u16)x | ((u32)(u16)y << 16));
+		CtrGpu_WritePackedXY(&poly->x1, (u16)(x + w) | ((u32)(u16)y << 16));
+		CtrGpu_WritePackedXY(&poly->x2, (u16)x | ((u32)(u16)(y + h) << 16));
+		CtrGpu_WritePackedXY(&poly->x3, (u16)(x + w) | ((u32)(u16)(y + h) << 16));
 
 		int u0 = texX & 0x3f;
 		int v0 = texY & 0xff;
@@ -194,16 +194,16 @@ void DecalMP_03(struct GameTracker *gGT)
 		if (v1 >= 0x100)
 			v1 = 0xff;
 
-		*(u16 *)&prim[3] = (u16)(u0 | (v0 << 8));
-		*(u16 *)&prim[5] = (u16)(u1 | (v0 << 8));
-		*(u16 *)&prim[7] = (u16)(u0 | (v1 << 8));
-		*(u16 *)&prim[9] = (u16)(u1 | (v1 << 8));
+		CtrGpu_WritePackedUV(&poly->u0, (u16)(u0 | (v0 << 8)));
+		CtrGpu_WritePackedUV(&poly->u1, (u16)(u1 | (v0 << 8)));
+		CtrGpu_WritePackedUV(&poly->u2, (u16)(u0 | (v1 << 8)));
+		CtrGpu_WritePackedUV(&poly->u3, (u16)(u1 | (v1 << 8)));
 
-		*(u16 *)((char *)prim + 0x16) = (u16)(((texY & 0x100) >> 4) | ((texX & 0x3ff) >> 6) | 0x100 | ((texY & 0x200) << 2));
+		poly->tpage = (u16)(((texY & 0x100) >> 4) | ((texX & 0x3ff) >> 6) | 0x100 | ((texY & 0x200) << 2));
 
 		u_long *ot = gGT->pushBuffer[cameraID].ptrOT + (entry->pb.renderBucketOTByteOffset >> 2);
-		prim[0] = *ot | 0x09000000;
-		CtrGpu_LinkPrimToOT(ot, prim);
-		gGT->backBuffer->primMem.cursor = prim + 10;
+		poly->tag = *ot | 0x09000000;
+		CtrGpu_LinkPrimToOT(ot, poly);
+		gGT->backBuffer->primMem.cursor = poly + 1;
 	}
 }
