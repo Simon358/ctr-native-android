@@ -28,7 +28,7 @@ int CDSYS_Init(int boolUseDisc)
 	sdata->discMode = -1;
 	sdata->bool_XnfLoaded = 0;
 
-	sdata->XA_State = 0;
+	sdata->XA_State = XA_IDLE;
 	sdata->XA_boolFinished = 0;
 
 	sdata->countFail_CdSyncCallback = 0;
@@ -94,7 +94,7 @@ void CDSYS_SetMode_StreamData()
 	// data reads begin keeps working. Guarded by XA_State so early-boot
 	// callers (CDSYS_Init, bigfile load, HOWL load) that run before gGT or
 	// any XA playback exists are no-ops.
-	if (sdata->XA_State != 0)
+	if (sdata->XA_State != XA_IDLE)
 		CDSYS_XAPauseForce();
 	return;
 #endif
@@ -124,7 +124,7 @@ void CDSYS_SetMode_StreamData()
 	CdControl(CdlSetmode, buf, 0);
 
 	sdata->discMode = DM_DATA;
-	sdata->XA_State = 0;
+	sdata->XA_State = XA_IDLE;
 
 	if (sdata->bool_XnfLoaded != 0)
 	{
@@ -159,7 +159,7 @@ void CDSYS_SetMode_StreamAudio()
 	CdControl(CdlSetmode, buf, 0);
 
 	sdata->discMode = DM_AUDIO;
-	sdata->XA_State = 0;
+	sdata->XA_State = XA_IDLE;
 
 	CdSyncCallback(CDSYS_XaCallbackCdSync);
 	CdReadyCallback(CDSYS_XaCallbackCdReady);
@@ -249,7 +249,7 @@ void CDSYS_XaCallbackCdSync(CdlIntrResult result, u8 *unk) //+unk to adhere to *
 
 		if (com < 2)
 		{
-			sdata->XA_State = 0;
+			sdata->XA_State = XA_IDLE;
 		}
 
 		return;
@@ -269,20 +269,20 @@ void CDSYS_XaCallbackCdReady(CdlIntrResult result, u8 *unk) //+unk to adhere to 
 
 		if (
 		    // queued to start (CD seeking?)
-		    (sdata->XA_State == 2) && (sdata->XA_StartPos <= sdata->XA_CurrPos))
+		    (sdata->XA_State == XA_STARTING) && (sdata->XA_StartPos <= sdata->XA_CurrPos))
 		{
 			// XA playing
-			sdata->XA_State = 3;
+			sdata->XA_State = XA_PLAYING;
 
 			sdata->XA_CurrOffset = (sdata->XA_CurrPos - sdata->XA_StartPos) * 4;
 		}
 
 		if (
 		    // XA is playing
-		    (sdata->XA_State == 3) && (sdata->XA_EndPos < sdata->XA_CurrPos))
+		    (sdata->XA_State == XA_PLAYING) && (sdata->XA_EndPos < sdata->XA_CurrPos))
 		{
 			// XA should stop
-			sdata->XA_State = 4;
+			sdata->XA_State = XA_FADING;
 
 			// disable music
 			sdata->XA_VolumeDeduct = 0x400;
@@ -321,7 +321,7 @@ half.
 	    // if XA is requested to stop,
 	    // either by CdReadyCallback,
 	    // or CDSYS_XAPauseRequest
-	    (sdata->XA_State == 4))
+	    (sdata->XA_State == XA_FADING))
 	{
 		// fade volume to zero, over multiple frames
 
@@ -558,7 +558,7 @@ int CDSYS_XASeek(int boolCdControl, int categoryID, int xaID)
 
 	CdIntToPos(sum, &loc);
 
-	sdata->XA_State = 1;
+	sdata->XA_State = XA_SEEKING;
 
 	com = CdlSeekP;
 	if (boolCdControl != 0)
@@ -613,7 +613,7 @@ int CDSYS_XAPlay(int categoryID, int xaID)
 		if (NativeAudio_PlayXATrack(categoryID, xaID, nativeVol << 7, nativeVol << 7) == 0)
 			return 0;
 
-		sdata->XA_State = 3;
+		sdata->XA_State = XA_PLAYING;
 		sdata->XA_Playing_Index = xaID;
 		sdata->XA_Playing_Category = categoryID;
 		sdata->XA_VolumeBitshift = nativeVol << 7;
@@ -649,7 +649,7 @@ int CDSYS_XAPlay(int categoryID, int xaID)
 	if (sdata->discMode != DM_AUDIO)
 		CDSYS_SetMode_StreamAudio();
 
-	sdata->XA_State = 2;
+	sdata->XA_State = XA_STARTING;
 
 	int vol = sdata->vol_Voice;
 	if (categoryID == CDSYS_XA_TYPE_MUSIC)
@@ -695,7 +695,7 @@ int CDSYS_XAPlay(int categoryID, int xaID)
 		return 1;
 	}
 
-	sdata->XA_State = 0;
+	sdata->XA_State = XA_IDLE;
 	return 0;
 }
 
@@ -706,9 +706,9 @@ void CDSYS_XAPauseRequest()
 	if (sdata->boolUseDisc == 0)
 	{
 #if defined(CTR_NATIVE)
-		if ((sdata->XA_State >= 2) && (sdata->XA_State <= 3))
+		if ((sdata->XA_State >= XA_STARTING) && (sdata->XA_State <= XA_PLAYING))
 		{
-			sdata->XA_State = 4;
+			sdata->XA_State = XA_FADING;
 			sdata->XA_VolumeDeduct = 0x400;
 		}
 #endif
@@ -716,12 +716,12 @@ void CDSYS_XAPauseRequest()
 	}
 	if (sdata->bool_XnfLoaded == 0)
 		return;
-	if (sdata->XA_State < 2)
+	if (sdata->XA_State < XA_STARTING)
 		return;
-	if (sdata->XA_State > 3)
+	if (sdata->XA_State > XA_PLAYING)
 		return;
 
-	sdata->XA_State = 4;
+	sdata->XA_State = XA_FADING;
 	sdata->XA_VolumeDeduct = 0x400;
 }
 
@@ -734,18 +734,18 @@ void CDSYS_XAPauseForce()
 #if defined(CTR_NATIVE)
 		NativeAudio_StopXA();
 		sdata->XA_boolFinished = 0;
-		sdata->XA_State = 0;
+		sdata->XA_State = XA_IDLE;
 		sdata->XA_PauseFrame = sdata->gGT->frameTimer_MainFrame_ResetDB;
 #endif
 		return;
 	}
 	if (sdata->bool_XnfLoaded == 0)
 		return;
-	if (sdata->XA_State == 0)
+	if (sdata->XA_State == XA_IDLE)
 		return;
 
 	sdata->XA_boolFinished = 0;
-	sdata->XA_State = 0;
+	sdata->XA_State = XA_IDLE;
 
 	SpuSetIRQ(0);
 	CDSYS_SpuDisableIRQ();
@@ -796,7 +796,7 @@ void CDSYS_XAPauseAtEnd()
 			sdata->XA_CurrOffset = currOffset;
 		}
 
-		if (sdata->XA_State == 4)
+		if (sdata->XA_State == XA_FADING)
 		{
 			sdata->XA_VolumeBitshift -= CDSYS_NativeGetXAFadeAmount(fadeSteps);
 			if (sdata->XA_VolumeBitshift <= 0)
@@ -804,7 +804,7 @@ void CDSYS_XAPauseAtEnd()
 				sdata->XA_VolumeBitshift = 0;
 				NativeAudio_StopXA();
 				sdata->XA_boolFinished = 0;
-				sdata->XA_State = 0;
+				sdata->XA_State = XA_IDLE;
 				sdata->XA_MaxSampleVal = 0;
 				sdata->XA_MaxSampleValInArr = 0;
 				sdata->XA_PauseFrame = sdata->gGT->frameTimer_MainFrame_ResetDB;
@@ -816,9 +816,9 @@ void CDSYS_XAPauseAtEnd()
 		}
 		else if (xaPlaying == 0)
 		{
-			if (sdata->XA_State != 0)
+			if (sdata->XA_State != XA_IDLE)
 				sdata->XA_PauseFrame = sdata->gGT->frameTimer_MainFrame_ResetDB;
-			sdata->XA_State = 0;
+			sdata->XA_State = XA_IDLE;
 			sdata->XA_MaxSampleVal = 0;
 			sdata->XA_MaxSampleValInArr = 0;
 		}

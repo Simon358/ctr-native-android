@@ -10,8 +10,8 @@ enum
 
 static void LOAD_NativeAudio_SetStateAfterBankReload(u32 state)
 {
-	int isSameLatchedState = sdata->unkAudioState == (s16)state;
-	int isStoppedSong0State = (state == 2) || (state == 5) || (state == 7);
+	int isSameLatchedState = sdata->audioState == (s16)state;
+	int isStoppedSong0State = (state == AUDIO_STOP_ALL) || (state == AUDIO_ADV_HUB) || (state == AUDIO_GARAGE_ENTRY);
 
 	if ((sdata->cseqBoolPlay == 0) && isSameLatchedState && isStoppedSong0State)
 	{
@@ -21,7 +21,7 @@ static void LOAD_NativeAudio_SetStateAfterBankReload(u32 state)
 		// so post-load menu/hub music is started again.
 		Voiceline_EmptyFunc();
 		Audio_SetState(state);
-		sdata->unkAudioState = (s16)state;
+		sdata->audioState = (s16)state;
 		return;
 	}
 

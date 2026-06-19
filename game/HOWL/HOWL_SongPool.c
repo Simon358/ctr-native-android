@@ -1,5 +1,11 @@
 #include <common.h>
 
+// Returns the CseqSongHeader for the given song ID from the parsed song data buffer.
+static struct CseqSongHeader *GetCseqSongHeader(u16 songID)
+{
+	return (struct CseqSongHeader *)&sdata->ptrCseqSongData[sdata->ptrCseqSongStartOffset[songID]];
+}
+
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x8002a63c-0x8002a678
 struct SongSeq *SongPool_FindFreeChannel(void)
 {
@@ -27,7 +33,7 @@ u32 SongPool_CalculateTempo(s16 const60, s16 tpqn, s16 bpm)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x8002a6cc-0x8002a730
 void SongPool_ChangeTempo(struct Song *song, s16 deltaBPM)
 {
-	struct CseqSongHeader *csh = (struct CseqSongHeader *)&sdata->ptrCseqSongData[sdata->ptrCseqSongStartOffset[song->id]];
+	struct CseqSongHeader *csh = GetCseqSongHeader(song->id);
 
 	song->bpm = (s16)CTR_MipsAddLo((u16)csh->bpm, deltaBPM);
 
@@ -49,7 +55,7 @@ void SongPool_Start(struct Song *song, u16 songID, s16 deltaBPM, int boolLoopAtE
 	song->flags = 1;
 	song->id = songID;
 
-	csh = (struct CseqSongHeader *)&sdata->ptrCseqSongData[sdata->ptrCseqSongStartOffset[songID]];
+	csh = GetCseqSongHeader(songID);
 	numSeqs = csh->numSeqs;
 
 	// advHub
@@ -160,7 +166,7 @@ void SongPool_Start(struct Song *song, u16 songID, s16 deltaBPM, int boolLoopAtE
 		seqCurr->NoteLength = 0;
 		seqCurr->NoteTimeElapsed = 0;
 
-		seqCurr->firstNote = (char *)NOTEHEADER_GETNOTES(cnhCurr);
+		seqCurr->firstNote = (u8 *)NOTEHEADER_GETNOTES(cnhCurr);
 
 		seqCurr->currNote = howl_GetNextNote(seqCurr->firstNote, &seqCurr->NoteLength);
 
@@ -187,7 +193,7 @@ void SongPool_AdvHub1(struct Song *song, int seqID, int vol, int boolImm)
 {
 	struct SongSeq *seq;
 
-	struct CseqSongHeader *csh = (struct CseqSongHeader *)&sdata->ptrCseqSongData[sdata->ptrCseqSongStartOffset[song->id]];
+	struct CseqSongHeader *csh = GetCseqSongHeader(song->id);
 
 	if (seqID >= (u8)csh->numSeqs)
 		return;
@@ -208,7 +214,7 @@ void SongPool_AdvHub2(struct Song *song, struct SongSet *songSet, int songSetAct
 {
 	int i;
 	int vol;
-	struct CseqSongHeader *csh = (struct CseqSongHeader *)&sdata->ptrCseqSongData[sdata->ptrCseqSongStartOffset[song->id]];
+	struct CseqSongHeader *csh = GetCseqSongHeader(song->id);
 	u8 numSeqs = csh->numSeqs;
 
 	// advHub

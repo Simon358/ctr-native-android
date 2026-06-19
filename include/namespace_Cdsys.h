@@ -17,6 +17,15 @@ enum DiscMode
 	DM_AUDIO
 };
 
+typedef enum XAState : int
+{
+	XA_IDLE = 0,
+	XA_SEEKING = 1,
+	XA_STARTING = 2,
+	XA_PLAYING = 3,
+	XA_FADING = 4,
+} XAState;
+
 struct XNF
 {
 	// 0x0

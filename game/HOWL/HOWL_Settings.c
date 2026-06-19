@@ -214,12 +214,12 @@ void OptionsMenu_TestSound(int newRow, int newBoolPlay)
 
 			if (Music_GetHighestSongPlayIndex() == 1)
 			{
-				CseqMusic_Stop(2);
+				CseqMusic_Stop(CSEQ_SONG_UKA);
 			}
 
 			else
 			{
-				CseqMusic_Stop(1);
+				CseqMusic_Stop(CSEQ_SONG_AKU);
 			}
 		}
 
@@ -273,12 +273,12 @@ void OptionsMenu_TestSound(int newRow, int newBoolPlay)
 
 				if (Music_GetHighestSongPlayIndex() == 1)
 				{
-					CseqMusic_Stop(2);
+					CseqMusic_Stop(CSEQ_SONG_UKA);
 				}
 
 				else
 				{
-					CseqMusic_Stop(1);
+					CseqMusic_Stop(CSEQ_SONG_AKU);
 				}
 			}
 

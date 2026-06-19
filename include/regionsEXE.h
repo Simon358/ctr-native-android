@@ -3737,7 +3737,7 @@ struct sData
 	int countPass_CdReadyCallback;
 
 	// 8008d708
-	int XA_State;
+	XAState XA_State;
 
 	// 8008d70c
 	int XA_VolumeBitshift;
@@ -3896,7 +3896,9 @@ struct sData
 	struct SampleDrums *ptrCseqShortSamples;
 
 	// 8008d7c8
-	char *ptrCseqSongData; // should maybe be `struct CseqSongHeader*` instead of `char*`
+	// NOTE(aalhendi): Raw byte buffer of parsed CSEQ song data.
+	// Indexed by ptrCseqSongStartOffset[] (byte offsets), then cast to CseqSongHeader* at use sites.
+	char *ptrCseqSongData;
 
 	// 8008d7cc
 	int boolStereoEnabled;
@@ -3934,7 +3936,7 @@ struct sData
 
 	// 8008bc30 sep3
 	// 8008d7f0 usaRetail
-	s16 unkAudioState;
+	AudioState audioState;
 
 	// 8008d7f2
 	s16 desiredXA_RaceIntroIndex;

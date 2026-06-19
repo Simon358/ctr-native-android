@@ -178,7 +178,7 @@ int howl_LoadHeader(char *filename);
 int howl_SetSong(int songID);
 int howl_LoadSong(void);
 void howl_ErasePtrCseqHeader(void);
-char *howl_GetNextNote(char *currNote, int *noteLen);
+u8 *howl_GetNextNote(u8 *currNote, int *noteLen);
 void cseq_opcode00_empty(struct SongSeq *seq);
 void cseq_opcode01_noteoff(struct SongSeq *seq);
 void cseq_opcode02_empty(struct SongSeq *seq);

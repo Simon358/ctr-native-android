@@ -13,7 +13,7 @@ void Music_SetIntro(void)
 	{
 	}
 
-	howl_SetSong(28);
+	howl_SetSong(HOWL_SONG_ND_CRATE);
 
 	while (howl_LoadSong() == 0)
 	{
@@ -322,7 +322,7 @@ u32 Music_AsyncParseBanks(void)
 			if (gGT->bossID >= 6)
 				break;
 
-			index = 0x19;
+			index = HOWL_SONG_BOSS_RACE;
 		}
 
 		// any level you can drive on
@@ -334,34 +334,34 @@ u32 Music_AsyncParseBanks(void)
 
 		else if (level == MAIN_MENU_LEVEL)
 		{
-			index = 27;
+			index = HOWL_SONG_MAIN_MENU;
 		}
 
 		else if (level == INTRO_RACE_TODAY)
 		{
-			index = 29;
+			index = HOWL_SONG_INTRO_RACE;
 		}
 
 		else if (level == NAUGHTY_DOG_CRATE)
 		{
-			index = 28;
+			index = HOWL_SONG_ND_CRATE;
 		}
 
 		// any%
 		else if (level == OXIDE_ENDING)
 		{
-			index = 30;
+			index = HOWL_SONG_OXIDE_END;
 		}
 
 		// 100% ending
 		else if (level == OXIDE_TRUE_ENDING)
 		{
-			index = 31;
+			index = HOWL_SONG_OXIDE_TRUE;
 		}
 
 		else if (level == CREDITS_CRASH)
 		{
-			index = 32;
+			index = HOWL_SONG_CREDITS;
 		}
 
 		else

@@ -255,14 +255,14 @@ void howl_ErasePtrCseqHeader()
 }
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80029dcc-0x80029e18
-char *howl_GetNextNote(char *currNote, int *noteLen)
+u8 *howl_GetNextNote(u8 *currNote, int *noteLen)
 {
 	int var1;
 
-	var1 = (u8)currNote[0] & 0x7f;
+	var1 = currNote[0] & 0x7f;
 
 	// find the end opcode of currNote
-	while (((u8)currNote[0] & 0x80) != 0)
+	while ((currNote[0] & 0x80) != 0)
 	{
 		currNote++;
 
@@ -273,7 +273,7 @@ char *howl_GetNextNote(char *currNote, int *noteLen)
 		// 7 bits is number data
 		// so that code skips proper amount of bytes it uses.
 		// it allows to send only 1 byte for s16 events.
-		var1 = CTR_MipsAddLo(CTR_MipsSll(var1, 7), (u8)currNote[0] & 0x7f);
+		var1 = CTR_MipsAddLo(CTR_MipsSll(var1, 7), currNote[0] & 0x7f);
 	}
 
 	*noteLen = var1;

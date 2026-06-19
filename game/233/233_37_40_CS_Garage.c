@@ -28,7 +28,7 @@ void CS_Garage_ZoomOut(char zoomState)
 		Garage_Init();
 		Garage_Enter(sdata->advCharSelectIndex_curr);
 
-		Audio_SetState_Safe(8);
+		Audio_SetState_Safe(AUDIO_GARAGE);
 	}
 }
 

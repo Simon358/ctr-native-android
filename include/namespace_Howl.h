@@ -7,6 +7,46 @@ struct SndVolume
 };
 #endif
 
+typedef enum AudioState : s16
+{
+	AUDIO_NONE = 0,
+	AUDIO_LOADING = 1,
+	AUDIO_STOP_ALL = 2,
+	AUDIO_ADV_HUB = 5,
+	AUDIO_ADV_HUB_WAIT = 6,
+	AUDIO_GARAGE_ENTRY = 7,
+	AUDIO_GARAGE = 8,
+	AUDIO_RACE_INTRO = 9,
+	AUDIO_TRAFFIC = 10,
+	AUDIO_RACING = 11,
+	AUDIO_PRE_LAST_LAP = 12,
+	AUDIO_FINAL_LAP = 13,
+	AUDIO_POST_LAST_LAP = 14,
+	AUDIO_LAST_LAP = 15,
+	AUDIO_RACE_END = 16,
+} AudioState;
+
+// Global song indices into howl_songOffsets[].
+enum HowlSong
+{
+	HOWL_SONG_BOSS_RACE = 25, // 0x19, shared by all boss races
+	HOWL_SONG_MAIN_MENU = 27,
+	HOWL_SONG_ND_CRATE = 28,
+	HOWL_SONG_INTRO_RACE = 29,
+	HOWL_SONG_OXIDE_END = 30,
+	HOWL_SONG_OXIDE_TRUE = 31,
+	HOWL_SONG_CREDITS = 32,
+};
+
+// Local song indices within a loaded CSEQ song pack. These are relative to
+// whatever song pack is currently resident.
+enum CseqSong
+{
+	CSEQ_SONG_LEVEL = 0,
+	CSEQ_SONG_AKU = 1,
+	CSEQ_SONG_UKA = 2,
+};
+
 #ifndef CTR_NATIVE
 // from TOMB5, not from psyq
 // https://github.com/TOMB5/TOMB5/blob/master/EMULATOR/LIBSPU.H
@@ -278,29 +318,6 @@ struct SongNoteHeader
 };
 #define NOTEHEADER_GETNOTES(x) ((u32)x + sizeof(struct SongNoteHeader))
 
-#if 0
-// AKA: SongNote
-struct SongOpcode
-{
-	// 0x0
-	// opcodeID (0x0 - 0xA)
-	
-	// 0x1
-	//		opcode01: pitchIndex_drumIndex
-	//		opcode05: pitchIndex_drumIndex
-	//		opcode06: volume
-	//		opcode07: distort
-	//		opcode08: reverb
-	//		opcode09: instrumentID
-	//		opcode0a: distortion
-	
-	// 0x2
-	// 		opcode05: volume
-	
-	// size -- unk
-};
-#endif
-
 struct SongSeq
 {
 	// pointer in SongPool->CseqSequences
@@ -355,12 +372,10 @@ struct SongSeq
 	int NoteTimeElapsed;
 
 	// 0x14
-	// SongOpcode
-	char *firstNote;
+	u8 *firstNote;
 
 	// 0x18
-	// SongOpcode
-	char *currNote;
+	u8 *currNote;
 
 	// 0x1C -- size
 };

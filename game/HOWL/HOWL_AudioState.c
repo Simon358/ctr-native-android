@@ -16,7 +16,7 @@ void Audio_SetState(u32 state)
 	switch (state)
 	{
 	// stop/pause cseq music (main: case 2)
-	case 1:
+	case AUDIO_LOADING:
 		sdata->boolNeedXASeek = 0;
 
 		CDSYS_XAPauseRequest();
@@ -26,15 +26,15 @@ void Audio_SetState(u32 state)
 		// erase backup, keep music, stop all fx
 		howl_StopAudio(1, 0, 1);
 		break;
-	case 2:
-	case 7:
+	case AUDIO_STOP_ALL:
+	case AUDIO_GARAGE_ENTRY:
 
 		CseqMusic_StopAll();
 
 		Music_Adjust(0, 0, 0, 0);
 
 		break;
-	case 5:
+	case AUDIO_ADV_HUB:
 
 		CseqMusic_StopAll();
 
@@ -47,19 +47,19 @@ void Audio_SetState(u32 state)
 			Music_Adjust(0, 0, &sdata->advHubSongSet, 1 << (level - 0x19U));
 		}
 		break;
-	case 9:
+	case AUDIO_RACE_INTRO:
 		XA_index = sdata->desiredXA_RaceIntroIndex;
 		sdata->desiredXA_RaceIntroIndex += 1;
 		sdata->desiredXA_RaceIntroIndex &= 3;
 		goto PLAY_XA;
 
-	case 10:
+	case AUDIO_TRAFFIC:
 
 		Music_Stop();
 
 		CseqMusic_StopAll();
 		break;
-	case 11:
+	case AUDIO_RACING:
 
 		sdata->WrongWayDirection_bool = false;
 
@@ -68,10 +68,10 @@ void Audio_SetState(u32 state)
 		Voiceline_ToggleEnable(1);
 		break;
 
-	case 12:
+	case AUDIO_PRE_LAST_LAP:
 
 	// last lap, distToFinish < 9000
-	case 15:
+	case AUDIO_LAST_LAP:
 
 		Voiceline_ToggleEnable(0);
 
@@ -79,7 +79,7 @@ void Audio_SetState(u32 state)
 		break;
 
 	// if you are on last lap
-	case 13:
+	case AUDIO_FINAL_LAP:
 		sdata->boolNeedXASeek = 0;
 
 		Music_LowerVolume();
@@ -88,7 +88,7 @@ void Audio_SetState(u32 state)
 		XA_index = 6;
 
 		goto PLAY_XA;
-	case 14:
+	case AUDIO_POST_LAST_LAP:
 
 		sdata->WrongWayDirection_bool = false;
 
@@ -99,7 +99,7 @@ void Audio_SetState(u32 state)
 		Voiceline_ToggleEnable(1);
 
 		break;
-	case 16:
+	case AUDIO_RACE_END:
 		sdata->boolNeedXASeek = 0;
 
 		Music_Restart();
@@ -122,21 +122,21 @@ void Audio_SetState(u32 state)
 void Audio_SetState_Safe(int state)
 {
 	// If this sound isn't already playing
-	if (state != sdata->unkAudioState)
+	if (state != sdata->audioState)
 	{
 		Voiceline_EmptyFunc();
 
 		Audio_SetState(state);
 
 		// set which sound is playing
-		sdata->unkAudioState = state;
+		sdata->audioState = state;
 	}
 }
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x8002d50c-0x8002d554
 void Audio_AdvHub_SwapSong(int levelID)
 {
-	if ((sdata->unkAudioState == 5) &&
+	if ((sdata->audioState == AUDIO_ADV_HUB) &&
 	    // If you're on a map in the Adventure Arena
 	    (levelID - GEM_STONE_VALLEY < 5))
 	{
@@ -211,29 +211,29 @@ void Audio_Update1(void)
 	int iVar7;
 	struct GameTracker *gGT = sdata->gGT;
 
-	switch (sdata->unkAudioState - 1)
+	switch (sdata->audioState - 1)
 	{
-	case 5:
-		if ((sdata->XA_State == 0) || (sdata->XA_Playing_Category != 0))
+	case AUDIO_ADV_HUB_WAIT - 1:
+		if ((sdata->XA_State == XA_IDLE) || (sdata->XA_Playing_Category != 0))
 		{
-			Audio_SetState_Safe(5);
+			Audio_SetState_Safe(AUDIO_ADV_HUB);
 		}
 		break;
-	case 7:
+	case AUDIO_GARAGE - 1:
 		Garage_LerpFX();
 		break;
-	case 8:
-		if (sdata->XA_State == 0)
+	case AUDIO_RACE_INTRO - 1:
+		if (sdata->XA_State == XA_IDLE)
 		{
 			// 9 means intro cutscene
 			// 10 means traffic lights
 			// 11 means racing
 
 			// Change state to traffic lights
-			Audio_SetState_Safe(10);
+			Audio_SetState_Safe(AUDIO_TRAFFIC);
 		}
 		break;
-	case 9:
+	case AUDIO_TRAFFIC - 1:
 		// If traffic lights finish counting down
 		// from 0x3840 to zero
 		if (gGT->trafficLightsTimer < 1)
@@ -243,10 +243,10 @@ void Audio_Update1(void)
 			// 11 means racing
 
 			// Change State to 11, which means racing
-			Audio_SetState_Safe(11);
+			Audio_SetState_Safe(AUDIO_RACING);
 		}
 		break;
-	case 10:
+	case AUDIO_RACING - 1:
 		Audio_SetMaskSong(0);
 
 		// human driver in the lead
@@ -281,10 +281,10 @@ void Audio_Update1(void)
 		    // distToFinish is small
 		    (d->distanceToFinish_curr < 9000))
 		{
-			Audio_SetState_Safe(12);
+			Audio_SetState_Safe(AUDIO_PRE_LAST_LAP);
 		}
 		break;
-	case 11:
+	case AUDIO_PRE_LAST_LAP - 1:
 		Audio_SetMaskSong(0);
 
 		// human driver in the lead
@@ -302,7 +302,7 @@ void Audio_Update1(void)
 #if defined(CTR_NATIVE)
 		if (d == NULL)
 		{
-			if (((sdata->boolNeedXASeek != 0) && (sdata->XA_State == 0)) && (9 < gGT->frameTimer_MainFrame_ResetDB - sdata->XA_PauseFrame))
+			if (((sdata->boolNeedXASeek != 0) && (sdata->XA_State == XA_IDLE)) && (9 < gGT->frameTimer_MainFrame_ResetDB - sdata->XA_PauseFrame))
 			{
 				sdata->boolNeedXASeek = 0;
 			}
@@ -313,7 +313,7 @@ void Audio_Update1(void)
 #endif
 
 		// if need to XASeek
-		if (((sdata->boolNeedXASeek != 0) && (sdata->XA_State == 0)) && (9 < gGT->frameTimer_MainFrame_ResetDB - sdata->XA_PauseFrame))
+		if (((sdata->boolNeedXASeek != 0) && (sdata->XA_State == XA_IDLE)) && (9 < gGT->frameTimer_MainFrame_ResetDB - sdata->XA_PauseFrame))
 		{
 			// far from finish line
 			if (2000 < d->distanceToFinish_curr)
@@ -332,10 +332,10 @@ void Audio_Update1(void)
 		if (d->lapIndex == gGT->numLaps - 1U)
 		{
 			// Play final lap sound
-			Audio_SetState_Safe(13);
+			Audio_SetState_Safe(AUDIO_FINAL_LAP);
 		}
 		break;
-	case 12:
+	case AUDIO_FINAL_LAP - 1:
 		maskTempo = 0;
 
 		// if XA has been playing more than a second
@@ -350,12 +350,12 @@ void Audio_Update1(void)
 
 		Level_AmbientSound();
 
-		if (sdata->XA_State == 0)
+		if (sdata->XA_State == XA_IDLE)
 		{
-			Audio_SetState_Safe(14);
+			Audio_SetState_Safe(AUDIO_POST_LAST_LAP);
 		}
 		break;
-	case 13:
+	case AUDIO_POST_LAST_LAP - 1:
 		Audio_SetMaskSong(20);
 
 		// human driver in the lead
@@ -388,11 +388,11 @@ void Audio_Update1(void)
 		    // if finish line is close
 		    (d->distanceToFinish_curr < 9000))
 		{
-			Audio_SetState_Safe(15);
+			Audio_SetState_Safe(AUDIO_LAST_LAP);
 		}
 
 		break;
-	case 14:
+	case AUDIO_LAST_LAP - 1:
 		raceOrderIndex = -1;
 
 		// human driver in the lead
@@ -411,7 +411,7 @@ void Audio_Update1(void)
 #if defined(CTR_NATIVE)
 		if (d == NULL)
 		{
-			if (((sdata->boolNeedXASeek != 0) && (sdata->XA_State == 0)) && (9 < gGT->frameTimer_MainFrame_ResetDB - sdata->XA_PauseFrame))
+			if (((sdata->boolNeedXASeek != 0) && (sdata->XA_State == XA_IDLE)) && (9 < gGT->frameTimer_MainFrame_ResetDB - sdata->XA_PauseFrame))
 			{
 				sdata->boolNeedXASeek = 0;
 			}
@@ -422,7 +422,7 @@ void Audio_Update1(void)
 #endif
 
 		// if need to XASeek
-		if (((sdata->boolNeedXASeek != 0) && (sdata->XA_State == 0)) && (9 < gGT->frameTimer_MainFrame_ResetDB - sdata->XA_PauseFrame))
+		if (((sdata->boolNeedXASeek != 0) && (sdata->XA_State == XA_IDLE)) && (9 < gGT->frameTimer_MainFrame_ResetDB - sdata->XA_PauseFrame))
 		{
 			// far from finish line
 			if (2000 < d->distanceToFinish_curr)
@@ -511,14 +511,14 @@ void Audio_Update1(void)
 			// desired XA
 			sdata->desiredXA_RaceEndIndex = uVar1;
 
-			Audio_SetState_Safe(0x10);
+			Audio_SetState_Safe(AUDIO_RACE_END);
 		}
 		break;
-	case 15:
+	case AUDIO_RACE_END - 1:
 
 		Level_AmbientSound();
 
-		if (sdata->XA_State == 0)
+		if (sdata->XA_State == XA_IDLE)
 		{
 			Audio_SetMaskSong(0);
 		}

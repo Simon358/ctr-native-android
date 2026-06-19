@@ -636,7 +636,7 @@ void StateZero()
 
 	Music_SetIntro();
 	CseqMusic_StopAll();
-	CseqMusic_Start(0, 0, NULL, 0, 0);
+	CseqMusic_Start(CSEQ_SONG_LEVEL, 0, NULL, 0, 0);
 	Music_Start(0);
 
 	// "Start your engines, for Sony Computer..."
