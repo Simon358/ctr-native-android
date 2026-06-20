@@ -49,7 +49,7 @@ void Vector_SpecLightSpin2D(struct Instance *inst, s16 *rot, s16 *lightDir)
 }
 
 
-static void Vector_SpecLightSpin3D_LightMatrixMul(MATRIX *matrix, const SVec3 *input, SVec3 *output)
+static void Vector_LightMatrixMul(MATRIX *matrix, const SVec3 *input, SVec3 *output)
 {
 	VECTOR mac;
 
@@ -82,8 +82,8 @@ void Vector_SpecLightSpin3D(struct Instance *inst, s16 *rot, s16 *lightDir)
 		SVec3 viewLocal;
 		SVec3 halfVector;
 
-		Vector_SpecLightSpin3D_LightMatrixMul(&pb->matrix_Camera, &light, &lightCamera);
-		Vector_SpecLightSpin3D_LightMatrixMul(&rotMatrix, &lightCamera, &lightLocal);
+		Vector_LightMatrixMul(&pb->matrix_Camera, &light, &lightCamera);
+		Vector_LightMatrixMul(&rotMatrix, &lightCamera, &lightLocal);
 
 		inst->unk53 = (char)lightLocal.x;
 		inst->reflectionRGBA = (u16)lightLocal.z;
@@ -92,7 +92,7 @@ void Vector_SpecLightSpin3D(struct Instance *inst, s16 *rot, s16 *lightDir)
 		view.y = inst->matrix.t[1] - pb->pos[1];
 		view.z = inst->matrix.t[2] - pb->pos[2];
 		MATH_VectorNormalize(&view);
-		Vector_SpecLightSpin3D_LightMatrixMul(&rotMatrix, &view, &viewLocal);
+		Vector_LightMatrixMul(&rotMatrix, &view, &viewLocal);
 
 		halfVector.x = lightLocal.x + viewLocal.x;
 		halfVector.y = lightLocal.y + viewLocal.y;
@@ -105,20 +105,6 @@ void Vector_SpecLightSpin3D(struct Instance *inst, s16 *rot, s16 *lightDir)
 	}
 }
 
-
-static void Vector_LightMatrixMul(MATRIX *matrix, const SVec3 *input, SVec3 *output)
-{
-	VECTOR mac;
-
-	gte_SetLightMatrix(matrix);
-	gte_ldv0((SVECTOR *)input);
-	gte_llv0();
-	gte_stlvnl(&mac);
-
-	output->x = (s16)mac.vx;
-	output->y = (s16)mac.vy;
-	output->z = (s16)mac.vz;
-}
 
 void Vector_SpecLightNoSpin3D(struct Instance *inst, s16 *rot, s16 *lightDir)
 {
@@ -184,10 +170,10 @@ static void Vector_BakeMatrixTable_PrepareBlastedFrames(void)
 		s32 angle3000 = (i * 0x3000) / count;
 		s32 sin2000 = MATH_Sin((u32)angle2000);
 
-		*(s16 *)(void *)(entry + 0xc) = (s16)angle2000;
-		*(s16 *)(void *)(entry + 0x8) = (s16)(-MATH_Sin((u32)angle3000) / 7);
-		*(s16 *)(void *)(entry + 0x10) = Vector_BakeMatrixTable_Div4TowardZero(sin2000) + 0x1000;
-		*(s16 *)(void *)(entry + 0x14) = (s16)(((sin2000 * 6) / 0x28) + 0x1000);
+		*(s16 *)(entry + 0xc) = (s16)angle2000;
+		*(s16 *)(entry + 0x8) = (s16)(-MATH_Sin((u32)angle3000) / 7);
+		*(s16 *)(entry + 0x10) = Vector_BakeMatrixTable_Div4TowardZero(sin2000) + 0x1000;
+		*(s16 *)(entry + 0x14) = (s16)(((sin2000 * 6) / 0x28) + 0x1000);
 	}
 }
 
@@ -208,13 +194,13 @@ static void Vector_BakeMatrixTable_BakeRotScaleEntries(void)
 		{
 			char *entry = entries + (j * 0x20);
 
-			ConvertRotToMatrix(&rot, (s16 *)(void *)(entry + 8));
+			ConvertRotToMatrix(&rot, (s16 *)(entry + 8));
 
-			scale.m[0][0] = *(s16 *)(void *)(entry + 0x10);
-			scale.m[1][1] = *(s16 *)(void *)(entry + 0x12);
-			scale.m[2][2] = *(s16 *)(void *)(entry + 0x14);
+			scale.m[0][0] = *(s16 *)(entry + 0x10);
+			scale.m[1][1] = *(s16 *)(entry + 0x12);
+			scale.m[2][2] = *(s16 *)(entry + 0x14);
 
-			MatrixRotate((MATRIX *)(void *)(entry + 8), &scale, &rot);
+			MatrixRotate((MATRIX *)(entry + 8), &scale, &rot);
 		}
 	}
 }
@@ -230,14 +216,14 @@ static void Vector_BakeMatrixTable_BakeBlastedOffsets(void)
 	for (int i = 0; i < count; i++)
 	{
 		char *entry = entries + (i * 0x20);
-		MATRIX *matrix = (MATRIX *)(void *)(entry + 8);
+		MATRIX *matrix = (MATRIX *)(entry + 8);
 		s32 x = (matrix->m[0][1] * -0x2000) >> 12;
 		s32 y = ((matrix->m[1][1] * -0x2000) >> 12) + 0x2000;
 		s32 z = (matrix->m[2][1] * -0x2000) >> 12;
 
-		*(s16 *)(void *)(entry + 0) = (s16)x;
-		*(s16 *)(void *)(entry + 2) = (s16)y;
-		*(s16 *)(void *)(entry + 4) = (s16)z;
+		*(s16 *)(entry + 0) = (s16)x;
+		*(s16 *)(entry + 2) = (s16)y;
+		*(s16 *)(entry + 4) = (s16)z;
 	}
 }
 
