@@ -15,22 +15,22 @@ void AH_MaskHint_SetAnim(int scale)
 	gte_rt();
 
 	int posEndINT[3];
-	s16 posEnd[3];
+	SVec3 posEnd;
 
 	gte_stlvnl(&posEndINT[0]);
 
-	posEnd[0] = posEndINT[0];
-	posEnd[1] = posEndINT[1];
-	posEnd[2] = posEndINT[2];
+	posEnd.x = posEndINT[0];
+	posEnd.y = posEndINT[1];
+	posEnd.z = posEndINT[2];
 
-	s16 rotEnd[3];
-	rotEnd[0] = pb->rot[0] - D232.maskOffsetRot[0];
-	rotEnd[1] = pb->rot[1] + D232.maskOffsetRot[1];
-	rotEnd[2] = pb->rot[2] - D232.maskOffsetRot[2];
+	SVec3 rotEnd;
+	rotEnd.x = pb->rot[0] - D232.maskOffsetRot[0];
+	rotEnd.y = pb->rot[1] + D232.maskOffsetRot[1];
+	rotEnd.z = pb->rot[2] - D232.maskOffsetRot[2];
 
-	s16 posCurr[3];
-	s16 rotCurr[3];
-	CAM_ProcessTransition(&posCurr[0], &rotCurr[0], &D232.maskCamPosStart[0], &D232.maskCamRotStart[0], &posEnd[0], &rotEnd[0], scale);
+	SVec3 posCurr;
+	SVec3 rotCurr;
+	CAM_ProcessTransition(posCurr.v, rotCurr.v, &D232.maskCamPosStart[0], &D232.maskCamRotStart[0], posEnd.v, rotEnd.v, scale);
 
 	int rot = 0x1000;
 	if (D232.maskSpawnFrame - 20 < D232.maskFrameCurr)
@@ -48,19 +48,19 @@ void AH_MaskHint_SetAnim(int scale)
 	int cos = MATH_Cos(angle);
 
 	struct Instance *mhInst = sdata->instMaskHints3D;
-	posCurr[0] += (s16)((sin * rot) >> 0xc);
-	posCurr[2] += (s16)((cos * rot) >> 0xc);
+	posCurr.x += (s16)((sin * rot) >> 0xc);
+	posCurr.z += (s16)((cos * rot) >> 0xc);
 
-	rotCurr[1] += angle;
-	ConvertRotToMatrix(&mhInst->matrix, rotCurr);
+	rotCurr.y += angle;
+	ConvertRotToMatrix(&mhInst->matrix, rotCurr.v);
 
 	((struct MaskHint *)mhInst->thread->object)->scale = scale * 4 - 1;
 
 	angle = (sdata->frameCounter + gGT->timer) * 0x20;
 	sin = MATH_Sin(angle);
-	posCurr[1] += (s16)(((sin << 4) >> 0xc) * scale >> 0xc);
+	posCurr.y += (s16)(((sin << 4) >> 0xc) * scale >> 0xc);
 
-	mhInst->matrix.t[0] = posCurr[0];
-	mhInst->matrix.t[1] = posCurr[1];
-	mhInst->matrix.t[2] = posCurr[2];
+	mhInst->matrix.t[0] = posCurr.x;
+	mhInst->matrix.t[1] = posCurr.y;
+	mhInst->matrix.t[2] = posCurr.z;
 }

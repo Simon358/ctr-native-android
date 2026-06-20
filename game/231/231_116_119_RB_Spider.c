@@ -313,7 +313,7 @@ int RB_Spider_ThCollide(struct Thread *spiderThread, struct Thread *driverTh, vo
 void RB_Spider_LInB(struct Instance *inst)
 {
 	struct Spider *spider;
-	s16 rot[3];
+	SVec3 rot;
 	struct Thread *t;
 	struct Instance *shadowInst;
 	int spiderID;
@@ -372,8 +372,8 @@ void RB_Spider_LInB(struct Instance *inst)
 	shadowInst->scale.y = 0x2000;
 	shadowInst->scale.z = 0x2000;
 
-	rot[0] = 0;
-	rot[1] = 0x200;
-	rot[2] = 0;
-	ConvertRotToMatrix(&shadowInst->matrix, &rot[0]);
+	rot.x = 0;
+	rot.y = 0x200;
+	rot.z = 0;
+	ConvertRotToMatrix(&shadowInst->matrix, rot.v);
 }

@@ -18,7 +18,7 @@ void MM_Characters_DrawWindows(int boolShowDrivers)
 	s16 *ptrCurr;
 	int iVar14;
 	struct TransitionMeta *tMeta;
-	s16 rot[3];
+	SVec3 rot;
 
 	gGT = sdata->gGT;
 
@@ -189,11 +189,11 @@ void MM_Characters_DrawWindows(int boolShowDrivers)
 		}
 
 		// driver rotation
-		rot[0] = D230.csm_instRot[0];
-		rot[1] = D230.csm_instRot[1] + D230.characterSelect_angle[iVar14];
-		rot[2] = D230.csm_instRot[2];
+		rot.x = D230.csm_instRot[0];
+		rot.y = D230.csm_instRot[1] + D230.characterSelect_angle[iVar14];
+		rot.z = D230.csm_instRot[2];
 
-		ConvertRotToMatrix(&iVar10->matrix, &rot[0]);
+		ConvertRotToMatrix(&iVar10->matrix, rot.v);
 	}
 	return;
 }

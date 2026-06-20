@@ -12,18 +12,18 @@ void RB_ShieldDark_ThTick_Pop(struct Thread *t)
 	struct Instance *instDark;
 	struct Instance *instColor;
 	struct Driver *driverOwner;
-	s16 rot[3];
+	SVec3 rot;
 
 	sh = t->object;
 	instDark = t->inst;
 	instColor = sh->instColor;
 	driverOwner = t->parentThread->object;
 
-	rot[0] = 0;
-	rot[1] = 0;
-	rot[2] = 0;
-	LHMatrix_Parent(instDark, driverOwner->instSelf, (SVECTOR *)&rot[0]);
-	LHMatrix_Parent(instColor, driverOwner->instSelf, (SVECTOR *)&rot[0]);
+	rot.x = 0;
+	rot.y = 0;
+	rot.z = 0;
+	LHMatrix_Parent(instDark, driverOwner->instSelf, (SVECTOR *)rot.v);
+	LHMatrix_Parent(instColor, driverOwner->instSelf, (SVECTOR *)rot.v);
 
 	// set rotation
 	*(int *)&instDark->matrix.m[0][0] = 0x1000;

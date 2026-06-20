@@ -36,8 +36,8 @@ void AH_Door_ThTick(struct Thread *t)
 	int dist;
 	int iVar17;
 	int iVar18;
-	s16 desiredPos[3];
-	s16 desiredRot[3];
+	SVec3 desiredPos;
+	SVec3 desiredRot;
 	SVec3 keyLightDir;
 	s16 *scaler;
 
@@ -386,24 +386,24 @@ void AH_Door_ThTick(struct Thread *t)
 		i = MATH_Cos((int)doorInst->instDef->rot[1] + 0x400);
 
 		// desired posX for transition
-		desiredPos[0] = doorInst->matrix.t[0] + (s16)(ratio * 0x312 >> 0xc) + (s16)(i * 0x600 >> 0xc);
+		desiredPos.x = doorInst->matrix.t[0] + (s16)(ratio * 0x312 >> 0xc) + (s16)(i * 0x600 >> 0xc);
 		// desired posY for transition
-		desiredPos[1] = doorInst->matrix.t[1] + 0x17a;
+		desiredPos.y = doorInst->matrix.t[1] + 0x17a;
 
 		ratio = MATH_Sin((int)doorInst->instDef->rot[1]);
 
 		i = MATH_Sin((int)doorInst->instDef->rot[1] + 0x400);
 
 		// desired posZ for transition
-		desiredPos[2] = doorInst->matrix.t[2] + (s16)(ratio * 0x312 >> 0xc) + (s16)(i * 0x600 >> 0xc);
+		desiredPos.z = doorInst->matrix.t[2] + (s16)(ratio * 0x312 >> 0xc) + (s16)(i * 0x600 >> 0xc);
 
 		// desired rotation for transition
-		desiredRot[0] = doorInst->instDef->rot[0] + 0x800;
-		desiredRot[1] = doorInst->instDef->rot[1];
-		desiredRot[2] = doorInst->instDef->rot[2];
+		desiredRot.x = doorInst->instDef->rot[0] + 0x800;
+		desiredRot.y = doorInst->instDef->rot[1];
+		desiredRot.z = doorInst->instDef->rot[2];
 
 		// set desired position and rotation for CamerDC transition
-		CAM_SetDesiredPosRot(&gGT->cameraDC[0], &desiredPos[0], &desiredRot[0]);
+		CAM_SetDesiredPosRot(&gGT->cameraDC[0], desiredPos.v, desiredRot.v);
 
 		GAMEPAD_JogCon2(driver, 0, 0);
 
@@ -420,18 +420,18 @@ void AH_Door_ThTick(struct Thread *t)
 		door->doorRot[1] += 0x10;
 
 		// right-hand door rot[x,y,z]
-		desiredRot[0] = door->doorRot[0];
-		desiredRot[1] = doorInst->instDef->rot[1] - door->doorRot[1];
-		desiredRot[2] = door->doorRot[2];
+		desiredRot.x = door->doorRot[0];
+		desiredRot.y = doorInst->instDef->rot[1] - door->doorRot[1];
+		desiredRot.z = door->doorRot[2];
 
 		// converted to TEST in rebuildPS1
-		ConvertRotToMatrix(&door->otherDoor->matrix, &desiredRot[0]);
+		ConvertRotToMatrix(&door->otherDoor->matrix, desiredRot.v);
 
 		// left-hand door rot[x,y,z]
-		desiredRot[1] = doorInst->instDef->rot[1] + door->doorRot[1];
+		desiredRot.y = doorInst->instDef->rot[1] + door->doorRot[1];
 
 		// converted to TEST in rebuildPS1
-		ConvertRotToMatrix(&doorInst->matrix, &desiredRot[0]);
+		ConvertRotToMatrix(&doorInst->matrix, desiredRot.v);
 
 		// if less than 11 frames have passed,
 		// decrease key scale, then quit function

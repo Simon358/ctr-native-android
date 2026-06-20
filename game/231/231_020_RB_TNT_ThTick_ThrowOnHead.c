@@ -11,7 +11,7 @@ void RB_TNT_ThTick_ThrowOnHead(struct Thread *t)
 	s16 *array;
 	struct GameTracker *gGT;
 
-	s16 rot[3];
+	SVec3 rot;
 	s16 distHead;
 
 	// matrix?
@@ -60,12 +60,12 @@ void RB_TNT_ThTick_ThrowOnHead(struct Thread *t)
 	LHMatrix_Parent(inst, mw->driverTarget->instSelf, (SVECTOR *)&mw->deltaPos[0]);
 
 	// rotation
-	rot[0] = 0;
-	rot[1] = mw->tntSpinY;
-	rot[2] = 0;
+	rot.x = 0;
+	rot.y = mw->tntSpinY;
+	rot.z = 0;
 
 	// convert 3 rotation shorts into rotation matrix
-	ConvertRotToMatrix((MATRIX *)auStack48, &rot[0]);
+	ConvertRotToMatrix((MATRIX *)auStack48, rot.v);
 
 	MatrixRotate(&inst->matrix, &inst->matrix, (MATRIX *)auStack48);
 

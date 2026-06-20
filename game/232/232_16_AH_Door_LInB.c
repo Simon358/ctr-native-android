@@ -6,8 +6,8 @@ void AH_Door_LInB(struct Instance *inst)
 	char i;
 	int levelID;
 	int ratio;
-	s16 leftRot[3];
-	s16 rightRot[3];
+	SVec3 leftRot;
+	SVec3 rightRot;
 
 	struct GameTracker *gGT;
 	struct Thread *t;
@@ -157,19 +157,19 @@ void AH_Door_LInB(struct Instance *inst)
 		// rotation = 90 degrees
 		woodDoor->doorRot[1] = 0x400;
 
-		leftRot[0] = woodDoor->doorRot[0];
-		leftRot[1] = inst->instDef->rot[1] + woodDoor->doorRot[1];
-		leftRot[2] = woodDoor->doorRot[2];
+		leftRot.x = woodDoor->doorRot[0];
+		leftRot.y = inst->instDef->rot[1] + woodDoor->doorRot[1];
+		leftRot.z = woodDoor->doorRot[2];
 
-		rightRot[0] = woodDoor->doorRot[0];
-		rightRot[1] = inst->instDef->rot[1] - woodDoor->doorRot[1];
-		rightRot[2] = woodDoor->doorRot[2];
+		rightRot.x = woodDoor->doorRot[0];
+		rightRot.y = inst->instDef->rot[1] - woodDoor->doorRot[1];
+		rightRot.z = woodDoor->doorRot[2];
 
 		// make matrices for both doors rotated open
 
 		// converted to TEST in rebuildPS1
-		ConvertRotToMatrix(&inst->matrix, &leftRot[0]);
-		ConvertRotToMatrix(&otherDoorInst->matrix, &rightRot[0]);
+		ConvertRotToMatrix(&inst->matrix, leftRot.v);
+		ConvertRotToMatrix(&otherDoorInst->matrix, rightRot.v);
 	}
 	return;
 }

@@ -3,7 +3,7 @@
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800af7f0-0x800af9f8.
 void AH_SaveObj_LInB(struct Instance *savInst)
 {
-	s16 rot[3];
+	SVec3 rot;
 
 	struct GameTracker *gGT = sdata->gGT;
 	struct SpawnType2 *spawn;
@@ -53,11 +53,11 @@ void AH_SaveObj_LInB(struct Instance *savInst)
 				// keep unpatched until a valid hub/save repro proves failure.
 				memcpy(&inst->matrix, &savInst->matrix, sizeof(inst->matrix));
 
-				rot[0] = spawn->posCoords[3];
-				rot[1] = spawn->posCoords[4];
-				rot[2] = spawn->posCoords[5];
+				rot.x = spawn->posCoords[3];
+				rot.y = spawn->posCoords[4];
+				rot.z = spawn->posCoords[5];
 
-				ConvertRotToMatrix(&inst->matrix, rot);
+				ConvertRotToMatrix(&inst->matrix, rot.v);
 
 				inst->matrix.t[0] = spawn->posCoords[0];
 				inst->matrix.t[1] = spawn->posCoords[1];

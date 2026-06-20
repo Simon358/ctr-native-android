@@ -5,18 +5,18 @@
 static void RB_Baron_SetPathFrame(struct Instance *inst, struct SpawnType2 *spawn, int pointIndex, int offsetX, int offsetZ, int flipRotX)
 {
 	s16 *coord;
-	s16 rot[3];
+	SVec3 rot;
 
 	coord = &spawn->posCoords[pointIndex * 6];
 
-	rot[0] = coord[3];
-	rot[1] = coord[4];
-	rot[2] = coord[5];
+	rot.x = coord[3];
+	rot.y = coord[4];
+	rot.z = coord[5];
 
 	if (flipRotX)
-		rot[0] = -rot[0];
+		rot.x = -rot.x;
 
-	ConvertRotToMatrix(&inst->matrix, rot);
+	ConvertRotToMatrix(&inst->matrix, rot.v);
 
 	inst->matrix.t[0] = coord[0] + offsetX;
 	inst->matrix.t[1] = coord[1];

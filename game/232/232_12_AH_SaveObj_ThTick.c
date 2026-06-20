@@ -11,8 +11,8 @@ void AH_SaveObj_ThTick(struct Thread *t)
 	int distZ;
 	u32 uVar6;
 	int iVar7;
-	s16 desiredPos[3];
-	s16 desiredRot[3];
+	SVec3 desiredPos;
+	SVec3 desiredRot;
 
 	struct GameTracker *gGT;
 	struct Instance *driverInst;
@@ -77,14 +77,14 @@ void AH_SaveObj_ThTick(struct Thread *t)
 			if ((int)(uVar2 << 0x10) < 0)
 			{
 				// desired transition position (x,y,z)
-				desiredPos[0] = gGT->level1->ptrSpawnType2_PosRot->posCoords[0] + (s16)((int)saveInst->matrix.m[0][0] * 0x19 >> 7);
-				desiredPos[1] = gGT->level1->ptrSpawnType2_PosRot->posCoords[1] + (s16)((int)saveInst->matrix.m[1][0] * 0x19 >> 7);
-				desiredPos[2] = gGT->level1->ptrSpawnType2_PosRot->posCoords[2] + (s16)((int)saveInst->matrix.m[2][0] * 0x19 >> 7);
+				desiredPos.x = gGT->level1->ptrSpawnType2_PosRot->posCoords[0] + (s16)((int)saveInst->matrix.m[0][0] * 0x19 >> 7);
+				desiredPos.y = gGT->level1->ptrSpawnType2_PosRot->posCoords[1] + (s16)((int)saveInst->matrix.m[1][0] * 0x19 >> 7);
+				desiredPos.z = gGT->level1->ptrSpawnType2_PosRot->posCoords[2] + (s16)((int)saveInst->matrix.m[2][0] * 0x19 >> 7);
 
 				// desired transition rotation (x,y,z)
-				desiredRot[0] = gGT->level1->ptrSpawnType2_PosRot->posCoords[3] + D232.saveObjCameraOffset[0];
-				desiredRot[1] = gGT->level1->ptrSpawnType2_PosRot->posCoords[4] + D232.saveObjCameraOffset[1];
-				desiredRot[2] = gGT->level1->ptrSpawnType2_PosRot->posCoords[5] + D232.saveObjCameraOffset[2];
+				desiredRot.x = gGT->level1->ptrSpawnType2_PosRot->posCoords[3] + D232.saveObjCameraOffset[0];
+				desiredRot.y = gGT->level1->ptrSpawnType2_PosRot->posCoords[4] + D232.saveObjCameraOffset[1];
+				desiredRot.z = gGT->level1->ptrSpawnType2_PosRot->posCoords[5] + D232.saveObjCameraOffset[2];
 
 				// VehBirth_NullThread is an empty function that does nothing
 				driver->instSelf->thread->funcThTick = VehBirth_NullThread;

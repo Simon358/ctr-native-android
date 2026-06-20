@@ -13,8 +13,8 @@ void RB_Bubbles_RoosTubes()
 	int numFreeParticles;
 	struct Particle *p;
 	struct Driver *d;
-	s16 posCurr[3];
-	s16 posPrev[3];
+	SVec3 posCurr;
+	SVec3 posPrev;
 	int velX;
 	int velZ;
 	int i;

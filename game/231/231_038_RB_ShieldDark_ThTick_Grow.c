@@ -103,17 +103,17 @@ void RB_ShieldDark_ThTick_Grow(struct Thread *th)
 		}
 	}
 
-	s16 pos[3];
-	pos[0] = 0;
-	pos[1] = 0;
-	pos[2] = 0;
+	SVec3 pos;
+	pos.x = 0;
+	pos.y = 0;
+	pos.z = 0;
 
 	// Copy matrix
 	// To: shield instance, highlight instance, etc
 	// From: thread (shield) -> parentthread (player) -> object (driver) -> instance
-	LHMatrix_Parent(shieldInst, driverInst, (SVECTOR *)&pos[0]);
-	LHMatrix_Parent(colorInst, driverInst, (SVECTOR *)&pos[0]);
-	LHMatrix_Parent(highlightInst, driverInst, (SVECTOR *)&pos[0]);
+	LHMatrix_Parent(shieldInst, driverInst, (SVECTOR *)pos.v);
+	LHMatrix_Parent(colorInst, driverInst, (SVECTOR *)pos.v);
+	LHMatrix_Parent(highlightInst, driverInst, (SVECTOR *)pos.v);
 
 	// set rotation variables
 	*(int *)&shieldInst->matrix.m[0][0] = 0x1000;

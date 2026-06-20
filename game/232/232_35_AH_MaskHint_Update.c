@@ -46,8 +46,8 @@ void AH_MaskHint_Update()
 	struct GameTracker *gGT = sdata->gGT;
 	struct Driver *d = gGT->drivers[0];
 	u32 angleAxisWork[CAM_FOLLOW_DRIVER_ANGLE_AXIS_WORK_SIZE / sizeof(u32)];
-	s16 pos[3];
-	s16 rot[3];
+	SVec3 pos;
+	SVec3 rot;
 
 	switch (sdata->AkuAkuHintState - 1)
 	{
@@ -77,8 +77,8 @@ void AH_MaskHint_Update()
 			cdc->flags |= 8;
 
 			// NOTE(aalhendi): Retail passes a stack work buffer here, not 0x1f800108.
-			CAM_FollowDriver_AngleAxis(cdc, d, (u8 *)(void *)angleAxisWork, pos, rot);
-			CAM_SetDesiredPosRot(cdc, pos, rot);
+			CAM_FollowDriver_AngleAxis(cdc, d, (u8 *)(void *)angleAxisWork, pos.v, rot.v);
+			CAM_SetDesiredPosRot(cdc, pos.v, rot.v);
 		}
 
 		D232.maskWarppadDelayFrames = 60;
@@ -98,12 +98,12 @@ void AH_MaskHint_Update()
 		sdata->instMaskHints3D = VehTalkMask_Init();
 		struct Instance *mhInst = sdata->instMaskHints3D;
 
-		CTR_MatrixToRot((SVECTOR *)rot, &dInst->matrix, 0x11);
+		CTR_MatrixToRot((SVECTOR *)&rot, &dInst->matrix, 0x11);
 
 		// not a typo
-		D232.maskCamRotStart[0] = rot[1] & 0xfff;
-		D232.maskCamRotStart[2] = rot[2] & 0xfff;
-		D232.maskCamRotStart[1] = rot[0] & 0xfff;
+		D232.maskCamRotStart[0] = rot.y & 0xfff;
+		D232.maskCamRotStart[2] = rot.z & 0xfff;
+		D232.maskCamRotStart[1] = rot.x & 0xfff;
 
 		CTR_COPY_VEC3(D232.maskCamPosStart, dInst->matrix.t);
 
