@@ -485,14 +485,14 @@ SKIP_CONTROLS:
 	// pointer to rotation
 
 	int getPath;
-	s16 camPos[3];
-	s16 camRot[3];
-	CAM_Path_Move((int)garageFrames, &camPos[0], &camRot[0], &getPath);
+	SVec3 camPos;
+	SVec3 camRot;
+	CAM_Path_Move((int)garageFrames, &camPos.x, &camRot.x, &getPath);
 
 	// set position and rotation to pushBuffer
-	CTR_COPY_VEC3(gGT->pushBuffer[0].pos, camPos);
+	gGT->pushBuffer[0].pos = camPos;
 
-	CTR_COPY_VEC3(gGT->pushBuffer[0].rot, camRot);
+	gGT->pushBuffer[0].rot = camRot;
 
 	int zoom = gGarage.numFramesCurr_ZoomOut;
 	if (zoom == 0)

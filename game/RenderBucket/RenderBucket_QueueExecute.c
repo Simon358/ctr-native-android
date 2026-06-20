@@ -144,9 +144,9 @@ _Static_assert(offsetof(struct InstDrawPerPlayer, unkEC) == 0x78);
 _Static_assert(offsetof(struct InstDrawPerPlayer, unkF0) == 0x7c);
 _Static_assert(sizeof(struct InstDrawPerPlayer) == 0x88);
 _Static_assert(sizeof(u_long) == 0x4);
-_Static_assert(offsetof(struct PushBuffer, pos[0]) == 0x0);
-_Static_assert(offsetof(struct PushBuffer, pos[1]) == 0x2);
-_Static_assert(offsetof(struct PushBuffer, pos[2]) == 0x4);
+_Static_assert(offsetof(struct PushBuffer, pos.x) == 0x0);
+_Static_assert(offsetof(struct PushBuffer, pos.y) == 0x2);
+_Static_assert(offsetof(struct PushBuffer, pos.z) == 0x4);
 
 typedef struct
 {
@@ -1031,9 +1031,9 @@ static void RenderBucket_GetViewPosition(struct Instance *inst, struct PushBuffe
 		return;
 	}
 
-	pos.vx = RenderBucket_MipsSub(inst->matrix.t[0], pb->pos[0]);
-	pos.vy = RenderBucket_MipsSub(inst->matrix.t[1], pb->pos[1]);
-	pos.vz = RenderBucket_MipsSub(inst->matrix.t[2], pb->pos[2]);
+	pos.vx = RenderBucket_MipsSub(inst->matrix.t[0], pb->pos.x);
+	pos.vy = RenderBucket_MipsSub(inst->matrix.t[1], pb->pos.y);
+	pos.vz = RenderBucket_MipsSub(inst->matrix.t[2], pb->pos.z);
 	RenderBucket_StoreRawViewScratch(&pos);
 
 	// NOTE(aalhendi): Source-backs QueueDraw's view-space position transform at

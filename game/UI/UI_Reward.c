@@ -185,7 +185,7 @@ void UI_ThTick_CtrLetters(struct Thread *bucket)
 	int endOfRaceTransition;
 	struct Instance *inst;
 	struct UiElement3D *obj;
-	s16 rot[3];
+	SVec3 rot;
 
 	// thread->instance
 	inst = bucket->inst;
@@ -217,7 +217,7 @@ void UI_ThTick_CtrLetters(struct Thread *bucket)
 
 	if (inst->scale.x == 0x800)
 	{
-		rot[1] = 0;
+		rot.y = 0;
 	}
 	else
 	{
@@ -226,12 +226,12 @@ void UI_ThTick_CtrLetters(struct Thread *bucket)
 		{
 			endOfRaceTransition = (int)inst->scale.x + -0x401;
 		}
-		rot[1] = ((s16)(endOfRaceTransition >> 10) + 1) * 0x200;
+		rot.y = ((s16)(endOfRaceTransition >> 10) + 1) * 0x200;
 	}
-	rot[0] = 0;
-	rot[2] = 0;
+	rot.x = 0;
+	rot.z = 0;
 
-	ConvertRotToMatrix(&inst->matrix, &rot[0]);
+	ConvertRotToMatrix(&inst->matrix, &rot.x);
 
 	MatrixRotate(&inst->matrix, &obj->m, &inst->matrix);
 

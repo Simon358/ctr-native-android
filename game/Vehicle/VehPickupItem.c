@@ -447,13 +447,13 @@ void VehPickupItem_ShootNow(struct Driver *d, int weaponID, int flags)
 			d->instBombThrow = weaponInst;
 
 			// Original Code
-			s16 rot[3];
-			CTR_MatrixToRot((SVECTOR *)&rot[0], &weaponInst->matrix, 0x11);
+			SVec3 rot;
+			CTR_MatrixToRot((SVECTOR *)&rot.x, &weaponInst->matrix, 0x11);
 
 			// not a typo, required like this
-			tw->dir.x = rot[1];
-			tw->dir.y = rot[0];
-			tw->dir.z = rot[2];
+			tw->dir.x = rot.y;
+			tw->dir.y = rot.x;
+			tw->dir.z = rot.z;
 
 			PlaySound3D(0x47, weaponInst);
 		}

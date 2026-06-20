@@ -2219,24 +2219,24 @@ UpdateTireColorTimer:
 
 							RotTrans(&v, &v2, &l3);
 
-							gGT->pushBuffer[botDriver->driverID].pos[0] = v2.vx;
-							gGT->pushBuffer[botDriver->driverID].pos[1] = CTR_MipsAddLo(plantInst->matrix.t[1], 0xc0);
-							gGT->pushBuffer[botDriver->driverID].pos[2] = v2.vz;
+							gGT->pushBuffer[botDriver->driverID].pos.x = v2.vx;
+							gGT->pushBuffer[botDriver->driverID].pos.y = CTR_MipsAddLo(plantInst->matrix.t[1], 0xc0);
+							gGT->pushBuffer[botDriver->driverID].pos.z = v2.vz;
 
 							int camDriverXDelta = CTR_MipsSubLo(v2.vx, plantInst->matrix.t[0]);
-							int camY = gGT->pushBuffer[botDriver->driverID].pos[1];
+							int camY = gGT->pushBuffer[botDriver->driverID].pos.y;
 							int driverY = plantInst->matrix.t[1];
 							int camDriverZDelta = CTR_MipsSubLo(v2.vz, plantInst->matrix.t[2]);
 
 							int rotY = ratan2(camDriverXDelta, camDriverZDelta);
-							gGT->pushBuffer[botDriver->driverID].rot[1] = rotY;
+							gGT->pushBuffer[botDriver->driverID].rot.y = rotY;
 
 							int rotX = SquareRoot0_stub(
 							    CTR_MipsAddLo(CTR_MipsMulLo(camDriverXDelta, camDriverXDelta), CTR_MipsMulLo(camDriverZDelta, camDriverZDelta)));
 							rotX = ratan2(CTR_MipsSubLo(camY, driverY), rotX);
 
-							gGT->pushBuffer[botDriver->driverID].rot[0] = CTR_MipsSubLo(0x800, rotX);
-							gGT->pushBuffer[botDriver->driverID].rot[2] = 0;
+							gGT->pushBuffer[botDriver->driverID].rot.x = CTR_MipsSubLo(0x800, rotX);
+							gGT->pushBuffer[botDriver->driverID].rot.z = 0;
 						}
 
 						botDriver->botData.aiPhysics.speedLinear = 0;

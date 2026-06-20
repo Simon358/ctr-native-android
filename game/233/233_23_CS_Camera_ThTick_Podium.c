@@ -59,12 +59,12 @@ void CS_Camera_ThTick_Podium(struct Thread *th)
 
 			CAM_Path_Move(frame, pos, rot, camPath);
 
-			gGT->pushBuffer[0].pos[0] = pos[0];
-			gGT->pushBuffer[0].pos[1] = pos[1];
-			gGT->pushBuffer[0].pos[2] = pos[2];
-			gGT->pushBuffer[0].rot[0] = rot[0];
-			gGT->pushBuffer[0].rot[1] = rot[1];
-			gGT->pushBuffer[0].rot[2] = rot[2];
+			gGT->pushBuffer[0].pos.x = pos[0];
+			gGT->pushBuffer[0].pos.y = pos[1];
+			gGT->pushBuffer[0].pos.z = pos[2];
+			gGT->pushBuffer[0].rot.x = rot[0];
+			gGT->pushBuffer[0].rot.y = rot[1];
+			gGT->pushBuffer[0].rot.z = rot[2];
 		}
 	}
 	else

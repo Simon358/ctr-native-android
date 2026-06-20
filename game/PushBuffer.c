@@ -307,26 +307,26 @@ void PushBuffer_SetMatrixVP(struct PushBuffer *pb)
 #endif
 
 #ifndef CTR_NATIVE
-	*(s16 *)0x1f8003f4 = pb->rot[0];
-	*(s16 *)0x1f8003f6 = pb->rot[1];
-	*(s16 *)0x1f8003f8 = pb->rot[2];
+	*(s16 *)0x1f8003f4 = pb->rot.x;
+	*(s16 *)0x1f8003f6 = pb->rot.y;
+	*(s16 *)0x1f8003f8 = pb->rot.z;
 	ConvertRotToMatrix(matrixDST, (s16 *)0x1f8003f4);
 #else
-	*(s16 *)&scratchpad[0x3f4] = pb->rot[0];
-	*(s16 *)&scratchpad[0x3f6] = pb->rot[1];
-	*(s16 *)&scratchpad[0x3f8] = pb->rot[2];
+	*(s16 *)&scratchpad[0x3f4] = pb->rot.x;
+	*(s16 *)&scratchpad[0x3f6] = pb->rot.y;
+	*(s16 *)&scratchpad[0x3f8] = pb->rot.z;
 	ConvertRotToMatrix(matrixDST, (s16 *)&scratchpad[0x3f4]);
 #endif
 
 	s16 negPos[3];
 
-	pb->matrix_Camera.t[0] = pb->pos[0];
-	pb->matrix_Camera.t[1] = pb->pos[1];
-	pb->matrix_Camera.t[2] = pb->pos[2];
+	pb->matrix_Camera.t[0] = pb->pos.x;
+	pb->matrix_Camera.t[1] = pb->pos.y;
+	pb->matrix_Camera.t[2] = pb->pos.z;
 
-	negPos[0] = -pb->pos[0];
-	negPos[1] = -pb->pos[1];
-	negPos[2] = -pb->pos[2];
+	negPos[0] = -pb->pos.x;
+	negPos[1] = -pb->pos.y;
+	negPos[2] = -pb->pos.z;
 
 	// load inverted camera position
 #ifndef CTR_NATIVE
@@ -491,8 +491,8 @@ int PushBuffer_SetFrustumPlane(s16 *frustumData, struct FrustumCornerOUT *fc1, s
 	int cameraPosY = camPos[1];
 	int cameraPosZ = camPos[2];
 
-	PushBuffer_SetFrustumPlane_LoadAxisVector(fc2->pos[0] - cameraPosX, fc2->pos[1] - cameraPosY, fc2->pos[2] - cameraPosZ);
-	PushBuffer_SetFrustumPlane_LoadIRVector(fc1->pos[0] - cameraPosX, fc1->pos[1] - cameraPosY, fc1->pos[2] - cameraPosZ);
+	PushBuffer_SetFrustumPlane_LoadAxisVector(fc2->pos.x - cameraPosX, fc2->pos.y - cameraPosY, fc2->pos.z - cameraPosZ);
+	PushBuffer_SetFrustumPlane_LoadIRVector(fc1->pos.x - cameraPosX, fc1->pos.y - cameraPosY, fc1->pos.z - cameraPosZ);
 
 	gte_op0();
 
@@ -596,9 +596,9 @@ void PushBuffer_UpdateFrustum(struct PushBuffer *pb)
 
 	PushBuffer_SetMatrixVP(pb);
 
-	cameraPosX = pb->pos[0];
-	cameraPosY = pb->pos[1];
-	cameraPosZ = pb->pos[2];
+	cameraPosX = pb->pos.x;
+	cameraPosY = pb->pos.y;
+	cameraPosZ = pb->pos.z;
 
 	val_X = pb->rect.w;
 	val_X = val_X / 2;
@@ -647,9 +647,9 @@ void PushBuffer_UpdateFrustum(struct PushBuffer *pb)
 
 		iVar19 = 0x1000;
 
-		fcOUT->pos[0] = tx + cameraPosX;
-		fcOUT->pos[1] = ty + cameraPosY;
-		fcOUT->pos[2] = tz + cameraPosZ;
+		fcOUT->pos.x = tx + cameraPosX;
+		fcOUT->pos.y = ty + cameraPosY;
+		fcOUT->pos.z = tz + cameraPosZ;
 
 		// far clip: pos + dir*100
 		spf->pos[0] = posX;
@@ -780,21 +780,21 @@ void PushBuffer_UpdateFrustum(struct PushBuffer *pb)
 	pb->bbox.max.z = (s16)max_Z;
 
 	// cameraPos (x,y,z)
-	spf->camPos[0] = cameraPosX;
-	spf->camPos[1] = cameraPosY;
-	spf->camPos[2] = cameraPosZ;
+	spf->camPos.x = cameraPosX;
+	spf->camPos.y = cameraPosY;
+	spf->camPos.z = cameraPosZ;
 
 	// PushBuffer_SetFrustumPlane (x4)
-	val_Y = PushBuffer_SetFrustumPlane(&pb->frustumData[0], &spf->fc[0], &spf->camPos[0], &spf->fc[1]);
+	val_Y = PushBuffer_SetFrustumPlane(&pb->frustumData[0], &spf->fc[0], &spf->camPos.x, &spf->fc[1]);
 	pb->RenderListJmpIndex[0] = ~val_Y & 7;
 
-	val_Y = PushBuffer_SetFrustumPlane(&pb->frustumData[0x8], &spf->fc[1], &spf->camPos[0], &spf->fc[3]);
+	val_Y = PushBuffer_SetFrustumPlane(&pb->frustumData[0x8], &spf->fc[1], &spf->camPos.x, &spf->fc[3]);
 	pb->RenderListJmpIndex[1] = ~val_Y & 7;
 
-	val_Y = PushBuffer_SetFrustumPlane(&pb->frustumData[0x10], &spf->fc[3], &spf->camPos[0], &spf->fc[2]);
+	val_Y = PushBuffer_SetFrustumPlane(&pb->frustumData[0x10], &spf->fc[3], &spf->camPos.x, &spf->fc[2]);
 	pb->RenderListJmpIndex[2] = ~val_Y & 7;
 
-	val_Y = PushBuffer_SetFrustumPlane(&pb->frustumData[0x18], &spf->fc[2], &spf->camPos[0], &spf->fc[0]);
+	val_Y = PushBuffer_SetFrustumPlane(&pb->frustumData[0x18], &spf->fc[2], &spf->camPos.x, &spf->fc[0]);
 	pb->RenderListJmpIndex[3] = ~val_Y & 7;
 
 	PushBuffer_UpdateFrustum_LoadV0(0, 0x1000);

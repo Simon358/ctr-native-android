@@ -86,9 +86,9 @@ void Vector_SpecLightSpin3D(struct Instance *inst, s16 *rot, const SVec3 *lightD
 		inst->unk53 = (char)lightLocal.x;
 		inst->reflectionRGBA = (u16)lightLocal.z;
 
-		view.x = inst->matrix.t[0] - pb->pos[0];
-		view.y = inst->matrix.t[1] - pb->pos[1];
-		view.z = inst->matrix.t[2] - pb->pos[2];
+		view.x = inst->matrix.t[0] - pb->pos.x;
+		view.y = inst->matrix.t[1] - pb->pos.y;
+		view.z = inst->matrix.t[2] - pb->pos.z;
 		MATH_VectorNormalize(&view);
 		Vector_LightMatrixMul(&rotMatrix, &view, &viewLocal);
 
@@ -123,9 +123,9 @@ void Vector_SpecLightNoSpin3D(struct Instance *inst, s16 *rot, const SVec3 *ligh
 		SVec3 viewLocal;
 		SVec3 halfVector;
 		SVec3 view = {
-		    .x = inst->matrix.t[0] - pb->pos[0],
-		    .y = inst->matrix.t[1] - pb->pos[1],
-		    .z = inst->matrix.t[2] - pb->pos[2],
+		    .x = inst->matrix.t[0] - pb->pos.x,
+		    .y = inst->matrix.t[1] - pb->pos.y,
+		    .z = inst->matrix.t[2] - pb->pos.z,
 		};
 
 		MATH_VectorNormalize(&view);

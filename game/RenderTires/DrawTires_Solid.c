@@ -296,10 +296,10 @@ static void DrawTiresSolid_BuildWheelLocalPairs(struct DrawTiresSolidScratch *sc
 
 static void DrawTiresSolid_SetupGteState(struct DrawTiresSolidScratch *scratch, struct Instance *inst, struct InstDrawPerPlayer *idpp, struct PushBuffer *pb)
 {
-	int relX = (inst->matrix.t[0] - pb->pos[0]) << 2;
-	int relY = (inst->matrix.t[1] - pb->pos[1]) << 2;
-	int relZ = (inst->matrix.t[2] - pb->pos[2]) << 2;
-	int splitCameraY = (DrawTiresSolid_ReadS16(scratch, 0x4c) - pb->pos[1]) << 2;
+	int relX = (inst->matrix.t[0] - pb->pos.x) << 2;
+	int relY = (inst->matrix.t[1] - pb->pos.y) << 2;
+	int relZ = (inst->matrix.t[2] - pb->pos.z) << 2;
+	int splitCameraY = (DrawTiresSolid_ReadS16(scratch, 0x4c) - pb->pos.y) << 2;
 
 	// NOTE(aalhendi): PSX-backfeed blocker: retail DrawTires_Solid writes
 	// instance matrix words to GTE control regs 16-20, IDPP m3x3 words to regs

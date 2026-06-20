@@ -66,9 +66,7 @@ void DecalMP_01(struct GameTracker *gGT)
 			}
 
 			entry->pb.matrix_ViewProj = pb->matrix_ViewProj;
-			entry->pb.pos[0] = pb->pos[0];
-			entry->pb.pos[1] = pb->pos[1];
-			entry->pb.pos[2] = pb->pos[2];
+			entry->pb.pos = pb->pos;
 			entry->pb.distanceToScreen_PREV = pb->distanceToScreen_PREV;
 			entry->pb.rect = pb->rect;
 			entry->pb.ptrOT = pb->ptrOT;

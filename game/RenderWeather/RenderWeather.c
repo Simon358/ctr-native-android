@@ -151,7 +151,7 @@ void RenderWeather(struct PushBuffer *pb, struct PrimMem *primMem, struct RainBu
 	CTC2(RenderWeather_ReadWord(&pb->matrix_ViewProj, 0x0c), 3);
 	CTC2(RenderWeather_ReadWord(&pb->matrix_ViewProj, 0x10), 4);
 
-	trig = RenderWeather_TrigAngleSinCos(pb->rot[1]);
+	trig = RenderWeather_TrigAngleSinCos(pb->rot.y);
 	*scratchPackedCenterXY = 0x04000000u | (u32)((trig.sin >> 2) + 0x400);
 	*scratchCenterZ = (u32)((trig.cos >> 2) + 0x400);
 
@@ -207,13 +207,13 @@ void RenderWeather(struct PushBuffer *pb, struct PrimMem *primMem, struct RainBu
 	scrollZStart = scrollZ + (velocityZ >> 1);
 
 	cameraXY = RenderWeather_ReadWord(pb, 0x00) & RENDER_WEATHER_XY_MASK;
-	cameraZ = pb->pos[2];
+	cameraZ = pb->pos.z;
 	prevCameraXY = rainWords[6];
 	prevCameraZ = *(s16 *)(void *)((char *)rainBuffer + 0x1c);
 	if (gameMode1 == 0)
 	{
 		rainWords[6] = cameraXY;
-		*(s16 *)(void *)((char *)rainBuffer + 0x1c) = pb->pos[2];
+		*(s16 *)(void *)((char *)rainBuffer + 0x1c) = pb->pos.z;
 	}
 
 	cameraDeltaXY = cameraXY - prevCameraXY;

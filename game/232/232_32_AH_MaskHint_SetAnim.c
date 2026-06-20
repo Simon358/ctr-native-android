@@ -24,9 +24,9 @@ void AH_MaskHint_SetAnim(int scale)
 	posEnd.z = posEndINT[2];
 
 	SVec3 rotEnd;
-	rotEnd.x = pb->rot[0] - D232.maskOffsetRot[0];
-	rotEnd.y = pb->rot[1] + D232.maskOffsetRot[1];
-	rotEnd.z = pb->rot[2] - D232.maskOffsetRot[2];
+	rotEnd.x = pb->rot.x - D232.maskOffsetRot[0];
+	rotEnd.y = pb->rot.y + D232.maskOffsetRot[1];
+	rotEnd.z = pb->rot.z - D232.maskOffsetRot[2];
 
 	SVec3 posCurr;
 	SVec3 rotCurr;

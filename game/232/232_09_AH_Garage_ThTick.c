@@ -213,9 +213,7 @@ LAB_800aede0:
 
 LAB_800aede8:
 
-	sps->Input1.pos.x = inst->instDef->pos.x;
-	sps->Input1.pos.y = inst->instDef->pos.y;
-	sps->Input1.pos.z = inst->instDef->pos.z;
+	sps->Input1.pos = inst->instDef->pos;
 	sps->Input1.hitRadius = 0x300;
 	sps->Input1.hitRadiusSquared = 0x90000;
 	sps->Input1.modelID = STATIC_PINGARAGE;

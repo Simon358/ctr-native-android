@@ -20,9 +20,9 @@ static void MM_Title_UpdateTrophySpecLight(struct Instance *titleInst)
 	VECTOR lightMac;
 	VECTOR viewMac;
 
-	rot.x = -pb->rot[0];
-	rot.y = -pb->rot[1];
-	rot.z = -pb->rot[2];
+	rot.x = -pb->rot.x;
+	rot.y = -pb->rot.y;
+	rot.z = -pb->rot.z;
 	ConvertRotToMatrix_Transpose(&matrix, (s16 *)&rot);
 
 	light.x = 0;
@@ -33,9 +33,9 @@ static void MM_Title_UpdateTrophySpecLight(struct Instance *titleInst)
 	titleInst->unk53 = (u8)lightMac.vx;
 	titleInst->reflectionRGBA = (u32)lightMac.vz;
 
-	view.x = titleInst->matrix.t[0] - pb->pos[0];
-	view.y = titleInst->matrix.t[1] - pb->pos[1];
-	view.z = titleInst->matrix.t[2] - pb->pos[2];
+	view.x = titleInst->matrix.t[0] - pb->pos.x;
+	view.y = titleInst->matrix.t[1] - pb->pos.y;
+	view.z = titleInst->matrix.t[2] - pb->pos.z;
 	MATH_VectorNormalize(&view);
 	MM_Title_RotMatrixMul(&matrix, &view, &viewMac);
 

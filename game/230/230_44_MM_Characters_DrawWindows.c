@@ -90,12 +90,12 @@ void MM_Characters_DrawWindows(int boolShowDrivers)
 		pb->distanceToScreen_PREV = 0x100;
 
 		// pushBuffer pos and rot to all zero
-		pb->pos[0] = 0;
-		pb->pos[1] = 0;
-		pb->pos[2] = 0;
-		pb->rot[0] = 0;
-		pb->rot[1] = 0;
-		pb->rot[2] = 0;
+		pb->pos.x = 0;
+		pb->pos.y = 0;
+		pb->pos.z = 0;
+		pb->rot.x = 0;
+		pb->rot.y = 0;
+		pb->rot.z = 0;
 
 		// player -> instance
 		iVar10 = gGT->drivers[iVar14]->instSelf;

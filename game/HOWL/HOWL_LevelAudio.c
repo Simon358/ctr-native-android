@@ -244,7 +244,7 @@ void Level_AmbientSound(void)
 
 				for (int playerIndex = 0; playerIndex < (u8)gGT->numPlyrCurrGame; playerIndex++)
 				{
-					int distance = GTE_GetSquaredDistance(gGT->pushBuffer[playerIndex].pos, coord);
+					int distance = GTE_GetSquaredDistance(gGT->pushBuffer[playerIndex].pos.v, coord);
 
 					if (distance < closestDistance[soundSlot])
 					{
@@ -333,9 +333,9 @@ void PlaySound3D(u32 soundID, struct Instance *inst)
 
 	for (int i = 0; i < (u8)gGT->numPlyrCurrGame; i++)
 	{
-		dir[i][0] = CTR_MipsSubLo(inst->matrix.t[0], gGT->pushBuffer[i].pos[0]);
-		dir[i][1] = CTR_MipsSubLo(inst->matrix.t[1], gGT->pushBuffer[i].pos[1]);
-		dir[i][2] = CTR_MipsSubLo(inst->matrix.t[2], gGT->pushBuffer[i].pos[2]);
+		dir[i][0] = CTR_MipsSubLo(inst->matrix.t[0], gGT->pushBuffer[i].pos.x);
+		dir[i][1] = CTR_MipsSubLo(inst->matrix.t[1], gGT->pushBuffer[i].pos.y);
+		dir[i][2] = CTR_MipsSubLo(inst->matrix.t[2], gGT->pushBuffer[i].pos.z);
 
 		distance[i] = GTE_GetSquaredLength(dir[i]);
 		distance[i] = SquareRoot0_stub(distance[i]);
@@ -389,9 +389,9 @@ void PlaySound3D_Flags(u32 *flags, u32 soundID, struct Instance *inst)
 
 	for (int i = 0; i < (u8)gGT->numPlyrCurrGame; i++)
 	{
-		dir[i][0] = CTR_MipsSubLo(inst->matrix.t[0], gGT->pushBuffer[i].pos[0]);
-		dir[i][1] = CTR_MipsSubLo(inst->matrix.t[1], gGT->pushBuffer[i].pos[1]);
-		dir[i][2] = CTR_MipsSubLo(inst->matrix.t[2], gGT->pushBuffer[i].pos[2]);
+		dir[i][0] = CTR_MipsSubLo(inst->matrix.t[0], gGT->pushBuffer[i].pos.x);
+		dir[i][1] = CTR_MipsSubLo(inst->matrix.t[1], gGT->pushBuffer[i].pos.y);
+		dir[i][2] = CTR_MipsSubLo(inst->matrix.t[2], gGT->pushBuffer[i].pos.z);
 
 		distance[i] = GTE_GetSquaredLength(dir[i]);
 		distance[i] = SquareRoot0_stub(distance[i]);

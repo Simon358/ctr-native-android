@@ -174,7 +174,7 @@ void DrawConfetti(struct PushBuffer *pb, struct PrimMem *primMem, void *confetti
 	CTC2(DrawConfetti_ReadWord(&pb->matrix_ViewProj, 0x0c), 3);
 	CTC2(DrawConfetti_ReadWord(&pb->matrix_ViewProj, 0x10), 4);
 
-	cameraTrig = DrawConfetti_TrigAngleSinCos(pb->rot[1]);
+	cameraTrig = DrawConfetti_TrigAngleSinCos(pb->rot.y);
 	centerX = (cameraTrig.sin >> 2) + 0x400;
 	centerZ = (cameraTrig.cos >> 2) + 0x400;
 
@@ -211,9 +211,9 @@ void DrawConfetti(struct PushBuffer *pb, struct PrimMem *primMem, void *confetti
 	screenBounds = DrawConfetti_ReadWord(pb, 0x20);
 	otBase = pb->ptrOT;
 	timer = (u32)frameTimer;
-	baseX = -pb->pos[0] + centerX;
-	baseY = (s32)(DrawConfetti_ReadWord(confetti, 0x08) * timer - (u32)(s32)pb->pos[1]);
-	baseZ = -pb->pos[2] + centerZ;
+	baseX = -pb->pos.x + centerX;
+	baseY = (s32)(DrawConfetti_ReadWord(confetti, 0x08) * timer - (u32)(s32)pb->pos.y);
+	baseZ = -pb->pos.z + centerZ;
 
 	*scratchColor = 0x28000000;
 	cycle = 6;

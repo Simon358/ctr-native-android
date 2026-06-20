@@ -317,9 +317,7 @@ void VehStuckProc_MaskGrab_Animate(struct Thread *t, struct Driver *d)
 			d->speedApprox = 0;
 
 			// position backups
-			d->posCurr.x = d->posPrev.x;
-			d->posCurr.y = d->posPrev.y;
-			d->posCurr.z = d->posPrev.z;
+			d->posCurr = d->posPrev;
 		}
 	}
 
@@ -458,9 +456,7 @@ void VehStuckProc_MaskGrab_Init(struct Thread *t, struct Driver *d)
 	d->posCurr.y = CTR_MipsSll(inst->matrix.t[1], 8);
 	d->posCurr.z = CTR_MipsSll(inst->matrix.t[2], 8);
 
-	d->posPrev.x = d->posCurr.x;
-	d->posPrev.y = d->posCurr.y;
-	d->posPrev.z = d->posCurr.z;
+	d->posPrev = d->posCurr;
 
 	for (int i = 0; i < DRIVER_FUNC_COUNT; i++)
 	{
@@ -586,21 +582,21 @@ void VehStuckProc_PlantEaten_Animate(struct Thread *t, struct Driver *d)
 
 		struct PushBuffer *pb = &gGT->pushBuffer[d->driverID];
 
-		pb->pos[0] = camVec.vx;
-		pb->pos[1] = CTR_MipsAddLo(inst->matrix.t[1], 0xc0);
-		pb->pos[2] = camVec.vz;
+		pb->pos.x = camVec.vx;
+		pb->pos.y = CTR_MipsAddLo(inst->matrix.t[1], 0xc0);
+		pb->pos.z = camVec.vz;
 
 		int camX = CTR_MipsSubLo(camVec.vx, inst->matrix.t[0]);
 		int camZ = CTR_MipsSubLo(camVec.vz, inst->matrix.t[2]);
 
-		pb->rot[1] = (s16)ratan2(camX, camZ);
+		pb->rot.y = (s16)ratan2(camX, camZ);
 
 		// get distance between car and camera
 		dist = SquareRoot0_stub(CTR_MipsAddLo(CTR_MipsMulLo(camX, camX), CTR_MipsMulLo(camZ, camZ)));
 
-		pb->rot[0] = CTR_MipsSubLo(0x800, ratan2(CTR_MipsSubLo(pb->pos[1], inst->matrix.t[1]), dist));
+		pb->rot.x = CTR_MipsSubLo(0x800, ratan2(CTR_MipsSubLo(pb->pos.y, inst->matrix.t[1]), dist));
 
-		pb->rot[2] = 0;
+		pb->rot.z = 0;
 	}
 }
 

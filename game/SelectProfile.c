@@ -18,7 +18,7 @@ void SelectProfile_QueueLoadHub_MenuProc(struct RectMenu *menu)
 struct SelectProfileLoadSaveIcon
 {
 	struct Instance *inst;
-	s16 rot[3];
+	SVec3 rot;
 	s16 padding;
 };
 
@@ -45,12 +45,12 @@ void SelectProfile_ThTick(struct Thread *t)
 	{
 		int slot = i % 3;
 
-		icon->rot[1] = (s16)(icon->rot[1] + sdata->LoadSave_SpinRateY[slot]);
-		ConvertRotToMatrix(&icon->inst->matrix, &icon->rot[0]);
+		icon->rot.y = (s16)(icon->rot.y + sdata->LoadSave_SpinRateY[slot]);
+		ConvertRotToMatrix(&icon->inst->matrix, &icon->rot.x);
 
 		if (slot != 1)
 		{
-			Vector_SpecLightSpin3D(icon->inst, &icon->rot[0], &data.MetaDataLoadSave[i].vec3_specular_inverted);
+			Vector_SpecLightSpin3D(icon->inst, &icon->rot.x, &data.MetaDataLoadSave[i].vec3_specular_inverted);
 		}
 	}
 }
@@ -300,9 +300,9 @@ void SelectProfile_Init(u16 flags)
 					inst->scale.y = data.MetaDataLoadSave[i].scale;
 					inst->scale.z = data.MetaDataLoadSave[i].scale;
 
-					icon->rot[0] = 0;
-					icon->rot[1] = 0;
-					icon->rot[2] = data.spinOffset_LoadSave[slot];
+					icon->rot.x = 0;
+					icon->rot.y = 0;
+					icon->rot.z = data.spinOffset_LoadSave[slot];
 
 					*(int *)&inst->matrix.m[0][0] = 0x1000;
 					*(int *)&inst->matrix.m[0][2] = 0;

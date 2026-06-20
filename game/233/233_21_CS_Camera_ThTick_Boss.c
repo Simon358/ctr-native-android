@@ -93,12 +93,12 @@ void CS_Camera_ThTick_Boss(struct Thread *t)
 		MEMPACK_SwapPacks(gGT->activeMempackIndex);
 
 		struct CsThreadInitData initData;
-		initData.podiumPos[0] = bcd->bossPos[0];
-		initData.podiumPos[1] = bcd->bossPos[1];
-		initData.podiumPos[2] = bcd->bossPos[2];
-		initData.rot[0] = bcd->bossRot[0];
-		initData.rot[1] = bcd->bossRot[1];
-		initData.rot[2] = bcd->bossRot[2];
+		initData.podiumPos[0] = bcd->bossPos.x;
+		initData.podiumPos[1] = bcd->bossPos.y;
+		initData.podiumPos[2] = bcd->bossPos.z;
+		initData.rot[0] = bcd->bossRot.x;
+		initData.rot[1] = bcd->bossRot.y;
+		initData.rot[2] = bcd->bossRot.z;
 		initData.characterPos[0] = 0;
 		initData.characterPos[1] = 0;
 		initData.characterPos[2] = 0;
@@ -135,13 +135,13 @@ void CS_Camera_ThTick_Boss(struct Thread *t)
 		}
 
 		// set camera position and rotation for cutscene
-		gGT->pushBuffer[0].pos[0] = bcd->camPos[0];
-		gGT->pushBuffer[0].pos[1] = bcd->camPos[1];
-		gGT->pushBuffer[0].pos[2] = bcd->camPos[2];
+		gGT->pushBuffer[0].pos.x = bcd->camPos.x;
+		gGT->pushBuffer[0].pos.y = bcd->camPos.y;
+		gGT->pushBuffer[0].pos.z = bcd->camPos.z;
 
-		gGT->pushBuffer[0].rot[0] = bcd->camRot[0] + 0x800;
-		gGT->pushBuffer[0].rot[1] = bcd->camRot[1];
-		gGT->pushBuffer[0].rot[2] = bcd->camRot[2];
+		gGT->pushBuffer[0].rot.x = bcd->camRot.x + 0x800;
+		gGT->pushBuffer[0].rot.y = bcd->camRot.y;
+		gGT->pushBuffer[0].rot.z = bcd->camRot.z;
 
 		// fade back in
 		gGT->pushBuffer_UI.fadeFromBlack_desiredResult = 0x1000;

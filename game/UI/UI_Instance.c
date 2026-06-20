@@ -17,7 +17,7 @@ struct Instance *UI_INSTANCE_BirthWithThread(int param_1, int param_2, int param
 	struct Driver *driver;
 	struct Thread *driverThread;
 	struct Model *model;
-	s16 rot[3];
+	SVec3 rot;
 
 	struct GameTracker *gGT;
 	gGT = sdata->gGT;
@@ -176,18 +176,18 @@ struct Instance *UI_INSTANCE_BirthWithThread(int param_1, int param_2, int param
 		inst->depthBiasSecondary = 0x80;
 		if (param_4 == 0)
 		{
-			rot[0] = 0;
+			rot.x = 0;
 		}
 		else
 		{
 			lVar7 = ratan2(inst->matrix.t[1], inst->matrix.t[2]);
-			rot[0] = -(s16)lVar7;
+			rot.x = -(s16)lVar7;
 		}
-		rot[1] = 0;
-		rot[2] = 0;
+		rot.y = 0;
+		rot.z = 0;
 
 		// converted to TEST in rebuildPS1
-		ConvertRotToMatrix(&ui3D->m, &rot[0]);
+		ConvertRotToMatrix(&ui3D->m, &rot.x);
 
 		ui3D->rot[0] = 0;
 		ui3D->rot[1] = 0;
@@ -337,9 +337,7 @@ void UI_INSTANCE_InitAll(void)
 	}
 
 	sdata->pushBuffer_DecalMP.matrix_ViewProj = gGT->pushBuffer_UI.matrix_ViewProj;
-	sdata->pushBuffer_DecalMP.pos[0] = gGT->pushBuffer_UI.pos[0];
-	sdata->pushBuffer_DecalMP.pos[1] = gGT->pushBuffer_UI.pos[1];
-	sdata->pushBuffer_DecalMP.pos[2] = gGT->pushBuffer_UI.pos[2];
+	sdata->pushBuffer_DecalMP.pos = gGT->pushBuffer_UI.pos;
 	sdata->pushBuffer_DecalMP.rect = gGT->pushBuffer_UI.rect;
 	sdata->pushBuffer_DecalMP.ptrOT = gGT->pushBuffer_UI.ptrOT;
 	sdata->pushBuffer_DecalMP.distanceToScreen_PREV = gGT->pushBuffer_UI.distanceToScreen_PREV;

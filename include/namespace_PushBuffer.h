@@ -1,6 +1,6 @@
 struct FrustumCornerOUT
 {
-	s16 pos[3];
+	SVec3 pos;
 };
 
 struct ScratchpadFrustum
@@ -12,7 +12,7 @@ struct ScratchpadFrustum
 	struct FrustumCornerOUT fc[4];
 
 	// 1f800024
-	s16 camPos[3];
+	SVec3 camPos;
 
 	// 1f80002A
 	// -- end --
@@ -37,10 +37,10 @@ union FrustumCornerIN
 struct PushBuffer
 {
 	// 0x0
-	s16 pos[3];
+	SVec3 pos;
 
 	// 0x6
-	s16 rot[3];
+	SVec3 rot;
 
 	// 0xc
 	// set at bottom of Camera_UpdateFrustum,

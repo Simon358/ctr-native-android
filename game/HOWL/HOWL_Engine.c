@@ -432,9 +432,9 @@ void EngineSound_AI(struct Driver *ai, struct Driver *cameraDriver, int slotInde
 static int EngineSound_NearestAIs_GetDistance(struct Driver *ai, int pushBufferIndex)
 {
 	struct PushBuffer *pb = &sdata->gGT->pushBuffer[pushBufferIndex];
-	int dx = CTR_MipsSubLo(pb->pos[0], CTR_MipsSra(ai->posCurr.x, 8));
-	int dy = CTR_MipsSubLo(pb->pos[1], CTR_MipsSra(ai->posCurr.y, 8));
-	int dz = CTR_MipsSubLo(pb->pos[2], CTR_MipsSra(ai->posCurr.z, 8));
+	int dx = CTR_MipsSubLo(pb->pos.x, CTR_MipsSra(ai->posCurr.x, 8));
+	int dy = CTR_MipsSubLo(pb->pos.y, CTR_MipsSra(ai->posCurr.y, 8));
+	int dz = CTR_MipsSubLo(pb->pos.z, CTR_MipsSra(ai->posCurr.z, 8));
 
 	return SquareRoot0_stub(CTR_MipsAddLo(CTR_MipsAddLo(CTR_MipsMulLo(dx, dx), CTR_MipsMulLo(dy, dy)), CTR_MipsMulLo(dz, dz)));
 }

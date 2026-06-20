@@ -205,7 +205,7 @@ void AH_WarpPad_ThTick(struct Thread *t)
 	// if warppad is locked
 	if (instArr[WPIS_CLOSED_1S] != 0)
 	{
-		angleCamToWarppad = ratan2(warppadMatrix->t[0] - gGT->pushBuffer[0].pos[0], warppadMatrix->t[2] - gGT->pushBuffer[0].pos[2]);
+		angleCamToWarppad = ratan2(warppadMatrix->t[0] - gGT->pushBuffer[0].pos.x, warppadMatrix->t[2] - gGT->pushBuffer[0].pos.z);
 
 		angleCamToWarppad = -angleCamToWarppad;
 

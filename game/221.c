@@ -35,7 +35,7 @@ void CC_EndEvent_DrawMenu()
 	// camera, Blizz Bluff gives Skull Rock token, and
 	// Dragon Mines gives purple gem
 	if (levelID == DINGO_CANYON)
-		tokenRewardOffset = gGT->pushBuffer[0].pos[2];
+		tokenRewardOffset = gGT->pushBuffer[0].pos.z;
 	else if (levelID == DRAGON_MINES)
 		tokenRewardOffset = 0;
 	else if (levelID == BLIZZARD_BLUFF)

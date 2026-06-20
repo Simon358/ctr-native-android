@@ -247,12 +247,16 @@ struct BossCutsceneData
 	char *opcode;
 
 	// 0x14
-	s16 camPos[4];
-	s16 camRot[4];
+	SVec3 camPos;
+	s16 _pad_camPos;
+	SVec3 camRot;
+	s16 _pad_camRot;
 
 	// 0x24
-	s16 bossPos[4];
-	s16 bossRot[4];
+	SVec3 bossPos;
+	s16 _pad_bossPos;
+	SVec3 bossRot;
+	s16 _pad_bossRot;
 
 	// 0x34
 };

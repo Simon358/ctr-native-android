@@ -149,18 +149,18 @@ int CS_Thread_UseOpcode(struct Instance *instance, struct CutsceneObj *cs)
 			if (iVar10 < (int)numCamPathPoints + -1)
 			{
 				CAM_Path_Move(iVar10, camPos, camRot, camPathFlags);
-				gGT->pushBuffer[0].pos[0] = camPos[0];
-				gGT->pushBuffer[0].pos[1] = camPos[1];
-				gGT->pushBuffer[0].pos[2] = camPos[2];
-				gGT->pushBuffer[0].rot[0] = camRot[0];
-				gGT->pushBuffer[0].rot[1] = camRot[1];
-				gGT->pushBuffer[0].rot[2] = camRot[2];
+				gGT->pushBuffer[0].pos.x = camPos[0];
+				gGT->pushBuffer[0].pos.y = camPos[1];
+				gGT->pushBuffer[0].pos.z = camPos[2];
+				gGT->pushBuffer[0].rot.x = camRot[0];
+				gGT->pushBuffer[0].rot.y = camRot[1];
+				gGT->pushBuffer[0].rot.z = camRot[2];
 			}
 			else
 			{
 				if (opcodeMeta->opcode == 0x14)
 					CS_ScriptCmd_OpcodeNext(cs);
-				CAM_Path_Move((int)(s16)(numCamPathPoints + -1), gGT->pushBuffer[0].pos, gGT->pushBuffer[0].rot, camPathFlags);
+				CAM_Path_Move((int)(s16)(numCamPathPoints + -1), gGT->pushBuffer[0].pos.v, gGT->pushBuffer[0].rot.v, camPathFlags);
 			}
 
 			clockEffectFlags = gGT->clockEffectEnabled;

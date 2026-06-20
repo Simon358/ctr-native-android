@@ -463,7 +463,7 @@ void MainInit_FinalizeInit(struct GameTracker *gGT)
 	pb = &gGT->pushBuffer_UI;
 	PushBuffer_Init(pb, 0, 1);
 
-	pb->rot[0] = 0x800;
+	pb->rot.x = 0x800;
 	PushBuffer_SetPsyqGeom(pb);
 	PushBuffer_SetMatrixVP(pb);
 
