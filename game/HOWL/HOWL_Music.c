@@ -33,8 +33,7 @@ void Music_LoadBanks(void)
 	    // Level ID
 	    level,
 
-	    // Check to see if this is a boss race
-	    (gGT->gameMode1 < 0),
+	    (IS_BOSS_RACE(gGT->gameMode1)),
 
 	    // Boss ID
 	    gGT->bossID);
@@ -106,7 +105,7 @@ u32 Music_AsyncParseBanks(void)
 			goto PARSE_FINISH;
 
 		// If you're in a Boss Race
-		if (gGT->gameMode1 < 0)
+		if (IS_BOSS_RACE(gGT->gameMode1))
 		{
 			if (gGT->bossID >= 6)
 				break;
@@ -317,7 +316,7 @@ u32 Music_AsyncParseBanks(void)
 
 		// If you're in a Boss Race
 		// 0x80000000
-		if (gGT->gameMode1 < 0)
+		if (IS_BOSS_RACE(gGT->gameMode1))
 		{
 			if (gGT->bossID >= 6)
 				break;

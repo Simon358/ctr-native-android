@@ -160,7 +160,7 @@ static void MainGameEnd_UpdateAdventureLosses(struct GameTracker *gGT, struct Dr
 
 	if (player->driverRank == 0)
 	{
-		if ((s32)gGT->gameMode1 < 0)
+		if (IS_BOSS_RACE(gGT->gameMode1))
 			sdata->advProgress.timesLostBossRace[gGT->bossID] = 0;
 		else
 			sdata->advProgress.timesLostRacePerLev[gGT->levelID] = 0;
@@ -170,7 +170,7 @@ static void MainGameEnd_UpdateAdventureLosses(struct GameTracker *gGT, struct Dr
 
 	char *lossCounter;
 
-	if ((s32)gGT->gameMode1 < 0)
+	if (IS_BOSS_RACE(gGT->gameMode1))
 		lossCounter = &sdata->advProgress.timesLostBossRace[gGT->bossID];
 	else
 		lossCounter = &sdata->advProgress.timesLostRacePerLev[gGT->levelID];

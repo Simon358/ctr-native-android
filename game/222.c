@@ -422,8 +422,7 @@ void AA_EndEvent_DrawMenu(void)
 	sdata->Loading.OnBegin.RemBitsConfig0 |= ADVENTURE_BOSS;
 	sdata->Loading.OnBegin.RemBitsConfig8 |= TOKEN_RACE;
 
-	// If you are in boss mode
-	if (gGT->gameMode1 < 0)
+	if (IS_BOSS_RACE(gGT->gameMode1))
 	{
 		sdata->Loading.OnBegin.AddBitsConfig8 |= SPAWN_AT_BOSS;
 	}
@@ -443,8 +442,7 @@ void AA_EndEvent_DrawMenu(void)
 	// Load the levelID for Adventure Hub that you came from
 	s16 levSpawn = gGT->prevLEV;
 
-	// If you are in boss mode
-	if (gGT->gameMode1 < 0)
+	if (IS_BOSS_RACE(gGT->gameMode1))
 	{
 		// Reward bit of key unlocked, and boss beaten.
 		rewardBit = gGT->bossID + ADV_REWARD_FIRST_BOSS_KEY;
@@ -489,7 +487,7 @@ void AA_EndEvent_DrawMenu(void)
 		UNLOCK_ADV_BIT(adv->rewards, rewardBit);
 	}
 
-	if (gGT->gameMode1 < 0)
+	if (IS_BOSS_RACE(gGT->gameMode1))
 	{
 		MainRaceTrack_RequestLoad(levSpawn);
 		return;

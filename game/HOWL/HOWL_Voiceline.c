@@ -283,7 +283,7 @@ void Voiceline_StartPlay(struct Item *voiceLine)
 	sdata->backupParams_FUN_8002cf28[2] = voiceLineWords[2];
 	sdata->backupParams_FUN_8002cf28[3] = voiceLineWords[3];
 
-	if (((s32)sdata->gGT->gameMode1 < 0) && ((u32)(voiceID - 10) < 6) && (((u32)(characterID - 8) < 4) || (characterID == 0xf)))
+	if ((IS_BOSS_RACE(sdata->gGT->gameMode1)) && ((u32)(voiceID - 10) < 6) && (((u32)(characterID - 8) < 4) || (characterID == 0xf)))
 	{
 		u32 rng = Voiceline_RequestPlay_NextAudioRNG();
 		voiceSetIndex = (rng & 3) + 4;

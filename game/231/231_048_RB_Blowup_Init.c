@@ -88,8 +88,7 @@ void RB_Blowup_Init(struct Instance *weaponInst)
 	sps->Input1.pos.y = weaponInst->matrix.t[1];
 	sps->Input1.pos.z = weaponInst->matrix.t[2];
 
-	// if you're in boss mode
-	if (gGT->gameMode1 < 0)
+	if (IS_BOSS_RACE(gGT->gameMode1))
 	{
 		// hitRadius and hitRadiusSquared
 		sps->Input1.hitRadius = 0x100;

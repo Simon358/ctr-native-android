@@ -124,8 +124,7 @@ void UI_DrawRankedDrivers(void)
 		// Default for Arcade: Show 4 racers
 		iVar14 = 4;
 
-		// If you're in a Boss Race
-		if (gGT->gameMode1 < 0)
+		if (IS_BOSS_RACE(gGT->gameMode1))
 		{
 			// Show 2 racers
 			iVar14 = 2;

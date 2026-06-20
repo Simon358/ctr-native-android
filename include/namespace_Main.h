@@ -35,6 +35,11 @@ enum GameMode1
 	ADVENTURE_BOSS = 0x80000000
 };
 
+// NOTE(aalhendi): ADVENTURE_BOSS = 0x80000000 sets the sign bit. Retail tests this via
+// signed comparison (bltz). Keep the same semantics, not a bitmask test.
+// TODO(aalhendi): i'd *like* to do something better. idk yet
+#define IS_BOSS_RACE(gm) ((gm) < 0)
+
 typedef enum MainMenuState : s16
 {
 	MAIN_MENU_TITLE = 0,

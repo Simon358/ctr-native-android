@@ -13,7 +13,7 @@ int RB_Hazard_HurtDriver(struct Driver *driverVictim, int damageType, struct Dri
 	}
 	else
 	{
-		if ((gGT->levelID == OXIDE_STATION) && (gGT->gameMode1 < 0))
+		if ((gGT->levelID == OXIDE_STATION) && (IS_BOSS_RACE(gGT->gameMode1)))
 			damageType = 1;
 
 		result = (int)BOTS_ChangeState(driverVictim, damageType, driverAttacker, reason);

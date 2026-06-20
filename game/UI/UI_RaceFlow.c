@@ -450,8 +450,7 @@ void UI_RaceEnd_MenuProc(struct RectMenu *menu)
 			break;
 		}
 
-		// If you're in a Boss Race
-		if (gGT->gameMode1 < 0)
+		if (IS_BOSS_RACE(gGT->gameMode1))
 		{
 			sdata->Loading.OnBegin.RemBitsConfig0 |= ADVENTURE_BOSS;
 			sdata->Loading.OnBegin.AddBitsConfig8 |= SPAWN_AT_BOSS;
