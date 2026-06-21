@@ -21,29 +21,105 @@ global_variable const s16 s_battleTrackPurpleTokenOffset[LAB_BASEMENT - NITRO_CO
 
 extern struct RectMenu menu221;
 
+static s32 CC_EndEvent_GetRewardOffset(struct GameTracker *gGT)
+{
+	s32 levelID = gGT->levelID;
+#if defined(CTR_NATIVE)
+	s32 frustumSavedCameraZ = PushBuffer_GetFrustumSavedCameraZ();
+#else
+	s32 frustumSavedCameraZ = gGT->pushBuffer[0].pos.z;
+#endif
+
+	if (levelID == DINGO_CANYON)
+	{
+		// NOTE(aalhendi): Retail does not read pushBuffer[0].pos.z directly
+		// here. This underreads the battle-token stack table and aliases the
+		// earlier PushBuffer_SetFrustumPlane stack save of
+		// PushBuffer_UpdateFrustum's s5 camera-Z value.
+		return (s16)frustumSavedCameraZ;
+	}
+
+	if (levelID == DRAGON_MINES)
+	{
+		// Same saved s5 word as Dingo, read from its high halfword.
+		return (s16)CTR_MipsSra(frustumSavedCameraZ, 16);
+	}
+
+	if (levelID == BLIZZARD_BLUFF)
+	{
+		// Low halfword of saved s6 from the same producer; retail s6 is the
+		// scratchpad base 0x1f800000, so this reads as zero.
+		return 0;
+	}
+
+	return s_battleTrackPurpleTokenOffset[levelID - NITRO_COURT];
+}
+
+static u32 CC_EndEvent_GetRewardBitMask(s32 rewardBit)
+{
+	return 1u << ((u32)rewardBit & 0x1f);
+}
+
+#if defined(CTR_NATIVE)
+_Static_assert(OFFSETOF(struct sData, gameOptions) + sizeof(struct GameOptions) == OFFSETOF(struct sData, advProgress));
+
+static u8 *CC_EndEvent_GetNativeRewardWordBytes(s32 rewardBit)
+{
+	s32 wordIndex = CTR_MipsSra(rewardBit, 5);
+	s64 rewardByteOffset = (s64)OFFSETOF(struct sData, advProgress.rewards) + (s64)wordIndex * (s64)sizeof(u32);
+	s64 windowStart = (s64)OFFSETOF(struct sData, gameOptions);
+	s64 windowEnd = (s64)OFFSETOF(struct sData, advProgress) + (s64)sizeof(struct AdvProgress);
+
+	// NOTE(aalhendi): Retail applies the unchecked residue index to
+	// advProgress.rewards, so Dingo Bingo can touch adjacent gameOptions words.
+	// Native bounds that retail window without doing host out-of-bounds access.
+	if ((rewardByteOffset < windowStart) || (rewardByteOffset > windowEnd - (s32)sizeof(u32)))
+		return NULL;
+
+	return (u8 *)sdata + (s32)rewardByteOffset;
+}
+#endif
+
+static b32 CC_EndEvent_HasRewardBit(struct AdvProgress *adv, s32 rewardBit)
+{
+#if defined(CTR_NATIVE)
+	(void)adv;
+	u8 *wordBytes = CC_EndEvent_GetNativeRewardWordBytes(rewardBit);
+	if (wordBytes == NULL)
+		return true;
+
+	u32 rewardWord;
+	memcpy(&rewardWord, wordBytes, sizeof(rewardWord));
+	return (rewardWord & CC_EndEvent_GetRewardBitMask(rewardBit)) != 0;
+#else
+	return CHECK_ADV_BIT(adv->rewards, rewardBit) != 0;
+#endif
+}
+
+static void CC_EndEvent_UnlockRewardBit(struct AdvProgress *adv, s32 rewardBit)
+{
+#if defined(CTR_NATIVE)
+	(void)adv;
+	u8 *wordBytes = CC_EndEvent_GetNativeRewardWordBytes(rewardBit);
+	if (wordBytes == NULL)
+		return;
+
+	u32 rewardWord;
+	memcpy(&rewardWord, wordBytes, sizeof(rewardWord));
+	rewardWord |= CC_EndEvent_GetRewardBitMask(rewardBit);
+	memcpy(wordBytes, &rewardWord, sizeof(rewardWord));
+#else
+	UNLOCK_ADV_BIT(adv->rewards, rewardBit);
+#endif
+}
+
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x8009f710-0x8009fbec for the retail path.
 void CC_EndEvent_DrawMenu()
 {
 	struct GameTracker *gGT = sdata->gGT;
-	s32 levelID = gGT->levelID;
 	struct Driver *driver = gGT->drivers[0];
 	SVec2 pos;
-	s32 tokenRewardOffset;
-
-	// "Dingo Bingo" $sp exploit, for 101% speedruns.
-	// Dingo Canyon gives different item depending on
-	// camera, Blizz Bluff gives Skull Rock token, and
-	// Dragon Mines gives purple gem
-	if (levelID == DINGO_CANYON)
-		tokenRewardOffset = gGT->pushBuffer[0].pos.z;
-	else if (levelID == DRAGON_MINES)
-		tokenRewardOffset = 0;
-	else if (levelID == BLIZZARD_BLUFF)
-		tokenRewardOffset = -1;
-
-	// default logic
-	else
-		tokenRewardOffset = s_battleTrackPurpleTokenOffset[levelID - NITRO_COURT];
+	s32 tokenRewardOffset = CC_EndEvent_GetRewardOffset(gGT);
 
 	s32 tokenRewardBit = tokenRewardOffset + ADV_REWARD_FIRST_PURPLE_TOKEN;
 	struct AdvProgress *adv = &sdata->advProgress;
@@ -87,7 +163,7 @@ void CC_EndEvent_DrawMenu()
 	DecalFont_DrawLine(sdata->lngStrings[resultStringIndex], pos.x + 0x33, pos.y + 8, FONT_BIG, (JUSTIFY_CENTER | ORANGE));
 
 	// if a token is not newly-unlocked
-	if (didLose || (CHECK_ADV_BIT(adv->rewards, tokenRewardBit) != 0))
+	if (didLose || CC_EndEvent_HasRewardBit(adv, tokenRewardBit))
 	{
 		// If you pressed X/O to continue, quit function
 		if ((sdata->menuReadyToPass & 1) != 0)
@@ -157,7 +233,7 @@ void CC_EndEvent_DrawMenu()
 
 	sdata->Loading.OnBegin.AddBitsConfig0 |= ADVENTURE_ARENA;
 	sdata->Loading.OnBegin.RemBitsConfig0 |= CRYSTAL_CHALLENGE;
-	UNLOCK_ADV_BIT(adv->rewards, tokenRewardBit);
+	CC_EndEvent_UnlockRewardBit(adv, tokenRewardBit);
 	MainRaceTrack_RequestLoad(gGT->prevLEV); // NOTE(aalhendi): Adv hub.
 
 	return;

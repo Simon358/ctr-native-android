@@ -578,6 +578,9 @@ void ThTick_SetAndExec(struct Thread *thread, void (*funcThTick)(struct Thread *
 
 void PushBuffer_Init(struct PushBuffer *pb, int id, int total);
 void PushBuffer_UpdateFrustum(struct PushBuffer *pb);
+#if defined(CTR_NATIVE)
+s32 PushBuffer_GetFrustumSavedCameraZ(void);
+#endif
 void PushBuffer_SetPsyqGeom(struct PushBuffer *pb);
 void PushBuffer_SetMatrixVP(struct PushBuffer *pb);
 

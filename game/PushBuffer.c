@@ -558,6 +558,15 @@ static void PushBuffer_UpdateFrustum_ReadMAC(s32 *x, s32 *y, s32 *z)
 	*z = MFC2_S(27);
 }
 
+#if defined(CTR_NATIVE)
+global_variable s32 s_pushBufferFrustumSavedCameraZ;
+
+s32 PushBuffer_GetFrustumSavedCameraZ(void)
+{
+	return s_pushBufferFrustumSavedCameraZ;
+}
+#endif
+
 void PushBuffer_UpdateFrustum(struct PushBuffer *pb)
 {
 	int cameraPosX;
@@ -599,6 +608,9 @@ void PushBuffer_UpdateFrustum(struct PushBuffer *pb)
 	cameraPosX = pb->pos.x;
 	cameraPosY = pb->pos.y;
 	cameraPosZ = pb->pos.z;
+#if defined(CTR_NATIVE)
+	s_pushBufferFrustumSavedCameraZ = cameraPosZ;
+#endif
 
 	val_X = pb->rect.w;
 	val_X = val_X / 2;
