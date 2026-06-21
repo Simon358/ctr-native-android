@@ -1,11 +1,12 @@
-typedef enum ScrapbookState : s32
+enum
 {
 	SCRAP_INIT = 0,
 	SCRAP_LOAD = 1,
 	SCRAP_PLAY = 2,
 	SCRAP_STOP = 3,
 	SCRAP_EXIT = 4,
-} ScrapbookState;
+};
+typedef s32 ScrapbookState;
 
 enum TransitionState
 {

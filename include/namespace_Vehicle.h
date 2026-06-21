@@ -56,26 +56,29 @@ enum KartState
 	KS_FREEZE = 11
 };
 
-typedef enum RevEngineChargeState : u8
+enum
 {
 	REV_ENGINE_CHARGE_IDLE = 0,
 	REV_ENGINE_CHARGE_RELEASED_ABOVE_ACCEL = 1,
 	REV_ENGINE_CHARGE_ACTIVE = 2,
-} RevEngineChargeState;
+};
+typedef u8 RevEngineChargeState;
 
-typedef enum RevEngineLockoutFlags : u8
+enum
 {
 	REV_ENGINE_LOCKOUT_PEDAL_HELD = 0x1,
 	REV_ENGINE_LOCKOUT_REV_DECAY = 0x2,
 	REV_ENGINE_LOCKOUT_ALL = REV_ENGINE_LOCKOUT_PEDAL_HELD | REV_ENGINE_LOCKOUT_REV_DECAY,
-} RevEngineLockoutFlags;
+};
+typedef u8 RevEngineLockoutFlags;
 
-typedef enum EngineSoundMode : u8
+enum
 {
 	ENGINE_SOUND_FADE_OUT = 0,
 	ENGINE_SOUND_FADE_IN = 1,
 	ENGINE_SOUND_DYNAMIC = 2,
-} EngineSoundMode;
+};
+typedef u8 EngineSoundMode;
 
 enum RevEnginePackedStatusMask
 {
@@ -472,7 +475,7 @@ enum EngineClass
 	NUM_CLASSES
 };
 
-typedef enum Actions : u32
+enum
 {
 	ACTION_TOUCH_GROUND = 0x1,
 	ACTION_STARTED_TOUCH_GROUND = 0x2,
@@ -506,17 +509,19 @@ typedef enum Actions : u32
 	ACTION_REVERSE_STEER_LEFT = 0x20000000,
 	ACTION_REVERSE_STEER_RIGHT = 0x40000000,
 	ACTION_DROPPING_MINE = 0x80000000u,
-} Actions;
+};
+typedef u32 Actions;
 
-typedef enum DriverCollisionFlags : s16
+enum
 {
 	DRIVER_COLL_FLAG_MASK_GRAB_REQUEST = 0x1,
 	DRIVER_COLL_FLAG_SURFACE_PUSHBACK = 0x2,
 	DRIVER_COLL_FLAG_TOUCHED_QUADBLOCK = 0x4,
 	DRIVER_COLL_FLAG_GROUNDED = 0x8,
-} DriverCollisionFlags;
+};
+typedef s16 DriverCollisionFlags;
 
-typedef enum RainCloudEffect : s16
+enum
 {
 	RAIN_CLOUD_EFFECT_SLOW = 0,
 	RAIN_CLOUD_EFFECT_ITEM_ROLL = 1,
@@ -525,14 +530,16 @@ typedef enum RainCloudEffect : s16
 	RAIN_CLOUD_EFFECT_NONE = 4,
 	RAIN_CLOUD_EFFECT_HEAVY_FRICTION = 5,
 	RAIN_CLOUD_EFFECT_RESERVE_RELEASE = 6,
-} RainCloudEffect;
+};
+typedef s16 RainCloudEffect;
 
-typedef enum ForcedJumpType : u8
+enum
 {
 	FORCED_JUMP_NONE = 0,
 	FORCED_JUMP_LOW = 1,
 	FORCED_JUMP_HIGH = 2,
-} ForcedJumpType;
+};
+typedef u8 ForcedJumpType;
 
 enum BotFlags
 {

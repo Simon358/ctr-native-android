@@ -7,15 +7,16 @@ struct MatrixND
 	int t[3];
 };
 
-typedef enum ScrubFlags : u32
+enum
 {
 	SCRUB_FLAG_APPLY_IMPACT = 0x1,
 	SCRUB_FLAG_SLAM_ON_HARD_IMPACT = 0x2,
 	SCRUB_FLAG_SKIP_WALL_RUB_TIMER = 0x4,
 	SCRUB_FLAG_KEEP_RESERVES = 0x8,
-} ScrubFlags;
+};
+typedef u32 ScrubFlags;
 
-typedef enum TerrainFlags : u32
+enum
 {
 	TERRAIN_FLAG_RAISE_GROUND_OFFSET = 0x1,
 	TERRAIN_FLAG_ACCEL_WHILE_REVERSE_SLIDING = 0x4,
@@ -25,12 +26,14 @@ typedef enum TerrainFlags : u32
 	TERRAIN_FLAG_LANDING_SPARKS = 0x40,
 	TERRAIN_FLAG_MUD_PHYSICS = 0x80,
 	TERRAIN_FLAG_SIDESLIP_FRICTION = 0x100,
-} TerrainFlags;
+};
+typedef u32 TerrainFlags;
 
-typedef enum TerrainBotFlags : u16
+enum
 {
 	TERRAIN_BOT_FLAG_DECEL_TO_TARGET_SPEED = 0x80,
-} TerrainBotFlags;
+};
+typedef u16 TerrainBotFlags;
 
 struct Scrub
 {

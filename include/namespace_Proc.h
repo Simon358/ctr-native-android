@@ -43,11 +43,12 @@ enum THREAD_BUCKET
 	NUM_BUCKETS // 0x12
 };
 
-typedef enum ThreadFlags : u32
+enum
 {
 	THREAD_FLAG_DEAD = 0x0800,
 	THREAD_FLAG_DISABLE_COLLISION = 0x1000,
-} ThreadFlags;
+};
+typedef u32 ThreadFlags;
 
 enum
 {

@@ -157,7 +157,7 @@ struct PVS
 
 typedef s16 BspChildId;
 
-typedef enum QuadBlockFlags : u16
+enum
 {
 	QUADBLOCK_FLAG_REFLECT_SPLIT_LINE_1 = 0x0001,
 	QUADBLOCK_FLAG_LOW_GRAVITY = 0x0002,
@@ -172,7 +172,8 @@ typedef enum QuadBlockFlags : u16
 	QUADBLOCK_FLAG_COLLISION_SURFACE = 0x2000,
 	QUADBLOCK_FLAG_NO_CAMERA_RESPAWN_PROBE = 0x4000,
 	QUADBLOCK_FLAG_SKIP_WATER_LIST = 0x8000,
-} QuadBlockFlags;
+};
+typedef u16 QuadBlockFlags;
 
 enum QuadBlockTriNormalDividendIndex
 {
@@ -367,38 +368,43 @@ struct BSP
 	// 0x20 bytes large
 };
 
-typedef enum BspChildIdEncoding : u16
+enum
 {
 	BSP_CHILD_ID_INDEX_MASK = 0x3fff,
 	BSP_CHILD_ID_LEAF_FLAG = 0x4000,
 	BSP_CHILD_ID_NONE = 0xffff,
-} BspChildIdEncoding;
+};
+typedef u16 BspChildIdEncoding;
 
-typedef enum BspNodeFlag : u16
+enum
 {
 	BSP_NODE_FLAG_LEAF = 0x0001,
-} BspNodeFlag;
+};
+typedef u16 BspNodeFlag;
 
-typedef enum BspRenderLeafFlag : u16
+enum
 {
 	BSP_RENDER_LEAF_FLAG_4X1 = 0x0008,
 	BSP_RENDER_LEAF_FLAG_4X2 = 0x0010,
 	BSP_RENDER_LEAF_FLAG_DYNAMIC_SUBDIV = 0x0020,
 	BSP_RENDER_LEAF_FLAG_4X4 = 0x0080,
-} BspRenderLeafFlag;
+};
+typedef u16 BspRenderLeafFlag;
 
-typedef enum BspHitboxFlag : u16
+enum
 {
 	BSP_HITBOX_LINC_USES_INSTDEF = 0x10,
 	BSP_HITBOX_CHECK_Y_RANGE = 0x20,
 	BSP_HITBOX_USE_Y_AXIS = 0x40,
 	BSP_HITBOX_COLLIDABLE = 0x80,
-} BspHitboxFlag;
+};
+typedef u16 BspHitboxFlag;
 
-typedef enum BspLeafFlag : u16
+enum
 {
 	BSP_LEAF_FLAG_WATER = 0x2,
-} BspLeafFlag;
+};
+typedef u16 BspLeafFlag;
 
 enum BspHitboxClass
 {

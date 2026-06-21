@@ -1,5 +1,4 @@
-
-typedef enum CutscenePhase : s32
+enum
 {
 	CS_CAMERA_PAN = 0,
 	CS_WAIT_INPUT = 1,
@@ -7,7 +6,8 @@ typedef enum CutscenePhase : s32
 	CS_LOADING = 3,
 	CS_FADE_IN = 4,
 	CS_WAIT_END = 5,
-} CutscenePhase;
+};
+typedef s32 CutscenePhase;
 
 struct CsThreadInitData
 {

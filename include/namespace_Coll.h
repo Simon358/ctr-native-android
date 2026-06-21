@@ -10,7 +10,7 @@ enum CollFixedPoint
 	COLL_FRACTION_INVALID = -FP_ONE,
 };
 
-typedef enum CollSearchFlags : u16
+enum
 {
 	COLL_SEARCH_TEST_INSTANCES = 0x1,
 	COLL_SEARCH_HIGH_LOD = 0x2,
@@ -18,9 +18,10 @@ typedef enum CollSearchFlags : u16
 	COLL_SEARCH_WALL_PROJECTION_DONE = 0x10,
 	COLL_SEARCH_REPEAT_SCRUB = 0x20,
 	COLL_SEARCH_FORCE_INSTANCE_HIT = 0x40,
-} CollSearchFlags;
+};
+typedef u16 CollSearchFlags;
 
-typedef enum CollStepFlags : u32
+enum
 {
 	// NOTE(aalhendi): Trigger quads OR their terrain_type byte into this
 	// word; low bits are packed trigger payload, not ordinary terrain.
@@ -35,7 +36,8 @@ typedef enum CollStepFlags : u32
 	COLL_STEP_TRIGGER_TURBO_PAD_MASK = COLL_STEP_TRIGGER_TURBO_PAD | COLL_STEP_TRIGGER_SUPER_TURBO_PAD,
 	COLL_STEP_FLAG_KILL_PLANE = 0x4000,
 	COLL_STEP_FLAG_WATER_BSP = 0x8000,
-} CollStepFlags;
+};
+typedef u32 CollStepFlags;
 
 enum CollModelIDFlags
 {
@@ -43,12 +45,13 @@ enum CollModelIDFlags
 	COLL_MODELID_BLOCKAGE_FLAG = 0x8000,
 };
 
-typedef enum CollNormalAxis : s16
+enum
 {
 	COLL_NORMAL_AXIS_Z = 1,
 	COLL_NORMAL_AXIS_X = 2,
 	COLL_NORMAL_AXIS_Y = 3,
-} CollNormalAxis;
+};
+typedef s16 CollNormalAxis;
 
 enum CollQuadTriangleId
 {
@@ -64,7 +67,7 @@ enum CollQuadTriangleId
 	COLL_QUAD_TRIANGLE_HI_7 = 9,
 };
 
-typedef enum CollTriangleClipResult : s8
+enum
 {
 	COLL_TRIANGLE_CLIP_MISS = -1,
 	COLL_TRIANGLE_CLIP_V1 = 0,
@@ -74,7 +77,8 @@ typedef enum CollTriangleClipResult : s8
 	COLL_TRIANGLE_CLIP_V3 = 4,
 	COLL_TRIANGLE_CLIP_EDGE_V1_V3 = 5,
 	COLL_TRIANGLE_CLIP_FACE = 6,
-} CollTriangleClipResult;
+};
+typedef s8 CollTriangleClipResult;
 
 struct CollPlane
 {

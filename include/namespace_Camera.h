@@ -79,7 +79,7 @@ struct CameraHeightSmoothing
 	s16 currentOffset;
 };
 
-typedef enum CameraFlags : u32
+enum
 {
 	CAMERA_FLAG_RESET_RAIN_POS = 0x1,
 	CAMERA_FLAG_BATTLE_END_OF_RACE = 0x4,
@@ -95,7 +95,8 @@ typedef enum CameraFlags : u32
 	CAMERA_FLAG_ARCADE_END_OF_RACE_ACTIVE = 0x1000,
 	CAMERA_FLAG_FROZEN = 0x8000,
 	CAMERA_FLAG_REVERSE = 0x10000,
-} CameraFlags;
+};
+typedef u32 CameraFlags;
 
 struct CameraDC
 {

@@ -1,13 +1,14 @@
 #include <common.h>
 
-typedef enum GhostOpcode : u8
+enum
 {
 	GHOST_OP_POSITION = 0x80,
 	GHOST_OP_ANIMATION,
 	GHOST_OP_BOOST,
 	GHOST_OP_INSTANCE,
 	GHOST_OP_IDLE,
-} GhostOpcode;
+};
+typedef u8 GhostOpcode;
 
 static const u8 GHOST_SIZE_POSITION = 11;
 static const u8 GHOST_SIZE_ANIMATION = 3;

@@ -7,7 +7,7 @@ struct SndVolume
 };
 #endif
 
-typedef enum AudioState : s16
+enum
 {
 	AUDIO_NONE = 0,
 	AUDIO_LOADING = 1,
@@ -24,7 +24,8 @@ typedef enum AudioState : s16
 	AUDIO_POST_LAST_LAP = 14,
 	AUDIO_LAST_LAP = 15,
 	AUDIO_RACE_END = 16,
-} AudioState;
+};
+typedef s16 AudioState;
 
 // Global song indices into howl_songOffsets[].
 enum HowlSong

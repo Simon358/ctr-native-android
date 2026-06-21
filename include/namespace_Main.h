@@ -40,7 +40,7 @@ enum GameMode1
 // TODO(aalhendi): i'd *like* to do something better. idk yet
 #define IS_BOSS_RACE(gm) ((gm) < 0)
 
-typedef enum LoadStage : s32
+enum
 {
 	LOAD_VLC = -6,         // loading VLC table (menu/scrapbook)
 	LOAD_RESTART = -5,     // restart race from pause
@@ -48,7 +48,8 @@ typedef enum LoadStage : s32
 	LOAD_FINISHED = -2,    // TenStages done, transitioning to next phase
 	LOAD_IDLE = -1,        // not loading
 	LOAD_TEN_STAGES_0 = 0, // begin TenStages pipeline
-} LoadStage;
+};
+typedef s32 LoadStage;
 
 _Static_assert(sizeof(LoadStage) == 0x4);
 _Static_assert(LOAD_VLC == -6);
@@ -58,7 +59,7 @@ _Static_assert(LOAD_FINISHED == -2);
 _Static_assert(LOAD_IDLE == -1);
 _Static_assert(LOAD_TEN_STAGES_0 == 0);
 
-typedef enum MainMenuState : s16
+enum
 {
 	MAIN_MENU_TITLE = 0,
 	MAIN_MENU_CHARACTERS = 1,
@@ -66,7 +67,8 @@ typedef enum MainMenuState : s16
 	MAIN_MENU_BATTLE_SETUP = 3,
 	MAIN_MENU_ADVENTURE = 4,
 	MAIN_MENU_SCRAPBOOK = 5,
-} MainMenuState;
+};
+typedef s16 MainMenuState;
 
 enum GameModeEnd
 {
