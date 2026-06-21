@@ -963,7 +963,7 @@ static int DrawLevelOvr1P_ProjectVertex(struct LevVertex *vertices, const struct
 {
 	long gteFlag;
 
-	gte_ldv0(&vertices[block->index[vertexIndex]].pos[0]);
+	gte_ldv0(&vertices[block->index[vertexIndex]].pos);
 	gte_rtps();
 	gte_stsxy(posScreen);
 	gte_stflg(&gteFlag);
@@ -1065,17 +1065,17 @@ static int DrawLevelOvr1P_ProjectVertexTriple(struct LevVertex *vertices, const 
 	u32 depth2;
 	long gteFlag;
 
-	*(u32 *)&projected[index0].pos[0] = *(u32 *)&vertex0->pos[0];
-	*(u32 *)&projected[index0].pos[2] = *(u32 *)&vertex0->pos[2];
+	*(u32 *)&projected[index0].pos[0] = *(u32 *)&vertex0->pos;
+	*(u32 *)&projected[index0].pos[2] = *(u32 *)&vertex0->pos.z;
 	*(u32 *)&projected[index0].color_hi[0] = *(u32 *)&vertex0->color_hi[0];
-	*(u32 *)&projected[index1].pos[0] = *(u32 *)&vertex1->pos[0];
-	*(u32 *)&projected[index1].pos[2] = *(u32 *)&vertex1->pos[2];
+	*(u32 *)&projected[index1].pos[0] = *(u32 *)&vertex1->pos;
+	*(u32 *)&projected[index1].pos[2] = *(u32 *)&vertex1->pos.z;
 	*(u32 *)&projected[index1].color_hi[0] = *(u32 *)&vertex1->color_hi[0];
-	*(u32 *)&projected[index2].pos[0] = *(u32 *)&vertex2->pos[0];
-	*(u32 *)&projected[index2].pos[2] = *(u32 *)&vertex2->pos[2];
+	*(u32 *)&projected[index2].pos[0] = *(u32 *)&vertex2->pos;
+	*(u32 *)&projected[index2].pos[2] = *(u32 *)&vertex2->pos.z;
 	*(u32 *)&projected[index2].color_hi[0] = *(u32 *)&vertex2->color_hi[0];
 
-	gte_ldv3(&vertex0->pos[0], &vertex1->pos[0], &vertex2->pos[0]);
+	gte_ldv3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
 	gte_rtpt();
 	gte_stsxy3(&projected[index0].posScreen[0], &projected[index1].posScreen[0], &projected[index2].posScreen[0]);
 	gte_stsz3(&depth0, &depth1, &depth2);
@@ -1096,8 +1096,8 @@ static void DrawLevelOvr1P_CopyVertexToProjected(struct LevVertex *vertices, con
 {
 	struct LevVertex *vertex = &vertices[block->index[index]];
 
-	*(u32 *)&projected[index].pos[0] = *(u32 *)&vertex->pos[0];
-	*(u32 *)&projected[index].pos[2] = *(u32 *)&vertex->pos[2];
+	*(u32 *)&projected[index].pos[0] = *(u32 *)&vertex->pos;
+	*(u32 *)&projected[index].pos[2] = *(u32 *)&vertex->pos.z;
 	*(u32 *)&projected[index].color_hi[0] = *(u32 *)&vertex->color_hi[0];
 }
 
@@ -1120,17 +1120,17 @@ static void Ovr226_800a0f78_ProjectVertexTripleFullDepth(struct LevVertex *verti
 	u32 depth1;
 	u32 depth2;
 
-	*(u32 *)&projected[index0].pos[0] = *(u32 *)&vertex0->pos[0];
-	*(u32 *)&projected[index0].pos[2] = *(u32 *)&vertex0->pos[2];
+	*(u32 *)&projected[index0].pos[0] = *(u32 *)&vertex0->pos;
+	*(u32 *)&projected[index0].pos[2] = *(u32 *)&vertex0->pos.z;
 	*(u32 *)&projected[index0].color_hi[0] = *(u32 *)&vertex0->color_hi[0];
-	*(u32 *)&projected[index1].pos[0] = *(u32 *)&vertex1->pos[0];
-	*(u32 *)&projected[index1].pos[2] = *(u32 *)&vertex1->pos[2];
+	*(u32 *)&projected[index1].pos[0] = *(u32 *)&vertex1->pos;
+	*(u32 *)&projected[index1].pos[2] = *(u32 *)&vertex1->pos.z;
 	*(u32 *)&projected[index1].color_hi[0] = *(u32 *)&vertex1->color_hi[0];
-	*(u32 *)&projected[index2].pos[0] = *(u32 *)&vertex2->pos[0];
-	*(u32 *)&projected[index2].pos[2] = *(u32 *)&vertex2->pos[2];
+	*(u32 *)&projected[index2].pos[0] = *(u32 *)&vertex2->pos;
+	*(u32 *)&projected[index2].pos[2] = *(u32 *)&vertex2->pos.z;
 	*(u32 *)&projected[index2].color_hi[0] = *(u32 *)&vertex2->color_hi[0];
 
-	gte_ldv3(&vertex0->pos[0], &vertex1->pos[0], &vertex2->pos[0]);
+	gte_ldv3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
 	gte_rtpt();
 	gte_stsxy3(&projected[index0].posScreen[0], &projected[index1].posScreen[0], &projected[index2].posScreen[0]);
 	gte_stsz3(&depth0, &depth1, &depth2);
@@ -1146,11 +1146,11 @@ static void Ovr226_800a1024_ProjectFullDynamicLowFourth(struct LevVertex *vertic
 	struct LevVertex *vertex = &vertices[block->index[3]];
 	u32 depth;
 
-	*(u32 *)&projected[3].pos[0] = *(u32 *)&vertex->pos[0];
-	*(u32 *)&projected[3].pos[2] = *(u32 *)&vertex->pos[2];
+	*(u32 *)&projected[3].pos[0] = *(u32 *)&vertex->pos;
+	*(u32 *)&projected[3].pos[2] = *(u32 *)&vertex->pos.z;
 	*(u32 *)&projected[3].color_hi[0] = *(u32 *)&vertex->color_hi[0];
 
-	gte_ldv0(&vertex->pos[0]);
+	gte_ldv0(&vertex->pos);
 	gte_rtps();
 	gte_stsxy(&projected[3].posScreen[0]);
 	gte_stsz(&depth);
@@ -1195,8 +1195,8 @@ static int DrawLevelOvr1P_ProjectQuadBlockGrid(struct LevVertex *vertices, const
 
 static void Ovr226_800a1ee0_StoreWaterListProjectedVertex(struct LevVertex *vertex, struct DrawLevelOvr1PScratchVertex *projected)
 {
-	*(u32 *)&projected->pos[0] = *(u32 *)&vertex->pos[0];
-	*(u32 *)&projected->pos[2] = *(u32 *)&vertex->pos[2];
+	*(u32 *)&projected->pos[0] = *(u32 *)&vertex->pos;
+	*(u32 *)&projected->pos[2] = *(u32 *)&vertex->pos.z;
 	projected->flags = (u16)vertex->color_lo[0] | ((u16)vertex->color_lo[1] << 8);
 }
 
@@ -1211,7 +1211,7 @@ static int Ovr226_800a1ee0_ProjectWaterListVertexTriple(struct LevVertex *vertic
 	u32 depth2;
 	long gteFlag;
 
-	gte_ldv3(&vertex0->pos[0], &vertex1->pos[0], &vertex2->pos[0]);
+	gte_ldv3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
 	gte_rtpt();
 
 	*(u32 *)&projected[index0].color_hi[0] = *(u32 *)&vertex0->color_hi[0];
@@ -1252,8 +1252,8 @@ static int Ovr226_800a1ee0_ProjectWaterListGrid(struct LevVertex *vertices, cons
 
 static void Ovr226_800a3738_CopyGround4x1ListProjectedSource(struct LevVertex *vertex, struct DrawLevelOvr1PScratchVertex *projected)
 {
-	*(u32 *)&projected->pos[0] = *(u32 *)&vertex->pos[0];
-	*(u32 *)&projected->pos[2] = *(u32 *)&vertex->pos[2];
+	*(u32 *)&projected->pos[0] = *(u32 *)&vertex->pos;
+	*(u32 *)&projected->pos[2] = *(u32 *)&vertex->pos.z;
 }
 
 static int Ovr226_800a3738_ProjectGround4x1ListVertexTriple(struct LevVertex *vertices, const struct QuadBlock *block,
@@ -1267,7 +1267,7 @@ static int Ovr226_800a3738_ProjectGround4x1ListVertexTriple(struct LevVertex *ve
 	u32 depth2;
 	long gteFlag;
 
-	gte_ldv3(&vertex0->pos[0], &vertex1->pos[0], &vertex2->pos[0]);
+	gte_ldv3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
 	gte_rtpt();
 
 	*(u32 *)&projected[index0].color_hi[0] = *(u32 *)&vertex0->color_hi[0];
@@ -1308,8 +1308,8 @@ static int Ovr226_800a3738_ProjectGround4x1ListGrid(struct LevVertex *vertices, 
 
 static void Ovr226_800a5030_CopyGround4x2ListProjectedSource(struct LevVertex *vertex, struct DrawLevelOvr1PScratchVertex *projected)
 {
-	*(u32 *)&projected->pos[0] = *(u32 *)&vertex->pos[0];
-	*(u32 *)&projected->pos[2] = *(u32 *)&vertex->pos[2];
+	*(u32 *)&projected->pos[0] = *(u32 *)&vertex->pos;
+	*(u32 *)&projected->pos[2] = *(u32 *)&vertex->pos.z;
 }
 
 static int Ovr226_800a5030_ProjectGround4x2ListVertexTriple(struct LevVertex *vertices, const struct QuadBlock *block,
@@ -1323,7 +1323,7 @@ static int Ovr226_800a5030_ProjectGround4x2ListVertexTriple(struct LevVertex *ve
 	u32 depth2;
 	long gteFlag;
 
-	gte_ldv3(&vertex0->pos[0], &vertex1->pos[0], &vertex2->pos[0]);
+	gte_ldv3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
 	gte_rtpt();
 
 	*(u32 *)&projected[index0].color_hi[0] = *(u32 *)&vertex0->color_hi[0];
@@ -1364,8 +1364,8 @@ static int Ovr226_800a5030_ProjectGround4x2ListGrid(struct LevVertex *vertices, 
 
 static void Ovr226_800a6fd0_CopyDynamicListProjectedSource(struct LevVertex *vertex, struct DrawLevelOvr1PScratchVertex *projected)
 {
-	*(u32 *)&projected->pos[0] = *(u32 *)&vertex->pos[0];
-	*(u32 *)&projected->pos[2] = *(u32 *)&vertex->pos[2];
+	*(u32 *)&projected->pos[0] = *(u32 *)&vertex->pos;
+	*(u32 *)&projected->pos[2] = *(u32 *)&vertex->pos.z;
 }
 
 static int Ovr226_800a6fd0_ProjectDynamicListVertexTriple(struct LevVertex *vertices, const struct QuadBlock *block,
@@ -1379,7 +1379,7 @@ static int Ovr226_800a6fd0_ProjectDynamicListVertexTriple(struct LevVertex *vert
 	u32 depth2;
 	long gteFlag;
 
-	gte_ldv3(&vertex0->pos[0], &vertex1->pos[0], &vertex2->pos[0]);
+	gte_ldv3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
 	gte_rtpt();
 
 	*(u32 *)&projected[index0].color_hi[0] = *(u32 *)&vertex0->color_hi[0];
@@ -1420,8 +1420,8 @@ static int Ovr226_800a6fd0_ProjectDynamicListGrid(struct LevVertex *vertices, co
 
 static void Ovr226_800a8bf0_CopyWideDynamicProjectedSource(struct LevVertex *vertex, struct DrawLevelOvr1PScratchVertex *projected)
 {
-	*(u32 *)&projected->pos[0] = *(u32 *)&vertex->pos[0];
-	*(u32 *)&projected->pos[2] = *(u32 *)&vertex->pos[2];
+	*(u32 *)&projected->pos[0] = *(u32 *)&vertex->pos;
+	*(u32 *)&projected->pos[2] = *(u32 *)&vertex->pos.z;
 }
 
 static int Ovr226_800a8bf0_ProjectWideDynamicVertexTriple(struct LevVertex *vertices, const struct QuadBlock *block,
@@ -1435,7 +1435,7 @@ static int Ovr226_800a8bf0_ProjectWideDynamicVertexTriple(struct LevVertex *vert
 	u32 depth2;
 	long gteFlag;
 
-	gte_ldv3(&vertex0->pos[0], &vertex1->pos[0], &vertex2->pos[0]);
+	gte_ldv3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
 	gte_rtpt();
 
 	*(u32 *)&projected[index0].color_hi[0] = *(u32 *)&vertex0->color_hi[0];
@@ -1476,8 +1476,8 @@ static int Ovr226_800a8bf0_ProjectWideDynamicGrid(struct LevVertex *vertices, co
 
 static void Ovr226_800a5e5c_StoreGround4x2RenderedProjectedVertex(struct LevVertex *vertex, struct DrawLevelOvr1PScratchVertex *projected)
 {
-	*(u32 *)&projected->pos[0] = *(u32 *)&vertex->pos[0];
-	*(u32 *)&projected->pos[2] = *(u32 *)&vertex->pos[2];
+	*(u32 *)&projected->pos[0] = *(u32 *)&vertex->pos;
+	*(u32 *)&projected->pos[2] = *(u32 *)&vertex->pos.z;
 	*(u32 *)&projected->color_hi[0] = *(u32 *)&vertex->color_hi[0];
 }
 
@@ -1495,7 +1495,7 @@ static void Ovr226_800a5e5c_ProjectGround4x2RenderedVertexTriple(struct LevVerte
 	Ovr226_800a5e5c_StoreGround4x2RenderedProjectedVertex(vertex1, &projected[index1]);
 	Ovr226_800a5e5c_StoreGround4x2RenderedProjectedVertex(vertex2, &projected[index2]);
 
-	gte_ldv3(&vertex0->pos[0], &vertex1->pos[0], &vertex2->pos[0]);
+	gte_ldv3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
 	gte_rtpt();
 	gte_stsxy3(&projected[index0].posScreen[0], &projected[index1].posScreen[0], &projected[index2].posScreen[0]);
 	gte_stsz3(&depth0, &depth1, &depth2);
@@ -1517,8 +1517,8 @@ static void Ovr226_800a5e5c_ProjectGround4x2RenderedGrid(struct LevVertex *verti
 
 static void Ovr226_800a7ba8_StoreDynamicRenderedProjectedVertex(struct LevVertex *vertex, struct DrawLevelOvr1PScratchVertex *projected)
 {
-	*(u32 *)&projected->pos[0] = *(u32 *)&vertex->pos[0];
-	*(u32 *)&projected->pos[2] = *(u32 *)&vertex->pos[2];
+	*(u32 *)&projected->pos[0] = *(u32 *)&vertex->pos;
+	*(u32 *)&projected->pos[2] = *(u32 *)&vertex->pos.z;
 	*(u32 *)&projected->color_hi[0] = *(u32 *)&vertex->color_hi[0];
 }
 
@@ -1536,7 +1536,7 @@ static void Ovr226_800a7ba8_ProjectDynamicRenderedVertexTriple(struct LevVertex 
 	Ovr226_800a7ba8_StoreDynamicRenderedProjectedVertex(vertex1, &projected[index1]);
 	Ovr226_800a7ba8_StoreDynamicRenderedProjectedVertex(vertex2, &projected[index2]);
 
-	gte_ldv3(&vertex0->pos[0], &vertex1->pos[0], &vertex2->pos[0]);
+	gte_ldv3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
 	gte_rtpt();
 	gte_stsxy3(&projected[index0].posScreen[0], &projected[index1].posScreen[0], &projected[index2].posScreen[0]);
 	gte_stsz3(&depth0, &depth1, &depth2);
@@ -1557,8 +1557,8 @@ static void Ovr226_800a7ba8_ProjectDynamicRenderedGrid(struct LevVertex *vertice
 
 static void Ovr226_800a97c8_StoreQuad4x4RenderedProjectedVertex(struct LevVertex *vertex, struct DrawLevelOvr1PScratchVertex *projected)
 {
-	*(u32 *)&projected->pos[0] = *(u32 *)&vertex->pos[0];
-	*(u32 *)&projected->pos[2] = *(u32 *)&vertex->pos[2];
+	*(u32 *)&projected->pos[0] = *(u32 *)&vertex->pos;
+	*(u32 *)&projected->pos[2] = *(u32 *)&vertex->pos.z;
 	*(u32 *)&projected->color_hi[0] = *(u32 *)&vertex->color_hi[0];
 }
 
@@ -1576,7 +1576,7 @@ static void Ovr226_800a97c8_ProjectQuad4x4RenderedVertexTriple(struct LevVertex 
 	Ovr226_800a97c8_StoreQuad4x4RenderedProjectedVertex(vertex1, &projected[index1]);
 	Ovr226_800a97c8_StoreQuad4x4RenderedProjectedVertex(vertex2, &projected[index2]);
 
-	gte_ldv3(&vertex0->pos[0], &vertex1->pos[0], &vertex2->pos[0]);
+	gte_ldv3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
 	gte_rtpt();
 	gte_stsxy3(&projected[index0].posScreen[0], &projected[index1].posScreen[0], &projected[index2].posScreen[0]);
 	gte_stsz3(&depth0, &depth1, &depth2);
@@ -1597,8 +1597,8 @@ static void Ovr226_800a97c8_ProjectQuad4x4RenderedGrid(struct LevVertex *vertice
 
 static void Ovr226_800a417c_StoreGround4x1RenderedProjectedVertex(struct LevVertex *vertex, struct DrawLevelOvr1PScratchVertex *projected)
 {
-	*(u32 *)&projected->pos[0] = *(u32 *)&vertex->pos[0];
-	*(u32 *)&projected->pos[2] = *(u32 *)&vertex->pos[2];
+	*(u32 *)&projected->pos[0] = *(u32 *)&vertex->pos;
+	*(u32 *)&projected->pos[2] = *(u32 *)&vertex->pos.z;
 	*(u32 *)&projected->color_hi[0] = *(u32 *)&vertex->color_hi[0];
 }
 
@@ -1616,7 +1616,7 @@ static void Ovr226_800a417c_ProjectGround4x1RenderedVertexTriple(struct LevVerte
 	Ovr226_800a417c_StoreGround4x1RenderedProjectedVertex(vertex1, &projected[index1]);
 	Ovr226_800a417c_StoreGround4x1RenderedProjectedVertex(vertex2, &projected[index2]);
 
-	gte_ldv3(&vertex0->pos[0], &vertex1->pos[0], &vertex2->pos[0]);
+	gte_ldv3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
 	gte_rtpt();
 	gte_stsxy3(&projected[index0].posScreen[0], &projected[index1].posScreen[0], &projected[index2].posScreen[0]);
 	gte_stsz3(&depth0, &depth1, &depth2);
@@ -1638,8 +1638,8 @@ static void Ovr226_800a417c_ProjectGround4x1RenderedGrid(struct LevVertex *verti
 
 static void Ovr226_800a2924_StoreWaterRenderedProjectedVertex(struct LevVertex *vertex, struct DrawLevelOvr1PScratchVertex *projected)
 {
-	*(u32 *)&projected->pos[0] = *(u32 *)&vertex->pos[0];
-	projected->pos[2] = vertex->pos[2];
+	*(u32 *)&projected->pos[0] = *(u32 *)&vertex->pos;
+	projected->pos[2] = vertex->pos.z;
 	projected->flags = (u16)vertex->color_lo[0] | ((u16)vertex->color_lo[1] << 8);
 	*(u32 *)&projected->color_hi[0] = *(u32 *)&vertex->color_hi[0];
 }
@@ -1658,7 +1658,7 @@ static void Ovr226_800a2924_ProjectWaterRenderedVertexTriple(struct LevVertex *v
 	Ovr226_800a2924_StoreWaterRenderedProjectedVertex(vertex1, &projected[index1]);
 	Ovr226_800a2924_StoreWaterRenderedProjectedVertex(vertex2, &projected[index2]);
 
-	gte_ldv3(&vertex0->pos[0], &vertex1->pos[0], &vertex2->pos[0]);
+	gte_ldv3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
 	gte_rtpt();
 	gte_stsxy3(&projected[index0].posScreen[0], &projected[index1].posScreen[0], &projected[index2].posScreen[0]);
 	gte_stsz3(&depth0, &depth1, &depth2);
@@ -8066,18 +8066,18 @@ static void Ovr226_800a11e0_ProjectFullDynamicLastPair(struct LevVertex *vertice
 	u32 depth8;
 	u32 unusedDepth;
 
-	*(u32 *)&projected[7].pos[0] = *(u32 *)&vertex7->pos[0];
-	*(u32 *)&projected[7].pos[2] = *(u32 *)&vertex7->pos[2];
+	*(u32 *)&projected[7].pos[0] = *(u32 *)&vertex7->pos.x;
+	*(u32 *)&projected[7].pos[2] = *(u32 *)&vertex7->pos.z;
 	*(u32 *)&projected[7].color_hi[0] = *(u32 *)&vertex7->color_hi[0];
-	*(u32 *)&projected[8].pos[0] = *(u32 *)&vertex8->pos[0];
-	*(u32 *)&projected[8].pos[2] = *(u32 *)&vertex8->pos[2];
+	*(u32 *)&projected[8].pos[0] = *(u32 *)&vertex8->pos.x;
+	*(u32 *)&projected[8].pos[2] = *(u32 *)&vertex8->pos.z;
 	*(u32 *)&projected[8].color_hi[0] = *(u32 *)&vertex8->color_hi[0];
 
 	// NOTE(aalhendi): Retail 0x800a11e0 uses ldv01, preserving V2 from vertex 6.
-	MTC2(*(u32 *)&vertex7->pos[0], 0);
-	MTC2(*(u32 *)&vertex7->pos[2], 1);
-	MTC2(*(u32 *)&vertex8->pos[0], 2);
-	MTC2(*(u32 *)&vertex8->pos[2], 3);
+	MTC2(*(u32 *)&vertex7->pos.x, 0);
+	MTC2(*(u32 *)&vertex7->pos.z, 1);
+	MTC2(*(u32 *)&vertex8->pos.x, 2);
+	MTC2(*(u32 *)&vertex8->pos.z, 3);
 	gte_rtpt();
 	gte_stsxy3(&projected[7].posScreen[0], &projected[8].posScreen[0], &unusedSxy[0]);
 	gte_stsz3(&depth7, &depth8, &unusedDepth);

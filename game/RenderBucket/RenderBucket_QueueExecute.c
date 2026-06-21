@@ -71,9 +71,9 @@ _Static_assert(offsetof(MATRIX, t[0]) == 0x14);
 _Static_assert(offsetof(MATRIX, t[1]) == 0x18);
 _Static_assert(offsetof(MATRIX, t[2]) == 0x1c);
 _Static_assert(sizeof(MATRIX) == 0x20);
-_Static_assert(offsetof(struct ModelFrame, pos[0]) == 0x0);
-_Static_assert(offsetof(struct ModelFrame, pos[1]) == 0x2);
-_Static_assert(offsetof(struct ModelFrame, pos[2]) == 0x4);
+_Static_assert(offsetof(struct ModelFrame, pos.x) == 0x0);
+_Static_assert(offsetof(struct ModelFrame, pos.y) == 0x2);
+_Static_assert(offsetof(struct ModelFrame, pos.z) == 0x4);
 _Static_assert(offsetof(struct ModelFrame, vertexOffset) == 0x18);
 _Static_assert(sizeof(struct ModelFrame) == 0x1c);
 _Static_assert(offsetof(struct Instance, next) == 0x0);
@@ -924,7 +924,7 @@ static void RenderBucket_ProjectBoundsUpdate3(struct RenderBucketBounds *bounds,
 
 static u32 RenderBucket_PackedFrameXY(struct ModelFrame *frame, struct ModelFrame *nextFrame)
 {
-	u32 packedXY = *(u32 *)&frame->pos[0];
+	u32 packedXY = *(u32 *)&frame->pos.x;
 	int blendedY;
 	int blendedX;
 
@@ -933,17 +933,17 @@ static u32 RenderBucket_PackedFrameXY(struct ModelFrame *frame, struct ModelFram
 
 	// NOTE(aalhendi): Retail QueueDraw averages current/next frame bounds at
 	// 0x80070db4-0x80070df0 before the 0x3fc bbox projection.
-	blendedY = RenderBucket_MipsSll(RenderBucket_MipsAdd(nextFrame->pos[1], (s32)packedXY >> 16) >> 2, 17);
-	blendedX = (RenderBucket_MipsAdd(nextFrame->pos[0], (s16)packedXY) >> 1) & 0xffff;
+	blendedY = RenderBucket_MipsSll(RenderBucket_MipsAdd(nextFrame->pos.y, (s32)packedXY >> 16) >> 2, 17);
+	blendedX = (RenderBucket_MipsAdd(nextFrame->pos.x, (s16)packedXY) >> 1) & 0xffff;
 	return blendedY | blendedX;
 }
 
 static int RenderBucket_FrameZ(struct ModelFrame *frame, struct ModelFrame *nextFrame)
 {
 	if (nextFrame == 0)
-		return frame->pos[2];
+		return frame->pos.z;
 
-	return RenderBucket_MipsAdd(frame->pos[2], nextFrame->pos[2]) >> 1;
+	return RenderBucket_MipsAdd(frame->pos.z, nextFrame->pos.z) >> 1;
 }
 
 static void RenderBucket_ProjectFrameBounds(struct ModelFrame *frame, struct ModelFrame *nextFrame, struct PushBuffer *pb, const MATRIX *projectionMvp,
@@ -1987,7 +1987,7 @@ void *RenderBucket_QueueNonLevInstances(struct Item *item, u_long *otMem, void *
 
 static u32 RenderBucket_PackModelVertexXY(struct RenderBucketDrawContext *ctx, const RenderBucketVertex *vertex)
 {
-	u32 frameOriginXY = (u16)(ctx->mf->pos[0] & 0x7fff) | ((u32)(u16)ctx->mf->pos[1] << 16);
+	u32 frameOriginXY = (u16)(ctx->mf->pos.x & 0x7fff) | ((u32)(u16)ctx->mf->pos.y << 16);
 	u32 vertexXZ = ((u32)vertex->x) | ((u32)vertex->z << 16);
 
 	// NOTE(aalhendi): Retail does a single packed 32-bit add:
@@ -2000,11 +2000,11 @@ static u32 RenderBucket_PackModelVertexXY(struct RenderBucketDrawContext *ctx, c
 static u32 RenderBucket_PackInterpolatedModelVertexXY(struct RenderBucketDrawContext *ctx, const RenderBucketVertex *curr, const RenderBucketVertex *next)
 {
 	struct ModelFrame *nextFrame = ctx->idpp->ptrNextFrame;
-	u32 frameOriginXY = (u16)(ctx->mf->pos[0] + nextFrame->pos[0]);
+	u32 frameOriginXY = (u16)(ctx->mf->pos.x + nextFrame->pos.x);
 	u32 currXZ = ((u32)curr->x) | ((u32)curr->z << 16);
 	u32 nextXZ = ((u32)next->x) | ((u32)next->z << 16);
 
-	frameOriginXY |= (u32)(u16)(ctx->mf->pos[1] + nextFrame->pos[1]) << 16;
+	frameOriginXY |= (u32)(u16)(ctx->mf->pos.y + nextFrame->pos.y) << 16;
 
 	// NOTE(aalhendi): Source-backs retail next-frame decoder 0x8006b464-
 	// 0x8006b480: current and next vertex X/Z bytes are added with the summed
@@ -2014,13 +2014,13 @@ static u32 RenderBucket_PackInterpolatedModelVertexXY(struct RenderBucketDrawCon
 
 static u32 RenderBucket_ModelVertexZ(struct RenderBucketDrawContext *ctx, const RenderBucketVertex *vertex)
 {
-	return ((u32)(ctx->mf->pos[2] + vertex->y)) << 2;
+	return ((u32)(ctx->mf->pos.z + vertex->y)) << 2;
 }
 
 static u32 RenderBucket_InterpolatedModelVertexZ(struct RenderBucketDrawContext *ctx, const RenderBucketVertex *curr, const RenderBucketVertex *next)
 {
 	struct ModelFrame *nextFrame = ctx->idpp->ptrNextFrame;
-	int z = (int)curr->y + (int)next->y + (int)ctx->mf->pos[2] + (int)nextFrame->pos[2];
+	int z = (int)curr->y + (int)next->y + (int)ctx->mf->pos.z + (int)nextFrame->pos.z;
 
 	// NOTE(aalhendi): Source-backs retail 0x8006b480-0x8006b49c. The vertical
 	// byte pair and summed frame Z are doubled, producing the halfway frame.
@@ -4723,15 +4723,15 @@ static int RenderBucket_PrepareDrawContext(struct RenderBucketDrawContext *ctx, 
 	}
 	if (nextFrame != 0)
 	{
-		*CTR_SCRATCHPAD_PTR(s16, 0x30) = mf->pos[0] + nextFrame->pos[0];
-		*CTR_SCRATCHPAD_PTR(s16, 0x32) = mf->pos[1] + nextFrame->pos[1];
-		*CTR_SCRATCHPAD_PTR(u32, 0x34) = (u32)((s32)(mf->pos[2] + nextFrame->pos[2]) << 1);
+		*CTR_SCRATCHPAD_PTR(s16, 0x30) = mf->pos.x + nextFrame->pos.x;
+		*CTR_SCRATCHPAD_PTR(s16, 0x32) = mf->pos.y + nextFrame->pos.y;
+		*CTR_SCRATCHPAD_PTR(u32, 0x34) = (u32)((s32)(mf->pos.z + nextFrame->pos.z) << 1);
 	}
 	else
 	{
-		*CTR_SCRATCHPAD_PTR(s16, 0x30) = mf->pos[0] & 0x7fff;
-		*CTR_SCRATCHPAD_PTR(s16, 0x32) = mf->pos[1];
-		*CTR_SCRATCHPAD_PTR(u32, 0x34) = (s32)mf->pos[2];
+		*CTR_SCRATCHPAD_PTR(s16, 0x30) = mf->pos.x & 0x7fff;
+		*CTR_SCRATCHPAD_PTR(s16, 0x32) = mf->pos.y;
+		*CTR_SCRATCHPAD_PTR(u32, 0x34) = (s32)mf->pos.z;
 	}
 
 	gte_SetRotMatrix(&idpp->mvp);

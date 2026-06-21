@@ -896,7 +896,7 @@ void COLL_FIXED_QUADBLK_LoadScratchpadVerts(struct ScratchpadStruct *sps)
 	{
 		struct LevVertex *vertCurr = &ptrVert[*index];
 		bsv->pLevelVertex = vertCurr;
-		CTR_COPY_VEC3(bsv->pos.v, vertCurr->pos);
+		bsv->pos = vertCurr->pos;
 		bsv->normalAxis = (CollNormalAxis)vertCurr->flags;
 	}
 }

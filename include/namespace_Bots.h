@@ -1,7 +1,7 @@
 struct NavFrame
 {
 	// 0
-	s16 pos[3];
+	SVec3 pos;
 
 	// 6
 	u8 rot[4];

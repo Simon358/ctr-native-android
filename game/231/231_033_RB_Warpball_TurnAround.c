@@ -66,7 +66,7 @@ void RB_Warpball_TurnAround(struct Thread *t)
 		struct CheckpointNode *cn = tw->ptrNodeCurr;
 
 		// rotation
-		rot = ratan2(cn->pos[0] - inst->matrix.t[0], cn->pos[2] - inst->matrix.t[2]);
+		rot = ratan2(cn->pos.x - inst->matrix.t[0], cn->pos.z - inst->matrix.t[2]);
 
 		// rotation
 		tw->dir.y = rot;

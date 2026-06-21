@@ -288,7 +288,8 @@ enum MODEL_ID
 struct ModelFrame
 {
 	// origin
-	s16 pos[4];
+	SVec3 pos;
+	s16 _pad;
 	char unk16[16];
 	int vertexOffset; // always 0x1C
 

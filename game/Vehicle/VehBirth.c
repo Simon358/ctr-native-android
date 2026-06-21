@@ -96,16 +96,16 @@ static void VehBirth_SetStartlinePosition(struct Driver *d, struct Level *level,
 	else
 #endif
 		d->distanceToFinish_checkpoint = level->ptr_restart_points[0].distToFinish << 3;
-	VehBirth_SetBottomFromPos(posBottom, level->DriverSpawn[spawnIndex].pos);
+	VehBirth_SetBottomFromPos(posBottom, level->DriverSpawn[spawnIndex].pos.v);
 }
 
 static void VehBirth_SetStartlineRotation(struct Driver *d, struct Level *level)
 {
 	u8 spawnIndex = VehBirth_GetStartlineIndex(d);
 
-	d->rotCurr.x = level->DriverSpawn[spawnIndex].rot[0];
-	d->rotCurr.y = (level->DriverSpawn[spawnIndex].rot[1] + 0x400) & 0xfff;
-	d->rotCurr.z = level->DriverSpawn[spawnIndex].rot[2];
+	d->rotCurr.x = level->DriverSpawn[spawnIndex].rot.x;
+	d->rotCurr.y = (level->DriverSpawn[spawnIndex].rot.y + 0x400) & 0xfff;
+	d->rotCurr.z = level->DriverSpawn[spawnIndex].rot.z;
 }
 
 static int VehBirth_ScaleTrig(int trig, int scale)

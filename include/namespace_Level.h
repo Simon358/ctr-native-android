@@ -444,7 +444,7 @@ _Static_assert(sizeof(struct VisMemBspListNode) == 8);
 struct LevVertex
 {
 	// 0x0
-	s16 pos[3];
+	SVec3 pos;
 
 	// 0x6
 	// COLL copies this into BspSearchVertex.normalAxis before recomputing triangle planes.
@@ -633,7 +633,7 @@ struct SpawnType2
 struct CheckpointNode
 {
 	// 0x0
-	s16 pos[3];
+	SVec3 pos;
 
 	// 0x6
 	u16 distToFinish;
@@ -782,8 +782,8 @@ struct Level
 	// array of 8 starting locations
 	struct
 	{
-		s16 pos[3];
-		s16 rot[3];
+		SVec3 pos;
+		SVec3 rot;
 	} DriverSpawn[8];
 
 	// 0xCC -- next

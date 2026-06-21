@@ -464,9 +464,9 @@ void BOTS_SetRotation(struct Driver *bot, int useSpawnYaw)
 
 	// ======== Compare to Nav Position =============
 
-	int dx = CTR_MipsSubLo(nf->pos[0], bot->botData.estimatePosition.x);
-	int dy = CTR_MipsSubLo(nf->pos[1], bot->botData.estimatePosition.y);
-	int dz = CTR_MipsSubLo(nf->pos[2], bot->botData.estimatePosition.z);
+	int dx = CTR_MipsSubLo(nf->pos.x, bot->botData.estimatePosition.x);
+	int dy = CTR_MipsSubLo(nf->pos.y, bot->botData.estimatePosition.y);
+	int dz = CTR_MipsSubLo(nf->pos.z, bot->botData.estimatePosition.z);
 
 	// ======== Calculate Distance =============
 
@@ -492,7 +492,7 @@ void BOTS_SetRotation(struct Driver *bot, int useSpawnYaw)
 	}
 	else
 	{
-		bot->botData.estimateRotNav[1] = (u8)CTR_MipsSra(CTR_MipsAddLo(sdata->gGT->level1->DriverSpawn[0].rot[1], 0x400), 4);
+		bot->botData.estimateRotNav[1] = (u8)CTR_MipsSra(CTR_MipsAddLo(sdata->gGT->level1->DriverSpawn[0].rot.y, 0x400), 4);
 	}
 
 	s16 v = (s16)CTR_MipsSll(bot->botData.estimateRotNav[1], 4);
@@ -609,18 +609,18 @@ void BOTS_MaskGrab(struct Thread *botThread)
 	bot->botData.navProgressRemainder = CTR_MipsSll(CTR_MipsDiv(frame->distToNextNavXZ, 2), 8);
 
 	// midpointX between nav frames
-	int midpoint = CTR_MipsSll(CTR_MipsAddLo(frame->pos[0], CTR_MipsDiv(CTR_MipsSubLo(nextFrame->pos[0], frame->pos[0]), 2)), 8);
+	int midpoint = CTR_MipsSll(CTR_MipsAddLo(frame->pos.x, CTR_MipsDiv(CTR_MipsSubLo(nextFrame->pos.x, frame->pos.x), 2)), 8);
 	bot->botData.positionBackup.x = midpoint;
 	bot->posPrev.x = midpoint;
 
 	// midpointY between nav frames
-	midpoint = CTR_MipsSll(CTR_MipsAddLo(frame->pos[1], CTR_MipsDiv(CTR_MipsSubLo(nextFrame->pos[1], frame->pos[1]), 2)), 8);
+	midpoint = CTR_MipsSll(CTR_MipsAddLo(frame->pos.y, CTR_MipsDiv(CTR_MipsSubLo(nextFrame->pos.y, frame->pos.y), 2)), 8);
 	bot->botData.positionBackup.y = midpoint;
 	bot->posPrev.y = midpoint;
 	bot->quadBlockHeight = midpoint;
 
 	// midpointZ between nav frames
-	midpoint = CTR_MipsSll(CTR_MipsAddLo(frame->pos[2], CTR_MipsDiv(CTR_MipsSubLo(nextFrame->pos[2], frame->pos[2]), 2)), 8);
+	midpoint = CTR_MipsSll(CTR_MipsAddLo(frame->pos.z, CTR_MipsDiv(CTR_MipsSubLo(nextFrame->pos.z, frame->pos.z), 2)), 8);
 	bot->botData.positionBackup.z = midpoint;
 	bot->posPrev.z = midpoint;
 
@@ -1549,7 +1549,7 @@ UpdateTireColorTimer:
 		if (navFrameNext >= sdata->NavPath_ptrHeader[index]->last)
 			navFrameNext = sdata->NavPath_ptrNavFrameArray[index];
 
-		if ((CTR_MipsSra(botDriver->botData.positionBackup.y, 8) < navFrameNext->pos[1]) && ((navFrameCurr->flags & BOTS_NAV_FLAG_KILLPLANE) != 0))
+		if ((CTR_MipsSra(botDriver->botData.positionBackup.y, 8) < navFrameNext->pos.y) && ((navFrameCurr->flags & BOTS_NAV_FLAG_KILLPLANE) != 0))
 		{
 			BOTS_Killplane(botThread);
 		}
@@ -1751,11 +1751,11 @@ UpdateTireColorTimer:
 	botDriver->rotPrev.z = botDriver->rotCurr.z;
 
 	botDriver->botData.positionBackup.x = CTR_MipsSll(
-	    CTR_MipsAddLo(navFrameCurr->pos[0], CTR_MipsSra(CTR_MipsMulLo(CTR_MipsSubLo(navFrameNext->pos[0], navFrameCurr->pos[0]), percentage), 0xc)), 8);
+	    CTR_MipsAddLo(navFrameCurr->pos.x, CTR_MipsSra(CTR_MipsMulLo(CTR_MipsSubLo(navFrameNext->pos.x, navFrameCurr->pos.x), percentage), 0xc)), 8);
 	botDriver->quadBlockHeight = CTR_MipsSll(
-	    CTR_MipsAddLo(navFrameCurr->pos[1], CTR_MipsSra(CTR_MipsMulLo(CTR_MipsSubLo(navFrameNext->pos[1], navFrameCurr->pos[1]), percentage), 0xc)), 8);
+	    CTR_MipsAddLo(navFrameCurr->pos.y, CTR_MipsSra(CTR_MipsMulLo(CTR_MipsSubLo(navFrameNext->pos.y, navFrameCurr->pos.y), percentage), 0xc)), 8);
 	botDriver->botData.positionBackup.z = CTR_MipsSll(
-	    CTR_MipsAddLo(navFrameCurr->pos[2], CTR_MipsSra(CTR_MipsMulLo(CTR_MipsSubLo(navFrameNext->pos[2], navFrameCurr->pos[2]), percentage), 0xc)), 8);
+	    CTR_MipsAddLo(navFrameCurr->pos.z, CTR_MipsSra(CTR_MipsMulLo(CTR_MipsSubLo(navFrameNext->pos.z, navFrameCurr->pos.z), percentage), 0xc)), 8);
 
 	if ((botDriver->botData.botFlags & BOT_FLAG_FREE_PHYSICS) != 0)
 	{
@@ -2838,7 +2838,7 @@ void BOTS_CollideWithOtherAI(struct Driver *robot_1, struct Driver *robot_2)
 		struct NavFrame *navFrameNext = navFrameCurr + 1;
 
 		// iVar4
-		navSegmentStartPos = &navFrameCurr->pos[0];
+		navSegmentStartPos = &navFrameCurr->pos.x;
 
 		// if you go out of bounds
 		if (sdata->NavPath_ptrHeader[botPathIndex]->last <= navFrameNext)
@@ -2846,7 +2846,7 @@ void BOTS_CollideWithOtherAI(struct Driver *robot_1, struct Driver *robot_2)
 			// loop back to first navFrame
 			navFrameNext = sdata->NavPath_ptrNavFrameArray[botPathIndex];
 		}
-		navSegmentEndPos = &navFrameNext->pos[0];
+		navSegmentEndPos = &navFrameNext->pos.x;
 	}
 	else
 	{
@@ -2855,25 +2855,24 @@ void BOTS_CollideWithOtherAI(struct Driver *robot_1, struct Driver *robot_2)
 
 		// iVar4
 		navSegmentStartPos = robot_1->botData.estimatePosition.v;
-		navSegmentEndPos = &navFrameNext->pos[0];
+		navSegmentEndPos = &navFrameNext->pos.x;
 	}
 
-	s16 pos[3];
-	// position of one driver
-	pos[0] = (s16)CTR_MipsSra(robot_1->posCurr.x, 8);
-	pos[1] = (s16)CTR_MipsSra(robot_1->posCurr.y, 8);
-	pos[2] = (s16)CTR_MipsSra(robot_1->posCurr.z, 8);
+	SVec3 pos = {
+	    .x = (s16)CTR_MipsSra(robot_1->posCurr.x, 8),
+	    .y = (s16)CTR_MipsSra(robot_1->posCurr.y, 8),
+	    .z = (s16)CTR_MipsSra(robot_1->posCurr.z, 8),
+	};
 
-	// two navFrame structs, and position pointer
-	int res1 = CAM_MapRange_PosPoints(navSegmentEndPos, navSegmentStartPos, &pos[0]);
+	int res1 = CAM_MapRange_PosPoints(navSegmentEndPos, navSegmentStartPos, &pos);
 
-	// position of other driver
-	pos[0] = (s16)CTR_MipsSra(robot_2->posCurr.x, 8);
-	pos[1] = (s16)CTR_MipsSra(robot_2->posCurr.y, 8);
-	pos[2] = (s16)CTR_MipsSra(robot_2->posCurr.z, 8);
+	pos = (SVec3){
+	    .x = (s16)CTR_MipsSra(robot_2->posCurr.x, 8),
+	    .y = (s16)CTR_MipsSra(robot_2->posCurr.y, 8),
+	    .z = (s16)CTR_MipsSra(robot_2->posCurr.z, 8),
+	};
 
-	// two navFrame structs, and position pointer
-	int res2 = CAM_MapRange_PosPoints(navSegmentEndPos, navSegmentStartPos, &pos[0]);
+	int res2 = CAM_MapRange_PosPoints(navSegmentEndPos, navSegmentStartPos, &pos);
 
 	// reduce speed of one AI,
 	// the AI that is closer to the previous nav point,
@@ -3062,9 +3061,9 @@ void BOTS_Driver_Convert(struct Driver *d)
 	if ((sdata->gGT->gameMode1 & BATTLE_MODE) != 0)
 	{ // you are in battle mode
 		struct NavFrame *nf = NAVHEADER_GETFRAME(sdata->NavPath_ptrHeader[navPathIndex]);
-		d->posCurr.x = CTR_MipsSll(nf->pos[0], 8);
-		d->posCurr.y = CTR_MipsSll(nf->pos[1], 8);
-		d->posCurr.z = CTR_MipsSll(nf->pos[2], 8);
+		d->posCurr.x = CTR_MipsSll(nf->pos.x, 8);
+		d->posCurr.y = CTR_MipsSll(nf->pos.y, 8);
+		d->posCurr.z = CTR_MipsSll(nf->pos.z, 8);
 	}
 
 	LIST_AddFront(&sdata->navBotList[navPathIndex], (struct Item *)&d->botData);

@@ -366,15 +366,15 @@ void UI_DrawRankedDrivers(void)
 			struct CheckpointNode *cn2 = &cn[cn1->nextIndex_forward];
 
 			s16 vec1[4];
-			vec1[0] = cn1->pos[0] - cn2->pos[0];
-			vec1[1] = cn1->pos[1] - cn2->pos[1];
-			vec1[2] = cn1->pos[2] - cn2->pos[2];
+			vec1[0] = cn1->pos.x - cn2->pos.x;
+			vec1[1] = cn1->pos.y - cn2->pos.y;
+			vec1[2] = cn1->pos.z - cn2->pos.z;
 			MATH_VectorNormalize((VECTOR *)&vec1[0]);
 
 			s16 vec2[4];
-			vec2[0] = pos[0] - cn1->pos[0];
-			vec2[1] = pos[1] - cn1->pos[1];
-			vec2[2] = pos[2] - cn1->pos[2];
+			vec2[0] = pos[0] - cn1->pos.x;
+			vec2[1] = pos[1] - cn1->pos.y;
+			vec2[2] = pos[2] - cn1->pos.z;
 
 #if defined(CTR_NATIVE)
 			// NOTE(aalhendi): Retail loads vec1 as GTE rot row 0, runs MVMVA

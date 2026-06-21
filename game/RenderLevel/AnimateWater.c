@@ -52,8 +52,8 @@ void AnimateQuadVertex(int timer, struct SCVert *scVert, u32 *visBits)
 		u32 animatedXy = offsetPosXy + (u32)(trig.sin >> 7);
 		u32 animatedZw = offsetPosZw + (u32)(trig.cos >> 7);
 
-		*(u32 *)&levVert->pos[0] = animatedXy | originalY;
-		levVert->pos[2] = (s16)animatedZw;
+		*(u32 *)&levVert->pos = animatedXy | originalY;
+		levVert->pos.z = (s16)animatedZw;
 	}
 
 	if ((flags & 0x4000) != 0)

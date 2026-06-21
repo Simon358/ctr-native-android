@@ -642,7 +642,7 @@ void CAM_FindClosestQuadblock(struct ScratchpadStruct *sps, struct CameraDC *cDC
 }
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80018ec0-0x80018fec.
-void CAM_StartLine_FlyIn_FixY(s16 *posRot)
+void CAM_StartLine_FlyIn_FixY(SVec3 *posRot)
 {
 	struct ScratchpadStruct *sps = &sdata->scratchpadStruct;
 	SVec3 pos;
@@ -653,9 +653,9 @@ void CAM_StartLine_FlyIn_FixY(s16 *posRot)
 	sps->Union.QuadBlockColl.searchFlags = COLL_SEARCH_HIGH_LOD;
 	sps->ptr_mesh_info = sdata->gGT->level1->ptr_mesh_info;
 
-	pos.x = posRot[0];
-	pos.y = posRot[1];
-	pos.z = posRot[2];
+	pos.x = posRot->x;
+	pos.y = posRot->y;
+	pos.z = posRot->z;
 
 	for (i = 0; i < 8; i++)
 	{
@@ -681,7 +681,7 @@ void CAM_StartLine_FlyIn_FixY(s16 *posRot)
 		}
 	}
 
-	posRot[1] = pos.y;
+	posRot->y = pos.y;
 }
 
 static s32 CAM_FollowDriver_AngleAxis_MulLo(s32 a, s32 b)
@@ -820,19 +820,19 @@ void CAM_StartLine_FlyIn(struct FlyInData *flyInData, s16 maxFrames, s32 frame, 
 	local_70.vy = pathStart[1] + (s16)(((pathStart[4] - pathStart[1]) * ratio) >> 0xc) - 0x60;
 	local_70.vz = pathStart[2] + (s16)(((pathStart[5] - pathStart[2]) * ratio) >> 0xc);
 
-	rot.vx = lev->DriverSpawn[0].rot[0];
-	rot.vy = lev->DriverSpawn[0].rot[1] + 0x400;
-	rot.vz = lev->DriverSpawn[0].rot[2];
+	rot.vx = lev->DriverSpawn[0].rot.x;
+	rot.vy = lev->DriverSpawn[0].rot.y + 0x400;
+	rot.vz = lev->DriverSpawn[0].rot.z;
 
 	ConvertRotToMatrix(&matrix, (s16 *)&rot);
 
-	CAM_StartLine_FlyIn_FixY(&lev->DriverSpawn[1].pos[0]);
-	CAM_StartLine_FlyIn_FixY(&lev->DriverSpawn[2].pos[0]);
-	CAM_StartLine_FlyIn_FixY(&lev->DriverSpawn[5].pos[0]);
+	CAM_StartLine_FlyIn_FixY(&lev->DriverSpawn[1].pos);
+	CAM_StartLine_FlyIn_FixY(&lev->DriverSpawn[2].pos);
+	CAM_StartLine_FlyIn_FixY(&lev->DriverSpawn[5].pos);
 
-	matrix.t[0] = lev->DriverSpawn[1].pos[0] + (lev->DriverSpawn[2].pos[0] - lev->DriverSpawn[1].pos[0]) / 2;
-	matrix.t[1] = lev->DriverSpawn[1].pos[1] + (lev->DriverSpawn[2].pos[1] - lev->DriverSpawn[1].pos[1]) / 2 + 0x40;
-	matrix.t[2] = lev->DriverSpawn[1].pos[2] + (lev->DriverSpawn[2].pos[2] - lev->DriverSpawn[1].pos[2]) / 2;
+	matrix.t[0] = lev->DriverSpawn[1].pos.x + (lev->DriverSpawn[2].pos.x - lev->DriverSpawn[1].pos.x) / 2;
+	matrix.t[1] = lev->DriverSpawn[1].pos.y + (lev->DriverSpawn[2].pos.y - lev->DriverSpawn[1].pos.y) / 2 + 0x40;
+	matrix.t[2] = lev->DriverSpawn[1].pos.z + (lev->DriverSpawn[2].pos.z - lev->DriverSpawn[1].pos.z) / 2;
 
 	SetRotMatrix(&matrix);
 	SetTransMatrix(&matrix);
@@ -881,9 +881,9 @@ static struct CheckpointNode *CAM_FollowDriver_TrackPath_GetNode(struct CameraDC
 
 static s32 CAM_FollowDriver_TrackPath_Length(struct CheckpointNode *from, struct CheckpointNode *to, s32 *dx, s32 *dy, s32 *dz)
 {
-	*dx = to->pos[0] - from->pos[0];
-	*dy = to->pos[1] - from->pos[1];
-	*dz = to->pos[2] - from->pos[2];
+	*dx = to->pos.x - from->pos.x;
+	*dy = to->pos.y - from->pos.y;
+	*dz = to->pos.z - from->pos.z;
 
 	s32 sum = CTR_MipsAddLo(CAM_FollowDriver_TrackPath_MulLo(*dx, *dx), CAM_FollowDriver_TrackPath_MulLo(*dy, *dy));
 	return SquareRoot0_stub(CTR_MipsAddLo(sum, CAM_FollowDriver_TrackPath_MulLo(*dz, *dz)));
@@ -933,13 +933,13 @@ u32 CAM_FollowDriver_TrackPath(struct CameraDC *cDC, SVec3 *pos, s32 speed, s32 
 	else
 		ratio = 0;
 
-	pos->x = curr->pos[0] + (s16)((CAM_FollowDriver_TrackPath_MulLo(dx, ratio)) >> 12);
-	pos->y = curr->pos[1] + (s16)((CAM_FollowDriver_TrackPath_MulLo(dy, ratio)) >> 12) + 0x80;
-	pos->z = curr->pos[2] + (s16)((CAM_FollowDriver_TrackPath_MulLo(dz, ratio)) >> 12);
+	pos->x = curr->pos.x + (s16)((CAM_FollowDriver_TrackPath_MulLo(dx, ratio)) >> 12);
+	pos->y = curr->pos.y + (s16)((CAM_FollowDriver_TrackPath_MulLo(dy, ratio)) >> 12) + 0x80;
+	pos->z = curr->pos.z + (s16)((CAM_FollowDriver_TrackPath_MulLo(dz, ratio)) >> 12);
 
 	yaw = (s16)ratan2(dx, dz) + 0x800;
 	angleNext = CAM_FollowDriver_TrackPath_GetNode(cDC, next, speed);
-	nextYaw = (s16)ratan2(angleNext->pos[0] - next->pos[0], angleNext->pos[2] - next->pos[2]) + 0x800;
+	nextYaw = (s16)ratan2(angleNext->pos.x - next->pos.x, angleNext->pos.z - next->pos.z) + 0x800;
 
 	yawDelta = (nextYaw - yaw) & 0xfff;
 	if (yawDelta >= 0x800)

@@ -11,9 +11,9 @@ static void RB_Warpball_AdvanceStraight(struct TrackerWeapon *tw, struct Instanc
 
 static int RB_Warpball_NodeDeltaLength(struct CheckpointNode *curr, struct CheckpointNode *next, int *dx, int *dy, int *dz)
 {
-	*dx = next->pos[0] - curr->pos[0];
-	*dy = next->pos[1] - curr->pos[1];
-	*dz = next->pos[2] - curr->pos[2];
+	*dx = next->pos.x - curr->pos.x;
+	*dy = next->pos.y - curr->pos.y;
+	*dz = next->pos.z - curr->pos.z;
 
 	return SquareRoot0_stub(((*dx) * (*dx)) + ((*dy) * (*dy)) + ((*dz) * (*dz)));
 }
@@ -106,9 +106,9 @@ void RB_Warpball_ThTick(struct Thread *t)
 			{
 				struct CheckpointNode *pathNode = tw->ptrNodeCurr;
 
-				distX = pathNode->pos[0] - inst->matrix.t[0];
-				distZ = pathNode->pos[2] - inst->matrix.t[2];
-				distY = pathNode->pos[1] - inst->matrix.t[1];
+				distX = pathNode->pos.x - inst->matrix.t[0];
+				distZ = pathNode->pos.z - inst->matrix.t[2];
+				distY = pathNode->pos.y - inst->matrix.t[1];
 				distXZ = (distX * distX) + (distZ * distZ);
 
 				if (distXZ < 0x4000)
@@ -217,9 +217,9 @@ void RB_Warpball_ThTick(struct Thread *t)
 				fraction = (progress << 12) / segmentLength;
 			}
 
-			inst->matrix.t[0] = curr->pos[0] + ((distX * fraction) >> 12);
-			inst->matrix.t[1] = curr->pos[1] + ((distY * fraction) >> 12);
-			inst->matrix.t[2] = curr->pos[2] + ((distZ * fraction) >> 12);
+			inst->matrix.t[0] = curr->pos.x + ((distX * fraction) >> 12);
+			inst->matrix.t[1] = curr->pos.y + ((distY * fraction) >> 12);
+			inst->matrix.t[2] = curr->pos.z + ((distZ * fraction) >> 12);
 
 			tw->dir.y = ratan2(distX, distZ);
 			tw->vel.x = (MATH_Sin(tw->dir.y) * 7) >> 8;

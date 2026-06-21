@@ -52,9 +52,9 @@ void VehStuckProc_MaskGrab_FindDestPos(struct Driver *d, struct QuadBlock *quad)
 		struct LevVertex *v0 = &verts[quad->index[0]];
 		struct LevVertex *v3 = &verts[quad->index[3]];
 
-		d->posCurr.x = CTR_MipsSll(CTR_MipsAddLo(v0->pos[0], v3->pos[0]), 7);
-		d->posCurr.y = CTR_MipsSll(CTR_MipsAddLo(CTR_MipsAddLo(v0->pos[1], v3->pos[1]), 0x80), 7);
-		d->posCurr.z = CTR_MipsSll(CTR_MipsAddLo(v0->pos[2], v3->pos[2]), 7);
+		d->posCurr.x = CTR_MipsSll(CTR_MipsAddLo(v0->pos.x, v3->pos.x), 7);
+		d->posCurr.y = CTR_MipsSll(CTR_MipsAddLo(CTR_MipsAddLo(v0->pos.y, v3->pos.y), 0x80), 7);
+		d->posCurr.z = CTR_MipsSll(CTR_MipsAddLo(v0->pos.z, v3->pos.z), 7);
 	}
 	else
 	{
@@ -78,12 +78,12 @@ void VehStuckProc_MaskGrab_FindDestPos(struct Driver *d, struct QuadBlock *quad)
 			{
 				nextRespawn = &level->ptr_restart_points[respawn->nextIndex_forward];
 
-				d->posCurr.x = CTR_MipsSll(respawn->pos[0], 8);
-				d->posCurr.y = CTR_MipsSll(CTR_MipsAddLo(respawn->pos[1], 0x80), 8);
-				d->posCurr.z = CTR_MipsSll(respawn->pos[2], 8);
+				d->posCurr.x = CTR_MipsSll(respawn->pos.x, 8);
+				d->posCurr.y = CTR_MipsSll(CTR_MipsAddLo(respawn->pos.y, 0x80), 8);
+				d->posCurr.z = CTR_MipsSll(respawn->pos.z, 8);
 
 				d->rotCurr.x = 0;
-				d->rotCurr.y = ratan2(CTR_MipsSubLo(nextRespawn->pos[0], respawn->pos[0]), CTR_MipsSubLo(nextRespawn->pos[2], respawn->pos[2]));
+				d->rotCurr.y = ratan2(CTR_MipsSubLo(nextRespawn->pos.x, respawn->pos.x), CTR_MipsSubLo(nextRespawn->pos.z, respawn->pos.z));
 				d->rotCurr.z = 0;
 
 				VehStuckProc_MaskGrab_SearchBsp(d, sps);

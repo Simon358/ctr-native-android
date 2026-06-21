@@ -30,14 +30,14 @@ struct Driver *RB_Warpball_GetDriverTarget(struct TrackerWeapon *tw, struct Inst
 	s32 projectedDistance;
 	int bestDistance = 0x7fffffff;
 
-	pathVector.x = (s16)(node1->pos[0] - node2->pos[0]);
-	pathVector.y = (s16)(node1->pos[1] - node2->pos[1]);
-	pathVector.z = (s16)(node1->pos[2] - node2->pos[2]);
+	pathVector.x = (s16)(node1->pos.x - node2->pos.x);
+	pathVector.y = (s16)(node1->pos.y - node2->pos.y);
+	pathVector.z = (s16)(node1->pos.z - node2->pos.z);
 	MATH_VectorNormalize(&pathVector);
 
-	orbVector.x = (s16)(inst->matrix.t[0] - node1->pos[0]);
-	orbVector.y = (s16)(inst->matrix.t[1] - node1->pos[1]);
-	orbVector.z = (s16)(inst->matrix.t[2] - node1->pos[2]);
+	orbVector.x = (s16)(inst->matrix.t[0] - node1->pos.x);
+	orbVector.y = (s16)(inst->matrix.t[1] - node1->pos.y);
+	orbVector.z = (s16)(inst->matrix.t[2] - node1->pos.z);
 
 	// NOTE(aalhendi): Retail uses GTE MVMVA MAC1; this is the same row0 dot product.
 	projectedDistance = ((s32)pathVector.x * orbVector.x) + ((s32)pathVector.y * orbVector.y) + ((s32)pathVector.z * orbVector.z);
