@@ -704,9 +704,9 @@ static void CAM_FollowDriver_AngleAxis_LoadGteMatrix(MATRIX *axisMatrix, struct 
 
 static void CAM_FollowDriver_AngleAxis_TransformOffset(const SVec3 *offset, VECTOR *out)
 {
-	gte_ldv0((SVECTOR *)offset);
+	CTR_GteLoadSVec3V0(offset);
 	gte_rtv0tr();
-	gte_stlvnl(out);
+	CTR_GteStoreMAC(&out->vx);
 }
 
 void CAM_FollowDriver_AngleAxis(struct CameraDC *cDC, struct Driver *d, u8 *workBuffer, SVec3 *pushBufferPos, SVec3 *pushBufferRot)
@@ -1033,7 +1033,6 @@ void CAM_FollowDriver_Normal(struct CameraDC *cDC, struct Driver *d, SVec3 *push
 	s32 x_00;
 	u32 uVar11;
 	s32 iVar12;
-	SVECTOR *psVar12;
 	u32 uVar13;
 	s32 iVar14;
 	SVec3 local_40;
@@ -1163,18 +1162,17 @@ void CAM_FollowDriver_Normal(struct CameraDC *cDC, struct Driver *d, SVec3 *push
 	cam->rot.z += cDC->fireSpeedZoom.distanceOffset >> 8;
 
 	gte_SetRotMatrix(&cam->matrix);
-	psVar12 = (SVECTOR *)&cam->rot;
-	gte_ldv0(psVar12);
+	CTR_GteLoadSVec3V0(&cam->rot);
 	gte_rtv0();
-	gte_stlvnl((VECTOR *)&cam->pos);
+	CTR_GteStoreMAC(cam->pos.v);
 
 	cam->rot.x = 0;
 	cam->rot.y = 0x40;
 	cam->rot.z = 0;
 
-	gte_ldv0(psVar12);
+	CTR_GteLoadSVec3V0(&cam->rot);
 	gte_rtv0();
-	gte_stlvnl((VECTOR *)(scratchpad + 0x27c));
+	CTR_GteStoreMAC((s32 *)(scratchpad + 0x27c));
 
 	cam->delta.x = CTR_MipsSra(d->posCurr.x, 8);
 	cam->delta.y = CTR_MipsSra(d->posCurr.y, 8);
@@ -1239,11 +1237,9 @@ void CAM_FollowDriver_Normal(struct CameraDC *cDC, struct Driver *d, SVec3 *push
 
 	gte_SetRotMatrix(&cam->matrix);
 
-	psVar12 = (SVECTOR *)&cam->rot;
-
-	gte_ldv0(psVar12);
+	CTR_GteLoadSVec3V0(&cam->rot);
 	gte_rtv0();
-	gte_stsv(psVar12);
+	CTR_GteStoreS16Triplet(cam->rot.v);
 
 	cam->delta.x += (s32)cam->rot.x;
 	cam->delta.z += (s32)cam->rot.z;
@@ -1704,7 +1700,7 @@ s32 CAM_MapRange_PosPoints(SVec3 *pos1, SVec3 *pos2, SVec3 *currPos)
 
 	CTC2(CTR_PackS16Pair(pathDelta.x, pathDelta.y), 0);
 	CTC2((s32)pathDelta.z, 1);
-	gte_ldv0(&currDelta);
+	CTR_GteLoadSVec3V0(&currDelta);
 	gte_mvmva(0, 0, 0, 3, 0);
 
 	return MFC2_S(25) >> 12;
@@ -2157,11 +2153,11 @@ SkipNewCameraEOR:
 								trackPathPos->z = (s16)(((s32)trackPathPos->z + (s32)trackPathLookaheadPos->z) >> 1);
 								ConvertRotToMatrix(&camThTick->matrix, &camThTick->rot);
 								gte_SetRotMatrix(&camThTick->matrix);
-								gte_ldv0((SVECTOR *)&cDC->transitionTo);
+								CTR_GteLoadSVec3V0(&cDC->transitionTo.pos);
 								gte_rtv0();
 
 								VECTOR pathOffset;
-								gte_stlvnl(&pathOffset);
+								CTR_GteStoreMAC(&pathOffset.vx);
 								uVar9 = pathOffset.vx;
 								iVar7 = pathOffset.vy;
 								iVar8 = pathOffset.vz;
