@@ -7,7 +7,7 @@
 #ifndef LIBGTE_H
 #define LIBGTE_H
 
-#include "types.h"
+#include <stdint.h>
 
 typedef struct
 {

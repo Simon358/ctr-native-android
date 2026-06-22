@@ -1314,7 +1314,7 @@ static void VehWarpDust_Project(struct VehWarpDustScratch *scratch, SVECTOR *poi
 static void VehWarpDust_EmitSegment(u32 **primCursor, struct PushBuffer *pb, const struct VehWarpDustProjected *prev, const struct VehWarpDustProjected *curr)
 {
 	struct VehWarpDustPacket *packet = (struct VehWarpDustPacket *)*primCursor;
-	u_long *ot = pb->ptrOT + CTR_MipsSra((s32)curr->depth, 6);
+	uint32_t *ot = pb->ptrOT + CTR_MipsSra((s32)curr->depth, 6);
 
 	packet->drawMode = 0xe1000a20;
 

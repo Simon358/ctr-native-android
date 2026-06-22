@@ -984,7 +984,7 @@ UpdateTireColorTimer:
 			}
 
 			if (( // if in front row & 25% chance
-			        (sdata->kartSpawnOrderArray[botDriver->driverID] < 3) && ((RngDeadCoed((u_int *)&sdata->const_0x30215400) & 0xFF) < 0x40)) ||
+			        (sdata->kartSpawnOrderArray[botDriver->driverID] < 3) && ((RngDeadCoed((uint32_t *)&sdata->const_0x30215400) & 0xFF) < 0x40)) ||
 			    (data.characterIDs[botDriver->driverID] == NITROS_OXIDE))
 			{ // start the race with a boost
 				VehFire_Increment(botDriver, 0x2d0, 1, 0x180);
@@ -1631,7 +1631,7 @@ UpdateTireColorTimer:
 	botDriver->actionsFlagSet &= ~(ACTION_ENGINE_ECHO | ACTION_BACK_SKID | ACTION_FRONT_SKID);
 	botDriver->actionsFlagSet |= navActionFlags;
 
-	struct Terrain *terrain = VehAfterColl_GetTerrain(((u_char)navFrameCurr->flags) >> 3);
+	struct Terrain *terrain = VehAfterColl_GetTerrain(((uint8_t)navFrameCurr->flags) >> 3);
 
 	botDriver->terrainMeta1 = terrain;
 

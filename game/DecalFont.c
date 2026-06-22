@@ -524,10 +524,10 @@ void DecalFont_DrawLine(char *str, int posX, int posY, s16 fontType, int flags)
 
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800228c4-0x80022930.
-void DecalFont_DrawLineOT(char *str, int posX, int posY, s16 fontType, int flags, u_long *ot)
+void DecalFont_DrawLineOT(char *str, int posX, int posY, s16 fontType, int flags, uint32_t *ot)
 {
 	struct GameTracker *gGT;
-	u_long *backupOT;
+	uint32_t *backupOT;
 
 	gGT = sdata->gGT;
 

@@ -7,7 +7,7 @@
 #ifndef LIBAPI_H
 #define LIBAPI_H
 
-#include "types.h"
+#include <stdint.h>
 
 #ifndef KERNEL_H
 #include "kernel.h"

@@ -66,7 +66,7 @@ static s32 CAM_SkyboxGlow_CalcTilt(struct PushBuffer *pb)
 	return CAM_SkyboxGlow_Div2TowardZero(-shifted);
 }
 
-static void CAM_SkyboxGlow_EmitG3(struct PrimMem *primMem, u_long *ot, u32 color0, u32 xy0, u32 color1, u32 xy1, u32 color2, u32 xy2)
+static void CAM_SkyboxGlow_EmitG3(struct PrimMem *primMem, uint32_t *ot, u32 color0, u32 xy0, u32 color1, u32 xy1, u32 color2, u32 xy2)
 {
 	POLY_G3 *poly = primMem->cursor;
 
@@ -82,7 +82,7 @@ static void CAM_SkyboxGlow_EmitG3(struct PrimMem *primMem, u_long *ot, u32 color
 	primMem->cursor = poly + 1;
 }
 
-static void CAM_SkyboxGlow_EmitG4(struct PrimMem *primMem, u_long *ot, u32 color0, u32 xy0, u32 color1, u32 xy1, u32 color2, u32 xy2, u32 color3, u32 xy3)
+static void CAM_SkyboxGlow_EmitG4(struct PrimMem *primMem, uint32_t *ot, u32 color0, u32 xy0, u32 color1, u32 xy1, u32 color2, u32 xy2, u32 color3, u32 xy3)
 {
 	POLY_G4 *poly = primMem->cursor;
 
@@ -100,7 +100,7 @@ static void CAM_SkyboxGlow_EmitG4(struct PrimMem *primMem, u_long *ot, u32 color
 	primMem->cursor = poly + 1;
 }
 
-static void CAM_SkyboxGlow_EmitF3(struct PrimMem *primMem, u_long *ot, u32 color, u32 xy0, u32 xy1, u32 xy2)
+static void CAM_SkyboxGlow_EmitF3(struct PrimMem *primMem, uint32_t *ot, u32 color, u32 xy0, u32 xy1, u32 xy2)
 {
 	POLY_F3 *poly = primMem->cursor;
 
@@ -114,7 +114,7 @@ static void CAM_SkyboxGlow_EmitF3(struct PrimMem *primMem, u_long *ot, u32 color
 	primMem->cursor = poly + 1;
 }
 
-static void CAM_SkyboxGlow_EmitF4(struct PrimMem *primMem, u_long *ot, u32 color, u32 xy0, u32 xy1, u32 xy2, u32 xy3)
+static void CAM_SkyboxGlow_EmitF4(struct PrimMem *primMem, uint32_t *ot, u32 color, u32 xy0, u32 xy1, u32 xy2, u32 xy3)
 {
 	POLY_F4 *poly = primMem->cursor;
 
@@ -140,7 +140,7 @@ static u32 CAM_SkyboxGlow_ClearGradientColor(void)
 }
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800175cc-0x8001861c
-void CAM_SkyboxGlow(struct SkyboxGlowGradient *grad, struct PushBuffer *pb, struct PrimMem *primMem, u_long *ptrOT)
+void CAM_SkyboxGlow(struct SkyboxGlowGradient *grad, struct PushBuffer *pb, struct PrimMem *primMem, uint32_t *ptrOT)
 {
 	s32 tilt = CAM_SkyboxGlow_CalcTilt(pb);
 	s32 centerY1 = CAM_SkyboxGlow_CalcCenterY(pb);
@@ -286,7 +286,7 @@ void CAM_ClearScreen(struct GameTracker *gGT)
 	for (s32 loop = 0; loop < numPlyr; loop++)
 	{
 		struct PushBuffer *pb = &gGT->pushBuffer[loop];
-		u_long *endOT = &pb->ptrOT[0x3FF];
+		uint32_t *endOT = &pb->ptrOT[0x3FF];
 
 		s16 x = pb->rect.x;
 		s16 y = pb->rect.y + swap * 0x128;

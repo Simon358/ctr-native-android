@@ -624,7 +624,7 @@ void MM_Characters_MenuProc(struct RectMenu *unused)
 
 	struct GameTracker *gGT = sdata->gGT;
 
-	u_long *ot = gGT->backBuffer->otMem.uiOT;
+	uint32_t *ot = gGT->backBuffer->otMem.uiOT;
 
 	for (i = 0; i < 4; i++)
 	{

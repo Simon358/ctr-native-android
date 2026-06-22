@@ -2,7 +2,7 @@
 
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800379f4-0x80037bc0.
-void MainFreeze_ConfigDrawNPC105(s16 startX, s16 startY, s16 radius, int angleStep, s16 angle, char *color, u_long *otMem, struct PrimMem *primMem)
+void MainFreeze_ConfigDrawNPC105(s16 startX, s16 startY, s16 radius, int angleStep, s16 angle, char *color, uint32_t *otMem, struct PrimMem *primMem)
 {
 	s16 pos[6];
 	char colors[0xc];
@@ -597,7 +597,7 @@ force_inline void DISPLAYRECTMENU_MainFreeze_MenuPtrOptions(struct RectMenu *men
 
 	int volumeSliderWidth = 380 - (30 + volumeSliderTriangleLeftMargin);
 
-	u_long *ot = gGT->backBuffer->otMem.uiOT;
+	uint32_t *ot = gGT->backBuffer->otMem.uiOT;
 	struct PrimMem *primMem = &gGT->backBuffer->primMem;
 	Color color;
 

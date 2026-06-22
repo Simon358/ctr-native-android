@@ -1109,7 +1109,7 @@ struct OVR_230_VideoBSS
 
 	// 30,31...
 	// 800b67fc
-	u_long *in_Buf[2];
+	uint32_t *in_Buf[2];
 
 	int field32_0x58;
 
@@ -1119,7 +1119,7 @@ struct OVR_230_VideoBSS
 	char field36_0x5f;
 
 	// 800b680c
-	u_long *out_Buf[4];
+	uint32_t *out_Buf[4];
 
 	// 800b681c
 	RECT slice;

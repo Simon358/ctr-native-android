@@ -1867,7 +1867,7 @@ int ParsePrimitive(P_TAG *polyTag)
 			rect.w = (s16)(rectSize & 0xffff);
 			rect.h = (s16)(rectSize >> 16);
 
-			LoadImage(&rect, (u_long *)drload->p);
+			LoadImage(&rect, (uint32_t *)drload->p);
 
 			// TODO(aalhendi): Audit whether CTR ever appends additional GPU
 			// commands after a DR_LOAD payload in the same packet.
