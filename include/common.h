@@ -8,7 +8,6 @@
 // Not native host
 #ifndef CTR_NATIVE
 #include <gccHeaders.h>
-#include <ctr_gte.h>
 #endif
 
 
