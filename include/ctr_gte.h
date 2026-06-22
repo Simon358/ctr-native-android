@@ -56,6 +56,25 @@ static inline void CTR_GteLoadSVec3V0(const SVec3 *v)
 	MTC2(CTR_PackS16Pair(v->z, 0), 1);
 }
 
+static inline void CTR_GteLoadSVec3V1(const SVec3 *v)
+{
+	MTC2(CTR_PackS16Pair(v->x, v->y), 2);
+	MTC2(CTR_PackS16Pair(v->z, 0), 3);
+}
+
+static inline void CTR_GteLoadSVec3V2(const SVec3 *v)
+{
+	MTC2(CTR_PackS16Pair(v->x, v->y), 4);
+	MTC2(CTR_PackS16Pair(v->z, 0), 5);
+}
+
+static inline void CTR_GteLoadSVec3V3(const SVec3 *v0, const SVec3 *v1, const SVec3 *v2)
+{
+	CTR_GteLoadSVec3V0(v0);
+	CTR_GteLoadSVec3V1(v1);
+	CTR_GteLoadSVec3V2(v2);
+}
+
 static inline void CTR_GteLoadSVec4V0(const SVec4 *v)
 {
 	MTC2(CTR_PackS16Pair(v->x, v->y), 0);
@@ -78,6 +97,21 @@ static inline void CTR_GteLoadLVL(const s32 *v)
 static inline void CTR_GteStoreSXY(void *xy)
 {
 	CTR_GteStoreU32(xy, MFC2(14));
+}
+
+static inline void CTR_GteStoreSXY0(void *xy)
+{
+	CTR_GteStoreU32(xy, MFC2(12));
+}
+
+static inline void CTR_GteStoreSXY1(void *xy)
+{
+	CTR_GteStoreU32(xy, MFC2(13));
+}
+
+static inline void CTR_GteStoreSXY2(void *xy)
+{
+	CTR_GteStoreSXY(xy);
 }
 
 static inline void CTR_GteStoreSXY3(void *xy0, void *xy1, void *xy2)

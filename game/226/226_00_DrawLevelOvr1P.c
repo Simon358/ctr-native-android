@@ -963,9 +963,9 @@ static int DrawLevelOvr1P_ProjectVertex(struct LevVertex *vertices, const struct
 {
 	long gteFlag;
 
-	gte_ldv0(&vertices[block->index[vertexIndex]].pos);
+	CTR_GteLoadSVec3V0(&vertices[block->index[vertexIndex]].pos);
 	gte_rtps();
-	gte_stsxy(posScreen);
+	CTR_GteStoreSXY(posScreen);
 	gte_stflg(&gteFlag);
 
 	return ((u32)gteFlag & DRAW_LEVEL_OVR1P_GTE_RTPT_OVERFLOW) != 0;
@@ -1075,9 +1075,9 @@ static int DrawLevelOvr1P_ProjectVertexTriple(struct LevVertex *vertices, const 
 	*(u32 *)&projected[index2].pos[2] = *(u32 *)&vertex2->pos.z;
 	*(u32 *)&projected[index2].color_hi[0] = *(u32 *)&vertex2->color_hi[0];
 
-	gte_ldv3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
+	CTR_GteLoadSVec3V3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
 	gte_rtpt();
-	gte_stsxy3(&projected[index0].posScreen[0], &projected[index1].posScreen[0], &projected[index2].posScreen[0]);
+	CTR_GteStoreSXY3(&projected[index0].posScreen[0], &projected[index1].posScreen[0], &projected[index2].posScreen[0]);
 	gte_stsz3(&depth0, &depth1, &depth2);
 	gte_stflg(&gteFlag);
 
@@ -1130,9 +1130,9 @@ static void Ovr226_800a0f78_ProjectVertexTripleFullDepth(struct LevVertex *verti
 	*(u32 *)&projected[index2].pos[2] = *(u32 *)&vertex2->pos.z;
 	*(u32 *)&projected[index2].color_hi[0] = *(u32 *)&vertex2->color_hi[0];
 
-	gte_ldv3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
+	CTR_GteLoadSVec3V3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
 	gte_rtpt();
-	gte_stsxy3(&projected[index0].posScreen[0], &projected[index1].posScreen[0], &projected[index2].posScreen[0]);
+	CTR_GteStoreSXY3(&projected[index0].posScreen[0], &projected[index1].posScreen[0], &projected[index2].posScreen[0]);
 	gte_stsz3(&depth0, &depth1, &depth2);
 
 	DrawLevelOvr1P_StoreProjectedDepthWord(&projected[index0], depth0);
@@ -1150,9 +1150,9 @@ static void Ovr226_800a1024_ProjectFullDynamicLowFourth(struct LevVertex *vertic
 	*(u32 *)&projected[3].pos[2] = *(u32 *)&vertex->pos.z;
 	*(u32 *)&projected[3].color_hi[0] = *(u32 *)&vertex->color_hi[0];
 
-	gte_ldv0(&vertex->pos);
+	CTR_GteLoadSVec3V0(&vertex->pos);
 	gte_rtps();
-	gte_stsxy(&projected[3].posScreen[0]);
+	CTR_GteStoreSXY(&projected[3].posScreen[0]);
 	gte_stsz(&depth);
 	DrawLevelOvr1P_StoreProjectedDepthWord(&projected[3], depth);
 }
@@ -1211,22 +1211,22 @@ static int Ovr226_800a1ee0_ProjectWaterListVertexTriple(struct LevVertex *vertic
 	u32 depth2;
 	long gteFlag;
 
-	gte_ldv3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
+	CTR_GteLoadSVec3V3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
 	gte_rtpt();
 
 	*(u32 *)&projected[index0].color_hi[0] = *(u32 *)&vertex0->color_hi[0];
 	*(u32 *)&projected[index1].color_hi[0] = *(u32 *)&vertex1->color_hi[0];
 	*(u32 *)&projected[index2].color_hi[0] = *(u32 *)&vertex2->color_hi[0];
-	gte_stsxy0(&projected[index0].posScreen[0]);
+	CTR_GteStoreSXY0(&projected[index0].posScreen[0]);
 	gte_stflg(&gteFlag);
 	depth0 = MFC2(17);
 	DrawLevelOvr1P_StoreProjectedDepthWord(&projected[index0], depth0);
 	if (((u32)gteFlag & DRAW_LEVEL_OVR1P_GTE_RTPT_OVERFLOW) != 0)
 		return 1;
 
-	gte_stsxy1(&projected[index1].posScreen[0]);
+	CTR_GteStoreSXY1(&projected[index1].posScreen[0]);
 	depth1 = MFC2(18);
-	gte_stsxy2(&projected[index2].posScreen[0]);
+	CTR_GteStoreSXY2(&projected[index2].posScreen[0]);
 	depth2 = MFC2(19);
 	Ovr226_800a1ee0_StoreWaterListProjectedVertex(vertex0, &projected[index0]);
 	Ovr226_800a1ee0_StoreWaterListProjectedVertex(vertex1, &projected[index1]);
@@ -1267,22 +1267,22 @@ static int Ovr226_800a3738_ProjectGround4x1ListVertexTriple(struct LevVertex *ve
 	u32 depth2;
 	long gteFlag;
 
-	gte_ldv3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
+	CTR_GteLoadSVec3V3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
 	gte_rtpt();
 
 	*(u32 *)&projected[index0].color_hi[0] = *(u32 *)&vertex0->color_hi[0];
 	*(u32 *)&projected[index1].color_hi[0] = *(u32 *)&vertex1->color_hi[0];
 	*(u32 *)&projected[index2].color_hi[0] = *(u32 *)&vertex2->color_hi[0];
-	gte_stsxy0(&projected[index0].posScreen[0]);
+	CTR_GteStoreSXY0(&projected[index0].posScreen[0]);
 	gte_stflg(&gteFlag);
 	depth0 = MFC2(17);
 	DrawLevelOvr1P_StoreProjectedDepthWord(&projected[index0], depth0);
 	if (((u32)gteFlag & DRAW_LEVEL_OVR1P_GTE_RTPT_OVERFLOW) != 0)
 		return 1;
 
-	gte_stsxy1(&projected[index1].posScreen[0]);
+	CTR_GteStoreSXY1(&projected[index1].posScreen[0]);
 	depth1 = MFC2(18);
-	gte_stsxy2(&projected[index2].posScreen[0]);
+	CTR_GteStoreSXY2(&projected[index2].posScreen[0]);
 	depth2 = MFC2(19);
 	Ovr226_800a3738_CopyGround4x1ListProjectedSource(vertex0, &projected[index0]);
 	Ovr226_800a3738_CopyGround4x1ListProjectedSource(vertex1, &projected[index1]);
@@ -1323,22 +1323,22 @@ static int Ovr226_800a5030_ProjectGround4x2ListVertexTriple(struct LevVertex *ve
 	u32 depth2;
 	long gteFlag;
 
-	gte_ldv3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
+	CTR_GteLoadSVec3V3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
 	gte_rtpt();
 
 	*(u32 *)&projected[index0].color_hi[0] = *(u32 *)&vertex0->color_hi[0];
 	*(u32 *)&projected[index1].color_hi[0] = *(u32 *)&vertex1->color_hi[0];
 	*(u32 *)&projected[index2].color_hi[0] = *(u32 *)&vertex2->color_hi[0];
-	gte_stsxy0(&projected[index0].posScreen[0]);
+	CTR_GteStoreSXY0(&projected[index0].posScreen[0]);
 	gte_stflg(&gteFlag);
 	depth0 = MFC2(17);
 	DrawLevelOvr1P_StoreProjectedDepthWord(&projected[index0], depth0);
 	if (((u32)gteFlag & DRAW_LEVEL_OVR1P_GTE_RTPT_OVERFLOW) != 0)
 		return 1;
 
-	gte_stsxy1(&projected[index1].posScreen[0]);
+	CTR_GteStoreSXY1(&projected[index1].posScreen[0]);
 	depth1 = MFC2(18);
-	gte_stsxy2(&projected[index2].posScreen[0]);
+	CTR_GteStoreSXY2(&projected[index2].posScreen[0]);
 	depth2 = MFC2(19);
 	Ovr226_800a5030_CopyGround4x2ListProjectedSource(vertex0, &projected[index0]);
 	Ovr226_800a5030_CopyGround4x2ListProjectedSource(vertex1, &projected[index1]);
@@ -1379,22 +1379,22 @@ static int Ovr226_800a6fd0_ProjectDynamicListVertexTriple(struct LevVertex *vert
 	u32 depth2;
 	long gteFlag;
 
-	gte_ldv3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
+	CTR_GteLoadSVec3V3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
 	gte_rtpt();
 
 	*(u32 *)&projected[index0].color_hi[0] = *(u32 *)&vertex0->color_hi[0];
 	*(u32 *)&projected[index1].color_hi[0] = *(u32 *)&vertex1->color_hi[0];
 	*(u32 *)&projected[index2].color_hi[0] = *(u32 *)&vertex2->color_hi[0];
-	gte_stsxy0(&projected[index0].posScreen[0]);
+	CTR_GteStoreSXY0(&projected[index0].posScreen[0]);
 	gte_stflg(&gteFlag);
 	depth0 = MFC2(17);
 	DrawLevelOvr1P_StoreProjectedDepthWord(&projected[index0], depth0);
 	if (((u32)gteFlag & DRAW_LEVEL_OVR1P_GTE_RTPT_OVERFLOW) != 0)
 		return 1;
 
-	gte_stsxy1(&projected[index1].posScreen[0]);
+	CTR_GteStoreSXY1(&projected[index1].posScreen[0]);
 	depth1 = MFC2(18);
-	gte_stsxy2(&projected[index2].posScreen[0]);
+	CTR_GteStoreSXY2(&projected[index2].posScreen[0]);
 	depth2 = MFC2(19);
 	Ovr226_800a6fd0_CopyDynamicListProjectedSource(vertex0, &projected[index0]);
 	Ovr226_800a6fd0_CopyDynamicListProjectedSource(vertex1, &projected[index1]);
@@ -1435,22 +1435,22 @@ static int Ovr226_800a8bf0_ProjectWideDynamicVertexTriple(struct LevVertex *vert
 	u32 depth2;
 	long gteFlag;
 
-	gte_ldv3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
+	CTR_GteLoadSVec3V3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
 	gte_rtpt();
 
 	*(u32 *)&projected[index0].color_hi[0] = *(u32 *)&vertex0->color_hi[0];
 	*(u32 *)&projected[index1].color_hi[0] = *(u32 *)&vertex1->color_hi[0];
 	*(u32 *)&projected[index2].color_hi[0] = *(u32 *)&vertex2->color_hi[0];
-	gte_stsxy0(&projected[index0].posScreen[0]);
+	CTR_GteStoreSXY0(&projected[index0].posScreen[0]);
 	gte_stflg(&gteFlag);
 	depth0 = MFC2(17);
 	DrawLevelOvr1P_StoreProjectedDepthWord(&projected[index0], depth0);
 	if (((u32)gteFlag & DRAW_LEVEL_OVR1P_GTE_RTPT_OVERFLOW) != 0)
 		return 1;
 
-	gte_stsxy1(&projected[index1].posScreen[0]);
+	CTR_GteStoreSXY1(&projected[index1].posScreen[0]);
 	depth1 = MFC2(18);
-	gte_stsxy2(&projected[index2].posScreen[0]);
+	CTR_GteStoreSXY2(&projected[index2].posScreen[0]);
 	depth2 = MFC2(19);
 	Ovr226_800a8bf0_CopyWideDynamicProjectedSource(vertex0, &projected[index0]);
 	Ovr226_800a8bf0_CopyWideDynamicProjectedSource(vertex1, &projected[index1]);
@@ -1495,9 +1495,9 @@ static void Ovr226_800a5e5c_ProjectGround4x2RenderedVertexTriple(struct LevVerte
 	Ovr226_800a5e5c_StoreGround4x2RenderedProjectedVertex(vertex1, &projected[index1]);
 	Ovr226_800a5e5c_StoreGround4x2RenderedProjectedVertex(vertex2, &projected[index2]);
 
-	gte_ldv3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
+	CTR_GteLoadSVec3V3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
 	gte_rtpt();
-	gte_stsxy3(&projected[index0].posScreen[0], &projected[index1].posScreen[0], &projected[index2].posScreen[0]);
+	CTR_GteStoreSXY3(&projected[index0].posScreen[0], &projected[index1].posScreen[0], &projected[index2].posScreen[0]);
 	gte_stsz3(&depth0, &depth1, &depth2);
 
 	DrawLevelOvr1P_SetProjectedDepth(&projected[index0], depth0, DRAW_LEVEL_OVR1P_CLIP_BYTES_RENDERED);
@@ -1536,9 +1536,9 @@ static void Ovr226_800a7ba8_ProjectDynamicRenderedVertexTriple(struct LevVertex 
 	Ovr226_800a7ba8_StoreDynamicRenderedProjectedVertex(vertex1, &projected[index1]);
 	Ovr226_800a7ba8_StoreDynamicRenderedProjectedVertex(vertex2, &projected[index2]);
 
-	gte_ldv3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
+	CTR_GteLoadSVec3V3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
 	gte_rtpt();
-	gte_stsxy3(&projected[index0].posScreen[0], &projected[index1].posScreen[0], &projected[index2].posScreen[0]);
+	CTR_GteStoreSXY3(&projected[index0].posScreen[0], &projected[index1].posScreen[0], &projected[index2].posScreen[0]);
 	gte_stsz3(&depth0, &depth1, &depth2);
 
 	DrawLevelOvr1P_SetProjectedDepth(&projected[index0], depth0, DRAW_LEVEL_OVR1P_CLIP_BYTES_RENDERED);
@@ -1576,9 +1576,9 @@ static void Ovr226_800a97c8_ProjectQuad4x4RenderedVertexTriple(struct LevVertex 
 	Ovr226_800a97c8_StoreQuad4x4RenderedProjectedVertex(vertex1, &projected[index1]);
 	Ovr226_800a97c8_StoreQuad4x4RenderedProjectedVertex(vertex2, &projected[index2]);
 
-	gte_ldv3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
+	CTR_GteLoadSVec3V3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
 	gte_rtpt();
-	gte_stsxy3(&projected[index0].posScreen[0], &projected[index1].posScreen[0], &projected[index2].posScreen[0]);
+	CTR_GteStoreSXY3(&projected[index0].posScreen[0], &projected[index1].posScreen[0], &projected[index2].posScreen[0]);
 	gte_stsz3(&depth0, &depth1, &depth2);
 
 	DrawLevelOvr1P_SetProjectedDepth(&projected[index0], depth0, DRAW_LEVEL_OVR1P_CLIP_BYTES_RENDERED);
@@ -1616,9 +1616,9 @@ static void Ovr226_800a417c_ProjectGround4x1RenderedVertexTriple(struct LevVerte
 	Ovr226_800a417c_StoreGround4x1RenderedProjectedVertex(vertex1, &projected[index1]);
 	Ovr226_800a417c_StoreGround4x1RenderedProjectedVertex(vertex2, &projected[index2]);
 
-	gte_ldv3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
+	CTR_GteLoadSVec3V3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
 	gte_rtpt();
-	gte_stsxy3(&projected[index0].posScreen[0], &projected[index1].posScreen[0], &projected[index2].posScreen[0]);
+	CTR_GteStoreSXY3(&projected[index0].posScreen[0], &projected[index1].posScreen[0], &projected[index2].posScreen[0]);
 	gte_stsz3(&depth0, &depth1, &depth2);
 
 	DrawLevelOvr1P_SetProjectedDepth(&projected[index0], depth0, DRAW_LEVEL_OVR1P_CLIP_BYTES_RENDERED);
@@ -1658,9 +1658,9 @@ static void Ovr226_800a2924_ProjectWaterRenderedVertexTriple(struct LevVertex *v
 	Ovr226_800a2924_StoreWaterRenderedProjectedVertex(vertex1, &projected[index1]);
 	Ovr226_800a2924_StoreWaterRenderedProjectedVertex(vertex2, &projected[index2]);
 
-	gte_ldv3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
+	CTR_GteLoadSVec3V3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
 	gte_rtpt();
-	gte_stsxy3(&projected[index0].posScreen[0], &projected[index1].posScreen[0], &projected[index2].posScreen[0]);
+	CTR_GteStoreSXY3(&projected[index0].posScreen[0], &projected[index1].posScreen[0], &projected[index2].posScreen[0]);
 	gte_stsz3(&depth0, &depth1, &depth2);
 
 	DrawLevelOvr1P_SetProjectedDepth(&projected[index0], depth0, DRAW_LEVEL_OVR1P_CLIP_BYTES_RENDERED);
@@ -1908,9 +1908,9 @@ static void DrawLevelOvr1P_ProjectScratchVertex(struct DrawLevelOvr1PScratchVert
 {
 	u32 depth;
 
-	gte_ldv0(&projected->pos[0]);
+	CTR_GteLoadS16TripletV0(&projected->pos[0]);
 	gte_rtps();
-	gte_stsxy(&projected->posScreen[0]);
+	CTR_GteStoreSXY(&projected->posScreen[0]);
 	gte_stsz(&depth);
 	DrawLevelOvr1P_SetProjectedDepth(projected, depth, writeClipBytes);
 }
@@ -1919,9 +1919,9 @@ static void DrawLevelOvr1P_ProjectCopiedGridListMidpoint_800a74a0_800a90c0(struc
 {
 	u32 depth;
 
-	gte_ldv0(&projected->pos[0]);
+	CTR_GteLoadS16TripletV0(&projected->pos[0]);
 	gte_rtps();
-	gte_stsxy(&projected->posScreen[0]);
+	CTR_GteStoreSXY(&projected->posScreen[0]);
 	gte_stsz(&depth);
 
 	// NOTE(aalhendi): Retail copied/default list helpers store full SZ3 at +0x10.
@@ -1933,9 +1933,9 @@ static void DrawLevelOvr1P_ProjectCopiedGridRenderedMidpoint_800a8150_800a9d70(s
 	u32 depth;
 	u32 threshold = (u32)DrawLevelOvr1P_GetDepthClipThreshold();
 
-	gte_ldv0(&projected->pos[0]);
+	CTR_GteLoadS16TripletV0(&projected->pos[0]);
 	gte_rtps();
-	gte_stsxy(&projected->posScreen[0]);
+	CTR_GteStoreSXY(&projected->posScreen[0]);
 	gte_stsz(&depth);
 
 	DrawLevelOvr1P_StoreProjectedDepthWord(projected, depth);
@@ -1947,9 +1947,9 @@ static void DrawLevelOvr1P_ProjectCompact4x1ListMidpoint_800a3a78(struct DrawLev
 {
 	u32 depth;
 
-	gte_ldv0(&projected->pos[0]);
+	CTR_GteLoadS16TripletV0(&projected->pos[0]);
 	gte_rtps();
-	gte_stsxy(&projected->posScreen[0]);
+	CTR_GteStoreSXY(&projected->posScreen[0]);
 	gte_stsz(&depth);
 
 	// NOTE(aalhendi): Retail 0x800a3a78 stores SZ3 as a word at scratch +0x10.
@@ -1961,9 +1961,9 @@ static void DrawLevelOvr1P_ProjectCompact4x1RenderedMidpoint_800a4594(struct Dra
 	u32 depth;
 	u32 threshold = (u32)DrawLevelOvr1P_GetDepthClipThreshold();
 
-	gte_ldv0(&projected->pos[0]);
+	CTR_GteLoadS16TripletV0(&projected->pos[0]);
 	gte_rtps();
-	gte_stsxy(&projected->posScreen[0]);
+	CTR_GteStoreSXY(&projected->posScreen[0]);
 	gte_stsz(&depth);
 
 	DrawLevelOvr1P_StoreProjectedDepthWord(projected, depth);
@@ -2058,7 +2058,7 @@ static void Ovr226_800a3a78_BuildGround4x1ListMidpointPair(struct DrawLevelOvr1P
 		dstMid->pos[i] = (s16)(((s32)srcA->pos[i] + (s32)srcB->pos[i]) >> 1);
 	}
 
-	gte_ldv0(&dstMid->pos[0]);
+	CTR_GteLoadS16TripletV0(&dstMid->pos[0]);
 	gte_rtps();
 
 	for (int offset = 8; offset <= 10; offset++)
@@ -2079,7 +2079,7 @@ static void Ovr226_800a3a78_BuildGround4x1ListMidpointPair(struct DrawLevelOvr1P
 	*(u32 *)&dstA->depth = *(const u32 *)&srcA->depth;
 	*(u32 *)&dstB->posScreen[0] = *(const u32 *)&srcB->posScreen[0];
 	*(u32 *)&dstB->depth = *(const u32 *)&srcB->depth;
-	gte_stsxy(&dstMid->posScreen[0]);
+	CTR_GteStoreSXY(&dstMid->posScreen[0]);
 	gte_stsz(&depth);
 	DrawLevelOvr1P_StoreProjectedDepthWord(dstMid, depth);
 }
@@ -2106,7 +2106,7 @@ static void Ovr226_800a560c_BuildGround4x2ListEdgeMidpoint(struct DrawLevelOvr1P
 		dstMid->pos[i] = (s16)(((s32)srcA->pos[i] + (s32)srcB->pos[i]) >> 1);
 	}
 
-	gte_ldv0(&dstMid->pos[0]);
+	CTR_GteLoadS16TripletV0(&dstMid->pos[0]);
 	gte_rtps();
 
 	for (int offset = 8; offset <= 10; offset++)
@@ -2123,7 +2123,7 @@ static void Ovr226_800a560c_BuildGround4x2ListEdgeMidpoint(struct DrawLevelOvr1P
 
 	*(u32 *)&dstA->posScreen[0] = *(const u32 *)&srcA->posScreen[0];
 	*(u32 *)&dstA->depth = *(const u32 *)&srcA->depth;
-	gte_stsxy(&dstMid->posScreen[0]);
+	CTR_GteStoreSXY(&dstMid->posScreen[0]);
 	gte_stsz(&depth);
 	DrawLevelOvr1P_StoreProjectedDepthWord(dstMid, depth);
 }
@@ -2146,7 +2146,7 @@ static void Ovr226_800a56f4_BuildGround4x2ListPairMidpoint(struct DrawLevelOvr1P
 		dstMid->pos[i] = (s16)(((s32)srcA->pos[i] + (s32)srcB->pos[i]) >> 1);
 	}
 
-	gte_ldv0(&dstMid->pos[0]);
+	CTR_GteLoadS16TripletV0(&dstMid->pos[0]);
 	gte_rtps();
 
 	for (int offset = 8; offset <= 10; offset++)
@@ -2167,7 +2167,7 @@ static void Ovr226_800a56f4_BuildGround4x2ListPairMidpoint(struct DrawLevelOvr1P
 	*(u32 *)&dstA->depth = *(const u32 *)&srcA->depth;
 	*(u32 *)&dstB->posScreen[0] = *(const u32 *)&srcB->posScreen[0];
 	*(u32 *)&dstB->depth = *(const u32 *)&srcB->depth;
-	gte_stsxy(&dstMid->posScreen[0]);
+	CTR_GteStoreSXY(&dstMid->posScreen[0]);
 	gte_stsz(&depth);
 	DrawLevelOvr1P_StoreProjectedDepthWord(dstMid, depth);
 }
@@ -2201,7 +2201,7 @@ static void Ovr226_800a6510_BuildGround4x2RenderedEdgeMidpoint(struct DrawLevelO
 		dstMid->pos[i] = (s16)(((s32)srcA->pos[i] + (s32)srcB->pos[i]) >> 1);
 	}
 
-	gte_ldv0(&dstMid->pos[0]);
+	CTR_GteLoadS16TripletV0(&dstMid->pos[0]);
 	gte_rtps();
 
 	for (int offset = 8; offset <= 10; offset++)
@@ -2218,7 +2218,7 @@ static void Ovr226_800a6510_BuildGround4x2RenderedEdgeMidpoint(struct DrawLevelO
 
 	*(u32 *)&dstA->posScreen[0] = *(const u32 *)&srcA->posScreen[0];
 	*(u32 *)&dstA->depth = *(const u32 *)&srcA->depth;
-	gte_stsxy(&dstMid->posScreen[0]);
+	CTR_GteStoreSXY(&dstMid->posScreen[0]);
 	gte_stsz(&depth);
 	DrawLevelOvr1P_SetProjectedDepth(dstMid, depth, DRAW_LEVEL_OVR1P_CLIP_BYTES_RENDERED);
 }
@@ -2248,7 +2248,7 @@ static void Ovr226_800a74a0_BuildDynamicListSubdivideMidpoint(struct DrawLevelOv
 		dstMid->pos[i] = (s16)(((s32)srcA->pos[i] + (s32)srcB->pos[i]) >> 1);
 	}
 
-	gte_ldv0(&dstMid->pos[0]);
+	CTR_GteLoadS16TripletV0(&dstMid->pos[0]);
 	gte_rtps();
 
 	for (int i = 0; i < 3; i++)
@@ -2265,7 +2265,7 @@ static void Ovr226_800a74a0_BuildDynamicListSubdivideMidpoint(struct DrawLevelOv
 
 	*(u32 *)&dstA->posScreen[0] = *(const u32 *)&srcA->posScreen[0];
 	*(u32 *)&dstA->depth = *(const u32 *)&srcA->depth;
-	gte_stsxy(&dstMid->posScreen[0]);
+	CTR_GteStoreSXY(&dstMid->posScreen[0]);
 	gte_stsz(&depth);
 	DrawLevelOvr1P_StoreProjectedDepthWord(dstMid, depth);
 }
@@ -2312,7 +2312,7 @@ static void Ovr226_800a8150_BuildDynamicRenderedSubdivideMidpoint(struct DrawLev
 		dstMid->pos[i] = (s16)(((s32)srcA->pos[i] + (s32)srcB->pos[i]) >> 1);
 	}
 
-	gte_ldv0(&dstMid->pos[0]);
+	CTR_GteLoadS16TripletV0(&dstMid->pos[0]);
 	gte_rtps();
 
 	for (int i = 0; i < 3; i++)
@@ -2329,7 +2329,7 @@ static void Ovr226_800a8150_BuildDynamicRenderedSubdivideMidpoint(struct DrawLev
 
 	*(u32 *)&dstA->posScreen[0] = *(const u32 *)&srcA->posScreen[0];
 	*(u32 *)&dstA->depth = *(const u32 *)&srcA->depth;
-	gte_stsxy(&dstMid->posScreen[0]);
+	CTR_GteStoreSXY(&dstMid->posScreen[0]);
 	gte_stsz(&depth);
 	DrawLevelOvr1P_SetProjectedDepth(dstMid, depth, DRAW_LEVEL_OVR1P_CLIP_BYTES_RENDERED);
 }
@@ -2379,7 +2379,7 @@ static void Ovr226_800a4594_BuildGround4x1RenderedMidpointPair(struct DrawLevelO
 		dstMid->pos[i] = (s16)(((s32)srcA->pos[i] + (s32)srcB->pos[i]) >> 1);
 	}
 
-	gte_ldv0(&dstMid->pos[0]);
+	CTR_GteLoadS16TripletV0(&dstMid->pos[0]);
 	gte_rtps();
 
 	for (int offset = 8; offset <= 10; offset++)
@@ -2400,7 +2400,7 @@ static void Ovr226_800a4594_BuildGround4x1RenderedMidpointPair(struct DrawLevelO
 	*(u32 *)&dstA->depth = *(const u32 *)&srcA->depth;
 	*(u32 *)&dstB->posScreen[0] = *(const u32 *)&srcB->posScreen[0];
 	*(u32 *)&dstB->depth = *(const u32 *)&srcB->depth;
-	gte_stsxy(&dstMid->posScreen[0]);
+	CTR_GteStoreSXY(&dstMid->posScreen[0]);
 	gte_stsz(&depth);
 	DrawLevelOvr1P_SetProjectedDepth(dstMid, depth, DRAW_LEVEL_OVR1P_CLIP_BYTES_RENDERED);
 }
@@ -2436,7 +2436,7 @@ static void Ovr226_800a17d8_BuildFullDynamicSubdivideMidpoint(struct DrawLevelOv
 		dstMid->pos[i] = (s16)(((s32)srcA->pos[i] + (s32)srcB->pos[i]) >> 1);
 	}
 
-	gte_ldv0(&dstMid->pos[0]);
+	CTR_GteLoadS16TripletV0(&dstMid->pos[0]);
 	gte_rtps();
 
 	for (int i = 0; i < 3; i++)
@@ -2453,7 +2453,7 @@ static void Ovr226_800a17d8_BuildFullDynamicSubdivideMidpoint(struct DrawLevelOv
 
 	*(u32 *)&dstA->posScreen[0] = *(const u32 *)&srcA->posScreen[0];
 	*(u32 *)&dstA->depth = *(const u32 *)&srcA->depth;
-	gte_stsxy(&dstMid->posScreen[0]);
+	CTR_GteStoreSXY(&dstMid->posScreen[0]);
 	gte_stsz(&depth);
 	DrawLevelOvr1P_StoreProjectedDepthWord(dstMid, depth);
 }
@@ -2889,7 +2889,7 @@ static void Ovr226_800a1408_AdjustFullDynamicMidVertex(struct DrawLevelOvr1PScra
 	MTC2(DrawLevelOvr1P_ReadWord(&mid->pos[0], 0), 0);
 	MTC2((u32)(s32)mid->pos[2], 1);
 	gte_rtps();
-	gte_stsxy(&mid->posScreen[0]);
+	CTR_GteStoreSXY(&mid->posScreen[0]);
 	gte_stsz(&depth);
 	DrawLevelOvr1P_StoreProjectedDepthWord(mid, depth);
 }
@@ -3218,17 +3218,17 @@ static s32 DrawLevelOvr1P_ProjectClipRecordEmitVertices(struct DrawLevelOvr1PScr
 		DrawLevelOvr1P_GetClipRecordSourceVector(&projected[indices[i]], &source[i]);
 	}
 
-	gte_ldv3(&source[0], &source[1], &source[2]);
+	CTR_GteLoadSV3(&source[0], &source[1], &source[2]);
 	gte_rtpt();
-	gte_stsxy3(&dst[0].posScreen[0], &dst[1].posScreen[0], &dst[2].posScreen[0]);
+	CTR_GteStoreSXY3(&dst[0].posScreen[0], &dst[1].posScreen[0], &dst[2].posScreen[0]);
 	gte_nclip();
 	gte_stopz(&nclip);
 
 	if (count == 4)
 	{
-		gte_ldv0(&source[3]);
+		CTR_GteLoadSV0(&source[3]);
 		gte_rtps();
-		gte_stsxy(&dst[3].posScreen[0]);
+		CTR_GteStoreSXY(&dst[3].posScreen[0]);
 	}
 
 	return nclip;
@@ -3241,9 +3241,9 @@ static void DrawLevelOvr1P_ProjectClipRecordEmitVertex(struct DrawLevelOvr1PScra
 	*dst = *projected;
 	DrawLevelOvr1P_GetClipRecordSourceVector(projected, &source);
 
-	gte_ldv0(&source);
+	CTR_GteLoadSV0(&source);
 	gte_rtps();
-	gte_stsxy(&dst->posScreen[0]);
+	CTR_GteStoreSXY(&dst->posScreen[0]);
 }
 
 static int Ovr226_800aac00_EmitClipRecordGT3(struct PushBuffer *pb, struct PrimMem *primMem, u_long *otEntry,
@@ -3370,7 +3370,7 @@ static void Ovr226_800aa858_ProjectClipRecordRawVertex(struct DrawLevelOvr1PScra
 	*(u32 *)&projected->pos[2] = *(const u32 *)&src->pos[2];
 	*(u32 *)&projected->color_hi[0] = *(const u32 *)&src->color_hi[0];
 
-	gte_ldv0(&projected->pos[0]);
+	CTR_GteLoadS16TripletV0(&projected->pos[0]);
 	// NOTE(aalhendi): Retail 0x800aa86c/0x800aa8b0/0x800aa8e8/0x800aaee4
 	// uses LLV0BK for this source-vector transform.
 	gte_llv0bk_b();
@@ -8079,7 +8079,7 @@ static void Ovr226_800a11e0_ProjectFullDynamicLastPair(struct LevVertex *vertice
 	MTC2(*(u32 *)&vertex8->pos.x, 2);
 	MTC2(*(u32 *)&vertex8->pos.z, 3);
 	gte_rtpt();
-	gte_stsxy3(&projected[7].posScreen[0], &projected[8].posScreen[0], &unusedSxy[0]);
+	CTR_GteStoreSXY3(&projected[7].posScreen[0], &projected[8].posScreen[0], &unusedSxy[0]);
 	gte_stsz3(&depth7, &depth8, &unusedDepth);
 	DrawLevelOvr1P_StoreProjectedDepthWord(&projected[7], depth7);
 	DrawLevelOvr1P_StoreProjectedDepthWord(&projected[8], depth8);
@@ -8760,7 +8760,7 @@ static void Ovr226_800a24e8_BuildWaterListSubdivideMidpoint(struct DrawLevelOvr1
 		dstMid->pos[i] = (s16)(((s32)srcA->pos[i] + (s32)srcB->pos[i]) >> 1);
 	}
 
-	gte_ldv0(&dstMid->pos[0]);
+	CTR_GteLoadS16TripletV0(&dstMid->pos[0]);
 	gte_rtps();
 
 	for (int i = 0; i < 3; i++)
@@ -8777,7 +8777,7 @@ static void Ovr226_800a24e8_BuildWaterListSubdivideMidpoint(struct DrawLevelOvr1
 
 	*(u32 *)&dstA->posScreen[0] = *(const u32 *)&srcA->posScreen[0];
 	*(u32 *)&dstA->depth = *(const u32 *)&srcA->depth;
-	gte_stsxy(&dstMid->posScreen[0]);
+	CTR_GteStoreSXY(&dstMid->posScreen[0]);
 	gte_stsz(&depth);
 	DrawLevelOvr1P_StoreProjectedDepthWord(dstMid, depth);
 }
@@ -8807,7 +8807,7 @@ static void Ovr226_800a2fe4_BuildWaterRenderedSubdivideMidpoint(struct DrawLevel
 		dstMid->pos[i] = (s16)(((s32)srcA->pos[i] + (s32)srcB->pos[i]) >> 1);
 	}
 
-	gte_ldv0(&dstMid->pos[0]);
+	CTR_GteLoadS16TripletV0(&dstMid->pos[0]);
 	gte_rtps();
 
 	for (int i = 0; i < 3; i++)
@@ -8824,7 +8824,7 @@ static void Ovr226_800a2fe4_BuildWaterRenderedSubdivideMidpoint(struct DrawLevel
 
 	*(u32 *)&dstA->posScreen[0] = *(const u32 *)&srcA->posScreen[0];
 	*(u32 *)&dstA->depth = *(const u32 *)&srcA->depth;
-	gte_stsxy(&dstMid->posScreen[0]);
+	CTR_GteStoreSXY(&dstMid->posScreen[0]);
 	gte_stsz(&depth);
 	DrawLevelOvr1P_SetProjectedDepth(dstMid, depth, DRAW_LEVEL_OVR1P_CLIP_BYTES_RENDERED);
 }
