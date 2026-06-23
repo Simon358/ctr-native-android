@@ -1,5 +1,9 @@
 #include <common.h>
 
+#if defined(CTR_NATIVE) && defined(CTR_INTERNAL)
+#include <platform/native_checkpoint.h>
+#endif
+
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800326b4-0x80032700.
 void LOAD_RunPtrMap(char *origin, int *patchArr, int numPtrs)
 {
@@ -9,6 +13,9 @@ void LOAD_RunPtrMap(char *origin, int *patchArr, int numPtrs)
 	{
 		int offset = (*ptrCurrOffset >> 2) << 2;
 		*(int *)&origin[offset] = *(int *)&origin[offset] + (int)origin;
+#if defined(CTR_NATIVE) && defined(CTR_INTERNAL)
+		NativeCheckpoint_RegisterPointerSlot(&origin[offset]);
+#endif
 	}
 }
 

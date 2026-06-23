@@ -1,5 +1,8 @@
 #include "../platform.h"
 #include "ctr_scratchpad.h"
+#if defined(CTR_INTERNAL)
+#include "platform/native_checkpoint.h"
+#endif
 
 #include <macros.h>
 
@@ -59,6 +62,9 @@ const struct PlatformMempackArena *Platform_InitMempackArena(void)
 {
 	memset(s_mempackMemory, 0, sizeof(s_mempackMemory));
 	Platform_ConfigureMempackArena();
+#if defined(CTR_INTERNAL)
+	NativeCheckpoint_OnMempackArenaReset();
+#endif
 
 	return &s_mempackArena;
 }
