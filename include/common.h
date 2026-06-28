@@ -13,11 +13,28 @@
 
 // headers we wrote to simplify the code
 #include <macros.h>
+
+// NOTE(aalhendi): PSX SDK-shaped headers used by game code.
+#include <psx/libapi.h>
+#include <psx/libcd.h>
+#include <psx/libetc.h>
+#include <psx/libgte.h>
+#include <psx/libgpu.h>
+#include <psx/libpad.h>
+#include <psx/libspu.h>
+#include <psx/strings.h>
+#include <psx/inline_c.h>
+
+#include <psn00bsdk/include/psxpad.h>
+
+#ifndef RECT
+#define RECT RECT16
+#endif
+
 #include <ctr_math.h>
 #include <ctr_gte.h>
 #include <ctr_scratchpad.h>
 #include <prim.h>
-#include <psx/libpad.h>
 
 #include <psn00bsdk/include/sys/fcntl.h>
 

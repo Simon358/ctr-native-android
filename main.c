@@ -19,14 +19,6 @@
 #define ExitCriticalSection()
 #endif
 
-#include "psx/libetc.h"
-#include "psx/libgte.h"
-#include "psx/libgpu.h"
-#include "psx/libspu.h"
-#include "psx/libcd.h"
-#include "psx/libapi.h"
-#include "psx/strings.h"
-#include "psx/inline_c.h"
 #include "platform/native_assets.h"
 #include "platform/native_log.h"
 #include "platform/native_perf.h"
@@ -36,22 +28,6 @@
 #ifndef __GNUC__
 #define __attribute__(x)
 #endif
-
-#define RECT RECT16
-typedef enum
-{
-	PAD_ID_MOUSE = 0x1,
-	PAD_ID_NEGCON = 0x2,
-	PAD_ID_IRQ10_GUN = 0x3,
-	PAD_ID_DIGITAL = 0x4,
-	PAD_ID_ANALOG_STICK = 0x5,
-	PAD_ID_GUNCON = 0x6,
-	PAD_ID_ANALOG = 0x7,
-	PAD_ID_MULTITAP = 0x8,
-	PAD_ID_JOGCON = 0xe,
-	PAD_ID_CONFIG_MODE = 0xf,
-	PAD_ID_NONE = 0xf
-} PadTypeID;
 
 #include "platform.h"
 
