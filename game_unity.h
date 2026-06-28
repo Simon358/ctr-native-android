@@ -11,8 +11,8 @@
 #include "game/227/227_00_DrawLevelOvr2P.c"
 #include "game/228/228_00_DrawLevelOvr3P.c"
 #include "game/229/229_00_DrawLevelOvr4P.c"
-#include "game/DrawConfetti/DrawConfetti.c"
-#include "game/DrawSky/DrawSky.c"
+#include "game/DrawConfetti.c"
+#include "game/DrawSky.c"
 
 #include "game/RenderBucket/RenderBucket_08_InitDepthGTE.c"
 #include "game/RenderBucket/RenderBucket_QueueExecute.c"
@@ -20,8 +20,8 @@
 #include "game/RenderLevel/RenderLists.c"
 #include "game/RenderTires/DrawTires_Solid.c"
 #include "game/RenderTires/DrawTires_Reflection.c"
-#include "game/RenderStars/RenderStars.c"
-#include "game/Torch/Torch.c"
+#include "game/RenderStars.c"
+#include "game/Torch.c"
 #include "game/RenderWeather/RedBeaker_RenderRain.c"
 #include "game/RenderWeather/RenderWeather.c"
 
@@ -95,7 +95,7 @@
 
 #include "game/LevInstDef.c"
 
-#include "game/LibraryOfModels/LibraryOfModels.c"
+#include "game/LibraryOfModels.c"
 
 #include "game/LinkedCollide.c"
 
@@ -164,7 +164,7 @@
 
 #include "game/Particle.c"
 
-#include "game/PickupBots/PickupBots.c"
+#include "game/PickupBots.c"
 
 #include "game/PROC.c"
 
@@ -172,7 +172,7 @@
 
 #include "game/QueueLoadTrack.c"
 
-#include "game/Podium/Podium_0_InitModels.c"
+#include "game/Podium.c"
 
 #include "game/RaceFlag.c"
 
@@ -186,9 +186,9 @@
 
 #include "game/TakeCupProgress.c"
 
-#include "game/SubmitName/SubmitName.c"
+#include "game/SubmitName.c"
 
-#include "game/Timer/Timer.c"
+#include "game/Timer.c"
 
 #include "game/prim.c"
 #include "game/math.c"
@@ -247,7 +247,7 @@
 
 #include "game/221_225_EndEvent.c"
 
-#include "game/PlayLevel/PlayLevel_0_UpdateLapStats.c"
+#include "game/PlayLevel.c"
 
 #include "game/230/R230.c"
 #include "game/230/D230.c"
