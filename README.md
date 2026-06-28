@@ -16,11 +16,11 @@ A native PC port of Crash Team Racing (PS1, 1999), built on top of the [CTR-ModS
 ctr_native/
   main.c              Entrypoint and native platform boundary
   platform/           Native-owned audio, input, memcard, CD, and PSX facade glue
-  game_unity.h        Ordered unity include chain for all game source files
   build.bat           Windows build (MinGW32)
   build.sh            Linux build
   README.md           This file
   game/               Our copies of all decompiled game source (943 files)
+    game_unity.h      Ordered unity include chain for all game source files
   include/            Project headers (structs, globals, declarations, platform facade)
   externals/
     SDL/              SDL3 source (static build)
@@ -127,7 +127,7 @@ main.c (entrypoint)
   |
   +-- platform/native_* (platform shell, audio, input, memcard, CD, renderer, PSX facade glue)
   |
-  +-- game_unity.h
+  +-- game/game_unity.h
         |
         +-- game/ (all decompiled game source)
               |

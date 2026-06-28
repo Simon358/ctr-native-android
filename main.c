@@ -32,7 +32,7 @@
 
 #include <platform.h>
 
-#include "game_unity.h"
+#include "game/game_unity.h"
 
 #include "game/zGlobal_RDATA.c"
 #include "game/zGlobal_DATA.c"
