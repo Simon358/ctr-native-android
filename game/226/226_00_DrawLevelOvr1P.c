@@ -191,6 +191,7 @@ CTR_STATIC_ASSERT(sizeof(((struct OverlayRDATA_226 *)0)->clipRecordJumpTable) ==
 
 static void DrawLevelOvr1P_SetGridFaceSlot(const struct DrawLevelOvr1PScratchVertex *projected, int faceIndex);
 static int DrawLevelOvr1P_IsDeepestSubdivisionFrame(const struct DrawLevelOvr1PScratchVertex *projected);
+static void Ovr226_800a0d34_SetEntryGteAndCameraScratch(struct PushBuffer *pb);
 
 static struct DrawLevelOvr1PStableScratch *DrawLevelOvr1P_Scratch(void)
 {
@@ -7713,6 +7714,17 @@ static void DrawLevelOvr1P_SetRenderedListCursor(struct QuadBlock **renderedList
 static void DrawLevelOvr1P_SetRenderedOverflowBase(struct QuadBlock **renderedList)
 {
 	sDrawLevelOvr1P_RenderedOverflowBase = renderedList;
+}
+
+static void DrawLevelOvr1P_SetViewportScratchContext(struct PushBuffer *pb, const int *visFaceList, u8 *clipStart, u8 *clipCursor,
+                                                     struct QuadBlock **renderedOverflowBase)
+{
+	DrawLevelOvr1P_SetRenderedListCursor(renderedOverflowBase);
+	DrawLevelOvr1P_SetClipRecordCursor(clipCursor);
+	DrawLevelOvr1P_Scratch()->visFaceListPtr32 = (u32)(uintptr_t)visFaceList;
+	DrawLevelOvr1P_SetClipRecordStart(clipStart);
+	DrawLevelOvr1P_SetRenderedOverflowBase(renderedOverflowBase);
+	Ovr226_800a0d34_SetEntryGteAndCameraScratch(pb);
 }
 
 static struct QuadBlock **DrawLevelOvr1P_GetRenderedOverflowBase(void)

@@ -1,5 +1,5 @@
 #include <common.h>
-#include "../RenderLevel/DrawLevelOvr1P_shared.h"
+#include "../RenderLevel/DrawLevelOvr_shared.h"
 
 typedef int (*Ovr228BucketDispatch)(u32 handlerAddress, void *bucketValue, struct PushBuffer *pb, struct mesh_info *mesh, struct PrimMem *primMem,
                                     const int *visFaceList);
@@ -192,12 +192,7 @@ static void Ovr228_800a8e08_CopyClipRecordJumpTable(void)
 static void Ovr228_800a1014_SetViewportContext(struct PushBuffer *pb, const int *visFaceList, u8 *clipStart, u8 *clipCursor,
                                                struct QuadBlock **renderedOverflowBase)
 {
-	DrawLevelOvr1P_Scratch()->renderedOverflowPtr32 = (u32)(uintptr_t)renderedOverflowBase;
-	DrawLevelOvr1P_Scratch()->clipCursorPtr32 = (u32)(uintptr_t)clipCursor;
-	DrawLevelOvr1P_Scratch()->visFaceListPtr32 = (u32)(uintptr_t)visFaceList;
-	DrawLevelOvr1P_SetClipRecordStart(clipStart);
-	DrawLevelOvr1P_SetRenderedOverflowBase(renderedOverflowBase);
-	Ovr226_800a0d34_SetEntryGteAndCameraScratch(pb);
+	DrawLevelOvr1P_SetViewportScratchContext(pb, visFaceList, clipStart, clipCursor, renderedOverflowBase);
 }
 
 static void Ovr228_ClearRenderedOverflowBase(int playerIndex)
