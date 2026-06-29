@@ -185,12 +185,6 @@ static void Ovr229_800a8ebc_CopyClipRecordJumpTable(void)
 	}
 }
 
-static void Ovr229_800a10c8_SetViewportContext(struct PushBuffer *pb, const int *visFaceList, u8 *clipStart, u8 *clipCursor,
-                                               struct QuadBlock **renderedOverflowBase)
-{
-	DrawLevelOvr1P_SetViewportScratchContext(pb, visFaceList, clipStart, clipCursor, renderedOverflowBase);
-}
-
 static int Ovr229_DrawViewportBucket(struct DrawLevelOvr1PRenderList *renderList, s32 renderListOffset, struct PushBuffer *pb, struct mesh_info *mesh,
                                      struct PrimMem *primMem, const int *visFaceList, u8 **clipCursor, int playerIndex, int applySetup,
                                      DrawLevelOvrBucketDispatch dispatch, int *didDispatch)
@@ -214,7 +208,7 @@ static int Ovr229_DrawViewportBucket(struct DrawLevelOvr1PRenderList *renderList
 		Ovr229_800a106c_ApplyBucketSetup(setupAddress, handlerAddress);
 	}
 
-	Ovr229_800a10c8_SetViewportContext(pb, visFaceList, data.PtrClipBuffer[playerIndex], *clipCursor, renderedOverflowBase);
+	DrawLevelOvr1P_SetViewportScratchContext(pb, visFaceList, data.PtrClipBuffer[playerIndex], *clipCursor, renderedOverflowBase);
 	if (!dispatch(handlerAddress, bucketValue, pb, mesh, primMem, visFaceList))
 	{
 		return 0;

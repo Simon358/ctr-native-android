@@ -163,12 +163,6 @@ static int Ovr227_800a0ddc_DispatchBucketHandler(u32 handlerAddress, void *bucke
 	return 0;
 }
 
-static void Ovr227_800a0f60_SetViewportContext(struct PushBuffer *pb, const int *visFaceList, u8 *clipStart, u8 *clipCursor,
-                                               struct QuadBlock **renderedOverflowBase)
-{
-	DrawLevelOvr1P_SetViewportScratchContext(pb, visFaceList, clipStart, clipCursor, renderedOverflowBase);
-}
-
 static int Ovr227_DrawViewportBucket(struct DrawLevelOvr1PRenderList *renderList, s32 renderListOffset, struct PushBuffer *pb, struct mesh_info *mesh,
                                      struct PrimMem *primMem, const int *visFaceList, u8 **clipCursor, int playerIndex, int applySetup)
 {
@@ -189,7 +183,7 @@ static int Ovr227_DrawViewportBucket(struct DrawLevelOvr1PRenderList *renderList
 		Ovr227_800a0f04_ApplyBucketSetup(setupAddress, handlerAddress);
 	}
 
-	Ovr227_800a0f60_SetViewportContext(pb, visFaceList, data.PtrClipBuffer[playerIndex], *clipCursor, renderedOverflowBase);
+	DrawLevelOvr1P_SetViewportScratchContext(pb, visFaceList, data.PtrClipBuffer[playerIndex], *clipCursor, renderedOverflowBase);
 	if (!Ovr227_800a0ddc_DispatchBucketHandler(handlerAddress, bucketValue, pb, mesh, primMem, visFaceList))
 	{
 		return 0;
