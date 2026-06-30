@@ -13,7 +13,7 @@ int MixRNG_Particles(int param_1)
 {
 	u32 uVar1;
 
-	uVar1 = RngDeadCoed((u32 *)&sdata->gGT->deadcoed_struct);
+	uVar1 = RngDeadCoed(&sdata->gGT->deadcoed_struct);
 	return (int)((uVar1 & 0xffff) * param_1) >> 0x10;
 }
 

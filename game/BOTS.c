@@ -348,11 +348,11 @@ void BOTS_Adv_AdjustDifficulty(void)
 	pathOrder[3] = 2;
 	pathOrder[7] = 2;
 
-	u8 firstPath = (RngDeadCoed((u32 *)&sdata->const_0x30215400) >> 8) & 1;
+	u8 firstPath = (RngDeadCoed(&sdata->advRng) >> 8) & 1;
 	pathOrder[1] = firstPath;
 	pathOrder[5] = firstPath ^ 1;
 
-	u8 secondPath = (RngDeadCoed((u32 *)&sdata->const_0x30215400) >> 8) & 1;
+	u8 secondPath = (RngDeadCoed(&sdata->advRng) >> 8) & 1;
 	pathOrder[2] = secondPath + 1;
 	pathOrder[6] = (secondPath ^ 1) + 1;
 
@@ -371,15 +371,15 @@ void BOTS_Adv_AdjustDifficulty(void)
 	{
 		for (s16 i = 0; i < BOTS_BATTLE_DRIVER_COUNT; i++)
 		{
-			sdata->driver_pathIndexIDs[i] = (RngDeadCoed((u32 *)&sdata->const_0x30215400) & BOTS_BATTLE_PATH_RANDOM_MASK) / BOTS_BATTLE_PATH_RANDOM_DIVISOR;
+			sdata->driver_pathIndexIDs[i] = (RngDeadCoed(&sdata->advRng) & BOTS_BATTLE_PATH_RANDOM_MASK) / BOTS_BATTLE_PATH_RANDOM_DIVISOR;
 		}
 	}
 
 	if ((((gameMode1 & ADVENTURE_CUP) == 0) && ((gameMode2 & CUP_ANY_KIND) == 0)) || (gGT->cup.trackIndex == 0))
 	{
 		u8 accelOrder[8];
-		u32 accel = (RngDeadCoed((u32 *)&sdata->const_0x30215400) >> 8) & 3;
-		u32 rearAccel = (RngDeadCoed((u32 *)&sdata->const_0x30215400) >> 8) & 3;
+		u32 accel = (RngDeadCoed(&sdata->advRng) >> 8) & 3;
+		u32 rearAccel = (RngDeadCoed(&sdata->advRng) >> 8) & 3;
 
 		for (s16 i = 0; i < BOTS_GRID_ROW_KART_COUNT; i++)
 		{
@@ -1020,7 +1020,7 @@ UpdateTireColorTimer:
 			}
 
 			if (( // if in front row & 25% chance
-			        (sdata->kartSpawnOrderArray[botDriver->driverID] < 3) && ((RngDeadCoed((uint32_t *)&sdata->const_0x30215400) & 0xFF) < 0x40)) ||
+			        (sdata->kartSpawnOrderArray[botDriver->driverID] < 3) && ((RngDeadCoed(&sdata->advRng) & 0xFF) < 0x40)) ||
 			    (data.characterIDs[botDriver->driverID] == NITROS_OXIDE))
 			{ // start the race with a boost
 				VehFire_Increment(botDriver, 0x2d0, 1, 0x180);
@@ -3038,7 +3038,7 @@ void BOTS_GotoStartingLine(struct Driver *d)
 	d->botData.botAccel = CTR_MipsMulLo(accelDuration, accel);
 
 	// cooldown before next weapon
-	int rng = RngDeadCoed(&sdata->const_0x30215400);
+	int rng = RngDeadCoed(&sdata->advRng);
 	d->botData.weaponCooldown = (s16)CTR_MipsAddLo(CTR_MipsSra(rng, 8) & 0xff, 300);
 }
 
@@ -3090,7 +3090,7 @@ struct Driver *BOTS_Driver_Init(int driverID)
 	d->botData.botPath = navPathIndex;
 	d->botData.botNavFrame = sdata->NavPath_ptrNavFrameArray[navPathIndex];
 	d->actionsFlagSet |= ACTION_BOT;
-	LIST_AddFront(&sdata->navBotList[navPathIndex], (struct Item *)(&d->botData));
+	LIST_AddFront(&sdata->navBotList[navPathIndex], &d->botData.item);
 
 	sdata->gGT->numBotsNextGame++;
 	BOTS_GotoStartingLine(d);
@@ -3166,7 +3166,7 @@ void BOTS_Driver_Convert(struct Driver *d)
 		d->posCurr.z = CTR_MipsSll(nf->pos.z, 8);
 	}
 
-	LIST_AddFront(&sdata->navBotList[navPathIndex], (struct Item *)&d->botData);
+	LIST_AddFront(&sdata->navBotList[navPathIndex], &d->botData.item);
 
 	BOTS_SetRotation(d, 0);
 

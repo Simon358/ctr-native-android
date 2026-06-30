@@ -38,7 +38,7 @@ void RB_MinePool_Init(void)
 	// add all mines
 	for (i = 0; i < numMines; i++)
 	{
-		LIST_AddFront(&D231.minePoolFree, (struct Item *)&D231.minePoolItem[i]);
+		LIST_AddFront(&D231.minePoolFree, &D231.minePoolItem[i].item);
 	}
 }
 

@@ -33,7 +33,7 @@ void RB_MaskWeapon_FadeAway(struct Thread *t)
 	// Second time is BeamInst
 	for (int i = 0; i < 2; i++)
 	{
-		LHMatrix_Parent(instCurr, driverInst, (SVECTOR *)&mhs->posOffset);
+		LHMatrix_Parent(instCurr, driverInst, &mhs->posOffset);
 
 		instCurr->scale.x += -0x100;
 		instCurr->scale.y += -0x100;
@@ -174,7 +174,7 @@ void RB_MaskWeapon_ThTick(struct Thread *maskTh)
 	{
 		if ((mask->rot.z & 1) == 0)
 		{
-			LHMatrix_Parent(instCurr, driverInst, (SVECTOR *)&mhs->posOffset);
+			LHMatrix_Parent(instCurr, driverInst, &mhs->posOffset);
 			ConvertRotToMatrix(&mhs->m, &mhs->rot);
 			MatrixRotate(&instCurr->matrix, &instCurr->matrix, &mhs->m);
 		}
@@ -271,8 +271,8 @@ void RB_ShieldDark_ThTick_Pop(struct Thread *t)
 	rot.x = 0;
 	rot.y = 0;
 	rot.z = 0;
-	LHMatrix_Parent(instDark, driverOwner->instSelf, (SVECTOR *)rot.v);
-	LHMatrix_Parent(instColor, driverOwner->instSelf, (SVECTOR *)rot.v);
+	LHMatrix_Parent(instDark, driverOwner->instSelf, &rot);
+	LHMatrix_Parent(instColor, driverOwner->instSelf, &rot);
 
 	// set rotation
 	CTR_MatrixSetRotIdentity(&instDark->matrix);
@@ -425,9 +425,9 @@ void RB_ShieldDark_ThTick_Grow(struct Thread *th)
 	// Copy matrix
 	// To: shield instance, highlight instance, etc
 	// From: thread (shield) -> parentthread (player) -> object (driver) -> instance
-	LHMatrix_Parent(shieldInst, driverInst, (SVECTOR *)pos.v);
-	LHMatrix_Parent(colorInst, driverInst, (SVECTOR *)pos.v);
-	LHMatrix_Parent(highlightInst, driverInst, (SVECTOR *)pos.v);
+	LHMatrix_Parent(shieldInst, driverInst, &pos);
+	LHMatrix_Parent(colorInst, driverInst, &pos);
+	LHMatrix_Parent(highlightInst, driverInst, &pos);
 
 	// set rotation variables
 	CTR_MatrixSetRotIdentity(&shieldInst->matrix);

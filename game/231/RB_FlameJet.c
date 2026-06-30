@@ -245,7 +245,7 @@ void RB_FlameJet_Particles(struct Instance *inst, struct FlameJet *fjObj)
 		particle1->axis[1].velocity = 0;
 		particle1->axis[2].velocity = (s16)fjObj->dirZ;
 
-		result = RngDeadCoed((u32 *)&gGT->deadcoed_struct);
+		result = RngDeadCoed(&gGT->deadcoed_struct);
 		result = MATH_Sin((gGT->timer * 0x100 + (result >> 0x18)) & 0xfff);
 		particle1->axis[1].accel = result >> 4;
 

@@ -177,12 +177,9 @@ void PushBuffer_SetDrawEnv_DecalMP(void *ot, struct DB *backBuffer, RECT *viewpo
 #endif
 
 	// Copy DrawEnv from gGT->backBuffer
-	int *dst = (int *)&newDrawEnv;
-	int *src = (int *)&backBuffer->drawEnv;
-
 	for (u32 i = 0; i < sizeof(DRAWENV) / 4; i++)
 	{
-		dst[i] = src[i];
+		CTR_WriteU32LE((u8 *)&newDrawEnv + i * 4, CTR_ReadU32LE((u8 *)&backBuffer->drawEnv + i * 4));
 	}
 
 	// Now modify DrawEnv...
@@ -243,12 +240,9 @@ void PushBuffer_SetDrawEnv_Normal(void *ot, struct PushBuffer *pb, struct DB *ba
 {
 	DRAWENV newDrawEnv;
 
-	int *dst = (int *)&newDrawEnv;
-	int *src = (int *)&backBuffer->drawEnv;
-
 	for (u32 i = 0; i < sizeof(DRAWENV) / 4; i++)
 	{
-		dst[i] = src[i];
+		CTR_WriteU32LE((u8 *)&newDrawEnv + i * 4, CTR_ReadU32LE((u8 *)&backBuffer->drawEnv + i * 4));
 	}
 
 	// always?

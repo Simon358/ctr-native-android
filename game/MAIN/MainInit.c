@@ -447,8 +447,8 @@ void MainInit_FinalizeInit(struct GameTracker *gGT)
 
 	// deadc0ed, FUN_8006c684
 	// RNG stuff
-	gGT->deadcoed_struct.unk1 = 0x30215400;
-	gGT->deadcoed_struct.unk2 = 0x493583fe;
+	gGT->deadcoed_struct.state0 = 0x30215400;
+	gGT->deadcoed_struct.state1 = 0x493583fe;
 
 	for (i = 0; i < 12; i++)
 	{
@@ -692,11 +692,11 @@ void MainInit_VRAMClear()
 	commands.d = 0;
 	commands.e = 0x3ff;
 	commands.f = 0x1ff;
-	DrawOTag((u32 *)&commands);
+	DrawOTag(&commands);
 
 	commands.d = 0x1ff;
 	commands.f = 1;
-	DrawOTag((u32 *)&commands);
+	DrawOTag(&commands);
 }
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x8003c310-0x8003c41c; native wraps
@@ -728,7 +728,7 @@ void MainInit_VRAMDisplay()
 
 			move.tag |= 0xffffff;
 
-			DrawOTag((u32 *)&move);
+			DrawOTag(&move);
 			DrawSync(0);
 		}
 	}

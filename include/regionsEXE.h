@@ -28,8 +28,23 @@ struct MatrixND
 			s16 extraShort;
 			int t[3];
 		};
+
+		MATRIX matrix;
 	};
 };
+
+typedef struct CTR_MAY_ALIAS MatrixNDOverlapMatrix
+{
+	s16 m[3][3];
+	Vec3 t;
+} MatrixNDOverlapMatrix;
+
+CTR_STATIC_ASSERT(sizeof(MatrixNDOverlapMatrix) == sizeof(MATRIX));
+
+force_inline MatrixNDOverlapMatrix *MatrixND_GetOverlapMatrix(struct MatrixND *matrix)
+{
+	return (MatrixNDOverlapMatrix *)((u8 *)matrix + MATRIX_ND_BAKED_MATRIX_OFFSET);
+}
 
 CTR_STATIC_ASSERT(sizeof(struct MatrixND) == 0x20);
 CTR_STATIC_ASSERT(offsetof(struct MatrixND, bakedOffset) == 0x0);
@@ -37,6 +52,17 @@ CTR_STATIC_ASSERT(offsetof(struct MatrixND, authoredRot) == 0x8);
 CTR_STATIC_ASSERT(offsetof(struct MatrixND, authoredScale) == 0x10);
 CTR_STATIC_ASSERT(MATRIX_ND_BAKED_MATRIX_OFFSET == offsetof(struct MatrixND, m[1][1]));
 CTR_STATIC_ASSERT(MATRIX_ND_BAKED_MATRIX_OFFSET == offsetof(struct MatrixND, authoredRot));
+CTR_STATIC_ASSERT(offsetof(struct MatrixND, matrix) == 0x0);
+
+struct SoundFadeInput
+{
+	int unk;
+	int desiredVolume;
+	int currentVolume;
+	int soundID_soundCount;
+};
+
+CTR_STATIC_ASSERT(sizeof(struct SoundFadeInput) == 0x10);
 
 typedef union DriverModelExtraSlot
 {
@@ -3637,8 +3663,16 @@ struct sData
 	// 8008d668 - UsaRetail
 	// 8008da1c - EurRetail
 	// used for RNG
-	u32 const_0x30215400;
-	u32 const_0x493583fe;
+	union
+	{
+		struct RngDeadCoedState advRng;
+
+		struct
+		{
+			u32 const_0x30215400;
+			u32 const_0x493583fe;
+		};
+	};
 
 	// 8008d670
 	// once used to load path files (Spyro 2 demo),
@@ -4828,13 +4862,7 @@ struct sData
 	int timeSet2[0x10];
 
 	// 800962c4 and 800962d4
-	struct
-	{
-		int unk;
-		int desiredVolume;
-		int currentVolume;
-		int soundID_soundCount;
-	} SoundFadeInput[2];
+	struct SoundFadeInput SoundFadeInput[2];
 
 #if BUILD >= UsaRetail
 	// 800962E4
@@ -4933,17 +4961,8 @@ struct sData
 	u32 buttonTapPerPlayer[4];
 
 	// 8009A9A0
-	// 0x90 bytes total
-	struct
-	{
-		struct Instance *inst;
-
-		SVec3 rot;
-
-		s16 padding;
-
-		// 4 profiles, 3 instances per profile
-	} LoadSaveData[12];
+	// 4 profiles, 3 instances per profile, 0x90 bytes total
+	struct SelectProfileLoadSaveIcon LoadSaveData[12];
 
 	// 0x8009AA30
 	// & 1: frame2->frame1

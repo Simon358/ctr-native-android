@@ -974,7 +974,8 @@ LAB_800b25f0:
 	local_58.w = local_40.w - 6;
 	local_58.h = local_40.h - 4;
 
-	CTR_Box_DrawClearBox(&local_58, (Color *)&D230.color3, TRANS_50_DECAL, ot);
+	Color boxColor = {.self = D230.color3};
+	CTR_Box_DrawClearBox(&local_58, &boxColor, TRANS_50_DECAL, ot);
 
 	RECTMENU_DrawInnerRect(&local_40, 0, ot);
 

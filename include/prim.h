@@ -286,6 +286,11 @@ typedef struct PolyFT4
 void GetPrimitiveMem(void **ppPrim, size_t primSize);
 void AddPrimitive(void *pPrim, void *pOt);
 
-#define GetPrimMem(p) GetPrimitiveMem((void **)&p, sizeof(*p))
+#define GetPrimMem(p)                            \
+	{                                            \
+		void *primMem;                           \
+		GetPrimitiveMem(&primMem, sizeof(*(p))); \
+		(p) = primMem;                           \
+	}
 
 #endif

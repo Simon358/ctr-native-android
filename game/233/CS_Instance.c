@@ -270,13 +270,15 @@ void CS_Instance_InitMatrix(void)
 		{
 			struct CsInitMatrixEntry *entry = &data[j];
 
-			ConvertRotToMatrix(&mat, (const SVec3 *)&entry->rotScaleOrMatrix[0]);
+			ConvertRotToMatrix(&mat, &entry->rot);
 
-			scale.m[0][0] = entry->rotScaleOrMatrix[4];
-			scale.m[1][1] = entry->rotScaleOrMatrix[5];
-			scale.m[2][2] = entry->rotScaleOrMatrix[6];
+			scale.m[0][0] = entry->scale.x;
+			scale.m[1][1] = entry->scale.y;
+			scale.m[2][2] = entry->scale.z;
 
-			MatrixRotate((MATRIX *)&entry->rotScaleOrMatrix[0], &scale, &mat);
+			MATRIX matrix;
+			MatrixRotate(&matrix, &scale, &mat);
+			*CsInitMatrixEntry_GetMatrix(entry) = *(CsInitMatrixOverlap *)&matrix;
 		}
 	}
 }

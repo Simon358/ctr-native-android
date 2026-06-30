@@ -42,7 +42,7 @@ static u32 CS_ScriptCmd_ReadOpcode_GetInt_dup(char **Opcodes)
 static void CS_ScriptCmd_ReadOpcode_Main(struct CutsceneObj *cs)
 {
 	char *opcodes;
-	struct CsOpcodeMeta *decoded;
+	union CsOpcodeMeta *decoded;
 	s16 *offsets;
 	char meta;
 	char *local_cursor;

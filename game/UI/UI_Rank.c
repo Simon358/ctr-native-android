@@ -185,6 +185,7 @@ void UI_DrawRankedDrivers(void)
 					}
 				}
 
+				SVec2 iconPos = {.x = pos.x, .y = pos.y};
 				s16 iconScale = FP(1);
 
 				int isTransitioning = (pos.x == -100);
@@ -192,7 +193,9 @@ void UI_DrawRankedDrivers(void)
 				// === Icon Transitioning ===
 				if (isTransitioning)
 				{
-					UI_Lerp2D_Angular((s16 *)&pos, *curr, *des, *psVar13);
+					UI_Lerp2D_Angular(&iconPos, *curr, *des, *psVar13);
+					pos.x = iconPos.x;
+					pos.y = iconPos.y;
 				}
 
 				UI_DrawDriverIcon(

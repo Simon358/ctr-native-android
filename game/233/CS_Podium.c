@@ -557,6 +557,7 @@ void CS_Podium_FullScene_Init(void)
 	struct Thread *victoryCamThread;
 	u32 podiumMusic;
 	struct CsThreadInitData InitData = {0};
+	MATRIX podiumMatrix;
 
 	struct SpawnPosRot *posRot;
 
@@ -619,9 +620,9 @@ void CS_Podium_FullScene_Init(void)
 	InitData.rot.z = posRot->rot.z;
 
 	// convert 3 rotation shorts into rotation matrix
-	ConvertRotToMatrix((MATRIX *)&InitData.local_30, &InitData.rot.vec);
+	ConvertRotToMatrix(&podiumMatrix, &InitData.rot.vec);
 	// Move position of trophy girl
-	gte_SetLightMatrix(&InitData.local_30);
+	gte_SetLightMatrix(&podiumMatrix);
 
 	// CameraDC, this makes the camera stop following you as it does while racing, it must be zero to follow you
 	gGT->cameraDC[0].cameraMode = 3;

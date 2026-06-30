@@ -457,8 +457,8 @@ void Particle_UpdateAllParticles(void)
 		return;
 	}
 
-	Particle_UpdateList((struct Particle **)&gGT->particleList_ordinary, gGT->particleList_ordinary);
-	Particle_UpdateList((struct Particle **)&gGT->particleList_heatWarp, gGT->particleList_heatWarp);
+	Particle_UpdateList(&gGT->particleList_ordinary, gGT->particleList_ordinary);
+	Particle_UpdateList(&gGT->particleList_heatWarp, gGT->particleList_heatWarp);
 }
 
 
@@ -1246,13 +1246,10 @@ static u8 ParticleEmitter_GetInitOffset(const struct ParticleEmitter *emSet)
 
 static void ParticleEmitter_CopyOscillator(struct ParticleOscillator *osc, const struct ParticleEmitter *emSet)
 {
-	const u32 *src = (const u32 *)emSet->data;
-	u32 *dst = (u32 *)&osc->flags;
-
-	dst[0] = src[0];
-	dst[1] = src[1];
-	dst[2] = src[2];
-	dst[3] = src[3];
+	CTR_WriteU32LE(&osc->flags, CTR_ReadU32LE(&emSet->data[0]));
+	CTR_WriteU32LE((u8 *)&osc->flags + 4, CTR_ReadU32LE(&emSet->data[4]));
+	CTR_WriteU32LE((u8 *)&osc->flags + 8, CTR_ReadU32LE(&emSet->data[8]));
+	CTR_WriteU32LE((u8 *)&osc->flags + 12, CTR_ReadU32LE(&emSet->data[12]));
 }
 
 static void Particle_InitAxis(struct Particle *p, const struct ParticleEmitter *emSet, u8 axisIndex, u32 *flagsAxis)

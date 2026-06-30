@@ -54,13 +54,13 @@ int DrawSync(int mode)
 	return 0;
 }
 
-int LoadImage(RECT16 *rect, uint32_t *p)
+int LoadImage(RECT16 *rect, void *p)
 {
 	NativeRenderer_CopyVRAM((unsigned short *)p, 0, 0, rect->w, rect->h, rect->x, rect->y);
 	return 0;
 }
 
-int LoadImage2(RECT16 *rect, uint32_t *p)
+int LoadImage2(RECT16 *rect, void *p)
 {
 	LoadImage(rect, p);
 	NativeRenderer_UpdateVRAM();
@@ -267,7 +267,7 @@ uint32_t DrawSyncCallback(void (*func)(void))
 	return 0;
 }
 
-void DrawOTag(uint32_t *p)
+void DrawOTag(void *p)
 {
 	NativePerf_BeginScope(NATIVE_PERF_BUCKET_DRAW_OTAG);
 	do

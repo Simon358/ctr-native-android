@@ -682,11 +682,11 @@ void VehStuckProc_PlantEaten_Init(struct Thread *t, struct Driver *d)
 	inst->flags |= HIDE_MODEL;
 
 	OtherFX_Stop1((int)d->driverAudioPtrs[1]);
-	d->driverAudioPtrs[1] = NULL;
+	d->driverAudioPtrs[1] = 0;
 	OtherFX_Stop1((int)d->driverAudioPtrs[2]);
-	d->driverAudioPtrs[2] = NULL;
+	d->driverAudioPtrs[2] = 0;
 	OtherFX_Stop1((int)d->driverAudioPtrs[0]);
-	d->driverAudioPtrs[0] = NULL;
+	d->driverAudioPtrs[0] = 0;
 
 	for (i = 0; i < DRIVER_FUNC_COUNT; i++)
 	{
@@ -1624,11 +1624,11 @@ void VehStuckProc_Warp_Init(struct Thread *th, struct Driver *d)
 	OtherFX_Play(0x97, 1);
 
 	OtherFX_Stop1((int)d->driverAudioPtrs[1]);
-	d->driverAudioPtrs[1] = NULL;
+	d->driverAudioPtrs[1] = 0;
 	OtherFX_Stop1((int)d->driverAudioPtrs[2]);
-	d->driverAudioPtrs[2] = NULL;
+	d->driverAudioPtrs[2] = 0;
 	OtherFX_Stop1((int)d->driverAudioPtrs[0]);
-	d->driverAudioPtrs[0] = NULL;
+	d->driverAudioPtrs[0] = 0;
 
 	u8 playerID = d->driverID;
 

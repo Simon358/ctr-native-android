@@ -514,7 +514,7 @@ void AH_WarpPad_ThTick(struct Thread *t)
 
 		for (i = 0; i < 7; i++)
 		{
-			rng1 = RngDeadCoed(&sdata->const_0x30215400);
+			rng1 = RngDeadCoed(&sdata->advRng);
 
 			rng2 = 7 - i;
 

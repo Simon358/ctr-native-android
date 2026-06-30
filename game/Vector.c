@@ -200,7 +200,9 @@ static void Vector_BakeMatrixTable_BakeRotScaleEntries(void)
 			scale.m[1][1] = entry->authoredScale.y;
 			scale.m[2][2] = entry->authoredScale.z;
 
-			MatrixRotate((MATRIX *)(void *)&entry->authoredRot, &scale, &rot);
+			MATRIX baked;
+			MatrixRotate(&baked, &scale, &rot);
+			*MatrixND_GetOverlapMatrix(entry) = *(MatrixNDOverlapMatrix *)&baked;
 		}
 	}
 }
@@ -218,7 +220,7 @@ static void Vector_BakeMatrixTable_BakeBlastedOffsets(void)
 	for (int i = 0; i < count; i++)
 	{
 		struct MatrixND *entry = &entries[i];
-		MATRIX *matrix = (MATRIX *)(void *)&entry->authoredRot;
+		MatrixNDOverlapMatrix *matrix = MatrixND_GetOverlapMatrix(entry);
 		s32 x = (matrix->m[0][1] * -0x2000) >> 12;
 		s32 y = ((matrix->m[1][1] * -0x2000) >> 12) + 0x2000;
 		s32 z = (matrix->m[2][1] * -0x2000) >> 12;

@@ -269,7 +269,7 @@ int GTE_GetSquaredDistance(s16 *pos1, s16 *pos2);
 void CalculateVolumeFromDistance(u32 *soundIDCount, u32 soundID, int distance);
 void PlayWarppadSound(u32 distance);
 void Level_SoundLoopSet(int *soundIDCount, u32 soundID, u32 volume);
-void Level_SoundLoopFade(int *fade, u32 soundID, int desiredVolume, int fadeStep);
+void Level_SoundLoopFade(struct SoundFadeInput *fade, u32 soundID, int desiredVolume, int fadeStep);
 void Level_RandomFX(int *cooldown, u32 soundID, int baseCooldown, u32 randomRange, int volumeScale);
 void Level_AmbientSound(void);
 void PlaySound3D(u32 soundID, struct Instance *inst);
@@ -304,7 +304,7 @@ void LevInstDef_RePack(struct mesh_info *ptr_mesh_info, b32 boolAdvHub);
 struct Instance *LinkedCollide_Hitbox_Desc(struct HitboxDesc *objBoxDesc);
 struct Instance *LinkedCollide_Hitbox(struct Instance *objInst, struct Thread *_objTh, struct Thread *thBucket, struct BoundingBox bbox);
 struct Instance *LinkedCollide_Radius(struct Instance *objInst, struct Thread *_objTh, struct Thread *thBucket, u32 hitRadius);
-void LHMatrix_Parent(struct Instance *pDst, struct Instance *pSrc, SVECTOR *transVec);
+void LHMatrix_Parent(struct Instance *pDst, struct Instance *pSrc, const SVec3 *transVec);
 
 // LIST
 void LIST_AddBack(struct LinkedList *L, struct Item *I);
@@ -397,8 +397,8 @@ void RenderStars(struct PushBuffer *pb, struct PrimMem *primMem, struct Stars *s
 void RenderWeather(struct PushBuffer *pb, struct PrimMem *primMem, struct RainBuffer *rainBuffer, char numPlyr, int gameMode1);
 void DrawConfetti(struct PushBuffer *pb, struct PrimMem *primMem, void *confetti, int frameTimer, int gameMode1);
 void RedBeaker_RenderRain(struct PushBuffer *pb, struct PrimMem *primMem, struct JitPool *rain, char numPlyr, int gameMode1);
-void *RenderBucket_QueueLevInstances(struct CameraDC *cDC, uint32_t *otMem, void *rbi, char *lod, char numPlyr, int gameMode1);
-void *RenderBucket_QueueNonLevInstances(struct Item *item, uint32_t *otMem, void *rbi, char *lod, char numPlyr, int gameMode1);
+void *RenderBucket_QueueLevInstances(struct CameraDC *cDC, struct OTMem *otMem, void *rbi, u32 lodMask, char numPlyr, int gameMode1);
+void *RenderBucket_QueueNonLevInstances(struct Item *item, struct OTMem *otMem, void *rbi, u32 lodMask, char numPlyr, int gameMode1);
 void RenderBucket_Execute(void *param_1, struct PrimMem *param_2);
 void DrawTires_Solid(struct Thread *thread, struct PrimMem *primMem, char numPlyr);
 void DrawTires_Reflection(struct Thread *thread, struct PrimMem *primMem, char numPlyr);
@@ -575,7 +575,7 @@ void RECTMENU_Show(struct RectMenu *m);
 int MixRNG_Scramble(void);
 int MixRNG_Particles(int param_1);
 u32 MixRNG_GetValue(int param_1);
-int RngDeadCoed(u32 *state);
+int RngDeadCoed(struct RngDeadCoedState *state);
 
 void MainStats_ClearBattleVS(void);
 void MainStats_RestartRaceCountLoss(void);
@@ -696,7 +696,7 @@ void UI_SaveLapTime(int numLaps, int lapTime, s16 driverID);
 void UI_Map_GetIconPos(s16 *m, int *posX, int *posY);
 void UI_Map_DrawMap(struct Icon *mapTop, struct Icon *mapBottom, s16 posX, s16 posY, struct PrimMem *primMem, uint32_t *otMem, u32 colorID);
 
-void UI_Lerp2D_Angular(s16 *ptrPos, s16 drawnPosition, s16 absolutePosition, s16 frameCounter);
+void UI_Lerp2D_Angular(SVec2 *pos, s16 drawnPosition, s16 absolutePosition, s16 frameCounter);
 void UI_Lerp2D_Linear(s16 *ptrPos, s16 startX, s16 startY, s16 endX, s16 endY, int curFrame, s16 endFrame);
 void UI_Lerp2D_HUD(s16 *ptrPos, s16 startX, s16 startY, s16 endX, s16 endY, int curFrame, s16 endFrame);
 

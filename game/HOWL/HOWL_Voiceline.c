@@ -19,7 +19,7 @@ void Voiceline_PoolInit(void)
 	LIST_Clear(&sdata->channelFree);
 	LIST_Clear(&sdata->channelTaken);
 
-	LIST_Init(&sdata->channelFree, (struct Item *)&sdata->channelStatsPrev[0], 0x20, 0x18);
+	LIST_Init(&sdata->channelFree, &sdata->channelStatsPrev[0].item, 0x20, 0x18);
 
 	SpuSetReverbVoice(0, 0xffffff);
 

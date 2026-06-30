@@ -103,9 +103,9 @@ void Level_SoundLoopSet(int *soundIDCount, u32 soundID, u32 volume)
 }
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x8002ea44-0x8002eab8
-void Level_SoundLoopFade(int *fade, u32 soundID, int desiredVolume, int fadeStep)
+void Level_SoundLoopFade(struct SoundFadeInput *fade, u32 soundID, int desiredVolume, int fadeStep)
 {
-	int currentVolume = fade[2];
+	int currentVolume = fade->currentVolume;
 	b32 clamped;
 
 	if (currentVolume == desiredVolume)
@@ -113,11 +113,11 @@ void Level_SoundLoopFade(int *fade, u32 soundID, int desiredVolume, int fadeStep
 		return;
 	}
 
-	fade[1] = desiredVolume;
+	fade->desiredVolume = desiredVolume;
 
 	if (currentVolume < desiredVolume)
 	{
-		fade[2] = currentVolume + fadeStep;
+		fade->currentVolume = currentVolume + fadeStep;
 		clamped = desiredVolume < currentVolume + fadeStep;
 	}
 	else
@@ -127,17 +127,17 @@ void Level_SoundLoopFade(int *fade, u32 soundID, int desiredVolume, int fadeStep
 			goto updateSound;
 		}
 
-		fade[2] = currentVolume - fadeStep;
+		fade->currentVolume = currentVolume - fadeStep;
 		clamped = currentVolume - fadeStep < desiredVolume;
 	}
 
 	if (clamped)
 	{
-		fade[2] = desiredVolume;
+		fade->currentVolume = desiredVolume;
 	}
 
 updateSound:
-	Level_SoundLoopSet(&fade[3], soundID, fade[2]);
+	Level_SoundLoopSet(&fade->soundID_soundCount, soundID, fade->currentVolume);
 }
 
 static u32 Level_RandomFX_NextAudioRNG(void)
@@ -208,7 +208,7 @@ void Level_AmbientSound(void)
 			Level_RandomFX(&sdata->SoundFadeInput[0].unk, 0x86, 6, 0x5a, 0xff);
 		}
 
-		Level_SoundLoopFade((int *)&sdata->SoundFadeInput[1], 0x87, playLoop ? 0xff : 0, 8);
+		Level_SoundLoopFade(&sdata->SoundFadeInput[1], 0x87, playLoop ? 0xff : 0, 8);
 		return;
 	}
 
@@ -235,8 +235,8 @@ void Level_AmbientSound(void)
 			}
 		}
 
-		Level_SoundLoopFade((int *)&sdata->SoundFadeInput[0], 0x88, playFirstLoop ? 0xff : 0, 8);
-		Level_SoundLoopFade((int *)&sdata->SoundFadeInput[1], 0x8b, playSecondLoop ? 0xff : 0, 4);
+		Level_SoundLoopFade(&sdata->SoundFadeInput[0], 0x88, playFirstLoop ? 0xff : 0, 8);
+		Level_SoundLoopFade(&sdata->SoundFadeInput[1], 0x8b, playSecondLoop ? 0xff : 0, 4);
 		return;
 	}
 

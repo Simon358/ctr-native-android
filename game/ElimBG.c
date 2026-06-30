@@ -112,7 +112,7 @@ void ElimBG_SaveScreenshot_Full(struct GameTracker *gGT)
 	rDst.y = 0xff;
 	rDst.w = 0x10;
 	rDst.h = 1;
-	LoadImage(&rDst, (u32 *)&data.pauseScreenStrip[0]);
+	LoadImage(&rDst, &data.pauseScreenStrip[0]);
 }
 
 

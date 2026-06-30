@@ -279,8 +279,8 @@ void RECTMENU_DrawInnerRect(RECT *r, int type, uint32_t *ot)
 		}
 		else
 		{
-			Color *color = (Color *)&sdata->DrawSolidBoxData[0];
-			CTR_Box_DrawSolidBox(&adjustedRect, *color, ot);
+			Color color = {.self = sdata->DrawSolidBoxData[0]};
+			CTR_Box_DrawSolidBox(&adjustedRect, color, ot);
 		}
 	}
 
@@ -753,7 +753,7 @@ int RECTMENU_ProcessInput(struct RectMenu *m)
 
 	int returnVal = 0;
 
-	RngDeadCoed(&sdata->const_0x30215400);
+	RngDeadCoed(&sdata->advRng);
 
 	// button from any player
 	button = sdata->AnyPlayerTap;

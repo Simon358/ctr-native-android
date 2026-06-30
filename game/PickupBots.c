@@ -193,7 +193,7 @@ static void PickupBots_SetBossCooldown(struct MetaDataBOSS *bossMeta)
 	struct GameTracker *gGT = sdata->gGT;
 
 	sdata->bossWeaponCooldown =
-	    (RngDeadCoed((u32 *)&sdata->const_0x30215400) & 0x10) + bossMeta->weaponCooldown + 0xc + ((s8)sdata->advProgress.timesLostBossRace[gGT->bossID] * 4);
+	    (RngDeadCoed(&sdata->advRng) & 0x10) + bossMeta->weaponCooldown + 0xc + ((s8)sdata->advProgress.timesLostBossRace[gGT->bossID] * 4);
 }
 
 static struct MetaDataBOSS *PickupBots_GetInitialBossMeta(void)

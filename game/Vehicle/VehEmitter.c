@@ -133,7 +133,7 @@ void VehEmitter_Sparks_Ground(struct Driver *d, struct ParticleEmitter *emSet)
 			continue;
 		}
 
-		u32 rng = (u32)(RngDeadCoed(&gGT->deadcoed_struct.unk1) & 0x7ff);
+		u32 rng = (u32)(RngDeadCoed(&gGT->deadcoed_struct) & 0x7ff);
 
 		if ((rng & 1) != 0)
 		{
@@ -583,7 +583,7 @@ static void VehEmitter_TerrainEffects(struct Thread *thread, struct Driver *d, s
 		u32 echo = ((d->actionsFlagSet & ACTION_ENGINE_ECHO) != 0);
 		u32 flags = HowlSfx_Pack(HOWL_SFX_LR_CENTER, HOWL_SFX_DISTORTION_NONE, (u32)(s16)d->engineVol, echo);
 
-		OtherFX_RecycleNew((u32 *)&d->driverAudioPtrs[2], wallSound, flags);
+		OtherFX_RecycleNew(&d->driverAudioPtrs[2], wallSound, flags);
 	}
 }
 
@@ -604,7 +604,7 @@ static void VehEmitter_TerrainAudioAndFeedback(struct Thread *thread, struct Dri
 	int vol = VehCalc_MapToRange(absSpeedApprox, 0, 5000, 0, 200);
 	int distort = VehCalc_MapToRange(absSpeedApprox, 0, 12000, 0x6c, 0xd2);
 	u32 echo = ((d->actionsFlagSet & ACTION_ENGINE_ECHO) != 0);
-	OtherFX_RecycleNew((u32 *)&d->driverAudioPtrs[1], soundID, HowlSfx_Pack(HOWL_SFX_LR_CENTER, (u32)distort, (u32)vol, echo));
+	OtherFX_RecycleNew(&d->driverAudioPtrs[1], soundID, HowlSfx_Pack(HOWL_SFX_LR_CENTER, (u32)distort, (u32)vol, echo));
 
 	if ((d->actionsFlagSet & ACTION_BOT) == 0)
 	{
@@ -634,10 +634,10 @@ static void VehEmitter_SkidmarkAudio(struct Thread *thread, struct Driver *d, st
 {
 	if (((d->actionsFlagSet & ACTION_TOUCH_GROUND) == 0) || ((d->actionsFlagSet & (ACTION_BACK_SKID | ACTION_FRONT_SKID)) == 0) || (absSpeedApprox < 0x201))
 	{
-		if (d->driverAudioPtrs[0] != NULL)
+		if (d->driverAudioPtrs[0] != 0)
 		{
 			OtherFX_Stop1((int)d->driverAudioPtrs[0]);
-			d->driverAudioPtrs[0] = NULL;
+			d->driverAudioPtrs[0] = 0;
 		}
 		return;
 	}
@@ -678,7 +678,7 @@ static void VehEmitter_SkidmarkAudio(struct Thread *thread, struct Driver *d, st
 		u32 echo = ((d->actionsFlagSet & ACTION_ENGINE_ECHO) != 0);
 		u32 flags = HowlSfx_Pack(lr, (u32)distort, (u32)(vol + (absTurn >> 1)), echo);
 
-		OtherFX_RecycleNew((u32 *)&d->driverAudioPtrs[0], terrain->skidSound, flags);
+		OtherFX_RecycleNew(&d->driverAudioPtrs[0], terrain->skidSound, flags);
 	}
 
 	VehEmitter_Skidmarks(thread, d, terrainFlags);

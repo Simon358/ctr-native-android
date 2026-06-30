@@ -167,11 +167,20 @@ struct ChannelAttr
 // similar to SndVoiceStats in psyq libsnd.h
 struct ChannelStats
 {
-	// 0x0
-	struct ChannelStats *next;
+	union
+	{
+		// 0x0
+		struct Item item;
 
-	// 0x4
-	struct ChannelStats *prev;
+		struct
+		{
+			// 0x0
+			struct ChannelStats *next;
+
+			// 0x4
+			struct ChannelStats *prev;
+		};
+	};
 
 	// 0x8
 	u8 flags;

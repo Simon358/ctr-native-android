@@ -185,7 +185,8 @@ int GAMEPAD_GetNumConnected(struct GamepadSystem *gGamepads)
 	int numSlots;
 	int numPortsPerSlot;
 
-	struct MultitapPacket *ptrControllerPacket;
+	struct MultitapPacket *slotPacket;
+	struct ControllerPacket *ptrControllerPacket;
 	struct GamepadBuffer *padCurr;
 
 	// 2 players, no multitap
@@ -213,13 +214,14 @@ int GAMEPAD_GetNumConnected(struct GamepadSystem *gGamepads)
 	{
 		for (int Port = 0; Port < numPortsPerSlot; Port++)
 		{
-			ptrControllerPacket = &gGamepads->slotBuffer[Slot];
-			if (ptrControllerPacket->plugged == PLUGGED)
+			slotPacket = &gGamepads->slotBuffer[Slot];
+			ptrControllerPacket = &slotPacket->controller;
+			if (slotPacket->plugged == PLUGGED)
 			{
 				// if multitap plugged in
-				if (ptrControllerPacket->controllerData == (PAD_ID_MULTITAP << 4))
+				if (slotPacket->controllerData == (PAD_ID_MULTITAP << 4))
 				{
-					ptrControllerPacket = (struct MultitapPacket *)&ptrControllerPacket->controllers[Port];
+					ptrControllerPacket = &slotPacket->controllers[Port];
 				}
 
 				if (ptrControllerPacket->plugged == PLUGGED)
@@ -227,7 +229,7 @@ int GAMEPAD_GetNumConnected(struct GamepadSystem *gGamepads)
 					bitwiseConnected |= 1 << (Slot * 4 + Port);
 					gGamepads->numGamepadsConnected = padIndex + 1;
 
-					padCurr->ptrControllerPacket = (struct ControllerPacket *)ptrControllerPacket;
+					padCurr->ptrControllerPacket = ptrControllerPacket;
 					padCurr->gamepadID = Slot * 0x10 + Port;
 				}
 			}

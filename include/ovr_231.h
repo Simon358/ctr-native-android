@@ -216,9 +216,18 @@ struct MineWeapon;
 
 struct WeaponSlot231
 {
-	// 0x0
-	struct WeaponSlot231 *next;
-	struct WeaponSlot231 *prev;
+	union
+	{
+		// 0x0
+		struct Item item;
+
+		struct
+		{
+			// 0x0
+			struct WeaponSlot231 *next;
+			struct WeaponSlot231 *prev;
+		};
+	};
 
 	// 0x8
 	struct MineWeapon *mineWeapon;

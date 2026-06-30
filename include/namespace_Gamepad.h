@@ -133,24 +133,31 @@ struct __attribute__((packed)) ControllerPacket
 
 struct __attribute__((packed)) MultitapPacket
 {
-	// 0x0
-	// see ControllerPacket
-	u8 plugged;
-
-	// 0x1
-	// ditto
 	union
 	{
 		struct
 		{
-			u8 payloadLength : 4;
-			u8 controllerType : 4;
-		};
-		u8 controllerData;
-	};
+			// 0x0
+			// see ControllerPacket
+			u8 plugged;
 
-	// 0x2
-	struct ControllerPacket controllers[4];
+			// 0x1
+			// ditto
+			union
+			{
+				struct
+				{
+					u8 payloadLength : 4;
+					u8 controllerType : 4;
+				};
+				u8 controllerData;
+			};
+
+			// 0x2
+			struct ControllerPacket controllers[4];
+		};
+		struct ControllerPacket controller;
+	};
 
 	// 34 bytes
 };

@@ -607,7 +607,7 @@ void CAM_ProcessTransition(SVec3 *currPos, SVec3 *currRot, SVec3 *startPos, SVec
 
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800188a8-0x80018b18
-void CAM_FindClosestQuadblock(struct ScratchpadStruct *sps, struct CameraDC *cDC, struct Driver *d, const VECTOR *pos)
+void CAM_FindClosestQuadblock(struct ScratchpadStruct *sps, struct CameraDC *cDC, struct Driver *d, const Vec3 *pos)
 {
 	struct GameTracker *gGT;
 	struct mesh_info *meshInfo;
@@ -616,9 +616,9 @@ void CAM_FindClosestQuadblock(struct ScratchpadStruct *sps, struct CameraDC *cDC
 	(void)d;
 
 	// NOTE(aalhendi): Retail consumes the low halfword of each VECTOR lane.
-	s16 posX = (s16)pos->vx;
-	s16 posY = (s16)pos->vy;
-	s16 posZ = (s16)pos->vz;
+	s16 posX = (s16)pos->x;
+	s16 posY = (s16)pos->y;
+	s16 posZ = (s16)pos->z;
 
 	sps->Union.QuadBlockColl.pos.x = posX;
 	sps->Union.QuadBlockColl.pos.y = posY;
@@ -741,18 +741,18 @@ static void CAM_FollowDriver_AngleAxis_LoadGteMatrix(MATRIX *axisMatrix, struct 
 	gte_SetTransVector(d->instSelf->matrix.t);
 }
 
-static void CAM_FollowDriver_AngleAxis_TransformOffset(const SVec3 *offset, VECTOR *out)
+static void CAM_FollowDriver_AngleAxis_TransformOffset(const SVec3 *offset, Vec3 *out)
 {
 	CTR_GteLoadSVec3V0(offset);
 	gte_rtv0tr();
-	CTR_GteStoreMAC(&out->vx);
+	CTR_GteStoreMAC(&out->x);
 }
 
 void CAM_FollowDriver_AngleAxis(struct CameraDC *cDC, struct Driver *d, struct CameraAngleAxisScratch *scratchWork, SVec3 *pushBufferPos, SVec3 *pushBufferRot)
 {
 	MATRIX *axisMatrix = &scratchWork->camera.matrix;
-	VECTOR *eye = (VECTOR *)&scratchWork->camera.pos;
-	VECTOR lookAt;
+	Vec3 *eye = &scratchWork->camera.pos;
+	Vec3 lookAt;
 	s32 ratio;
 	s32 dx;
 	s32 dy;
@@ -775,26 +775,26 @@ void CAM_FollowDriver_AngleAxis(struct CameraDC *cDC, struct Driver *d, struct C
 
 	if ((cDC->flags & CAMERA_FLAG_DIRECTION_CHANGED) != 0)
 	{
-		cDC->lookAtPos.x = lookAt.vx;
-		cDC->lookAtPos.y = lookAt.vy;
-		cDC->lookAtPos.z = lookAt.vz;
+		cDC->lookAtPos.x = lookAt.x;
+		cDC->lookAtPos.y = lookAt.y;
+		cDC->lookAtPos.z = lookAt.z;
 	}
 	else
 	{
 		ratio = cDC->angleAxisLerpRatio;
 
-		eye->vx = CAM_FollowDriver_AngleAxis_Lerp256(eye->vx, pushBufferPos->x, ratio);
-		eye->vy = CAM_FollowDriver_AngleAxis_Lerp256(eye->vy, pushBufferPos->y, ratio);
-		eye->vz = CAM_FollowDriver_AngleAxis_Lerp256(eye->vz, pushBufferPos->z, ratio);
+		eye->x = CAM_FollowDriver_AngleAxis_Lerp256(eye->x, pushBufferPos->x, ratio);
+		eye->y = CAM_FollowDriver_AngleAxis_Lerp256(eye->y, pushBufferPos->y, ratio);
+		eye->z = CAM_FollowDriver_AngleAxis_Lerp256(eye->z, pushBufferPos->z, ratio);
 
-		cDC->lookAtPos.x = CAM_FollowDriver_AngleAxis_Lerp256(lookAt.vx, cDC->lookAtPos.x, ratio);
-		cDC->lookAtPos.y = CAM_FollowDriver_AngleAxis_Lerp256(lookAt.vy, cDC->lookAtPos.y, ratio);
-		cDC->lookAtPos.z = CAM_FollowDriver_AngleAxis_Lerp256(lookAt.vz, cDC->lookAtPos.z, ratio);
+		cDC->lookAtPos.x = CAM_FollowDriver_AngleAxis_Lerp256(lookAt.x, cDC->lookAtPos.x, ratio);
+		cDC->lookAtPos.y = CAM_FollowDriver_AngleAxis_Lerp256(lookAt.y, cDC->lookAtPos.y, ratio);
+		cDC->lookAtPos.z = CAM_FollowDriver_AngleAxis_Lerp256(lookAt.z, cDC->lookAtPos.z, ratio);
 	}
 
-	dx = eye->vx - cDC->lookAtPos.x;
-	dy = eye->vy - cDC->lookAtPos.y;
-	dz = eye->vz - cDC->lookAtPos.z;
+	dx = eye->x - cDC->lookAtPos.x;
+	dy = eye->y - cDC->lookAtPos.y;
+	dz = eye->z - cDC->lookAtPos.z;
 
 	scratchWork->camera.dir.x = dx;
 	scratchWork->camera.dir.y = dy;
@@ -805,9 +805,9 @@ void CAM_FollowDriver_AngleAxis(struct CameraDC *cDC, struct Driver *d, struct C
 	pushBufferRot->x = 0x800 - (s16)ratan2(dy, distanceXZ);
 	pushBufferRot->z = 0;
 
-	pushBufferPos->x = (s16)eye->vx;
-	pushBufferPos->y = (s16)eye->vy;
-	pushBufferPos->z = (s16)eye->vz;
+	pushBufferPos->x = (s16)eye->x;
+	pushBufferPos->y = (s16)eye->y;
+	pushBufferPos->z = (s16)eye->z;
 }
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800194c8-0x800198f8.
@@ -1425,7 +1425,7 @@ void CAM_FollowDriver_Normal(struct CameraDC *cDC, struct Driver *d, SVec3 *push
 		}
 	}
 
-	CAM_FindClosestQuadblock(sps, cDC, d, (VECTOR *)&cam->pos);
+	CAM_FindClosestQuadblock(sps, cDC, d, &cam->pos);
 
 	struct QuadBlock *quad = sps->hit.ptrQuadblock;
 	if ((sps->boolDidTouchQuadblock == 0) || ((quad->quadFlags & CAM_FOLLOW_DRIVER_QUAD_FLAGS_SKIP_TERRAIN_HEIGHT) != 0))
@@ -1684,7 +1684,7 @@ LAB_8001ab04:
 	cam->pos.y = (s32)pb->pos.y;
 	cam->pos.z = (s32)pb->pos.z;
 
-	CAM_FindClosestQuadblock((struct ScratchpadStruct *)scratchWork, cDC, d, (VECTOR *)&cam->pos);
+	CAM_FindClosestQuadblock((struct ScratchpadStruct *)scratchWork, cDC, d, &cam->pos);
 
 	x = cDC->transitionFrameCount;
 	iVar14 = cDC->transitionFrameCount;
@@ -2318,12 +2318,12 @@ SkipNewCameraEOR:
 				pb->distanceToScreen_PREV = pb->distanceToScreen_CURR + iVar7;
 			}
 
-			VECTOR *cameraProbePos = (VECTOR *)&camThTick->pos;
-			cameraProbePos->vx = (s32)pb->pos.x;
-			cameraProbePos->vy = (s32)pb->pos.y;
-			cameraProbePos->vz = (s32)pb->pos.z;
+			Vec3 cameraProbePos;
+			cameraProbePos.x = (s32)pb->pos.x;
+			cameraProbePos.y = (s32)pb->pos.y;
+			cameraProbePos.z = (s32)pb->pos.z;
 
-			CAM_FindClosestQuadblock((struct ScratchpadStruct *)scratchWork, cDC, d, cameraProbePos);
+			CAM_FindClosestQuadblock((struct ScratchpadStruct *)scratchWork, cDC, d, &cameraProbePos);
 			goto LAB_8001c150;
 		}
 	}

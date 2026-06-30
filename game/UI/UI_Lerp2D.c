@@ -7,7 +7,7 @@
 // param3 = absolute position
 // param4 = frame counter
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x8004eaa8-0x8004ec18.
-void UI_Lerp2D_Angular(s16 *ptrPos, s16 drawnPosition, s16 absolutePosition, s16 frameCounter)
+void UI_Lerp2D_Angular(SVec2 *pos, s16 drawnPosition, s16 absolutePosition, s16 frameCounter)
 {
 	int angle;
 	int drawnPositionInt;
@@ -28,18 +28,18 @@ void UI_Lerp2D_Angular(s16 *ptrPos, s16 drawnPosition, s16 absolutePosition, s16
 	// if driver "just" passed another driver
 	if (absolutePositionInt < drawnPositionInt)
 	{
-		ptrPos[0] = (s16)(angle * 0x14 >> 0xc) + 0x14;
+		pos->x = (s16)(angle * 0x14 >> 0xc) + 0x14;
 	}
 
 	// if driver "was" passed by another driver
 	else
 	{
-		ptrPos[0] = 0x14 - (s16)(angle * 0x14 >> 0xc);
+		pos->x = 0x14 - (s16)(angle * 0x14 >> 0xc);
 	}
 
 	// absolutePositionInt - drawnPositionInt is either -1 or +1
 	// 0x1b is vertical size of the icon
-	ptrPos[1] =
+	pos->y =
 
 	    // Y value where all icons start
 	    0x39 +

@@ -35,6 +35,6 @@ void CTR_ErrorScreen(char r, char g, char b)
 		p.g0 = g;
 		p.b0 = b;
 
-		DrawOTag((uint32_t *)&p);
+		DrawOTag(&p);
 	}
 }

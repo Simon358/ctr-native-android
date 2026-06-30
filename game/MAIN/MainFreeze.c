@@ -50,7 +50,7 @@ void MainFreeze_ConfigDrawArrows(s16 offsetX, s16 offsetY, char *str)
 {
 	int lineWidth;
 	int color;
-	u8 **colorPtr;
+	u32 *colorPtr;
 	struct GameTracker *gGT = sdata->gGT;
 
 	// orange color
@@ -65,7 +65,7 @@ void MainFreeze_ConfigDrawArrows(s16 offsetX, s16 offsetY, char *str)
 	lineWidth = DecalFont_GetLineWidth(str, 1) >> 1;
 
 	// get color data
-	colorPtr = (u8 **)&data.ptrColor[color];
+	colorPtr = data.ptrColor[color];
 
 	struct Icon **iconPtrArray = ICONGROUP_GETICONS(gGT->iconGroup[4]);
 
@@ -83,7 +83,7 @@ void MainFreeze_ConfigDrawArrows(s16 offsetX, s16 offsetY, char *str)
 	    gGT->pushBuffer_UI.ptrOT,
 
 	    // color data
-	    *colorPtr[0], *colorPtr[1], *colorPtr[2], *colorPtr[3],
+	    colorPtr[0], colorPtr[1], colorPtr[2], colorPtr[3],
 
 	    0, FP(1.0), 0x800);
 
@@ -101,7 +101,7 @@ void MainFreeze_ConfigDrawArrows(s16 offsetX, s16 offsetY, char *str)
 	    gGT->pushBuffer_UI.ptrOT,
 
 	    // color data
-	    *colorPtr[0], *colorPtr[1], *colorPtr[2], *colorPtr[3],
+	    colorPtr[0], colorPtr[1], colorPtr[2], colorPtr[3],
 
 	    0, FP(1.0), 0);
 

@@ -204,7 +204,7 @@ void VehGroundSkids_Main(struct Thread *thread, struct PushBuffer *pb)
 	scratch->origin.z = 0;
 
 	gte_SetRotMatrix(&pb->matrix_ViewProj);
-	gte_SetTransVector((VECTOR *)&scratch->origin);
+	gte_SetTransVector(&scratch->origin);
 
 	scratch->origin.x = pb->matrix_Camera.t[0];
 	scratch->origin.y = pb->matrix_Camera.t[1];

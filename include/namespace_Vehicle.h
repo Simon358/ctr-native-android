@@ -1064,7 +1064,7 @@ struct Driver
 	// 0x304 = No sound yet defined* (VehEmitter.c: VehEmitter_DriverMain)
 	// 0x308 = Kart "kirb_dirt" sound
 	// 0x30C = Kart "engine_jet" sound
-	void *driverAudioPtrs[4];
+	u32 driverAudioPtrs[4];
 
 	// 0x310
 	MATRIX matrixMovingDir;

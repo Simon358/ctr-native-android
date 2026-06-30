@@ -66,6 +66,7 @@ typedef double f64;
 #define internal                static
 #define local_persist           static
 #define global_variable         static
+#define CTR_MAY_ALIAS           __attribute__((may_alias))
 
 #define len(arr)                (sizeof(arr) / sizeof(arr[0]))
 #define OFFSETOF(TYPE, ELEMENT) ((u32)offsetof(TYPE, ELEMENT))

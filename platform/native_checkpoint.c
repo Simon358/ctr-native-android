@@ -1455,14 +1455,14 @@ internal void NativeCheckpoint_RelocateHowlLists(const struct NativeCheckpointHe
 	NativeCheckpoint_RelocateLinkedList(oldHeader, liveHeader, &sdata_static.channelFree);
 	for (u32 i = 0; i < len(sdata_static.channelStatsPrev); i++)
 	{
-		NativeCheckpoint_RelocateItemLinks(oldHeader, liveHeader, (struct Item *)&sdata_static.channelStatsPrev[i]);
+		NativeCheckpoint_RelocateItemLinks(oldHeader, liveHeader, &sdata_static.channelStatsPrev[i].item);
 	}
 
 	NativeCheckpoint_RelocateLinkedList(oldHeader, liveHeader, &sdata_static.Voiceline1);
 	NativeCheckpoint_RelocateLinkedList(oldHeader, liveHeader, &sdata_static.Voiceline2);
 	for (u32 i = 0; i < len(sdata_static.voicelinePool); i++)
 	{
-		NativeCheckpoint_RelocateItemLinks(oldHeader, liveHeader, (struct Item *)&sdata_static.voicelinePool[i]);
+		NativeCheckpoint_RelocateItemLinks(oldHeader, liveHeader, &sdata_static.voicelinePool[i].item);
 	}
 }
 
@@ -1655,7 +1655,7 @@ internal void NativeCheckpoint_RelocateD231Pointers(const struct NativeCheckpoin
 {
 	for (u32 i = 0; i < len(D231.minePoolItem); i++)
 	{
-		NativeCheckpoint_RelocateItemLinks(oldHeader, liveHeader, (struct Item *)&D231.minePoolItem[i]);
+		NativeCheckpoint_RelocateItemLinks(oldHeader, liveHeader, &D231.minePoolItem[i].item);
 		NativeCheckpoint_RelocatePointerSlot(oldHeader, liveHeader, &D231.minePoolItem[i].mineWeapon);
 	}
 

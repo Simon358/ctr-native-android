@@ -12,22 +12,20 @@ CTR_STATIC_ASSERT(offsetof(struct CSThreadParentFrameScratch, parentRot) == 0x10
 
 static void CS_SaveDecodedOpcode(const struct CutsceneObj *cs, int out[5])
 {
-	const int *src = (const int *)&cs->decodedOpcode;
-	out[0] = src[0];
-	out[1] = src[1];
-	out[2] = src[2];
-	out[3] = src[3];
-	out[4] = src[4];
+	out[0] = cs->decodedOpcode.words[0];
+	out[1] = cs->decodedOpcode.words[1];
+	out[2] = cs->decodedOpcode.words[2];
+	out[3] = cs->decodedOpcode.words[3];
+	out[4] = cs->decodedOpcode.words[4];
 }
 
 static void CS_RestoreDecodedOpcode(struct CutsceneObj *cs, const int in[5])
 {
-	int *dst = (int *)&cs->decodedOpcode;
-	dst[0] = in[0];
-	dst[1] = in[1];
-	dst[2] = in[2];
-	dst[3] = in[3];
-	dst[4] = in[4];
+	cs->decodedOpcode.words[0] = in[0];
+	cs->decodedOpcode.words[1] = in[1];
+	cs->decodedOpcode.words[2] = in[2];
+	cs->decodedOpcode.words[3] = in[3];
+	cs->decodedOpcode.words[4] = in[4];
 }
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800ac840-0x800ade8c
@@ -48,7 +46,7 @@ int CS_Thread_UseOpcode(struct Instance *instance, struct CutsceneObj *cs)
 	struct Thread *dancerThread;
 	char *opcodeAt;
 	int iVar12;
-	struct CsOpcodeMeta *opcodeMeta;
+	union CsOpcodeMeta *opcodeMeta;
 	s16 *opcodeMetaShorts;
 	struct CsInitMatrixEntry *frameData;
 	int rotInterpNumerator;
@@ -127,9 +125,9 @@ int CS_Thread_UseOpcode(struct Instance *instance, struct CutsceneObj *cs)
 					CS_ScriptCmd_OpcodeAt(cs, R233.advCharSelectSelectOpcodes[(int)instance->model->id - STATIC_CRASHSELECT]);
 					CS_SaveDecodedOpcode(cs, metadataBackup);
 				reloadAdvCharSelectOpcodeState:
-					cs->unk18 = ((int *)&cs->decodedOpcode)[2];
+					cs->unk18 = cs->decodedOpcode.words[2];
 					iVar8 = MixRNG_Scramble();
-					opcodeMeta = (struct CsOpcodeMeta *)cs->metadata;
+					opcodeMeta = cs->metadataMeta;
 					opcodeMetaShorts = (s16 *)opcodeMeta;
 					cs->opcodeDuration =
 					    opcodeMeta->frameStart + (s16)((int)((iVar8 >> 2 & 0xfff) * (((int)opcodeMeta->frameEnd - (int)opcodeMeta->frameStart) + 1)) >> 0xc);
@@ -152,7 +150,7 @@ int CS_Thread_UseOpcode(struct Instance *instance, struct CutsceneObj *cs)
 	iVar12 = cs->unk18;
 	iVar8 = (int)cs->unk1e;
 	elapsedTimeRemaining = gGT->elapsedTimeMS;
-	opcodeMeta = (struct CsOpcodeMeta *)cs->metadata;
+	opcodeMeta = cs->metadataMeta;
 	opcodeMetaShorts = (s16 *)opcodeMeta;
 	animIndex = (int)opcodeMeta->animIndex;
 
@@ -1344,7 +1342,7 @@ void CS_Thread_LInB(struct Instance *inst)
 
 	t->inst = inst;
 
-	cs->metadata = (int *)&cs->decodedOpcode;
+	cs->metadataMeta = &cs->decodedOpcode;
 	cs->prevOpcode = (char *)-1;
 	cs->Subtitles.lngIndex = -1;
 
@@ -1372,7 +1370,7 @@ void CS_Thread_LInB(struct Instance *inst)
 
 	{
 		int rng = MixRNG_Scramble();
-		s16 *meta = (s16 *)cs->metadata;
+		s16 *meta = cs->metadataShorts;
 		s16 frameStart = meta[2];
 		s16 frameEnd = meta[3];
 
@@ -1502,17 +1500,17 @@ thTick_subtitles:
 	{
 		struct GameTracker *gGT = sdata->gGT;
 		int textWidth;
-		u16 textRect[4];
+		RECT textRect;
 
 		textWidth = DecalFont_DrawMultiLine(sdata->lngStrings[cs->Subtitles.lngIndex], cs->Subtitles.textPos.x, cs->Subtitles.textPos.y, 460,
 		                                    cs->Subtitles.font, cs->Subtitles.colors);
 
-		textRect[0] = (u16)((u16)cs->Subtitles.textPos.x - 236);
-		textRect[1] = (u16)((u16)cs->Subtitles.textPos.y - 4);
-		textRect[2] = 472;
-		textRect[3] = (u16)((s16)textWidth + 8);
+		textRect.x = (s16)((u16)cs->Subtitles.textPos.x - 236);
+		textRect.y = (s16)((u16)cs->Subtitles.textPos.y - 4);
+		textRect.w = 472;
+		textRect.h = (s16)textWidth + 8;
 
-		RECTMENU_DrawInnerRect((RECT *)textRect, 4, gGT->backBuffer->otMem.uiOT);
+		RECTMENU_DrawInnerRect(&textRect, 4, gGT->backBuffer->otMem.uiOT);
 	}
 
 	// ASM: 0x800ae7dc - check isCutsceneOver, re-apply death flag
@@ -1571,7 +1569,7 @@ struct Thread *CS_Thread_Init(s16 modelID, const char *name, struct CsThreadInit
 
 	cs = t->object;
 
-	cs->metadata = (int *)&cs->decodedOpcode;
+	cs->metadataMeta = &cs->decodedOpcode;
 	cs->frameOverrideRoot = NULL;
 	cs->prevOpcode = (char *)-1;
 	cs->Subtitles.lngIndex = -1;
@@ -1671,7 +1669,7 @@ after_opcode:
 
 	cs->unk18 = cs->metadata[2];
 
-	meta = (s16 *)cs->metadata;
+	meta = cs->metadataShorts;
 	cs->opcodeDuration = meta[2] + (s16)(((MixRNG_Scramble() >> 2 & 0xfff) * ((meta[3] - meta[2]) + 1)) >> 0xc);
 
 	if (inst != NULL)
