@@ -13,9 +13,8 @@ void MM_HighScore_Text3D(char *string, int posX, int posY, s16 font, u32 flags)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 overlay 230 0x800b2fbc-0x800b3914.
 void MM_HighScore_Draw(u16 trackIndex, u32 rowIndex, u32 posX, u32 posY)
 {
-	char i;
+	s32 i;
 	s16 numColor;
-	s16 sVar1;
 	s16 lineWidth;
 	u32 *colorPtr;
 	s16 levelID;
@@ -114,7 +113,7 @@ void MM_HighScore_Draw(u16 trackIndex, u32 rowIndex, u32 posX, u32 posY)
 	// Icon, Name, and Time
 	for (i = 0; i < 5; i++)
 	{
-		char j = i + 2;
+		s32 j = i + 2;
 
 		// Character Icon
 		RECTMENU_DrawPolyGT4(gGT->ptrIcons[data.MetaDataCharacters[entry[i + 1].characterID].iconID], D230.transitionMeta_HighScores[j].currX + offsetX + 0x20,

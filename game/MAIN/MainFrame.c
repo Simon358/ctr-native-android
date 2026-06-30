@@ -126,12 +126,9 @@ void MainFrame_GameLogic(struct GameTracker *gGT, struct GamepadSystem *gGamepad
 	int iVar4;
 	DriverFunc pcVar5;
 	u32 uVar5;
-	u32 uVar6;
-	int *piVar7;
 	struct Driver *psVar8;
 	struct Driver *psVar9;
 	struct Driver *psVar10;
-	struct Driver *pvVar12;
 	struct PushBuffer *pushBuffer;
 	int iVar11;
 	struct Thread *psVar12;

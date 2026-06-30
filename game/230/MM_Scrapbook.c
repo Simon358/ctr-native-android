@@ -54,10 +54,7 @@ CTR_GCC_OPTIMIZE_O0 int ScrapBookPlayMovie_DecodeFrame()
 void MM_Scrapbook_PlayMovie(struct RectMenu *menu)
 {
 	s16 lev;
-	int cdPos;
 	int getButtonPress = 0;
-	DRAWENV *ptrDrawEnv;
-	CdlFILE cdlFile;
 	struct GameTracker *gGT = sdata->gGT;
 
 	// book state (0,1,2,3,4)

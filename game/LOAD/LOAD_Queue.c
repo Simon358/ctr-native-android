@@ -10,7 +10,7 @@ void LOAD_AppendQueue(struct BigHeader *bigfile, int type, int fileIndex, void *
 		return;
 	}
 
-	lqs = &sdata->queueSlots[sdata->queueLength];
+	lqs = &sdata->queueSlots[(s32)sdata->queueLength];
 	lqs->ptrBigfileCdPos_UNUSED = bigfile;
 	lqs->flags = 0;
 	lqs->type_UNUSED = type;

@@ -180,7 +180,12 @@ internal s32 NativeCD_SearchFile(CdlFILE *loc, const char *filename)
 	memcpy(&loc->pos, &encodedPos, sizeof(encodedPos));
 	loc->size = fileSize;
 	memset(loc->name, 0, sizeof(loc->name));
-	strncpy(loc->name, rootlessPath, sizeof(loc->name) - 1);
+	size_t nameLen = rootless.len;
+	if (nameLen >= sizeof(loc->name))
+	{
+		nameLen = sizeof(loc->name) - 1;
+	}
+	memcpy(loc->name, rootless.ptr, nameLen);
 
 	return 1;
 }

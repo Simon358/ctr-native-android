@@ -1338,11 +1338,6 @@ static void RenderBucket_GteMulLightMatrixColumns(u32 *m0, u32 *m1, u32 *m2, u32
 	Unknown_8006c558(m0, m1, m2, m3, m4);
 }
 
-static int RenderBucket_GetScaledMatrixElem(struct Instance *inst, int scale[3], int row, int col)
-{
-	return (inst->matrix.m[row][col] * scale[col]) >> 8;
-}
-
 static void RenderBucket_BuildM3x3(struct Instance *inst, struct ModelHeader *mh, int viewDepth, struct RenderBucketMatrixState *matrixState)
 {
 	u32 m0;
@@ -1750,18 +1745,11 @@ static void RenderBucket_UpdatePushBufferMetadata(struct PushBuffer *pb, const s
 	int width;
 	int height;
 	int packedWidth;
-#ifdef CTR_INTERNAL
-	u32 beforeFlags;
-#endif
 
 	if ((*instFlags & PUSHBUFFER_EXISTS) == 0)
 	{
 		return;
 	}
-
-#ifdef CTR_INTERNAL
-	beforeFlags = *instFlags;
-#endif
 
 	// NOTE(aalhendi): Retail 0x80071164-0x800711c8 writes projected screen
 	// pos/size to PushBuffer 0x100/0x104 and clears PUSHBUFFER_EXISTS when the
@@ -2852,8 +2840,6 @@ static u8 RenderBucket_SaturateU8(int value)
 
 static int RenderBucket_DrawInstPrim_NormalAtOTEntry(struct RenderBucketDrawContext *ctx, u32 command, struct TextureLayout *tex, uint32_t *otEntry)
 {
-	u16 texIndex = command & 0x1ff;
-
 	if ((char *)ctx->primMem->cursor + sizeof(POLY_GT3) >= (char *)ctx->primMem->guardEnd)
 	{
 		return -1;
@@ -3377,7 +3363,34 @@ static int RenderBucket_DispatchDrawInstPrimAtRange(struct RenderBucketDrawConte
 
 static int RenderBucket_DispatchDrawInstPrim(struct RenderBucketDrawContext *ctx, u32 command, struct TextureLayout *tex, int depthMac0)
 {
-	return RenderBucket_DispatchDrawInstPrimAtRange(ctx, command, tex, ctx->idpp->otRangeNormal, depthMac0);
+	switch ((u32)(uintptr_t)ctx->inst->funcPtr[1])
+	{
+	case RB_RETAIL_INST_PRIM_SELECT_RANGE:
+		return RenderBucket_DrawInstPrim_SelectRange(ctx, command, tex, depthMac0);
+
+	case RB_RETAIL_INST_PRIM_NORMAL:
+		return RenderBucket_DrawInstPrim_Normal(ctx, command, tex, depthMac0);
+
+	case RB_RETAIL_INST_PRIM_DEPTH_FADE:
+		return RenderBucket_DrawInstPrim_DepthFade(ctx, command, tex, depthMac0);
+
+	case RB_RETAIL_INST_PRIM_KEY_TOKEN:
+		return RenderBucket_DrawInstPrim_KeyRelicToken(ctx, command, tex, depthMac0);
+
+	case RB_RETAIL_INST_PRIM_CLAMP_DEPTH:
+		return RenderBucket_DrawInstPrim_ClampDepth(ctx, command, tex, depthMac0);
+
+	case RB_RETAIL_INST_PRIM_LIT_TEXTURE:
+		return RenderBucket_DrawInstPrim_LitTexture(ctx, command, tex, depthMac0);
+
+	case RB_RETAIL_INST_PRIM_GHOST:
+		return RenderBucket_DrawInstPrim_Ghost(ctx, command, tex, depthMac0);
+
+	default:
+		// TODO(aalhendi): Port any newly observed Instance+0x60 primitive writers.
+		// Do not draw through the normal writer here; that masks live retail rows.
+		return 0;
+	}
 }
 
 static int RenderBucket_SelectPrimitiveActiveRange(struct RenderBucketDrawContext *ctx, u32 command)
@@ -3430,8 +3443,6 @@ static int RenderBucket_DrawSplitPrimitiveNormalAtOTEntry(struct RenderBucketDra
                                                           const struct RenderBucketSplitVertex *v0, const struct RenderBucketSplitVertex *v1,
                                                           const struct RenderBucketSplitVertex *v2)
 {
-	u16 texIndex = command & 0x1ff;
-
 	if ((char *)ctx->primMem->cursor + sizeof(POLY_GT3) >= (char *)ctx->primMem->guardEnd)
 	{
 		return -1;

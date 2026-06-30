@@ -1009,34 +1009,6 @@ static void DrawLevelOvr1P_SetProjectedDepth(struct DrawLevelOvr1PScratchVertex 
 	}
 }
 
-static int DrawLevelOvr1P_ProjectVertexTriple(struct LevVertex *vertices, const struct QuadBlock *block, struct DrawLevelOvr1PScratchVertex *projected,
-                                              int index0, int index1, int index2, int writeClipBytes)
-{
-	struct LevVertex *vertex0 = &vertices[block->index[index0]];
-	struct LevVertex *vertex1 = &vertices[block->index[index1]];
-	struct LevVertex *vertex2 = &vertices[block->index[index2]];
-	u32 depth0;
-	u32 depth1;
-	u32 depth2;
-	s32 gteFlag;
-
-	DrawLevelOvr1P_CopySourceVertex(&projected[index0], vertex0);
-	DrawLevelOvr1P_CopySourceVertex(&projected[index1], vertex1);
-	DrawLevelOvr1P_CopySourceVertex(&projected[index2], vertex2);
-
-	CTR_GteLoadSVec3V3(&vertex0->pos, &vertex1->pos, &vertex2->pos);
-	gte_rtpt();
-	CTR_GteStoreSXY3(&projected[index0].posScreen[0], &projected[index1].posScreen[0], &projected[index2].posScreen[0]);
-	gte_stsz3(&depth0, &depth1, &depth2);
-	gte_stflg(&gteFlag);
-
-	DrawLevelOvr1P_SetProjectedDepth(&projected[index0], depth0, writeClipBytes);
-	DrawLevelOvr1P_SetProjectedDepth(&projected[index1], depth1, writeClipBytes);
-	DrawLevelOvr1P_SetProjectedDepth(&projected[index2], depth2, writeClipBytes);
-
-	return ((u32)gteFlag & DRAW_LEVEL_OVR1P_GTE_RTPT_OVERFLOW) != 0;
-}
-
 static void DrawLevelOvr1P_StoreProjectedDepthWord(struct DrawLevelOvr1PScratchVertex *projected, u32 depth);
 
 static void Ovr226_800a0f78_ProjectVertexTripleFullDepth(struct LevVertex *vertices, const struct QuadBlock *block,
@@ -1102,18 +1074,6 @@ static void Ovr226_800a0dc4_ClearProjectedScratch(void)
 	{
 		projectedScratch[offset / (int)sizeof(u32)] = 0;
 	}
-}
-
-static int DrawLevelOvr1P_ProjectQuadBlockGrid(struct LevVertex *vertices, const struct QuadBlock *block, struct DrawLevelOvr1PScratchVertex *projected,
-                                               int writeClipBytes)
-{
-	int gteOverflow = 0;
-
-	gteOverflow |= DrawLevelOvr1P_ProjectVertexTriple(vertices, block, projected, 0, 1, 2, writeClipBytes);
-	gteOverflow |= DrawLevelOvr1P_ProjectVertexTriple(vertices, block, projected, 3, 4, 5, writeClipBytes);
-	gteOverflow |= DrawLevelOvr1P_ProjectVertexTriple(vertices, block, projected, 6, 7, 8, writeClipBytes);
-
-	return gteOverflow;
 }
 
 static void DrawLevelOvr1P_CopyProjectedSource(struct LevVertex *vertex, struct DrawLevelOvr1PScratchVertex *projected,
@@ -4368,8 +4328,6 @@ static int Ovr226_800a39c4_DispatchGround4x1HelperWrappers(struct PushBuffer *pb
                                                            struct DrawLevelOvr1PScratchVertex *projected, int faceIndex, const struct TextureLayout *texture,
                                                            int depth, u32 handlerAddress, int inheritedOtIndex)
 {
-	const int writeClipBytes = DRAW_LEVEL_OVR1P_CLIP_BYTES_LIST;
-
 	switch (handlerAddress)
 	{
 	case OVR226_RETAIL_LABEL_GROUND_4X1_LIST_SUBDIV_A:
@@ -7420,9 +7378,6 @@ static void DrawLevelOvr1P_TerminateRenderedListCursor(void)
 	}
 }
 
-static int DrawLevelOvr1P_DrawWaterListQuadBlock(struct PushBuffer *pb, struct PrimMem *primMem, struct mesh_info *mesh, struct QuadBlock *block,
-                                                 int captureRenderedOverflow);
-
 static struct TextureLayout *Ovr226_800a1058_PrepareFullDynamicLowUv(struct QuadBlock *block, struct DrawLevelOvr1PScratchVertex *projected)
 {
 	const int *indices = sDrawLevelOvr1PFullDynamicLowIndices;
@@ -9052,33 +9007,6 @@ static int Ovr226_800a25d0_WaterListFaceGate(struct PushBuffer *pb, struct PrimM
 	}
 
 	return Ovr226_800a27b8_EmitWaterListDirectTail(pb, primMem, block, projected, indices, faceIndex, faceOtEntry);
-}
-
-static int DrawLevelOvr1P_DrawWaterListQuadBlock(struct PushBuffer *pb, struct PrimMem *primMem, struct mesh_info *mesh, struct QuadBlock *block,
-                                                 int captureRenderedOverflow)
-{
-	struct LevVertex *vertices = mesh->ptrVertexArray;
-	struct DrawLevelOvr1PScratchVertex *projected = DrawLevelOvr1P_GetScratchVertices();
-
-	if ((block->quadFlags & QUADBLOCK_FLAG_SKIP_WATER_LIST) != 0)
-	{
-		return 1;
-	}
-
-	if (DrawLevelOvr1P_ProjectQuadBlockGrid(vertices, block, projected, DRAW_LEVEL_OVR1P_CLIP_BYTES_LIST))
-	{
-		if (captureRenderedOverflow)
-		{
-			DrawLevelOvr1P_AppendRenderedQuadBlock(block);
-		}
-
-		return 1;
-	}
-
-	Ovr226_800a211c_ApplyWaterListColorFades(projected);
-
-	return Ovr226_800a22a4_DispatchWaterListHelperWrappers(pb, primMem, block, projected, 0, 0, DRAW_LEVEL_OVR_RETAIL_LABEL_WATER_LIST_WRAPPER_SLOT5, 5,
-	                                                       DRAW_LEVEL_OVR1P_DIRECT_QUAD, NULL);
 }
 
 static void Ovr226_800a1e30_SeedWaterListState(void)

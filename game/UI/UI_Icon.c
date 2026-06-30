@@ -15,26 +15,26 @@ void UI_WeaponBG_AnimateShine(void)
 	local_18 = ((sine * 0x7f) >> 0xc) + 0x7f;
 	sdata->wumpaShineColor1[0][0] = local_18;
 	sdata->wumpaShineColor1[0][1] = local_18;
-	*(s16 *)&sdata->wumpaShineColor1[0][2] = 0;
+	CTR_WriteU16LE(&sdata->wumpaShineColor1[0][2], 0);
 
 	local_14 = ((sine * 0x32) >> 0xc) + 0x32;
 	sdata->wumpaShineColor1[1][0] = local_18;
 	sdata->wumpaShineColor1[1][1] = local_14;
-	*(s16 *)&sdata->wumpaShineColor1[1][2] = 0;
+	CTR_WriteU16LE(&sdata->wumpaShineColor1[1][2], 0);
 
 	sdata->wumpaShineColor1[2][0] = ((sine * 0x21) >> 0xc) + 0x21;
 	sdata->wumpaShineColor1[2][1] = ((sine * 0x10) >> 0xc) + 0x10;
-	*(s16 *)&sdata->wumpaShineColor1[2][2] = 0;
+	CTR_WriteU16LE(&sdata->wumpaShineColor1[2][2], 0);
 
 	// Calculate wumpaShineColor2
 	local_10 = ((sine * 0x5f) >> 0xc) + 0x5f;
 	sdata->wumpaShineColor2[0][0] = local_10;
 	sdata->wumpaShineColor2[0][1] = local_10;
-	*(s16 *)&sdata->wumpaShineColor2[0][2] = local_10;
+	CTR_WriteU16LE(&sdata->wumpaShineColor2[0][2], (u16)local_10);
 
-	local_10 = *(int *)&sdata->wumpaShineColor2[0][0];
-	*(int *)&sdata->wumpaShineColor2[1][0] = local_10;
-	*(int *)&sdata->wumpaShineColor2[2][0] = local_10;
+	local_10 = CTR_ReadU32LE(&sdata->wumpaShineColor2[0][0]);
+	CTR_WriteU32LE(&sdata->wumpaShineColor2[1][0], local_10);
+	CTR_WriteU32LE(&sdata->wumpaShineColor2[2][0], local_10);
 
 	sdata->wumpaShineResult = (sine * 0xff >> 0xd) + 0x80;
 	return;
@@ -57,11 +57,11 @@ void UI_WeaponBG_DrawShine(struct Icon *icon, s16 posX, s16 posY, struct PrimMem
 
 	(void)unusedColor;
 
-	u32 *wumpaShine = (u32 *)&sdata->wumpaShineColor1[0][0];
+	u8 *wumpaShine = &sdata->wumpaShineColor1[0][0];
 
 	if (transparency == 3)
 	{
-		wumpaShine = (u32 *)&sdata->wumpaShineColor2[0][0];
+		wumpaShine = &sdata->wumpaShineColor2[0][0];
 	}
 
 	sVar3 = (s16)(((icon->texLayout.u1 - icon->texLayout.u0) * (int)angleX) >> 0xc);
@@ -78,10 +78,10 @@ void UI_WeaponBG_DrawShine(struct Icon *icon, s16 posX, s16 posY, struct PrimMem
 	for (i = 0; i < 4; i++)
 	{
 		p = primMem->cursor;
-		*(int *)&p->u0 = *(int *)&icon->texLayout.u0;
-		*(int *)&p->u1 = *(int *)&icon->texLayout.u1;
-		*(int *)&p->u2 = *(int *)&icon->texLayout.u2;
-		*(s16 *)&p->u3 = *(s16 *)&icon->texLayout.u3;
+		CtrGpu_WritePackedUVWord(&p->u0, CTR_ReadU32LE(&icon->texLayout.u0));
+		CtrGpu_WritePackedUVWord(&p->u1, CTR_ReadU32LE(&icon->texLayout.u1));
+		CtrGpu_WritePackedUVWord(&p->u2, CTR_ReadU32LE(&icon->texLayout.u2));
+		CtrGpu_WritePackedUV(&p->u3, CTR_ReadU16LE(&icon->texLayout.u3));
 
 		switch (i)
 		{
@@ -148,10 +148,10 @@ void UI_WeaponBG_DrawShine(struct Icon *icon, s16 posX, s16 posY, struct PrimMem
 		}
 
 		// color RGB
-		*(u32 *)&p->r0 = wumpaShine[2];
-		*(u32 *)&p->r1 = wumpaShine[1];
-		*(u32 *)&p->r2 = wumpaShine[1];
-		*(u32 *)&p->r3 = wumpaShine[0];
+		CtrGpu_WriteColorCode(&p->r0, CTR_ReadU32LE(&wumpaShine[2 * sizeof(u32)]));
+		CtrGpu_WriteColorCode(&p->r1, CTR_ReadU32LE(&wumpaShine[1 * sizeof(u32)]));
+		CtrGpu_WriteColorCode(&p->r2, CTR_ReadU32LE(&wumpaShine[1 * sizeof(u32)]));
+		CtrGpu_WriteColorCode(&p->r3, CTR_ReadU32LE(&wumpaShine[0 * sizeof(u32)]));
 
 		setPolyGT4(p);
 
@@ -175,8 +175,6 @@ void UI_TrackerBG(struct Icon *targetIcon, s16 centerX, s16 centerY, struct Prim
 	s16 rightX;
 	s16 bottomY;
 	s16 offsY;
-	s16 tmpX;
-	s16 tmpY;
 	POLY_FT4 *p;
 	int offsX;
 	int quadIndex;
@@ -206,11 +204,11 @@ void UI_TrackerBG(struct Icon *targetIcon, s16 centerX, s16 centerY, struct Prim
 		p = primMem->cursor;
 		primMem->cursor = (p + 1);
 
-		*(int *)&p->r0 = *(int *)&color;
-		*(int *)&p->u0 = *(int *)&targetIcon->texLayout.u0;
-		*(int *)&p->u1 = *(int *)&targetIcon->texLayout.u1;
-		*(s16 *)&p->u2 = *(s16 *)&targetIcon->texLayout.u2;
-		*(s16 *)&p->u3 = *(s16 *)&targetIcon->texLayout.u3;
+		CtrGpu_WriteColorCode(&p->r0, (u32)color);
+		CtrGpu_WritePackedUVWord(&p->u0, CTR_ReadU32LE(&targetIcon->texLayout.u0));
+		CtrGpu_WritePackedUVWord(&p->u1, CTR_ReadU32LE(&targetIcon->texLayout.u1));
+		CtrGpu_WritePackedUV(&p->u2, CTR_ReadU16LE(&targetIcon->texLayout.u2));
+		CtrGpu_WritePackedUV(&p->u3, CTR_ReadU16LE(&targetIcon->texLayout.u3));
 
 		setPolyFT4(p);
 

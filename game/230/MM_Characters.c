@@ -21,7 +21,7 @@ void MM_Characters_AnimateColors(u8 *colorData, s16 playerID, s16 flag)
 		trigApproximationIndex = sdata->frameCounter * 0x100 + playerID * 0x400;
 
 		// approximate trigonometry
-		trigApprox = *(u32 *)&data.trigApprox[trigApproximationIndex & 0x3ff];
+		trigApprox = CTR_ReadU32LE(&data.trigApprox[trigApproximationIndex & 0x3ff]);
 
 		if ((trigApproximationIndex & 0x400) == 0)
 		{
@@ -56,8 +56,8 @@ int MM_Characters_GetNextDriver(s16 dpad, char characterID)
 	s16 unlocked;
 	char newDriver;
 
-	nextDriver = D230.csm_Active[characterID].indexNext[dpad];
-	unlocked = D230.csm_Active[nextDriver].unlockFlags;
+	nextDriver = D230.csm_Active[(s32)characterID].indexNext[dpad];
+	unlocked = D230.csm_Active[(s32)nextDriver].unlockFlags;
 
 	// set new driver to the driver
 	// you'd get when pressing Up button
@@ -142,12 +142,9 @@ struct Model *MM_Characters_GetModelByName(int *name)
 void MM_Characters_DrawWindows(b32 boolShowDrivers)
 {
 	struct GameTracker *gGT;
-	s16 uVar2;
-	s16 uVar3;
 	struct Model *uVar4;
 	int iVar5;
 	u32 iVar6;
-	u32 uVar7;
 	int iVar8;
 	s16 sVar9;
 	struct Instance *iVar10;
@@ -412,7 +409,7 @@ void MM_Characters_BackupIDs(void)
 	{
 		// make a backup when you leave character selection,
 		// backup is restored when you go back to selection
-		sdata->characterIDs_backup[i] = data.characterIDs[i];
+		sdata->characterIDs_backup[(s32)i] = data.characterIDs[(s32)i];
 	}
 	return;
 }
@@ -424,7 +421,6 @@ void MM_Characters_PreventOverlap(void)
 	char cVar1;
 	int iVar2;
 	char *pcVar3;
-	int iVar4;
 	int iVar5;
 	int iVar6;
 	int iVar7;
@@ -487,8 +483,6 @@ void MM_Characters_RestoreIDs(void)
 {
 	struct GameTracker *gGT = sdata->gGT;
 	s16 *currID;
-	int iVar3;
-	int iVar4;
 	char i;
 	s16 uVar1;
 
@@ -503,7 +497,7 @@ void MM_Characters_RestoreIDs(void)
 	for (i = 0; i < 8; i++)
 	{
 		// set character ID to the last ID you entered
-		data.characterIDs[i] = sdata->characterIDs_backup[i];
+		data.characterIDs[(s32)i] = sdata->characterIDs_backup[(s32)i];
 	}
 
 	MM_Characters_SetMenuLayout();
@@ -518,7 +512,7 @@ void MM_Characters_RestoreIDs(void)
 		// Basically sets them to 0, 1, 2, 3, 4... up to 0xE,
 		// setting Oxide's manually to 0xF is needed to make his icon appear
 
-		D230.characterMenuID[D230.csm_Active[i].characterID] = i;
+		D230.characterMenuID[(s32)D230.csm_Active[(s32)i].characterID] = i;
 	}
 
 	for (i = 0; i < gGT->numPlyrNextGame; i++)
@@ -526,10 +520,10 @@ void MM_Characters_RestoreIDs(void)
 		// Determine if this icon is unlocked (and drawing)
 
 		// get character ID
-		currID = &data.characterIDs[i];
+		currID = &data.characterIDs[(s32)i];
 
 		// get unlock requirement for this character
-		uVar1 = D230.csm_Active[*currID].unlockFlags;
+		uVar1 = D230.csm_Active[(s32)*currID].unlockFlags;
 
 		if (
 		    // If Icon has an unlock requirement
@@ -549,14 +543,14 @@ void MM_Characters_RestoreIDs(void)
 	{
 		// set name string ID to the character ID of each player.
 		// The string will only draw if both these variables match
-		D230.characterSelect_charIDs_curr[i] = data.characterIDs[i];
-		D230.characterSelect_charIDs_desired[i] = data.characterIDs[i];
+		D230.characterSelect_charIDs_curr[(s32)i] = data.characterIDs[(s32)i];
+		D230.characterSelect_charIDs_desired[(s32)i] = data.characterIDs[(s32)i];
 
 		// something to do with transitioning between icons
-		D230.timerPerPlayer[i] = 0;
+		D230.timerPerPlayer[(s32)i] = 0;
 
 		// rotation of each driver, 90 degrees difference
-		D230.characterSelect_angle[i] = (i * 0x400) + 400;
+		D230.characterSelect_angle[(s32)i] = (i * 0x400) + 400;
 	}
 
 	MM_Characters_DrawWindows(0);
@@ -571,9 +565,9 @@ void MM_Characters_HideDrivers(void)
 
 	for (i = 0; i < 4; i++)
 	{
-		PushBuffer_Init(&gGT->pushBuffer[i], 0, 1);
+		PushBuffer_Init(&gGT->pushBuffer[(s32)i], 0, 1);
 
-		gGT->drivers[i]->instSelf->flags |= HIDE_MODEL;
+		gGT->drivers[(s32)i]->instSelf->flags |= HIDE_MODEL;
 	}
 
 	return;
@@ -585,7 +579,6 @@ void MM_Characters_MenuProc(struct RectMenu *unused)
 	int bVar2;
 	int bVar3;
 	u16 characterSelectFlags5bit;
-	s16 *psVar5;
 	s16 sVar6;
 	s16 nextDriver;
 	int iVar8;

@@ -690,7 +690,7 @@ void VehStuckProc_PlantEaten_Init(struct Thread *t, struct Driver *d)
 
 	for (i = 0; i < DRIVER_FUNC_COUNT; i++)
 	{
-		d->funcPtrs[i] = PlayerEatenFuncTable[i];
+		d->funcPtrs[(s32)i] = PlayerEatenFuncTable[(s32)i];
 	}
 }
 
@@ -1073,7 +1073,7 @@ void VehStuckProc_RevEngine_Init(struct Thread *t, struct Driver *d)
 		sdata->gGT->cameraDC[d->driverID].flags |= 8;
 	}
 
-	for (char i = 0; i < DRIVER_FUNC_COUNT; i++)
+	for (s32 i = 0; i < DRIVER_FUNC_COUNT; i++)
 	{
 		d->funcPtrs[i] = PlayerRevEngineFuncTable[i];
 	}
@@ -1294,7 +1294,7 @@ void VehStuckProc_Warp_AddDustPuff1(struct ScratchpadStruct *sps)
 	}
 
 	// position variables
-	for (char i = 0; i < 3; i++)
+	for (s32 i = 0; i < 3; i++)
 	{
 		p->axis[i].startVal = CTR_MipsAddLo(p->axis[i].startVal, CTR_MipsSll(sps->Input1.pos.v[i], 8));
 	}
@@ -1542,7 +1542,7 @@ void VehStuckProc_Warp_PhysAngular(struct Thread *th, struct Driver *d)
 		// interpolate until scale is [0x12c0, 0x960, 0x12c0],
 		// car is wide and s16
 
-		for (char i = 0; i < 3; i++)
+		for (s32 i = 0; i < 3; i++)
 		{
 			inst->scale.v[i] = VehCalc_InterpBySpeed(inst->scale.v[i], 120, 4800 >> (i & 1));
 		}
@@ -1562,7 +1562,7 @@ void VehStuckProc_Warp_PhysAngular(struct Thread *th, struct Driver *d)
 		// interpolate until scale is [0, 24000, 0],
 		// car is tall and thin
 
-		for (char i = 0; i < 3; i++)
+		for (s32 i = 0; i < 3; i++)
 		{
 			inst->scale.v[i] = VehCalc_InterpBySpeed(inst->scale.v[i], (i == 1) ? 3200 : 600, 24000 * (i & 1));
 		}

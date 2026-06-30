@@ -229,12 +229,7 @@ void howl_UnPauseChannel(struct ChannelStats *stats)
 	// enable all bits in ChannelUpdate flag
 	sdata->ChannelUpdateFlags[stats->channelID] |= 0x7e;
 
-	int *dest = (int *)&sdata->channelAttrNew[stats->channelID];
-	int *src = (int *)&attr;
-	dest[0] = src[0];
-	dest[1] = src[1];
-	dest[2] = src[2];
-	dest[3] = src[3];
+	memcpy(&sdata->channelAttrNew[stats->channelID], &attr, sizeof(attr));
 }
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x8002c784-0x8002c8a8

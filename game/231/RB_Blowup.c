@@ -102,11 +102,7 @@ void RB_Blowup_Init(struct Instance *weaponInst)
 	blowup[1] = (s32)(uintptr_t)explosionInst;
 
 	// copy position and rotation from weapon to explosion
-	*(int *)&explosionInst->matrix.m[0][0] = *(int *)&weaponInst->matrix.m[0][0];
-	*(int *)&explosionInst->matrix.m[0][2] = *(int *)&weaponInst->matrix.m[0][2];
-	*(int *)&explosionInst->matrix.m[1][1] = *(int *)&weaponInst->matrix.m[1][1];
-	*(int *)&explosionInst->matrix.m[2][0] = *(int *)&weaponInst->matrix.m[2][0];
-	explosionInst->matrix.m[2][2] = weaponInst->matrix.m[2][2];
+	CTR_MatrixCopyRot(&explosionInst->matrix, &weaponInst->matrix);
 	explosionInst->matrix.t[0] = weaponInst->matrix.t[0];
 	explosionInst->matrix.t[1] = weaponInst->matrix.t[1];
 	explosionInst->matrix.t[2] = weaponInst->matrix.t[2];
@@ -142,11 +138,7 @@ void RB_Blowup_Init(struct Instance *weaponInst)
 
 	shockwaveInst->flags |= PIXEL_LOD;
 
-	*(int *)&shockwaveInst->matrix.m[0][0] = 0x1000;
-	*(int *)&shockwaveInst->matrix.m[0][2] = 0;
-	*(int *)&shockwaveInst->matrix.m[1][1] = 0x1000;
-	*(int *)&shockwaveInst->matrix.m[2][0] = 0;
-	shockwaveInst->matrix.m[2][2] = 0x1000;
+	CTR_MatrixSetRotIdentity(&shockwaveInst->matrix);
 	shockwaveInst->matrix.t[0] = weaponInst->matrix.t[0];
 	shockwaveInst->matrix.t[1] = weaponInst->matrix.t[1];
 	shockwaveInst->matrix.t[2] = weaponInst->matrix.t[2];

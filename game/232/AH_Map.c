@@ -233,7 +233,6 @@ void AH_Map_HubItems(void *hubPtrs, s16 *param_2)
 	struct GameTracker *gGT;
 	struct AdvProgress *adv;
 	s16 levelID;
-	s16 hubID;
 	s16 sVar1;
 	s16 *trophies;
 	b32 open;

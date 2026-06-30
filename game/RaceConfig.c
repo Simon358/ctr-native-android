@@ -41,5 +41,5 @@ void RaceConfig_SaveGameOptions(void)
 
 	memcpy(&sdata->gameOptions.rwd[0], &data.rwd[0], sizeof(data.rwd));
 	sdata->gameOptions.gameMode1_vibrationFlags = sdata->gGT->gameMode1 & GAME_MODE_VIBRATION_MASK;
-	*(s16 *)&sdata->gameOptions.audioMode = howl_ModeGet() != 0;
+	CTR_WriteU16LE(&sdata->gameOptions.audioMode, (u16)(howl_ModeGet() != 0));
 }

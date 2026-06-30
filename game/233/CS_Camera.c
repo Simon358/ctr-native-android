@@ -117,14 +117,14 @@ void CS_Camera_ThTick_Boss(struct Thread *t)
 
 		for (i = 0; i < 2; i++)
 		{
-			if (mArr[i] != NULL)
+			if (mArr[(s32)i] != NULL)
 			{
 				if (i != 0)
 				{
-					mArr[i] = (struct Model *)((char *)mArr[i] + 4);
+					mArr[(s32)i] = (struct Model *)((char *)mArr[(s32)i] + 4);
 				}
 
-				gGT->modelPtr[mArr[i]->id] = mArr[i];
+				gGT->modelPtr[mArr[(s32)i]->id] = mArr[(s32)i];
 			}
 		}
 
@@ -147,12 +147,12 @@ void CS_Camera_ThTick_Boss(struct Thread *t)
 		t = 0;
 		for (i = 1; i >= 0; i--)
 		{
-			if (mArr[i] == NULL)
+			if (mArr[(s32)i] == NULL)
 			{
 				continue;
 			}
 
-			t = CS_Thread_Init(mArr[i]->id, mArr[i]->name, &initData, 0, t);
+			t = CS_Thread_Init(mArr[(s32)i]->id, mArr[(s32)i]->name, &initData, 0, t);
 			if (t == NULL)
 			{
 				continue;

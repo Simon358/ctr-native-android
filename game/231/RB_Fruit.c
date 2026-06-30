@@ -68,7 +68,7 @@ int RB_Fruit_ThCollide(struct Thread *fruitTh, struct Thread *driverTh, void *fu
 
 	fruitObj->driver = driver;
 
-	*(int *)&fruitInst->scale.x = 0;
+	CTR_WriteU32LE(&fruitInst->scale.x, 0);
 	fruitInst->scale.z = 0;
 	fruitInst->thread = NULL;
 

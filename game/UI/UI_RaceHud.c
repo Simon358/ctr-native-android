@@ -11,7 +11,6 @@ void UI_BattleDrawHeadArrows(struct Driver *player)
 		POLY_G3 g3;
 	} G3_SEMITRANS;
 
-	int playerDistance;
 	u16 currTeam;
 	s16 sVar1;
 	s16 sVar3;
@@ -128,13 +127,13 @@ void UI_BattleDrawHeadArrows(struct Driver *player)
 		color = *(u32 *)data.ptrColor[PLAYER_BLUE + currTeam];
 
 		// it's all the same color
-		*(int *)&p->g3.r0 = (color & 0xffffff) | 0x30000000;
-		*(int *)&p->g3.r1 = color | 0x30000000;
-		*(int *)&p->g3.r2 = color | 0x30000000;
+		CtrGpu_WriteColorCode(&p->g3.r0, (color & 0xffffff) | 0x30000000);
+		CtrGpu_WriteColorCode(&p->g3.r1, color | 0x30000000);
+		CtrGpu_WriteColorCode(&p->g3.r2, color | 0x30000000);
 
 		uint32_t *ot = gGT->pushBuffer[playerID].ptrOT;
 
-		*(int *)p = CtrGpu_PackOTTag(*ot, 0x8000000);
+		p->tag = CtrGpu_PackOTTag(*ot, 0x8000000);
 		*ot = CtrGpu_PrimToOTLink24(p);
 	}
 }
@@ -389,9 +388,9 @@ LAB_8004fe8c:
 			}
 			primMem->cursor = p + 1;
 
-			*(int *)&p->r0 = rgb0;
-			*(int *)&p->r1 = 0x30ffffff;
-			*(int *)&p->r2 = rgb2;
+			CtrGpu_WriteColorCode(&p->r0, rgb0);
+			CtrGpu_WriteColorCode(&p->r1, 0x30ffffff);
+			CtrGpu_WriteColorCode(&p->r2, rgb2);
 
 			sVar4 = orientation * sVar6;
 			p->x0 = screenPosX + sVar4;
@@ -406,7 +405,7 @@ LAB_8004fe8c:
 
 			ot = gGT->pushBuffer[driverid].ptrOT;
 
-			*(int *)p = CtrGpu_PackOTTag(*ot, 0x6000000);
+			p->tag = CtrGpu_PackOTTag(*ot, 0x6000000);
 			*ot = CtrGpu_PrimToOTLink24(p);
 
 			// next Prim
@@ -438,17 +437,17 @@ LAB_8004fe8c:
 				rgb2 = 0x3000bbff;
 			}
 
-			*(int *)&p->r0 = rgb0;
-			*(int *)&p->r1 = rgb1;
-			*(int *)&p->r2 = rgb2;
+			CtrGpu_WriteColorCode(&p->r0, rgb0);
+			CtrGpu_WriteColorCode(&p->r1, rgb1);
+			CtrGpu_WriteColorCode(&p->r2, rgb2);
 
-			*(int *)&p->x0 = *(int *)&pLast->x0;
-			*(int *)&p->x1 = *(int *)&pLast->x1;
+			CtrGpu_WritePackedXY(&p->x0, CTR_ReadU32LE(&pLast->x0));
+			CtrGpu_WritePackedXY(&p->x1, CTR_ReadU32LE(&pLast->x1));
 			p->x2 = pLast->x2;
 
 			p->y2 = screenPosY + sVar5 - 12;
 
-			*(int *)p = CtrGpu_PackOTTag(*ot, 0x6000000);
+			p->tag = CtrGpu_PackOTTag(*ot, 0x6000000);
 			*ot = CtrGpu_PrimToOTLink24(p);
 		}
 	}

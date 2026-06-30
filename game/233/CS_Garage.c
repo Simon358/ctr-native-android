@@ -198,10 +198,10 @@ void CS_Garage_MenuProc(struct RectMenu *param_1)
 				primMem->cursor = p + 1;
 
 				// color data
-				*(int *)&p->r0 = barColor[0] | 0x38000000;
-				*(int *)&p->r1 = barColor[1] | 0x38000000;
-				*(int *)&p->r2 = barColor[0] | 0x38000000;
-				*(int *)&p->r3 = barColor[1] | 0x38000000;
+				CtrGpu_WriteColorCode(&p->r0, barColor[0] | 0x38000000);
+				CtrGpu_WriteColorCode(&p->r1, barColor[1] | 0x38000000);
+				CtrGpu_WriteColorCode(&p->r2, barColor[0] | 0x38000000);
+				CtrGpu_WriteColorCode(&p->r3, barColor[1] | 0x38000000);
 
 				s16 segmentX = statBarPosX + segmentStart;
 
@@ -263,7 +263,7 @@ void CS_Garage_MenuProc(struct RectMenu *param_1)
 	}
 
 	// Color data
-	u32 *arrowColors = data.ptrColor[arrowColor];
+	u32 *arrowColors = data.ptrColor[(s32)arrowColor];
 
 	int nameLen = DecalFont_GetLineWidth(name, 1) >> 1;
 

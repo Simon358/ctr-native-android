@@ -293,13 +293,11 @@ void MainInit_Drivers(struct GameTracker *gGT)
 	char i;
 	char numPlyrCurrGame = gGT->numPlyrCurrGame;
 	u8 numDrivers;
-	u32 uVar3;
 	int gameMode = gGT->gameMode1;
-	struct Driver *d;
 
 	for (i = 0; i < 8; i++)
 	{
-		gGT->drivers[i] = NULL;
+		gGT->drivers[(s32)i] = NULL;
 	}
 
 	gGT->numBotsNextGame = 0;
@@ -321,7 +319,7 @@ void MainInit_Drivers(struct GameTracker *gGT)
 	// because of threadBucket linked list order
 	for (i = numPlyrCurrGame - 1; i >= 0; i--)
 	{
-		gGT->drivers[i] = VehBirth_Player(i);
+		gGT->drivers[(s32)i] = VehBirth_Player(i);
 	}
 
 	// spawn all AIs
@@ -388,7 +386,7 @@ void MainInit_Drivers(struct GameTracker *gGT)
 		// fill up 4 players
 		for (i = numPlyrCurrGame; i < 4; i++)
 		{
-			gGT->drivers[i] = VehBirth_Player(i);
+			gGT->drivers[(s32)i] = VehBirth_Player(i);
 		}
 	}
 
@@ -416,7 +414,6 @@ void MainInit_FinalizeInit(struct GameTracker *gGT)
 {
 	int i;
 	int numPlyr;
-	u8 *puVar3;
 	struct Driver *d;
 	struct Level *lev1;
 	struct Instance *inst;

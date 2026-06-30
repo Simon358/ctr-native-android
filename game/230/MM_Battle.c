@@ -26,9 +26,9 @@ void MM_Battle_DrawIcon_Weapon(struct Icon *icon, u32 posX, int posY, struct Pri
 
 	POLY_FT4 *p = (POLY_FT4 *)primMem->cursor;
 
-	u32 uv0 = *(u32 *)&icon->texLayout.u0;
-	u32 uv1 = *(u32 *)&icon->texLayout.u1;
-	u32 uv2 = *(u32 *)&icon->texLayout.u2;
+	u32 uv0 = CTR_ReadU32LE(&icon->texLayout.u0);
+	u32 uv1 = CTR_ReadU32LE(&icon->texLayout.u1);
+	u32 uv2 = CTR_ReadU32LE(&icon->texLayout.u2);
 	s32 scaledWidth = (((s32)((u8)icon->texLayout.u1 - (u8)icon->texLayout.u0)) * param_7) >> 0xc;
 	s32 scaledHeight = (((s32)((u8)icon->texLayout.v2 - (u8)icon->texLayout.v0)) * param_7) >> 0xc;
 	u32 code = 0x2c000000;
@@ -44,11 +44,11 @@ void MM_Battle_DrawIcon_Weapon(struct Icon *icon, u32 posX, int posY, struct Pri
 		uv1 = (uv1 & 0xff9fffff) | ((((u32)(u8)transparency - 1) << 0x15));
 	}
 
-	*(u32 *)&p->r0 = (*color & 0xffffff) | code;
-	*(u32 *)&p->u0 = uv0;
-	*(u32 *)&p->u1 = uv1;
-	*(u16 *)&p->u2 = (u16)uv2;
-	*(u16 *)&p->u3 = (u16)(uv2 >> 0x10);
+	CtrGpu_WriteColorCode(&p->r0, (*color & 0xffffff) | code);
+	CtrGpu_WritePackedUVWord(&p->u0, uv0);
+	CtrGpu_WritePackedUVWord(&p->u1, uv1);
+	CtrGpu_WritePackedUV(&p->u2, (u16)uv2);
+	CtrGpu_WritePackedUV(&p->u3, (u16)(uv2 >> 0x10));
 
 	if ((param_8 & 1) != 0)
 	{
@@ -57,17 +57,17 @@ void MM_Battle_DrawIcon_Weapon(struct Icon *icon, u32 posX, int posY, struct Pri
 
 		if ((s16)param_8 == 1)
 		{
-			*(u32 *)&p->x1 = posX | packedY;
-			*(u32 *)&p->x3 = sidewaysX | packedY;
-			*(u32 *)&p->x0 = posX | packedSideY;
-			*(u32 *)&p->x2 = sidewaysX | packedSideY;
+			CtrGpu_WritePackedXY(&p->x1, posX | packedY);
+			CtrGpu_WritePackedXY(&p->x3, sidewaysX | packedY);
+			CtrGpu_WritePackedXY(&p->x0, posX | packedSideY);
+			CtrGpu_WritePackedXY(&p->x2, sidewaysX | packedSideY);
 		}
 		else
 		{
-			*(u32 *)&p->x2 = posX | packedY;
-			*(u32 *)&p->x0 = sidewaysX | packedY;
-			*(u32 *)&p->x3 = posX | packedSideY;
-			*(u32 *)&p->x1 = sidewaysX | packedSideY;
+			CtrGpu_WritePackedXY(&p->x2, posX | packedY);
+			CtrGpu_WritePackedXY(&p->x0, sidewaysX | packedY);
+			CtrGpu_WritePackedXY(&p->x3, posX | packedSideY);
+			CtrGpu_WritePackedXY(&p->x1, sidewaysX | packedSideY);
 		}
 	}
 	else
@@ -77,22 +77,22 @@ void MM_Battle_DrawIcon_Weapon(struct Icon *icon, u32 posX, int posY, struct Pri
 
 		if (((u32)param_8 << 0x10) == 0)
 		{
-			*(u32 *)&p->x0 = posX | packedY;
-			*(u32 *)&p->x1 = rightX | packedY;
-			*(u32 *)&p->x2 = posX | packedBottomY;
-			*(u32 *)&p->x3 = rightX | packedBottomY;
+			CtrGpu_WritePackedXY(&p->x0, posX | packedY);
+			CtrGpu_WritePackedXY(&p->x1, rightX | packedY);
+			CtrGpu_WritePackedXY(&p->x2, posX | packedBottomY);
+			CtrGpu_WritePackedXY(&p->x3, rightX | packedBottomY);
 		}
 		else
 		{
-			*(u32 *)&p->x3 = posX | packedY;
-			*(u32 *)&p->x2 = rightX | packedY;
-			*(u32 *)&p->x1 = posX | packedBottomY;
-			*(u32 *)&p->x0 = rightX | packedBottomY;
+			CtrGpu_WritePackedXY(&p->x3, posX | packedY);
+			CtrGpu_WritePackedXY(&p->x2, rightX | packedY);
+			CtrGpu_WritePackedXY(&p->x1, posX | packedBottomY);
+			CtrGpu_WritePackedXY(&p->x0, rightX | packedBottomY);
 		}
 	}
 
-	*(int *)p = CtrGpu_PackOTTag(*(uint32_t *)ot, 0x9000000);
-	*(int *)ot = (int)CtrGpu_PrimToOTLink24(p);
+	p->tag = CtrGpu_PackOTTag(*ot, 0x9000000);
+	*ot = CtrGpu_PrimToOTLink24(p);
 
 	primMem->cursor = p + 1;
 }
@@ -118,7 +118,6 @@ void MM_Battle_MenuProc(struct RectMenu *unused)
 	int iVar13;
 	int iVar16;
 	u32 uVar17;
-	s16 *puVar18;
 	s16 sVar20;
 	RECT local_60;
 	u16 local_60b[4];
@@ -129,7 +128,6 @@ void MM_Battle_MenuProc(struct RectMenu *unused)
 	RECT local_40;
 	s16 local_38;
 	s16 local_36;
-	Color color_;
 
 	struct RectMenu *box;
 	struct GameTracker *gGT = sdata->gGT;

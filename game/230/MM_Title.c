@@ -275,7 +275,7 @@ void MM_Title_KillThread(void)
 		// destroy six instances
 		for (n = 0; n < 6; n++)
 		{
-			INSTANCE_Death(title->i[n]);
+			INSTANCE_Death(title->i[(s32)n]);
 		}
 
 		title->t->flags |= THREAD_FLAG_DEAD;
@@ -317,11 +317,11 @@ void MM_Title_SetTrophyDPP(void)
 
 	e4 = idpp2->otRangeNormal;
 	e8 = idpp2->otRangeSecondary;
-	dc = *(int *)&idpp2->depthOffset[0];
+	dc = CTR_ReadU32LE(&idpp2->depthOffset[0]);
 
 	idpp1->otRangeNormal = e4;
 	idpp1->otRangeSecondary = e8;
-	*(int *)&idpp1->depthOffset[0] = dc;
+	CTR_WriteU32LE(&idpp1->depthOffset[0], dc);
 }
 
 // NOTE(aalhendi): ASM-verified against NTSC-U 926 overlay 230 0x800ac1f0-0x800ac350.
@@ -556,21 +556,21 @@ void MM_Title_Init(void)
 		// create 6 instances
 		for (n = 0; n < 6; n++)
 		{
-			inst = INSTANCE_Birth3D(gGT->modelPtr[D230.titleInstances[n].modelID], 0, t);
+			inst = INSTANCE_Birth3D(gGT->modelPtr[D230.titleInstances[(s32)n].modelID], 0, t);
 
 			// store instance
-			title->i[n] = inst;
+			title->i[(s32)n] = inst;
 
-			if (D230.titleInstances[n].boolTrophy)
+			if (D230.titleInstances[(s32)n].boolTrophy)
 			{
 				inst->flags |= VISIBLE_DURING_GAMEPLAY;
 			}
 
-			*(int *)&inst->matrix.m[0][0] = 0x5000;
-			*(int *)&inst->matrix.m[0][2] = 0;
-			*(int *)&inst->matrix.m[1][1] = 0x5000;
-			*(int *)&inst->matrix.m[2][0] = 0;
-			*(int *)&inst->matrix.m[2][2] = 0x5000;
+			CTR_WriteU32LE(&inst->matrix.m[0][0], 0x5000);
+			CTR_WriteU32LE(&inst->matrix.m[0][2], 0);
+			CTR_WriteU32LE(&inst->matrix.m[1][1], 0x5000);
+			CTR_WriteU32LE(&inst->matrix.m[2][0], 0);
+			inst->matrix.m[2][2] = 0x5000;
 
 			inst->matrix.t[0] = 0;
 			inst->matrix.t[1] = 0;
@@ -582,7 +582,7 @@ void MM_Title_Init(void)
 			struct InstDrawPerPlayer *idpp = INST_GETIDPP(inst);
 			for (m = 1; m < gGT->numPlyrCurrGame; m++)
 			{
-				idpp[m].pushBuffer = 0;
+				idpp[(s32)m].pushBuffer = 0;
 			}
 		}
 

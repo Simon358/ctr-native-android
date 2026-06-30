@@ -359,7 +359,6 @@ void MM_TrackSelect_MenuProc(struct RectMenu *menu)
 	RECT r;
 	RECT q;
 	RECT p;
-	u32 local_44;
 	s16 numTracks;
 
 	struct MainMenu_LevelRow *selectMenu;

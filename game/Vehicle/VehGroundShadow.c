@@ -112,12 +112,6 @@ static void VehGroundShadow_LoadGteLightMatrix(const MATRIX *m)
 	CTC2(VehGroundShadow_ReadWord(m, 0x10), 12);
 }
 
-static void VehGroundShadow_LoadV0(s32 x, s32 y, s32 z)
-{
-	MTC2(VehGroundShadow_PackXY(x, y), 0);
-	MTC2((u32)z, 1);
-}
-
 static void VehGroundShadow_LoadRtptVectors(s16 points[VEH_GROUND_SHADOW_NUM_POINTS][3], int start)
 {
 	MTC2(VehGroundShadow_PackXY(points[start + 0][0], points[start + 0][1]), 0);

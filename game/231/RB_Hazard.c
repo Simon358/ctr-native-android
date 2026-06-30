@@ -181,7 +181,6 @@ void RB_Hazard_ThCollide_Generic(struct Thread *thread)
 	struct MineWeapon *mw;
 
 	struct Instance *crateInst;
-	struct Thread *crateThread;
 	struct Crate *crateObj;
 
 	int modelID;

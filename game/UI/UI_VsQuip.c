@@ -528,7 +528,7 @@ static const SVec2 s_battleStatsPos3P4P[4] = {
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800552a4-0x8005572c.
 void UI_VsWaitForPressX(void)
 {
-	char i, j;
+	s32 i, j;
 	u8 numAttacked;
 	s16 sVar4;
 	int string;

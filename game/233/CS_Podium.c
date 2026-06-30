@@ -126,7 +126,7 @@ void CS_Podium_Prize_Spin(struct Instance *inst, s16 *prize)
 		s16 sine1;
 		s16 cos1;
 
-		trigApprox = *(u32 *)&data.trigApprox[angle & 0x3ff];
+		trigApprox = CTR_ReadU32LE(&data.trigApprox[angle & 0x3ff]);
 		if ((angle & 0x400) == 0)
 		{
 			cos1 = (s16)(trigApprox >> 16);
@@ -155,7 +155,7 @@ void CS_Podium_Prize_Spin(struct Instance *inst, s16 *prize)
 		s16 sine2;
 		s16 cos2;
 
-		trigApprox = *(u32 *)&data.trigApprox[angle & 0x3ff];
+		trigApprox = CTR_ReadU32LE(&data.trigApprox[angle & 0x3ff]);
 		if ((angle & 0x400) == 0)
 		{
 			cos2 = (s16)(trigApprox >> 16);

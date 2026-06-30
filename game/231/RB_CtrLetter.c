@@ -80,7 +80,6 @@ SVec3 letterLightDir = {0x94F, 0x94F, -0x94F};
 
 void RB_CtrLetter_ThTick(struct Thread *t)
 {
-	int sine;
 	struct Instance *letterInst;
 	struct CtrLetter *letterObj;
 

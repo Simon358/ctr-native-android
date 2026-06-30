@@ -603,7 +603,7 @@ void AH_Door_LInB(struct Instance *inst)
 	instPtrArr = &woodDoor->keyInst[0];
 	for (i = 0; i < 4; i++)
 	{
-		instPtrArr[i] = NULL;
+		instPtrArr[(s32)i] = NULL;
 	}
 
 	woodDoor->frameCount_unused = 0;
@@ -617,9 +617,9 @@ void AH_Door_LInB(struct Instance *inst)
 	woodDoor->doorRot.z = 0;
 	woodDoor->doorID = 0;
 
-	for (i = 5; inst->name[i] != '\0'; i++)
+	for (i = 5; inst->name[(s32)i] != '\0'; i++)
 	{
-		woodDoor->doorID = woodDoor->doorID * 10 + inst->name[i] - '0';
+		woodDoor->doorID = woodDoor->doorID * 10 + inst->name[(s32)i] - '0';
 	}
 
 	// Level ID is Glacier Park

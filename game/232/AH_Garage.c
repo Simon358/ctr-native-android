@@ -77,7 +77,6 @@ void AH_Garage_ThTick(struct Thread *t)
 	int bottom;
 	s16 *check;
 	u32 bitIndex;
-	u32 uVar5;
 	u32 uVar8;
 	int dist[3];
 	int pos[3];
@@ -213,7 +212,7 @@ LAB_800aeb6c:
 		for (i = 0; i < 4; i++)
 		{
 			// if any trophy on this hub is not unlocked
-			if (CHECK_ADV_BIT(adv->rewards, check[i] + ADV_REWARD_FIRST_TROPHY) == 0)
+			if (CHECK_ADV_BIT(adv->rewards, check[(s32)i] + ADV_REWARD_FIRST_TROPHY) == 0)
 			{
 				// boss is not open
 				goto LAB_800aebd0;
@@ -418,11 +417,7 @@ void AH_Garage_LInB(struct Instance *inst)
 		garageTop = INSTANCE_Birth3D(gGT->modelPtr[STATIC_GARAGETOP], R232.s_garagetop, t);
 
 		// copy matrix from one instance to the other
-		*(int *)&garageTop->matrix.m[0][0] = *(int *)&inst->matrix.m[0][0];
-		*(int *)&garageTop->matrix.m[0][2] = *(int *)&inst->matrix.m[0][2];
-		*(int *)&garageTop->matrix.m[1][1] = *(int *)&inst->matrix.m[1][1];
-		*(int *)&garageTop->matrix.m[2][0] = *(int *)&inst->matrix.m[2][0];
-		garageTop->matrix.m[2][2] = inst->matrix.m[2][2];
+		CTR_MatrixCopyRot(&garageTop->matrix, &inst->matrix);
 		garageTop->matrix.t[0] = inst->matrix.t[0];
 		garageTop->matrix.t[1] = inst->matrix.t[1];
 		garageTop->matrix.t[2] = inst->matrix.t[2];
@@ -467,7 +462,7 @@ void AH_Garage_LInB(struct Instance *inst)
 		for (i = 0; i < 4; i++)
 		{
 			// if any trophy on this hub is not unlocked
-			if (CHECK_ADV_BIT(adv->rewards, check[i] + ADV_REWARD_FIRST_TROPHY) == 0)
+			if (CHECK_ADV_BIT(adv->rewards, check[(s32)i] + ADV_REWARD_FIRST_TROPHY) == 0)
 			{
 				// boss is not open
 				goto GarageLocked;

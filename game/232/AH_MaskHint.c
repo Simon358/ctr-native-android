@@ -192,7 +192,7 @@ void AH_MaskHint_LerpVol(int param_1)
 	int volume;
 	u8 backup;
 
-	for (char i = 0; i < 3; i++)
+	for (s32 i = 0; i < 3; i++)
 	{
 		backup = D232.audioBackup[i];
 
@@ -317,12 +317,13 @@ void AH_MaskHint_Update()
 		sdata->instMaskHints3D = VehTalkMask_Init();
 		struct Instance *mhInst = sdata->instMaskHints3D;
 
-		CTR_MatrixToRot((SVECTOR *)&rot, &dInst->matrix, 0x11);
+		SVECTOR matrixRot;
+		CTR_MatrixToRot(&matrixRot, &dInst->matrix, 0x11);
 
 		// not a typo
-		D232.maskCamRotStart.x = rot.y & 0xfff;
-		D232.maskCamRotStart.z = rot.z & 0xfff;
-		D232.maskCamRotStart.y = rot.x & 0xfff;
+		D232.maskCamRotStart.x = matrixRot.vy & 0xfff;
+		D232.maskCamRotStart.z = matrixRot.vz & 0xfff;
+		D232.maskCamRotStart.y = matrixRot.vx & 0xfff;
 
 		CTR_COPY_VEC3(D232.maskCamPosStart.v, dInst->matrix.t);
 

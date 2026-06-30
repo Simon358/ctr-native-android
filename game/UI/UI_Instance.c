@@ -5,8 +5,6 @@ struct Instance *UI_INSTANCE_BirthWithThread(int param_1, int param_2, int param
 
 {
 	s16 modelID;
-	s16 sVar2;
-	s16 sVar3;
 	s16 uVar5;
 	struct Thread *hudThread;
 	s32 lVar7;

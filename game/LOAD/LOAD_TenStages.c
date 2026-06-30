@@ -33,7 +33,6 @@ int LOAD_TenStages(struct GameTracker *gGT, int loadingStage, struct BigHeader *
 {
 	s16 sVar4;
 	int iVar5;
-	u32 uVar6;
 	int iVar9;
 	int iVar12;
 	u32 uVar16;

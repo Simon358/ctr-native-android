@@ -54,7 +54,7 @@ void UI_Map_DrawMap(struct Icon *mapTop, struct Icon *mapBottom, s16 posX, s16 p
 	    ((gGT->gameMode1 & MAIN_MENU) != 0))
 	{
 		// r0, g0, b0 (vertex color)
-		*(int *)&p->r0 = color;
+		CtrGpu_WriteColorCode(&p->r0, color);
 
 		// position of the top margin of the primitive for the top half of the minimap
 		mapTopHeight = posY - (((u16)mapTop->texLayout.v2 - (u16)mapTop->texLayout.v0) + mapBottomHeight);
@@ -70,7 +70,7 @@ void UI_Map_DrawMap(struct Icon *mapTop, struct Icon *mapBottom, s16 posX, s16 p
 	}
 
 	// r0, g0, b0 (vertex color)
-	*(int *)&p->r0 = color;
+	CtrGpu_WriteColorCode(&p->r0, color);
 
 	p->y0 = posY - mapBottomHeight;
 	p->y1 = posY - mapBottomHeight;
@@ -102,10 +102,10 @@ void UI_Map_DrawMap_ExtraFunc(struct Icon *icon, POLY_FT4 *p, s16 posX, s16 empt
 	setPolyFT4(p);
 
 	// UVs
-	*(int *)&p->u0 = *(int *)&icon->texLayout.u0;
-	*(int *)&p->u1 = *(int *)&icon->texLayout.u1;
-	*(int *)&p->u2 = *(int *)&icon->texLayout.u2;
-	*(s16 *)&p->u3 = *(s16 *)&icon->texLayout.u3;
+	CtrGpu_WritePackedUVWord(&p->u0, CTR_ReadU32LE(&icon->texLayout.u0));
+	CtrGpu_WritePackedUVWord(&p->u1, CTR_ReadU32LE(&icon->texLayout.u1));
+	CtrGpu_WritePackedUVWord(&p->u2, CTR_ReadU32LE(&icon->texLayout.u2));
+	CtrGpu_WritePackedUV(&p->u3, CTR_ReadU16LE(&icon->texLayout.u3));
 
 	if (transparency != 0)
 	{

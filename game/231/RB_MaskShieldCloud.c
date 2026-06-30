@@ -115,9 +115,9 @@ void RB_MaskWeapon_ThTick(struct Thread *maskTh)
 	{
 		for (i = 0; i < numPlyr; i++)
 		{
-			pb = &gGT->pushBuffer[i];
-			maskIdpp[i].pushBuffer = pb;
-			beamIdpp[i].pushBuffer = pb;
+			pb = &gGT->pushBuffer[(s32)i];
+			maskIdpp[(s32)i].pushBuffer = pb;
+			beamIdpp[(s32)i].pushBuffer = pb;
 		}
 	}
 
@@ -130,8 +130,8 @@ void RB_MaskWeapon_ThTick(struct Thread *maskTh)
 				continue;
 			}
 
-			maskIdpp[i].pushBuffer = NULL;
-			beamIdpp[i].pushBuffer = NULL;
+			maskIdpp[(s32)i].pushBuffer = NULL;
+			beamIdpp[(s32)i].pushBuffer = NULL;
 		}
 	}
 
@@ -275,18 +275,10 @@ void RB_ShieldDark_ThTick_Pop(struct Thread *t)
 	LHMatrix_Parent(instColor, driverOwner->instSelf, (SVECTOR *)rot.v);
 
 	// set rotation
-	*(int *)&instDark->matrix.m[0][0] = 0x1000;
-	*(int *)&instDark->matrix.m[0][2] = 0;
-	*(int *)&instDark->matrix.m[1][1] = 0x1000;
-	*(int *)&instDark->matrix.m[2][0] = 0;
-	instDark->matrix.m[2][2] = 0x1000;
+	CTR_MatrixSetRotIdentity(&instDark->matrix);
 
 	// set rotation
-	*(int *)&instColor->matrix.m[0][0] = 0x1000;
-	*(int *)&instColor->matrix.m[0][2] = 0;
-	*(int *)&instColor->matrix.m[1][1] = 0x1000;
-	*(int *)&instColor->matrix.m[2][0] = 0;
-	instColor->matrix.m[2][2] = 0x1000;
+	CTR_MatrixSetRotIdentity(&instColor->matrix);
 
 	int animFrame = sh->animFrame;
 
@@ -438,18 +430,10 @@ void RB_ShieldDark_ThTick_Grow(struct Thread *th)
 	LHMatrix_Parent(highlightInst, driverInst, (SVECTOR *)pos.v);
 
 	// set rotation variables
-	*(int *)&shieldInst->matrix.m[0][0] = 0x1000;
-	*(int *)&shieldInst->matrix.m[0][2] = 0;
-	*(int *)&shieldInst->matrix.m[1][1] = 0x1000;
-	*(int *)&shieldInst->matrix.m[2][0] = 0;
-	shieldInst->matrix.m[2][2] = 0x1000;
+	CTR_MatrixSetRotIdentity(&shieldInst->matrix);
 
 	// set rotation variables
-	*(int *)&colorInst->matrix.m[0][0] = 0x1000;
-	*(int *)&colorInst->matrix.m[0][2] = 0;
-	*(int *)&colorInst->matrix.m[1][1] = 0x1000;
-	*(int *)&colorInst->matrix.m[2][0] = 0;
-	colorInst->matrix.m[2][2] = 0x1000;
+	CTR_MatrixSetRotIdentity(&colorInst->matrix);
 
 	// convert 3 rotation shorts into rotation matrix
 	ConvertRotToMatrix(&highlightInst->matrix, &shield->highlightRot);
@@ -594,11 +578,7 @@ void RB_ShieldDark_ThTick_Grow(struct Thread *th)
 	}
 
 	// copy position and rotation from one instance to another
-	*(int *)&bombInst->matrix.m[0][0] = *(int *)&shieldInst->matrix.m[0][0];
-	*(int *)&bombInst->matrix.m[0][2] = *(int *)&shieldInst->matrix.m[0][2];
-	*(int *)&bombInst->matrix.m[1][1] = *(int *)&shieldInst->matrix.m[1][1];
-	*(int *)&bombInst->matrix.m[2][0] = *(int *)&shieldInst->matrix.m[2][0];
-	bombInst->matrix.m[2][2] = shieldInst->matrix.m[2][2];
+	CTR_MatrixCopyRot(&bombInst->matrix, &shieldInst->matrix);
 	bombInst->matrix.t[0] = shieldInst->matrix.t[0];
 	bombInst->matrix.t[1] = shieldInst->matrix.t[1];
 	bombInst->matrix.t[2] = shieldInst->matrix.t[2];
@@ -687,8 +667,6 @@ void RB_RainCloud_ThTick(struct Thread *t)
 {
 	s16 animFrame;
 	int numFrames;
-	int reduce;
-	int rng;
 	struct Instance *inst;
 	struct Driver *d;
 	struct RainCloud *rcloud;
@@ -819,11 +797,7 @@ void RB_RainCloud_Init(struct Driver *d)
 
 		cloudInst->thread->funcThDestroy = PROC_DestroyInstance;
 
-		*(int *)&cloudInst->matrix.m[0][0] = 0x1000;
-		*(int *)&cloudInst->matrix.m[0][2] = 0;
-		*(int *)&cloudInst->matrix.m[1][1] = 0x1000;
-		*(int *)&cloudInst->matrix.m[2][0] = 0;
-		cloudInst->matrix.m[2][2] = 0x1000;
+		CTR_MatrixSetRotIdentity(&cloudInst->matrix);
 
 		// cloud->posX = driver->posX
 		cloudInst->matrix.t[0] = d->instSelf->matrix.t[0];

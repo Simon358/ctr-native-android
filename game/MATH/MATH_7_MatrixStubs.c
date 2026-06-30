@@ -2,12 +2,12 @@
 
 static inline u32 MATH_Matrix_ReadWord(const void *ptr, s32 offset)
 {
-	return *(u32 *)(void *)((u8 *)ptr + offset);
+	return CTR_ReadU32LE((u8 *)ptr + offset);
 }
 
 static inline void MATH_Matrix_WriteWord(void *ptr, s32 offset, u32 value)
 {
-	*(u32 *)(void *)((u8 *)ptr + offset) = value;
+	CTR_WriteU32LE((u8 *)ptr + offset, value);
 }
 
 static inline u32 MATH_Matrix_NegLowWord(u32 value)
@@ -22,7 +22,7 @@ static inline u32 MATH_Matrix_NegHighWord(u32 value)
 
 static void MATH_Matrix_TrigSinCos(u32 angle, u32 *sinOut, u32 *cosOut)
 {
-	u32 trig = *(u32 *)&data.trigApprox[angle & 0x3ff];
+	u32 trig = CTR_ReadU32LE(&data.trigApprox[angle & 0x3ff]);
 	u32 quadrant = angle & 0xc00;
 
 	if (quadrant == 0)

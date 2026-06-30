@@ -8,7 +8,7 @@ struct AnimateQuadTrig
 
 static struct AnimateQuadTrig AnimateQuad_GetTrig(s32 angle)
 {
-	u32 packed = *(u32 *)&data.trigApprox[angle & 0x3ff];
+	u32 packed = CTR_ReadU32LE(&data.trigApprox[angle & 0x3ff]);
 	struct AnimateQuadTrig trig;
 
 	if ((angle & 0x400) == 0)
@@ -54,7 +54,7 @@ void AnimateQuadVertex(int timer, struct SCVert *scVert, u32 *visBits)
 		u32 animatedXy = offsetPosXy + (u32)(trig.sin >> 7);
 		u32 animatedZw = offsetPosZw + (u32)(trig.cos >> 7);
 
-		*(u32 *)&levVert->pos = animatedXy | originalY;
+		CTR_WriteU32LE(&levVert->pos, animatedXy | originalY);
 		levVert->pos.z = (s16)animatedZw;
 	}
 
@@ -65,8 +65,8 @@ void AnimateQuadVertex(int timer, struct SCVert *scVert, u32 *visBits)
 		gte_dpcs();
 
 		u32 color = MFC2(22);
-		*(u32 *)&levVert->color_hi[0] = color;
-		*(u32 *)&levVert->color_lo[0] = color;
+		CTR_WriteU32LE(&levVert->color_hi[0], color);
+		CTR_WriteU32LE(&levVert->color_lo[0], color);
 	}
 }
 
@@ -116,8 +116,8 @@ void AnimateWaterVertex(struct WaterVert *waterVert, u16 colorOffset, int firstO
 
 	struct LevVertex *levVert = waterVert->v;
 	struct OVert *waterColor = waterVert->w;
-	u16 first = *(u16 *)((char *)waterColor + firstOffset);
-	u16 second = *(u16 *)((char *)waterColor + secondOffset);
+	u16 first = CTR_ReadU16LE((char *)waterColor + firstOffset);
+	u16 second = CTR_ReadU16LE((char *)waterColor + secondOffset);
 
 	u32 rgb = (first & 0x3f);
 	u32 farR = (second & 0x3f) << 4;
@@ -136,17 +136,15 @@ void AnimateWaterVertex(struct WaterVert *waterVert, u16 colorOffset, int firstO
 	gte_dpcs();
 
 	u32 color = MFC2(22);
-	*(u16 *)&levVert->color_lo[0] = (u16)(color + colorOffset);
+	CTR_WriteU16LE(&levVert->color_lo[0], (u16)(color + colorOffset));
 
 	color = (color >> 16) & 0xff;
-	*(u32 *)&levVert->color_hi[0] = (color << 16) | (color << 8) | color;
+	CTR_WriteU32LE(&levVert->color_hi[0], (color << 16) | (color << 8) | color);
 }
 
 static u16 AnimateWater_ReadTextureHalf(const struct TextureLayout *layout, int offset)
 {
-	const u8 *bytes = (const u8 *)layout + offset;
-
-	return (u16)((u16)bytes[0] | ((u16)bytes[1] << 8));
+	return CTR_ReadU16LE((const u8 *)layout + offset);
 }
 
 static void AnimateWater_Common(int timer, int numWaterVertices, struct WaterVert *waterVert, const struct TextureLayout *waterEnvMap, int numLists,

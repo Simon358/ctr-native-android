@@ -509,11 +509,7 @@ void AH_Pause_Update()
 				idpp[j].pushBuffer = 0;
 			}
 
-			*(int *)&inst->matrix.m[0][0] = 0x1000;
-			*(int *)&inst->matrix.m[0][2] = 0;
-			*(int *)&inst->matrix.m[1][1] = 0x1000;
-			*(int *)&inst->matrix.m[2][0] = 0;
-			inst->matrix.m[2][2] = 0x1000;
+			CTR_MatrixSetRotIdentity(&inst->matrix);
 			inst->matrix.t[2] = 0x100;
 		}
 	}

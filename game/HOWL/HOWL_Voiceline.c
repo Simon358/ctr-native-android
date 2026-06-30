@@ -4,7 +4,7 @@
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x8002c918-0x8002caa8
 void Voiceline_PoolInit(void)
 {
-	char index;
+	s32 index;
 
 	sdata->criticalSectionCount = 0;
 
@@ -74,7 +74,7 @@ void Voiceline_PoolInit(void)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x8002caa8-0x8002cae0
 void Voiceline_ClearTimeStamp(void)
 {
-	for (char i = 0; i < 16; i++)
+	for (s32 i = 0; i < 16; i++)
 	{
 		// Clear audio timestamps arrays
 		sdata->timeSet1[i] = 0;

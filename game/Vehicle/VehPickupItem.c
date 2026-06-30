@@ -178,7 +178,7 @@ static void VehPickupItem_MissileLoadPlayerView(struct GameTracker *gGT, struct 
 static void VehPickupItem_MissileLoadAiView(struct Driver *driver)
 {
 	SVECTOR rot = {driver->rotCurr.x, driver->rotCurr.y, driver->rotCurr.z, 0};
-	MATRIX matrix;
+	MATRIX matrix = {0};
 	MATRIX unusedInverse;
 
 	RotMatrix(&rot, &matrix);

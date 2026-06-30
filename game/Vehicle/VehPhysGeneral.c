@@ -10,7 +10,6 @@ void VehPhysGeneral_PhysAngular(struct Thread *thread, struct Driver *driver)
 	int elapsedTimeMS;
 	int classSpeed_original;
 	int driverSpeed;
-	u32 destinedRot;
 	int classSpeed_halved;
 	struct Terrain *terrain;
 	int rotCurrW_original;

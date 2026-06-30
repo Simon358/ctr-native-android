@@ -85,7 +85,7 @@ void MM_CupSelect_MenuProc(struct RectMenu *menu)
 					for (i = 0; i < 8; i++)
 					{
 						// set all points for all 8 drivers to zero
-						gGT->cup.points[i] = 0;
+						gGT->cup.points[(s32)i] = 0;
 					}
 
 					// passthrough Menu for the function

@@ -4,7 +4,7 @@
 void Garage_Init(void)
 {
 	struct GarageFX *garageSounds;
-	char i;
+	s32 i;
 
 	// erase backup, keep music, stop all fx
 	howl_StopAudio(1, 0, 1);
@@ -114,8 +114,9 @@ void Garage_PlayFX(u32 soundId, char charId)
 			soundId = (sdata->audioRNG % 3) + 0xf3;
 		}
 
+		u8 garageIndex = (u8)charId;
 		OtherFX_Play_LowLevel(soundId & 0xffff, 1,
-		                      HowlSfx_Pack(sdata->garageSoundPool[charId].LR, HOWL_SFX_DISTORTION_NONE, sdata->garageSoundPool[charId].volume, 0));
+		                      HowlSfx_Pack(sdata->garageSoundPool[garageIndex].LR, HOWL_SFX_DISTORTION_NONE, sdata->garageSoundPool[garageIndex].volume, 0));
 	}
 }
 
@@ -198,7 +199,7 @@ void Garage_LerpFX(void)
 void Garage_MoveLR(int desiredId)
 {
 	struct GarageFX *garageSounds;
-	char i;
+	s32 i;
 	char charRight;
 	char charLeft;
 

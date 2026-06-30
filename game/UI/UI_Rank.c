@@ -55,9 +55,6 @@ void UI_DrawRankedDrivers(void)
 	struct GameTracker *gGT;
 	s16 txtColor;
 	u32 uVar7;
-	int absPosRank;
-	int iVar8;
-	s16 *puVar9;
 	s16 numRacersFinished;
 	u16 uVar11;
 	int iVar12;
@@ -67,17 +64,9 @@ void UI_DrawRankedDrivers(void)
 	struct Instance *warpballInst;
 	int iVar15;
 	s16 *puVar16;
-	s16 *psVar17;
 	u16 uVar18;
 	Point pos;
-	s16 local_44;
-	s16 local_40;
-	s16 local_3e;
-	s16 local_3c;
-	s16 local_38;
-	s16 local_34;
 	u32 local_30;
-	u32 local_2c;
 
 	gGT = sdata->gGT;
 

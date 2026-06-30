@@ -131,7 +131,7 @@ void GAMEPAD_PollVsync(struct GamepadSystem *gGamepads)
 	{
 		// loop through all gamepads that can connect
 		// to this gamepad port. 1 for no mtap, 4 for mtap
-		for (char i = 0; i < maxPadsPerPort; i++)
+		for (s32 i = 0; i < maxPadsPerPort; i++)
 		{
 			b32 unpluggedPort = ((
 			                         // multitap here, and unplugged
@@ -269,9 +269,7 @@ int GAMEPAD_GetNumConnected(struct GamepadSystem *gGamepads)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80025718-0x80025854.
 int GAMEPAD_ProcessHold(struct GamepadSystem *gGamepads)
 {
-	char j;
 	char *btnMapPtr;
-	u32 *puVar2;
 	u16 uVar4;
 	u32 uVar5;
 	u32 heldAny = 0;

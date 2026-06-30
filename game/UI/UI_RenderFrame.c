@@ -18,12 +18,8 @@ void UI_RenderFrame_Racing()
 	struct Icon *iconPtr;
 	uint32_t *primMemCurr;
 	char *fmt;
-	int partTimeVariable3;
 	POLY_G4 *TurboCounterBar;
 	s16 sVar17;
-	u32 local_7c;
-	u32 local_78;
-	u32 local_70;
 	struct Driver *playerStruct;
 	struct UiElement2D *hudStructPtr;
 	void *levPtrMap;
@@ -34,7 +30,6 @@ void UI_RenderFrame_Racing()
 	SVec2 turboCountPos;
 	s16 local_30[2];
 	struct Thread *playerThread;
-	uint32_t *ptrOT;
 	struct DB *backBuffer;
 	struct Thread *turboThread;
 	struct Turbo *turboThreadObject;
@@ -713,10 +708,10 @@ void UI_RenderFrame_Racing()
 					return;
 				}
 
-				*(u32 *)&TurboCounterBar->r0 = 0x3800c8ff;
-				*(u32 *)&TurboCounterBar->r1 = 0x3800c8ff;
-				*(u32 *)&TurboCounterBar->r2 = 0x380000ff;
-				*(u32 *)&TurboCounterBar->r3 = 0x380000ff;
+				CtrGpu_WriteColorCode(&TurboCounterBar->r0, 0x3800c8ff);
+				CtrGpu_WriteColorCode(&TurboCounterBar->r1, 0x3800c8ff);
+				CtrGpu_WriteColorCode(&TurboCounterBar->r2, 0x380000ff);
+				CtrGpu_WriteColorCode(&TurboCounterBar->r3, 0x380000ff);
 				TurboCounterBar->x0 = turboCountPos.x - 0xaa;
 				TurboCounterBar->y0 = turboCountPos.y + 9;
 				TurboCounterBar->x1 = turboCountPos.x + 0x32;

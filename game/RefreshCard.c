@@ -6,7 +6,7 @@ int RefreshCard_BoolGhostForLEV(u16 trackID)
 {
 	int i;
 	int count = 0;
-	int numGhosts = *(s16 *)&sdata->numGhostProfilesSaved;
+	int numGhosts = (s16)CTR_ReadU16LE(&sdata->numGhostProfilesSaved);
 	s16 levelID = trackID;
 
 	for (i = 0; i < numGhosts; i++)
@@ -174,7 +174,7 @@ void RefreshCard_GhostEncodeProfile(u32 slotIndex, u16 characterID, u16 levelID,
 	*(u8 *)&profile->alwaysOne = 1;
 	profile->trackID = levelID;
 	profile->characterID = characterID;
-	*(s16 *)&profile->memcardProfileIndex = slotIndex;
+	CTR_WriteU16LE(&profile->memcardProfileIndex, (u16)slotIndex);
 	profile->trackTime = time;
 }
 
@@ -259,21 +259,21 @@ void RefreshCard_SetScreenText(int screenText)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800471e8-0x80047224.
 void RefreshCard_Unknown2(void)
 {
-	if (*(s16 *)&sdata->boolAdvProfilesChecked == 0)
+	if ((s16)CTR_ReadU16LE(&sdata->boolAdvProfilesChecked) == 0)
 	{
 		GAMEPROG_InitFullMemcard((struct MemcardProfile *)sdata->ptrToMemcardBuffer1);
-		*(s16 *)&sdata->boolAdvProfilesChecked = 1;
+		CTR_WriteU16LE(&sdata->boolAdvProfilesChecked, 1);
 	}
 
-	*(s16 *)&sdata->unk8008d95c = 1;
-	*(s16 *)&sdata->unk_memcardRelated_8008d928[0] = 0;
+	CTR_WriteU16LE(&sdata->unk8008d95c, 1);
+	CTR_WriteU16LE(&sdata->unk_memcardRelated_8008d928[0], 0);
 }
 
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80047224-0x80047230.
 void RefreshCard_GetNumGhostsTotal(void)
 {
-	*(s16 *)&sdata->numGhostProfilesSaved = 0;
+	CTR_WriteU16LE(&sdata->numGhostProfilesSaved, 0);
 }
 
 
@@ -282,9 +282,9 @@ void RefreshCard_GameProgressAndOptions(void)
 {
 	struct MemcardProfile *memcard;
 
-	*(s16 *)&sdata->unk8008d95c = 1;
-	*(s16 *)&sdata->unk_memcardRelated_8008d928[0] = 1;
-	*(s16 *)&sdata->advProfileIndex = -1;
+	CTR_WriteU16LE(&sdata->unk8008d95c, 1);
+	CTR_WriteU16LE(&sdata->unk_memcardRelated_8008d928[0], 1);
+	CTR_WriteU16LE(&sdata->advProfileIndex, (u16)-1);
 
 	memcard = (struct MemcardProfile *)sdata->ptrToMemcardBuffer1;
 
@@ -460,8 +460,8 @@ void RefreshCard_Unknown3(void)
 	if (RefreshCard_GetResult(MC_RESULT_READY_LOAD) != 0)
 	{
 		RefreshCard_Unknown2();
-		*(s16 *)&sdata->unk8008d95c = 0;
-		*(s16 *)&sdata->boolAdvProfilesChecked = 0;
+		CTR_WriteU16LE(&sdata->unk8008d95c, 0);
+		CTR_WriteU16LE(&sdata->boolAdvProfilesChecked, 0);
 		RefreshCard_SetScreenText(MC_SCREEN_LOADING);
 		RefreshCard_QueueMainLoad();
 		sdata->boolError = 0;
@@ -513,7 +513,7 @@ void RefreshCard_Unknown3(void)
 			}
 		}
 
-		*(s16 *)&sdata->unk8008d964 = 1;
+		CTR_WriteU16LE(&sdata->unk8008d964, 1);
 		sdata->mcStart = 2;
 		RefreshCard_SetScreenText(MC_SCREEN_NULL);
 		RefreshCard_QueueGetInfo();
@@ -553,8 +553,8 @@ void RefreshCard_Unknown3(void)
 		{
 			RefreshCard_GetNumGhostsTotal();
 			RefreshCard_Unknown2();
-			*(s16 *)&sdata->unk8008d95c = 0;
-			*(s16 *)&sdata->boolAdvProfilesChecked = 0;
+			CTR_WriteU16LE(&sdata->unk8008d95c, 0);
+			CTR_WriteU16LE(&sdata->boolAdvProfilesChecked, 0);
 			RefreshCard_SetScreenText(MC_SCREEN_LOADING);
 			RefreshCard_QueueMainLoad();
 			sdata->boolError = 0;
@@ -566,10 +566,10 @@ void RefreshCard_Unknown3(void)
 	if (sdata->mcStart == 5)
 	{
 		sdata->boolReplayHumanGhost = 1;
-		*(s16 *)&sdata->unk8008d964 = 1;
+		CTR_WriteU16LE(&sdata->unk8008d964, 1);
 		RefreshCard_SetScreenText(MC_SCREEN_NULL);
 	}
-	else if (*(int *)sdata->ptrToMemcardBuffer2 == 0x1600ffee)
+	else if (CTR_ReadU32LE(sdata->ptrToMemcardBuffer2) == 0x1600ffee)
 	{
 		sdata->boolMemcardDataValid = 0;
 		RefreshCard_GameProgressAndOptions();

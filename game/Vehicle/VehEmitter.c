@@ -307,9 +307,9 @@ void VehEmitter_Sparks_Wall(struct Driver *d, struct ParticleEmitter *emSet)
 
 #define gte_SetLightMatrix3x2(r0)                  \
 	{                                              \
-		CTC2(*(uint32_t *)((char *)(r0)), 8);      \
-		CTC2(*(uint32_t *)((char *)(r0) + 4), 9);  \
-		CTC2(*(uint32_t *)((char *)(r0) + 8), 10); \
+		CTC2(CTR_ReadU32LE((char *)(r0)), 8);      \
+		CTC2(CTR_ReadU32LE((char *)(r0) + 4), 9);  \
+		CTC2(CTR_ReadU32LE((char *)(r0) + 8), 10); \
 	}
 
 #else

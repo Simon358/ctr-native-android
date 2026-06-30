@@ -250,10 +250,10 @@ void UI_ThTick_big1(struct Thread *bucket)
 	inst = bucket->inst;
 
 	uVar1 = obj->scale;
-	*(int *)&inst->matrix.m[0][0] = uVar1;
-	*(int *)&inst->matrix.m[0][2] = 0;
-	*(int *)&inst->matrix.m[1][1] = uVar1;
-	*(int *)&inst->matrix.m[2][0] = 0;
+	CTR_WriteU32LE(&inst->matrix.m[0][0], uVar1);
+	CTR_WriteU32LE(&inst->matrix.m[0][2], 0);
+	CTR_WriteU32LE(&inst->matrix.m[1][1], uVar1);
+	CTR_WriteU32LE(&inst->matrix.m[2][0], 0);
 	inst->matrix.m[2][2] = uVar1;
 
 	MatrixRotate(&inst->matrix, &obj->m, &inst->matrix);

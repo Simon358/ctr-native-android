@@ -44,11 +44,11 @@ void DebugFont_DrawNumbers(int index, int screenPosX, int screenPosY)
 	ot = (u32 *)gGT->pushBuffer_UI.ptrOT;
 	gGT->backBuffer->primMem.cursor = p + 1;
 
-	*(int *)&p->r0 = 0x2e000000;
-	*(int *)&p->x0 = screenPosX | uVar5;
-	*(int *)&p->x3 = uVar6 | uVar4;
-	*(int *)&p->x1 = uVar6 | uVar5;
-	*(int *)&p->x2 = screenPosX | uVar4;
+	CtrGpu_WriteColorCode(&p->r0, 0x2e000000);
+	CtrGpu_WritePackedXY(&p->x0, (u32)(screenPosX | uVar5));
+	CtrGpu_WritePackedXY(&p->x3, uVar6 | uVar4);
+	CtrGpu_WritePackedXY(&p->x1, uVar6 | uVar5);
+	CtrGpu_WritePackedXY(&p->x2, (u32)(screenPosX | uVar4));
 
 	// Each character is 7x7 pixels,
 	// '0' is 6th character on 2nd row
@@ -57,14 +57,14 @@ void DebugFont_DrawNumbers(int index, int screenPosX, int screenPosY)
 	topV = sdata->debugFont.v + 7;
 	bottomV = topV + 7;
 
-	*(int *)&p->u0 = topU | (topV << 8);
-	*(int *)&p->u1 = bottomU | (topV << 8);
-	*(int *)&p->u2 = topU | (bottomV << 8);
-	*(int *)&p->u3 = bottomU | (bottomV << 8);
+	CtrGpu_WritePackedUVWord(&p->u0, topU | (topV << 8));
+	CtrGpu_WritePackedUVWord(&p->u1, bottomU | (topV << 8));
+	CtrGpu_WritePackedUVWord(&p->u2, topU | (bottomV << 8));
+	CtrGpu_WritePackedUVWord(&p->u3, bottomU | (bottomV << 8));
 
 	p->clut = sdata->debugFont.clut;
 	p->tpage = sdata->debugFont.tpage;
 
-	*(int *)p = CtrGpu_PackOTTag(*ot, 0x9000000);
+	p->tag = CtrGpu_PackOTTag(*ot, 0x9000000);
 	*ot = CtrGpu_PrimToOTLink24(p);
 }

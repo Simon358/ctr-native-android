@@ -1099,7 +1099,7 @@ void WindowDivsionLines(struct GameTracker *gGT)
 
 		// set R, G, B, CODE, all to zero,
 		// this makes black color, and invalid CODE
-		*(int *)&p->r0 = 0;
+		CtrGpu_WriteColorCode(&p->r0, 0);
 
 		// this sets CODE to the proper value
 		setPolyF4(p);
@@ -1136,7 +1136,7 @@ void WindowDivsionLines(struct GameTracker *gGT)
 
 		// set R, G, B, CODE, all to zero,
 		// this makes black color, and invalid CODE
-		*(int *)&p->r0 = 0;
+		CtrGpu_WriteColorCode(&p->r0, 0);
 
 		// this sets CODE to the proper value
 		setPolyF4(p);
@@ -1171,7 +1171,7 @@ void WindowDivsionLines(struct GameTracker *gGT)
 
 		// set R, G, B, CODE, all to zero,
 		// this makes black color, and invalid CODE
-		*(int *)&p->r0 = 0;
+		CtrGpu_WriteColorCode(&p->r0, 0);
 
 		// this sets CODE to the proper value
 		setPolyF4(p);

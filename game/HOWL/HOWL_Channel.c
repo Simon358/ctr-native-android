@@ -80,7 +80,6 @@ int Channel_FindSound(int soundID)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x8002b608-0x8002b7d0
 struct ChannelStats *Channel_AllocSlot_AntiSpam(s16 soundID, char boolUseAntiSpam, int flags, struct ChannelAttr *attr)
 {
-	struct ChannelAttr *newAttr;
 	struct ChannelStats *curr, *backupNext;
 
 	// with AntiSpam, a new sound started within
@@ -545,9 +544,9 @@ void Channel_UpdateChannels()
 		// ADSR needs to change
 		if ((updateFlags & 8) != 0)
 		{
-			int adsr = *(int *)&new->ad;
+			int adsr = (int)CTR_ReadU32LE(&new->ad);
 
-			if (adsr != *(int *)&cur->ad)
+			if (adsr != (int)CTR_ReadU32LE(&cur->ad))
 			{
 				int ad = new->ad;
 				int sr = new->sr;
@@ -631,9 +630,9 @@ void Channel_UpdateChannels()
 		// volume needs to change
 		if ((updateFlags & 0x40) != 0)
 		{
-			int audioLR = *(int *)&new->audioL;
+			int audioLR = (int)CTR_ReadU32LE(&new->audioL);
 
-			if (audioLR != *(int *)&cur->audioL)
+			if (audioLR != (int)CTR_ReadU32LE(&cur->audioL))
 			{
 				int audioL = new->audioL;
 				int audioR = new->audioR;

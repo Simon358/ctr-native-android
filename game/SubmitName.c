@@ -37,7 +37,6 @@ void SubmitName_UseKeyboard(int key)
 s16 SubmitName_DrawMenu(u16 string)
 {
 	s16 currNameLength;
-	u16 uVar3;
 	int currNameWidth;
 	u32 uVar2;
 	u32 cursorCharacter;
@@ -57,7 +56,6 @@ s16 SubmitName_DrawMenu(u16 string)
 	int letterID;
 	int strlenCurrNameEnteredInt;
 	u32 keyboardCharacterTopByte;
-	u8 character;
 
 	struct GameTracker *gGT = sdata->gGT;
 

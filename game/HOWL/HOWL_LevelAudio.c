@@ -175,7 +175,6 @@ void Level_AmbientSound(void)
 	struct Level *level = gGT->level1;
 	u32 levelID = gGT->levelID;
 	int closestDistance[2];
-	int closestIndex[2];
 
 	if ((levelID >= 0x19) || ((u8)gGT->numPlyrCurrGame >= 3))
 	{
@@ -244,7 +243,6 @@ void Level_AmbientSound(void)
 	for (int i = 0; i < 2; i++)
 	{
 		closestDistance[i] = 0x7fffffff;
-		closestIndex[i] = -1;
 	}
 
 	for (int soundSlot = 0; soundSlot < 2; soundSlot++)
@@ -277,7 +275,6 @@ void Level_AmbientSound(void)
 					if (distance < closestDistance[soundSlot])
 					{
 						closestDistance[soundSlot] = distance;
-						closestIndex[soundSlot] = coordIndex;
 					}
 				}
 			}

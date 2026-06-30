@@ -16,7 +16,6 @@ void UI_DrawRaceClock(u16 paramX, u16 paramY, u32 flags, struct Driver *driver)
 	s16 sVar1;
 	int stringColor;
 	u32 lapIndex;
-	u32 uVar3;
 	char *totalTimeString;
 	int iVar5;
 	int numParamY;
@@ -27,7 +26,6 @@ void UI_DrawRaceClock(u16 paramX, u16 paramY, u32 flags, struct Driver *driver)
 	int str;
 	int posX;
 	int numLaps;
-	int levID;
 
 	int strOffset;
 
@@ -353,9 +351,6 @@ void UI_DrawRaceClock(u16 paramX, u16 paramY, u32 flags, struct Driver *driver)
 	// If did not unlock relic, draw NEXT goal
 	if ((gGT->gameModeEnd & NEW_RELIC) == 0)
 	{
-		// Level ID
-		levID = gGT->levelID;
-
 		// if you have gold or platinum, draw platinum
 		if ((CHECK_ADV_BIT(rewardsSet, gGT->levelID + ADV_REWARD_FIRST_PLATINUM_RELIC) != 0) ||
 		    (CHECK_ADV_BIT(rewardsSet, gGT->levelID + ADV_REWARD_FIRST_GOLD_RELIC) != 0))

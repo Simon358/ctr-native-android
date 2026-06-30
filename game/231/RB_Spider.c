@@ -100,8 +100,8 @@ void RB_Spider_DrawWebs(struct Thread *t, struct PushBuffer *pb)
 				p->tpage = 0xe1000a20;
 				p->f2.tag = 0;
 
-				*(u32 *)&p->f2.x0 = MFC2(12);
-				*(u32 *)&p->f2.x1 = MFC2(13);
+				CtrGpu_WritePackedXY(&p->f2.x0, MFC2(12));
+				CtrGpu_WritePackedXY(&p->f2.x1, MFC2(13));
 
 				lineColor = 0x3f;
 				if (depth > 0xa00)
@@ -367,11 +367,7 @@ void RB_Spider_LInB(struct Instance *inst)
 
 	spider->shadowInst = shadowInst;
 
-	*(int *)&shadowInst->matrix.m[0][0] = *(int *)&inst->matrix.m[0][0];
-	*(int *)&shadowInst->matrix.m[0][2] = *(int *)&inst->matrix.m[0][2];
-	*(int *)&shadowInst->matrix.m[1][1] = *(int *)&inst->matrix.m[1][1];
-	*(int *)&shadowInst->matrix.m[2][0] = *(int *)&inst->matrix.m[2][0];
-	shadowInst->matrix.m[2][2] = inst->matrix.m[2][2];
+	CTR_MatrixCopyRot(&shadowInst->matrix, &inst->matrix);
 
 	shadowInst->matrix.t[0] = inst->matrix.t[0];
 	shadowInst->matrix.t[1] = inst->matrix.t[1] - 8;

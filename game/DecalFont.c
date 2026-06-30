@@ -75,7 +75,9 @@ int DecalFont_GetLineWidthStrlen(char *character, int len, int fontType)
 			pixLength += font_charPixWidth;
 		}
 
+#if BUILD >= JpnTrial
 	NextIteration:
+#endif
 		character++;
 		len--;
 	}

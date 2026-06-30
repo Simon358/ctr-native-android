@@ -152,17 +152,17 @@ void DecalHUD_Arrow2D(struct Icon *icon, s16 posX, s16 posY, struct PrimMem *pri
 		return;
 	}
 
-	topRightCornerAndPageXY = *(u32 *)&icon->texLayout.u1;
-	topLeftCornerAndPaletteXY = *(u32 *)&icon->texLayout.u0;
+	topRightCornerAndPageXY = CTR_ReadU32LE(&icon->texLayout.u1);
+	topLeftCornerAndPaletteXY = CTR_ReadU32LE(&icon->texLayout.u0);
 	y2 = icon->texLayout.v2;
-	bottomMargin = *(u32 *)&icon->texLayout.u2;
+	bottomMargin = CTR_ReadU32LE(&icon->texLayout.u2);
 
 	p = (POLY_GT4 *)primMem->cursor;
 
 	if (transparency == 0)
 	{
 		code = 0x3c000000;
-		*(int *)&p->u1 = topRightCornerAndPageXY;
+		CtrGpu_WritePackedUVWord(&p->u1, topRightCornerAndPageXY);
 	}
 
 	else
@@ -171,25 +171,26 @@ void DecalHUD_Arrow2D(struct Icon *icon, s16 posX, s16 posY, struct PrimMem *pri
 
 		// set top right corner UVs and texpage of primitive, and alter the blending mode bits of the texpage from 11 (Mode 3, which is no blending) to 00 (Mode
 		// 0, equivalent to regular 50% opacity)
-		*(int *)&p->u1 = (topRightCornerAndPageXY & 0xff9fffff) | (((u32)transparency - 1) * 0x200000);
+		CtrGpu_WritePackedUVWord(&p->u1, (topRightCornerAndPageXY & 0xff9fffff) | (((u32)transparency - 1) * 0x200000));
 	}
 
 	// set top left vertex color, and code in 7th byte of prim
-	*(int *)&p->r0 = (color1 & 0xffffff) | code;
+	CtrGpu_WriteColorCode(&p->r0, (color1 & 0xffffff) | code);
 
 	posX = posX & 0xffff;
-	*(int *)&p->u0 = topLeftCornerAndPaletteXY;
-	*(s16 *)&p->u2 = (s16)bottomMargin;
+	CtrGpu_WritePackedUVWord(&p->u0, topLeftCornerAndPaletteXY);
+	CtrGpu_WritePackedUV(&p->u2, (u16)bottomMargin);
 
 	bitshiftPosY = (int)(((u32)y2 - ((int)topLeftCornerAndPaletteXY >> 8 & 0xffU)) * (int)scale) >> 0xd;
 
-	*(u16 *)&p->u3 = *(u16 *)&icon->texLayout.u3;
+	CtrGpu_WritePackedUV(&p->u3, CTR_ReadU16LE(&icon->texLayout.u3));
 
 	bitshiftTopRightCorner = (int)(((topRightCornerAndPageXY & 0xff) - (topLeftCornerAndPaletteXY & 0xff)) * (int)scale) >> 0xd;
 
 	// stuff for rotation of primitive
-	iVar13 = *(int *)(&data.trigApprox[((u32)rot & 0x3ff) * 4]) >> 0x10;
-	sVar8 = (s16) * (int *)(&data.trigApprox[((u32)rot & 0x3ff) * 4]);
+	u32 trigApprox = CTR_ReadU32LE(&data.trigApprox[(u32)rot & 0x3ff]);
+	iVar13 = (s32)trigApprox >> 0x10;
+	sVar8 = (s16)trigApprox;
 
 	if ((rot & 0x400) == 0)
 	{
@@ -219,24 +220,26 @@ LAB_800232d8:
 	iVar6 = iVar12 * iVar10 >> 0xc;
 	iVar12 = posY + (iVar12 * iVar13 >> 0xc);
 
-	*(int *)&p->x0 = ((posX + (-bitshiftTopRightCorner * iVar13 >> 0xc) + iVar6) & 0xffff) | ((iVar12 - (-bitshiftTopRightCorner * iVar10 >> 0xc)) * 0x10000);
+	CtrGpu_WritePackedXY(&p->x0, ((posX + (-bitshiftTopRightCorner * iVar13 >> 0xc) + iVar6) & 0xffff) |
+	                                 ((u32)(iVar12 - (-bitshiftTopRightCorner * iVar10 >> 0xc)) << 16));
 
 	iVar7 = bitshiftPosY * iVar10 >> 0xc;
 
-	*(int *)&p->x1 =
-	    ((posX + ((bitshiftTopRightCorner + 1) * iVar13 >> 0xc) + iVar6) & 0xffff) | ((iVar12 - ((bitshiftTopRightCorner + 1) * iVar10 >> 0xc)) * 0x10000);
+	CtrGpu_WritePackedXY(&p->x1, ((posX + ((bitshiftTopRightCorner + 1) * iVar13 >> 0xc) + iVar6) & 0xffff) |
+	                                 ((u32)(iVar12 - ((bitshiftTopRightCorner + 1) * iVar10 >> 0xc)) << 16));
 
 	posY = posY + (bitshiftPosY * iVar13 >> 0xc);
 
-	*(int *)&p->x2 = ((posX + (-bitshiftTopRightCorner * iVar13 >> 0xc) + iVar7) & 0xffff) | ((posY - (-bitshiftTopRightCorner * iVar10 >> 0xc)) * 0x10000);
-	*(int *)&p->x3 =
-	    ((posX + ((bitshiftTopRightCorner + 1) * iVar13 >> 0xc) + iVar7) & 0xffff) | ((posY - ((bitshiftTopRightCorner + 1) * iVar10 >> 0xc)) * 0x10000);
+	CtrGpu_WritePackedXY(&p->x2, ((posX + (-bitshiftTopRightCorner * iVar13 >> 0xc) + iVar7) & 0xffff) |
+	                                 ((u32)(posY - (-bitshiftTopRightCorner * iVar10 >> 0xc)) << 16));
+	CtrGpu_WritePackedXY(&p->x3, ((posX + ((bitshiftTopRightCorner + 1) * iVar13 >> 0xc) + iVar7) & 0xffff) |
+	                                 ((u32)(posY - ((bitshiftTopRightCorner + 1) * iVar10 >> 0xc)) << 16));
 
-	*(int *)&p->r1 = color2;
-	*(int *)&p->r2 = color3;
-	*(int *)&p->r3 = color4;
+	CtrGpu_WriteColorCode(&p->r1, color2);
+	CtrGpu_WriteColorCode(&p->r2, color3);
+	CtrGpu_WriteColorCode(&p->r3, color4);
 
-	*(int *)p = CtrGpu_PackOTTag(*otMemPtr, 0xc000000);
+	p->tag = CtrGpu_PackOTTag(*otMemPtr, 0xc000000);
 	*otMemPtr = CtrGpu_PrimToOTLink24(p);
 
 	// POLY_GT4 is 0x34 bytes large

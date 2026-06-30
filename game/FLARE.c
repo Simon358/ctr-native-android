@@ -17,10 +17,10 @@ static inline void FLARE_LoadGridRow(s16 y)
 
 static inline void FLARE_WriteTexture(POLY_GT4 *poly, struct Icon *icon, u32 texWord1)
 {
-	CtrGpu_WritePackedUVWord(&poly->u0, *(u32 *)&icon->texLayout.u0);
+	CtrGpu_WritePackedUVWord(&poly->u0, CTR_ReadU32LE(&icon->texLayout.u0));
 	CtrGpu_WritePackedUVWord(&poly->u1, texWord1);
-	CtrGpu_WritePackedUV(&poly->u2, *(u16 *)&icon->texLayout.u2);
-	CtrGpu_WritePackedUV(&poly->u3, *(u16 *)&icon->texLayout.u3);
+	CtrGpu_WritePackedUV(&poly->u2, CTR_ReadU16LE(&icon->texLayout.u2));
+	CtrGpu_WritePackedUV(&poly->u3, CTR_ReadU16LE(&icon->texLayout.u3));
 }
 
 static inline void FLARE_WriteColors(POLY_GT4 *poly)
@@ -120,7 +120,7 @@ void FLARE_ThTick(struct Thread *th)
 		return;
 	}
 
-	u32 texWord1 = (*(u32 *)&icon->texLayout.u1 & 0xff9fffff) | 0x00200000;
+	u32 texWord1 = (CTR_ReadU32LE(&icon->texLayout.u1) & 0xff9fffff) | 0x00200000;
 	POLY_GT4 *p0 = prim;
 	POLY_GT4 *p1 = prim + 1;
 	POLY_GT4 *p2 = prim + 2;

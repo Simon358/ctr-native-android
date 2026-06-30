@@ -1286,14 +1286,6 @@ internal int NativeAudio_AlignUpInt(int value, int align)
 	return (value + mask) & ~mask;
 }
 
-internal void NativeAudio_ArenaFree(struct NativeAudioDecodeArena *arena)
-{
-	free(arena->memory);
-	arena->memory = NULL;
-	arena->capacity = 0;
-	arena->used = 0;
-}
-
 internal void NativeAudio_ArenaReset(struct NativeAudioDecodeArena *arena)
 {
 	arena->used = 0;

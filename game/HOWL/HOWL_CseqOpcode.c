@@ -133,7 +133,6 @@ void howl_InitChannelAttr_Music(struct SongSeq *seq, struct ChannelAttr *attr, i
 void cseq_opcode_from06and07(struct SongSeq *seq)
 {
 	struct ChannelStats *curr, *backupNext;
-	u8 *currNote = seq->currNote;
 	int soundID = seq->soundID;
 	int songIndex = seq->songPoolIndex;
 

@@ -1515,7 +1515,6 @@ thTick_subtitles:
 		RECTMENU_DrawInnerRect((RECT *)textRect, 4, gGT->backBuffer->otMem.uiOT);
 	}
 
-thTick_epilogue:
 	// ASM: 0x800ae7dc - check isCutsceneOver, re-apply death flag
 	if (D233.isCutsceneOver != 0)
 	{

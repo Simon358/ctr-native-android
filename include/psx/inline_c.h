@@ -252,11 +252,11 @@ extern int doCOP2(int op);
 // load ctc2 0-4
 #define gte_SetRotMatrix(r0)                       \
 	{                                              \
-		CTC2(*(uint32_t *)((char *)(r0)), 0);      \
-		CTC2(*(uint32_t *)((char *)(r0) + 4), 1);  \
-		CTC2(*(uint32_t *)((char *)(r0) + 8), 2);  \
-		CTC2(*(uint32_t *)((char *)(r0) + 12), 3); \
-		CTC2(*(uint32_t *)((char *)(r0) + 16), 4); \
+		CTC2(CTR_ReadU32LE((char *)(r0)), 0);      \
+		CTC2(CTR_ReadU32LE((char *)(r0) + 4), 1);  \
+		CTC2(CTR_ReadU32LE((char *)(r0) + 8), 2);  \
+		CTC2(CTR_ReadU32LE((char *)(r0) + 12), 3); \
+		CTC2(CTR_ReadU32LE((char *)(r0) + 16), 4); \
 	}
 
 // load ctc2 5-7

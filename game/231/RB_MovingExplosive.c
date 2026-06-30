@@ -12,7 +12,6 @@ static void RB_MovingExplosive_CallThCollide(struct Thread *hitTh, struct Thread
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800adb50-0x800ae478.
 void RB_MovingExplosive_ThTick(struct Thread *t)
 {
-	s16 sVar1;
 	s16 sVar3;
 	struct GameTracker *gGT = sdata->gGT;
 	s16 modelID;

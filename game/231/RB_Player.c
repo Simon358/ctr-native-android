@@ -225,7 +225,7 @@ void RB_Player_ToggleInvisible(void)
 					struct InstDrawPerPlayer *idpp = INST_GETIDPP(d->instSelf);
 
 					// make driver instance invisible on this screen
-					idpp[i].instFlags &= 0xffffffbf;
+					idpp[(s32)i].instFlags &= 0xffffffbf;
 				}
 			}
 		}
@@ -259,7 +259,7 @@ void RB_Player_ToggleFlicker(void)
 			for (i = 0; i < gGT->numPlyrCurrGame; i++)
 			{
 				// make driver invisible
-				idpp[i].instFlags &= 0xffffffbf;
+				idpp[(s32)i].instFlags &= 0xffffffbf;
 			}
 		}
 	}

@@ -197,7 +197,6 @@ void INSTANCE_Death(struct Instance *inst)
 // param2 - number of instances
 void INSTANCE_LevInitAll(struct InstDef *levInstDef, int numInst)
 {
-	s16 sVar5;
 	u16 modelID;
 	int *dst;
 	int *src;
@@ -274,7 +273,7 @@ void INSTANCE_LevInitAll(struct InstDef *levInstDef, int numInst)
 		struct InstDrawPerPlayer *idpp = INST_GETIDPP(inst);
 
 		// loop through InstDrawPerPlayer
-		for (char j = 0; j < gGT->numPlyrCurrGame; j++)
+		for (s32 j = 0; j < gGT->numPlyrCurrGame; j++)
 		{
 			idpp[j].mh = 0;
 			idpp[j].pushBuffer = &gGT->pushBuffer[j];

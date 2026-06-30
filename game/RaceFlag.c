@@ -220,7 +220,7 @@ u32 *RaceFlag_GetOT(void)
 			{
 				sdata->RaceFlag_Position = 0;
 
-			// transition for frame >= 8
+				// transition for frame >= 8
 			}
 			else
 			{
@@ -302,8 +302,7 @@ void RaceFlag_DrawLoadingString(void)
 	int iVar9;
 	int iVar10;
 	u32 *uVar11;
-	char local_30;
-	char local_2f;
+	char local_30[2];
 
 	pbVar7 = sdata->lngStrings[LNG_LOADING];
 
@@ -377,12 +376,12 @@ void RaceFlag_DrawLoadingString(void)
 					iVar4 = (0x4b - iVar3) * 0x3c + 0x100;
 				}
 			}
-			local_30 = *pbVar7;
+			local_30[0] = *pbVar7;
 			pbVar8 = pbVar7 + 1;
 			uVar5 = 1;
-			if (local_30 < 4)
+			if (local_30[0] < 4)
 			{
-				local_2f = *pbVar8;
+				local_30[1] = *pbVar8;
 				pbVar8 = pbVar7 + 2;
 
 				// increment loop counter
@@ -392,10 +391,10 @@ void RaceFlag_DrawLoadingString(void)
 			}
 			if ((s16)iVar4 != 0x23c)
 			{
-				DecalFont_DrawLineStrlen(&local_30, uVar5, (iVar10 + iVar4), 0x6c, 1, 0);
+				DecalFont_DrawLineStrlen(local_30, uVar5, (iVar10 + iVar4), 0x6c, 1, 0);
 			}
 
-			iVar4 = DecalFont_GetLineWidthStrlen(&local_30, uVar5, 1);
+			iVar4 = DecalFont_GetLineWidthStrlen(local_30, uVar5, 1);
 
 			iVar10 = iVar10 + iVar4;
 			iVar9 = iVar9 + 0xf0;
@@ -452,7 +451,7 @@ force_inline int MathSinInline(u32 param_1)
 	int iVar1;
 
 	// approximate trigonometry
-	iVar1 = *(int *)&data.trigApprox[param_1 & 0x3ff];
+	iVar1 = (s32)CTR_ReadU32LE(&data.trigApprox[param_1 & 0x3ff]);
 
 	if ((param_1 & 0x400) == 0)
 	{
@@ -725,24 +724,24 @@ SKIP_LOADING_TEXT:
 
 					u8 colorR = RaceFlag_CalculateBrightness(lightR, boolDark);
 					setRGB0(p, colorR, colorR, colorR);
-					*(int *)&p->r2 = *(int *)&p->r0;
+					CTR_WriteU32LE(&p->r2, CTR_ReadU32LE(&p->r0));
 
 					u8 colorL = RaceFlag_CalculateBrightness(lightL, boolDark);
 					setRGB1(p, colorL, colorL, colorL);
-					*(int *)&p->r3 = *(int *)&p->r1;
+					CTR_WriteU32LE(&p->r3, CTR_ReadU32LE(&p->r1));
 
 					// positions
-					*(int *)&p->x0 = read0;
-					*(int *)&p->x2 = read1;
-					*(int *)&p->x1 = write0;
-					*(int *)&p->x3 = write1;
+					CtrGpu_WritePackedXY(&p->x0, read0);
+					CtrGpu_WritePackedXY(&p->x2, read1);
+					CtrGpu_WritePackedXY(&p->x1, write0);
+					CtrGpu_WritePackedXY(&p->x3, write1);
 
 					// prim/code
 					setPolyG4(p);
 
 					// Prim/OT
 					// addPrim(ot, p); works but uses more instructions.
-					*(int *)p = CtrGpu_PackOTTag(*ot, 0x8000000);
+					p->tag = CtrGpu_PackOTTag(*ot, 0x8000000);
 					*ot = CtrGpu_PrimToOTLink24(p);
 
 					p++;

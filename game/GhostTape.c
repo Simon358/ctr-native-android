@@ -80,9 +80,6 @@ void GhostTape_WriteMoves(s16 raceFinished)
 	struct Instance *iVar7;
 	struct Driver *iVar8;
 	int iVar9;
-	char local_10;
-	char local_e;
-	char local_c;
 	struct GameTracker *gGT = sdata->gGT;
 	u32 gameMode = gGT->gameMode1;
 

@@ -274,11 +274,7 @@ void RB_Burst_Init(struct Instance *weaponInst)
 	currInst->depthBiasNormal += -2;
 
 	// set rotation to identity matrix
-	*(int *)&currInst->matrix.m[0][0] = 0x1000;
-	*(int *)&currInst->matrix.m[0][2] = 0;
-	*(int *)&currInst->matrix.m[1][1] = 0x1000;
-	*(int *)&currInst->matrix.m[2][0] = 0;
-	currInst->matrix.m[2][2] = 0x1000;
+	CTR_MatrixSetRotIdentity(&currInst->matrix);
 
 	// set flag to always point to camera
 	headers = currInst->model->headers;
@@ -298,8 +294,8 @@ void RB_Burst_Init(struct Instance *weaponInst)
 	currInst->matrix.m[0][1] = 0xf000;
 	currInst->matrix.m[0][2] = 0;
 	currInst->matrix.m[1][0] = 0x1000;
-	*(int *)&currInst->matrix.m[1][1] = 0;
-	*(int *)&currInst->matrix.m[2][0] = 0;
+	CTR_WriteU32LE(&currInst->matrix.m[1][1], 0);
+	CTR_WriteU32LE(&currInst->matrix.m[2][0], 0);
 	currInst->matrix.m[2][2] = 0x1000;
 
 	// set flag to always point to camera
@@ -341,7 +337,7 @@ void RB_Burst_Init(struct Instance *weaponInst)
 		}
 
 		// identity matrix (z)
-		*(int *)&currInst->matrix.m[2][0] = 0;
+		CTR_WriteU32LE(&currInst->matrix.m[2][0], 0);
 		currInst->matrix.m[2][2] = 0x1000;
 
 		if (i == 2)
@@ -350,9 +346,9 @@ void RB_Burst_Init(struct Instance *weaponInst)
 		}
 
 		// identity matrix (x, y)
-		*(int *)&currInst->matrix.m[0][0] = 0x1000;
-		*(int *)&currInst->matrix.m[0][2] = 0;
-		*(int *)&currInst->matrix.m[1][1] = 0x1000;
+		CTR_WriteU32LE(&currInst->matrix.m[0][0], 0x1000);
+		CTR_WriteU32LE(&currInst->matrix.m[0][2], 0);
+		CTR_WriteU32LE(&currInst->matrix.m[1][1], 0x1000);
 	}
 
 	// currInst is burst[2]
@@ -364,7 +360,7 @@ void RB_Burst_Init(struct Instance *weaponInst)
 
 	// rotate 90 degrees (Y -> X)
 	currInst->matrix.m[1][0] = 0x1000;
-	*(int *)&currInst->matrix.m[1][1] = 0;
+	CTR_WriteU32LE(&currInst->matrix.m[1][1], 0);
 
 	// ========= Collisions ===========
 

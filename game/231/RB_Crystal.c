@@ -49,7 +49,7 @@ int RB_Crystal_ThCollide(struct Thread *crystalTh, struct Thread *driverTh, void
 		driver->PickupWumpaHUD.numCollected++;
 	}
 
-	*(int *)&crystalInst->scale.x = 0;
+	CTR_WriteU32LE(&crystalInst->scale.x, 0);
 	crystalInst->scale.z = 0;
 	crystalInst->thread = 0;
 
@@ -154,7 +154,7 @@ void RB_Crystal_LInB(struct Instance *inst)
 		t->funcThCollide = (void (*)(struct Thread *))RB_Crystal_ThCollide;
 
 		// rotX, rotY, rotZ
-		*(int *)&crystalObj->rot.x = 0;
+		CTR_WriteU32LE(&crystalObj->rot.x, 0);
 		crystalObj->rot.z = 0;
 
 		inst->colorRGBA = 0xd22fff0;

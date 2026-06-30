@@ -51,12 +51,9 @@ void AH_HintMenu_MenuProc(struct RectMenu *menu)
 	struct GameTracker *gGT;
 	struct Instance *inst;
 
-	u32 *puVar1;
-	u16 uVar2;
 	char bVar3;
 	u32 uVar6;
 	int iVar7;
-	int *puVar8;
 	s16 sVar9;
 	int iVar10;
 	int iVar11;
@@ -103,7 +100,7 @@ void AH_HintMenu_MenuProc(struct RectMenu *menu)
 		D232.hintMenu_scrollIndex = 0;
 	}
 
-	int lngIndex = D232.hintMenu_lngIndexArr[hintsFound[menu->rowSelected]];
+	int lngIndex = D232.hintMenu_lngIndexArr[(s32)hintsFound[menu->rowSelected]];
 
 	// if viewing a hint
 	if (D232.hintMenu_boolViewHint != 0)
@@ -311,7 +308,7 @@ LAB_800b38cc:
 			iVar7 = D232.hintMenu_scrollIndex + (int)(s16)iVar11;
 			if (iVar7 < numHintsFound)
 			{
-				uVar6 = D232.hintMenu_lngIndexArr[hintsFound[iVar7]];
+				uVar6 = D232.hintMenu_lngIndexArr[(s32)hintsFound[iVar7]];
 			}
 			else
 			{
