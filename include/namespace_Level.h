@@ -70,6 +70,11 @@ enum LevelID
 	SCRAPBOOK
 };
 
+enum AdventureSyntheticLevelID
+{
+	ADVENTURE_CUP_SYNTHETIC_LEVEL_ID_BASE = 100,
+};
+
 enum TerrainType
 {
 	TERRAIN_ASPHALT,

@@ -1,5 +1,40 @@
 #include <common.h>
 
+enum AHMapIconID
+{
+	AH_MAP_ICON_WARPPAD = 0x31,
+	AH_MAP_ICON_BOSS_STAR = 0x37,
+};
+
+enum AHMapArrowType
+{
+	AH_MAP_ARROW_WARPPAD_TROPHY = 0,
+	AH_MAP_ARROW_HUB_ROUTE,
+	AH_MAP_ARROW_BOSS,
+};
+
+enum AHMapColor
+{
+	AH_MAP_COLOR_COMPLETE = RED,
+	AH_MAP_COLOR_FLASH_PRIMARY = CRASH_BLUE,
+	AH_MAP_COLOR_FLASH_SECONDARY = WHITE,
+	AH_MAP_COLOR_RELIC_TOKEN = PAPU_YELLOW,
+	AH_MAP_COLOR_INVALID = BLACK,
+	AH_MAP_COLOR_LOCKED = GRAY,
+};
+
+CTR_STATIC_ASSERT(AH_MAP_ICON_WARPPAD == 0x31);
+CTR_STATIC_ASSERT(AH_MAP_ICON_BOSS_STAR == 0x37);
+CTR_STATIC_ASSERT(AH_MAP_ARROW_WARPPAD_TROPHY == 0);
+CTR_STATIC_ASSERT(AH_MAP_ARROW_HUB_ROUTE == 1);
+CTR_STATIC_ASSERT(AH_MAP_ARROW_BOSS == 2);
+CTR_STATIC_ASSERT(AH_MAP_COLOR_COMPLETE == 3);
+CTR_STATIC_ASSERT(AH_MAP_COLOR_FLASH_PRIMARY == 5);
+CTR_STATIC_ASSERT(AH_MAP_COLOR_FLASH_SECONDARY == 4);
+CTR_STATIC_ASSERT(AH_MAP_COLOR_RELIC_TOKEN == 0xe);
+CTR_STATIC_ASSERT(AH_MAP_COLOR_INVALID == 0x15);
+CTR_STATIC_ASSERT(AH_MAP_COLOR_LOCKED == 0x17);
+
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800b0b98-0x800b0ce0.
 void AH_Map_LoadSave_Prim(s16 *vertPos, char *vertCol, void *ot, struct PrimMem *primMem)
 {
@@ -233,7 +268,7 @@ void AH_Map_HubItems(void *hubPtrs, s16 *param_2)
 	struct GameTracker *gGT;
 	struct AdvProgress *adv;
 	s16 levelID;
-	s16 sVar1;
+	AdventureHubItemType iconType;
 	s16 *trophies;
 	b32 open;
 	int iVar3;
@@ -268,13 +303,12 @@ void AH_Map_HubItems(void *hubPtrs, s16 *param_2)
 			sVar7 = -1;
 			sVar7 = -1;
 
-			// iconType
-			sVar1 = psVar9[2];
+			iconType = psVar9[2];
 
 			open = true;
 
-			// Arrow beach->gemstone
-			if (sVar1 == -1)
+			// One-key route arrow, only locked in N. Sanity Beach.
+			if (iconType == AH_HUB_ITEM_ROUTE_KEY1_IF_BEACH)
 			{
 				sVar7 = 0;
 
@@ -293,12 +327,12 @@ void AH_Map_HubItems(void *hubPtrs, s16 *param_2)
 			}
 			else
 			{
-				if (-1 < sVar1)
+				if (AH_HUB_ITEM_ROUTE_KEY1_IF_BEACH < iconType)
 				{
 					sVar7 = sVar7;
 
 					// gemstone valley
-					if (sVar1 == 4)
+					if (iconType == AH_HUB_ITEM_OXIDE_WARPPAD)
 					{
 						iVar3 = 0;
 						iVar5 = 0;
@@ -328,13 +362,13 @@ void AH_Map_HubItems(void *hubPtrs, s16 *param_2)
 					{
 						iVar5 = 0;
 
-						if (3 < sVar1)
+						if (AH_HUB_ITEM_PINSTRIPE_GARAGE < iconType)
 						{
 							iVar5 = -0x10000;
 							sVar8 = sVar8;
 
-							// saveLoad screen (0x64)
-							if (sVar1 == 100)
+							// save/load screen synthetic hub marker
+							if (iconType == AH_HUB_ITEM_SAVE_LOAD_MARKER)
 							{
 								local_40 = (int)*psVar10 + -0x200;
 								local_3c = (int)*psVar9 + -0x100;
@@ -385,17 +419,17 @@ void AH_Map_HubItems(void *hubPtrs, s16 *param_2)
 					goto LAB_800b17ec;
 				}
 
-				// Arrow beach->glacier
-				if (sVar1 == -4)
+				// Two-key route arrow.
+				if (iconType == AH_HUB_ITEM_ROUTE_KEY2)
 				{
 					// locked if keys < 2
 					sVar7 = ((gGT->currAdvProfile.numKeys) < 2);
 					goto LAB_800b17e8;
 				}
-				if (sVar1 < -3)
+				if (iconType < AH_HUB_ITEM_ROUTE_OPEN_B)
 				{
-					// Arrow glacier->citadel
-					if (sVar1 == -5)
+					// Three-key route arrow.
+					if (iconType == AH_HUB_ITEM_ROUTE_KEY3)
 					{
 						// locked if keys < 3
 						sVar7 = ((gGT->currAdvProfile.numKeys) < 3);
@@ -406,9 +440,8 @@ void AH_Map_HubItems(void *hubPtrs, s16 *param_2)
 
 				else
 				{
-					// either arrow on Gemstone hub,
-					// pointing to beach or to ruins
-					if ((sVar1 == -3) || (sVar1 == -2))
+					// Open route arrows.
+					if ((iconType == AH_HUB_ITEM_ROUTE_OPEN_B) || (iconType == AH_HUB_ITEM_ROUTE_OPEN_A))
 					{
 						// never locked
 						sVar7 = 0;
@@ -424,9 +457,9 @@ void AH_Map_HubItems(void *hubPtrs, s16 *param_2)
 				local_38 = (int)*psVar10 + -0x200;
 				local_34 = (int)*psVar9 + -0x100;
 				UI_Map_GetIconPos(hubPtrs, &local_38, &local_34);
-				if ((iVar5 == 0) && (D232.unkModeHubItems == 0))
+				if ((iVar5 == 0) && (D232.mapPriorityArrowDrawn == 0))
 				{
-					AH_Map_HubArrowOutter(hubPtrs, (int)*param_2, local_38, local_34, (0x1000 - (u16)psVar9[1]), 1);
+					AH_Map_HubArrowOutter(hubPtrs, (int)*param_2, local_38, local_34, (0x1000 - (u16)psVar9[1]), AH_MAP_ARROW_HUB_ROUTE);
 					*param_2 = *param_2 + 1;
 				}
 
@@ -453,7 +486,7 @@ void AH_Map_HubItems(void *hubPtrs, s16 *param_2)
 				if (sVar8 == 2)
 				{
 					// red
-					uVar6 = 3;
+					uVar6 = AH_MAP_COLOR_COMPLETE;
 				}
 				else
 				{
@@ -461,17 +494,17 @@ void AH_Map_HubItems(void *hubPtrs, s16 *param_2)
 					// sVar6 == 0
 
 					// grey
-					uVar6 = 0x17;
+					uVar6 = AH_MAP_COLOR_LOCKED;
 
 					// open, not beaten
 					if (sVar8 == 1)
 					{
 						// blue and white
 						// depending on frames
-						uVar6 = 5;
+						uVar6 = AH_MAP_COLOR_FLASH_PRIMARY;
 						if ((gGT->timer & 2) != 0)
 						{
-							uVar6 = 4;
+							uVar6 = AH_MAP_COLOR_FLASH_SECONDARY;
 						}
 					}
 				}
@@ -479,19 +512,19 @@ void AH_Map_HubItems(void *hubPtrs, s16 *param_2)
 				// open, not beaten
 				if (sVar8 == 1)
 				{
-					D232.unkModeHubItems = sVar8;
+					D232.mapPriorityArrowDrawn = sVar8;
 					local_30 = pos3D[0];
 					local_2c = pos3D[2];
 
 					UI_Map_GetIconPos(hubPtrs, &local_30, &local_2c);
 
-					AH_Map_HubArrowOutter(hubPtrs, (int)*param_2, local_30, local_2c, 0, 2);
+					AH_Map_HubArrowOutter(hubPtrs, (int)*param_2, local_30, local_2c, 0, AH_MAP_ARROW_BOSS);
 
 					*param_2 = *param_2 + 1;
 				}
 
 				// draw star icon for boss
-				UI_Map_DrawRawIcon((int)hubPtrs, &pos3D[0], 0x37, uVar6, 0, 0x1000);
+				UI_Map_DrawRawIcon((int)hubPtrs, &pos3D[0], AH_MAP_ICON_BOSS_STAR, uVar6, 0, 0x1000);
 			}
 			psVar10 = psVar10 + 4;
 			psVar9 = psVar9 + 4;
@@ -524,38 +557,38 @@ void AH_Map_Warppads(s16 *ptrMap, struct Thread *warppadThread, s16 *param_3)
 	for (
 	    /**/; warppadThread != NULL; warppadThread = warppadThread->siblingThread)
 	{
-		int index = warppadThread->modelIndex;
+		int visualState = warppadThread->modelIndex;
 		int isTrophy = 0;
 		int skipDistance = 0;
 
 		warppadInst = warppadThread->inst;
 
-		switch ((u32)index)
+		switch ((u32)visualState)
 		{
-		case 0:
-			color = 0x17;
+		case AH_WP_VISUAL_LOCKED:
+			color = AH_MAP_COLOR_LOCKED;
 			skipDistance = 1;
 			break;
-		case 1:
-			color = 5;
+		case AH_WP_VISUAL_TROPHY_OPEN:
+			color = AH_MAP_COLOR_FLASH_PRIMARY;
 			if ((gGT->timer & 2) != 0)
 			{
-				color = 4;
+				color = AH_MAP_COLOR_FLASH_SECONDARY;
 			}
 			isTrophy = 1;
 			break;
-		case 2:
-			color = 3;
+		case AH_WP_VISUAL_COMPLETE:
+			color = AH_MAP_COLOR_COMPLETE;
 			break;
-		case 3:
-			color = 0xe;
+		case AH_WP_VISUAL_RELIC_TOKEN_OPEN:
+			color = AH_MAP_COLOR_RELIC_TOKEN;
 			break;
-		case 4:
+		case AH_WP_VISUAL_COLOR_CYCLE_OPEN:
 			// Each Slide Coliseum/Turbo Track color lasts two frames.
-			color = ((gGT->timer >> 1) & 7) + 5;
+			color = ((gGT->timer >> 1) & 7) + AH_MAP_COLOR_FLASH_PRIMARY;
 			break;
 		default:
-			color = 0x15;
+			color = AH_MAP_COLOR_INVALID;
 			skipDistance = 1;
 			break;
 		}
@@ -566,17 +599,17 @@ void AH_Map_Warppads(s16 *ptrMap, struct Thread *warppadThread, s16 *param_3)
 			posX = warppadInst->matrix.t[0];
 			posY = warppadInst->matrix.t[2];
 
-			D232.unkModeHubItems = 1;
+			D232.mapPriorityArrowDrawn = 1;
 
 			// Get Icon Dimensions
 			UI_Map_GetIconPos(ptrMap, &posX, &posY);
 
-			AH_Map_HubArrowOutter(ptrMap, (int)*param_3, posX, posY, 0, 0);
+			AH_Map_HubArrowOutter(ptrMap, (int)*param_3, posX, posY, 0, AH_MAP_ARROW_WARPPAD_TROPHY);
 
 			*param_3 = *param_3 + 1;
 		}
 
-		UI_Map_DrawRawIcon((int)ptrMap, (int *)&warppadInst->matrix.t[0], 0x31, color, 0, 0x1000);
+		UI_Map_DrawRawIcon((int)ptrMap, (int *)&warppadInst->matrix.t[0], AH_MAP_ICON_WARPPAD, color, 0, 0x1000);
 
 		if (skipDistance)
 		{
@@ -670,7 +703,7 @@ void AH_Map_Main(void)
 	{
 		local_1e[0] = 0;
 
-		D232.unkModeHubItems = 0;
+		D232.mapPriorityArrowDrawn = 0;
 
 		UI_Map_DrawDrivers(hubPtrs, gGT->threadBuckets[0].thread, &local_20);
 

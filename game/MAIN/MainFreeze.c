@@ -869,8 +869,6 @@ void MainFreeze_MenuPtrDefault(struct RectMenu *menu)
 	struct GameTracker *gGT = sdata->gGT;
 	gameMode = gGT->gameMode1;
 
-	u8 ADV_CUP = 100;
-
 	// if you have not waited 5 frames since the game was paused then quit
 	if (gGT->cooldownfromPauseUntilUnpause != 0)
 	{
@@ -1103,7 +1101,7 @@ void MainFreeze_MenuPtrDefault(struct RectMenu *menu)
 			sdata->Loading.OnBegin.RemBitsConfig0 |= ADVENTURE_CUP | RELIC_RACE | CRYSTAL_CHALLENGE;
 
 			// Level ID
-			gGT->levelID = gGT->cup.cupID + ADV_CUP;
+			gGT->levelID = gGT->cup.cupID + ADVENTURE_CUP_SYNTHETIC_LEVEL_ID_BASE;
 		}
 		break;
 	default:

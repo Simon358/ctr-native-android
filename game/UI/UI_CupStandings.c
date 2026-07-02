@@ -130,8 +130,6 @@ void UI_CupStandings_InputAndDraw(void)
 
 	gGT = sdata->gGT;
 
-	u8 ADV_CUP = 100;
-
 	numDrivers = gGT->numPlyrCurrGame + gGT->numBotsNextGame;
 
 	// Multiplayer Cup Game
@@ -580,7 +578,7 @@ void UI_CupStandings_InputAndDraw(void)
 				if ((gGT->gameMode2 & CUP_ANY_KIND) == 0)
 				{
 					// Array with the ranking of each player
-					gGT->levelID = i + ADV_CUP;
+					gGT->levelID = i + ADVENTURE_CUP_SYNTHETIC_LEVEL_ID_BASE;
 
 					// when loading is done,
 					// remove flag for adventure cup

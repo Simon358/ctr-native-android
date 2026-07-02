@@ -36,7 +36,7 @@ void AH_Garage_Open(struct ScratchpadStruct *sps, void *hitObject)
 
 	if (
 	    // if door is not opening
-	    (garage->direction != 1) &&
+	    (garage->direction != BOSS_GARAGE_DOOR_OPENING) &&
 
 	    // if door is closed,
 	    // if posY is the same as instDef posY
@@ -59,7 +59,7 @@ void AH_Garage_Open(struct ScratchpadStruct *sps, void *hitObject)
 	}
 
 	// door is now opening
-	garage->direction = 1;
+	garage->direction = BOSS_GARAGE_DOOR_OPENING;
 
 	// enable access through a door (disable collision)
 	sdata->doorAccessFlags |= 1;
@@ -98,7 +98,7 @@ void AH_Garage_ThTick(struct Thread *t)
 	hubID = levelID - GEM_STONE_VALLEY;
 
 	// if door is not opening or closing
-	if (garage->direction == 0)
+	if (garage->direction == BOSS_GARAGE_DOOR_STOPPED)
 	{
 		// if door is fully closed
 		if (garage->cooldown == 0)
@@ -129,7 +129,7 @@ void AH_Garage_ThTick(struct Thread *t)
 			garage->cooldown = 0;
 
 			// door is closing
-			garage->direction = -1;
+			garage->direction = BOSS_GARAGE_DOOR_CLOSING;
 
 			inst->flags &= ~HIDE_MODEL;
 		}
@@ -151,7 +151,7 @@ void AH_Garage_ThTick(struct Thread *t)
 			inst->matrix.t[1] = top;
 
 			// Door is now open (not moving)
-			garage->direction = 0;
+			garage->direction = BOSS_GARAGE_DOOR_STOPPED;
 
 			// Cooldown for 2 seconds
 			garage->cooldown = 0x780;
@@ -165,7 +165,7 @@ void AH_Garage_ThTick(struct Thread *t)
 			// Set position to the bottom
 			inst->matrix.t[1] = bottom;
 
-			garage->direction = 0;
+			garage->direction = BOSS_GARAGE_DOOR_STOPPED;
 
 			garage->cooldown = 0;
 
@@ -400,7 +400,7 @@ void AH_Garage_LInB(struct Instance *inst)
 	t->funcThDestroy = AH_Garage_ThDestroy;
 
 	garage = t->object;
-	garage->direction = 0;
+	garage->direction = BOSS_GARAGE_DOOR_STOPPED;
 	garage->cooldown = 0;
 
 	// if it is Oxide's Door

@@ -607,7 +607,7 @@ void AH_Door_LInB(struct Instance *inst)
 	}
 
 	woodDoor->frameCount_unused = 0;
-	woodDoor->camFlags = 0;
+	woodDoor->camFlags = WdCam_None;
 	woodDoor->camTimer_unused = 0;
 	woodDoor->frameCount_doorOpenAnim = 0;
 	woodDoor->keyShrinkFrame = 0;

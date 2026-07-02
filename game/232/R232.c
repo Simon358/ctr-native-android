@@ -1,7 +1,7 @@
 #include <common.h>
 
 struct OverlayRDATA_232 R232 = {
-    .battleTrackArr = {3, 1, -1, 0, -1, 2, -1, 0},
+    .battleTrackPurpleTokenOffset = {3, 1, -1, 0, -1, 2, -1, 0},
     .bossTracks = {OXIDE_STATION, ROO_TUBES, PAPU_PYRAMID, DRAGON_MINES, HOT_AIR_SKYWAY, 0},
     .bossIDs = {4, 0, 1, 2, 3, 0},
     .s_garage = "garage",

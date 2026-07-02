@@ -10,9 +10,23 @@ struct MaskHint
 	// end of struct
 };
 
+enum BossGarageDoorDirectionID
+{
+	BOSS_GARAGE_DOOR_CLOSING = -1,
+	BOSS_GARAGE_DOOR_STOPPED = 0,
+	BOSS_GARAGE_DOOR_OPENING = 1,
+};
+
+typedef s32 BossGarageDoorDirection;
+
+CTR_STATIC_ASSERT(BOSS_GARAGE_DOOR_CLOSING == -1);
+CTR_STATIC_ASSERT(BOSS_GARAGE_DOOR_STOPPED == 0);
+CTR_STATIC_ASSERT(BOSS_GARAGE_DOOR_OPENING == 1);
+CTR_STATIC_ASSERT(sizeof(BossGarageDoorDirection) == 0x4);
+
 struct BossGarageDoor
 {
-	int direction; // 1, 0, -1
+	BossGarageDoorDirection direction;
 
 	// so you can't spam open/close
 	int cooldown;
@@ -25,6 +39,8 @@ struct BossGarageDoor
 	// 0x14 bytes large
 };
 
+CTR_STATIC_ASSERT(sizeof(struct BossGarageDoor) == 0x14);
+
 #if 0
 struct AdvPause {
 
@@ -33,11 +49,21 @@ struct AdvPause {
 
 enum WoodDoorCamFlags
 {
+	WdCam_None = 0,
 	WdCam_FlyingOut = 1,
 	WdCam_FullyOut = 2,
 	WdCam_FlyingIn = 4,
 	WdCam_CutscenePlaying = 0x10
 };
+
+typedef s16 WoodDoorCamFlagSet;
+
+CTR_STATIC_ASSERT(WdCam_None == 0);
+CTR_STATIC_ASSERT(WdCam_FlyingOut == 1);
+CTR_STATIC_ASSERT(WdCam_FullyOut == 2);
+CTR_STATIC_ASSERT(WdCam_FlyingIn == 4);
+CTR_STATIC_ASSERT(WdCam_CutscenePlaying == 0x10);
+CTR_STATIC_ASSERT(sizeof(WoodDoorCamFlagSet) == 0x2);
 
 struct WoodDoor
 {
@@ -49,7 +75,7 @@ struct WoodDoor
 	s16 _pad_doorRot;
 
 	// 0x1c (7)
-	s16 camFlags;
+	WoodDoorCamFlagSet camFlags;
 	s16 camTimer_unused;
 
 	// 0x20 (8)
@@ -74,6 +100,8 @@ struct WoodDoor
 	// 0x38 bytes large
 };
 
+CTR_STATIC_ASSERT(sizeof(struct WoodDoor) == 0x38);
+
 enum WarpPadInstanceSet
 {
 	// instances that appear
@@ -93,6 +121,81 @@ enum WarpPadInstanceSet
 	WPIS_OPEN_PRIZE3,
 
 	WPIS_NUM_INSTANCES
+};
+
+enum AdventureHubItemTypeID
+{
+	// Boss-garage and marker values are data IDs. Route values select lock behavior,
+	// not a unique source/destination pair.
+	AH_HUB_ITEM_RIPPER_ROO_GARAGE = 0,
+	AH_HUB_ITEM_PAPU_PAPU_GARAGE,
+	AH_HUB_ITEM_KOMODO_JOE_GARAGE,
+	AH_HUB_ITEM_PINSTRIPE_GARAGE,
+	AH_HUB_ITEM_OXIDE_WARPPAD,
+	AH_HUB_ITEM_SAVE_LOAD_MARKER = 100,
+	AH_HUB_ITEM_ROUTE_KEY1_IF_BEACH = -1,
+	AH_HUB_ITEM_ROUTE_OPEN_A = -2,
+	AH_HUB_ITEM_ROUTE_OPEN_B = -3,
+	AH_HUB_ITEM_ROUTE_KEY2 = -4,
+	AH_HUB_ITEM_ROUTE_KEY3 = -5,
+};
+
+typedef s16 AdventureHubItemType;
+
+CTR_STATIC_ASSERT(AH_HUB_ITEM_RIPPER_ROO_GARAGE == 0);
+CTR_STATIC_ASSERT(AH_HUB_ITEM_PAPU_PAPU_GARAGE == 1);
+CTR_STATIC_ASSERT(AH_HUB_ITEM_KOMODO_JOE_GARAGE == 2);
+CTR_STATIC_ASSERT(AH_HUB_ITEM_PINSTRIPE_GARAGE == 3);
+CTR_STATIC_ASSERT(AH_HUB_ITEM_OXIDE_WARPPAD == 4);
+CTR_STATIC_ASSERT(AH_HUB_ITEM_SAVE_LOAD_MARKER == 100);
+CTR_STATIC_ASSERT(AH_HUB_ITEM_ROUTE_KEY1_IF_BEACH == -1);
+CTR_STATIC_ASSERT(AH_HUB_ITEM_ROUTE_OPEN_A == -2);
+CTR_STATIC_ASSERT(AH_HUB_ITEM_ROUTE_OPEN_B == -3);
+CTR_STATIC_ASSERT(AH_HUB_ITEM_ROUTE_KEY2 == -4);
+CTR_STATIC_ASSERT(AH_HUB_ITEM_ROUTE_KEY3 == -5);
+CTR_STATIC_ASSERT(sizeof(AdventureHubItemType) == 0x2);
+
+enum AHWarpPadVisualState
+{
+	AH_WP_VISUAL_LOCKED = 0,
+	AH_WP_VISUAL_TROPHY_OPEN,
+	AH_WP_VISUAL_COMPLETE,
+	AH_WP_VISUAL_RELIC_TOKEN_OPEN,
+	AH_WP_VISUAL_COLOR_CYCLE_OPEN,
+	AH_WP_VISUAL_COUNT,
+};
+
+enum AHPausePageType
+{
+	AH_PAUSE_PAGE_HUB = 0,
+	AH_PAUSE_PAGE_TOKEN_TOTALS,
+	AH_PAUSE_PAGE_RELIC_TOTALS,
+};
+
+enum AHPauseIconIndex
+{
+	AH_PAUSE_ICON_NONE = -1,
+	AH_PAUSE_ICON_FIRST_GEM = 0,
+	AH_PAUSE_ICON_BOSS_KEY = 5,
+	AH_PAUSE_ICON_SAPPHIRE_RELIC = 6,
+	AH_PAUSE_ICON_GOLD_RELIC = 7,
+	AH_PAUSE_ICON_PLATINUM_RELIC = 8,
+	AH_PAUSE_ICON_FIRST_TOKEN = 9,
+	AH_PAUSE_ICON_TROPHY = 14,
+};
+
+enum AHPauseConstants
+{
+	AH_PAUSE_MENU_PAGE_COUNT = 7,
+	AH_PAUSE_MEMBER_COUNT = 0xe,
+	AH_PAUSE_ICON_COUNT = 15,
+	AH_PAUSE_GEM_ICON_COUNT = 5,
+	AH_PAUSE_TOKEN_ICON_COUNT = 5,
+	AH_PAUSE_PURPLE_TOKEN_INDEX = 4,
+	AH_PAUSE_RELIC_ICON_COUNT = 3,
+	AH_PAUSE_CTR_TOKEN_TRACK_COUNT = 0x10,
+	AH_PAUSE_RELIC_TRACK_COUNT = 0x12,
+	AH_PAUSE_PURPLE_TOKEN_COUNT = 4,
 };
 
 struct WarpPad
@@ -168,7 +271,7 @@ struct SaveObj
 struct OverlayRDATA_232
 {
 	// 0x800aba3c
-	s16 battleTrackArr[8];
+	s16 battleTrackPurpleTokenOffset[8];
 
 	// 0x800aba4c
 	s16 bossTracks[6];
@@ -190,7 +293,7 @@ struct OverlayRDATA_232
 	char s_door[8];
 
 	// 0x800abaac
-	u32 warppadColorJumpTable[5];
+	u32 warppadColorJumpTable[AH_WP_VISUAL_COUNT];
 
 	// 0x800abac0
 	u32 unk_800abac0;
@@ -232,7 +335,7 @@ struct OverlayDATA_232
 	s16 levelID;
 
 	// 800b4e88
-	int timeCrystalChallenge[7];
+	int battleCrystalChallengeTime[7];
 
 	// 800b4ea4
 	s16 saveObjCameraOffset[4];
@@ -253,15 +356,7 @@ struct OverlayDATA_232
 		s16 angle;
 
 		// 0x6
-		// 0x03: boss
-		// 0x04: warppad
-		// 0x64: saveload
-		// -1: (1 key) Arrow beach->gemstone
-		// -2: (0 key) Arrow gemstone->beach
-		// -3: (0 key) Arrow gemstone->ruins
-		// -4: (2 key) Arrow beach->glacier
-		// -5: (3 key) Arrow glacier->citadel
-		s16 iconType;
+		AdventureHubItemType iconType;
 
 		// 0x8 -- size
 	}
@@ -318,13 +413,11 @@ struct OverlayDATA_232
 		// get name from MetaDataLev
 		s16 titleLng;
 
-		// 0: draw tracks
-		// 1: draw 5 tokens
-		// 2: draw relics
+		// enum AHPausePageType
 		s16 type;
 
 		s16 characterID_Boss;
-	} advPausePages[7];
+	} advPausePages[AH_PAUSE_MENU_PAGE_COUNT];
 
 	// 0x800B5060
 	// 0,1,2,3,4: Gems
@@ -352,7 +445,7 @@ struct OverlayDATA_232
 
 
 		// 0x14 bytes each
-	} advPauseInst[15];
+	} advPauseInst[AH_PAUSE_ICON_COUNT];
 
 	// 0x800B518C
 	struct RectMenu menuHintMenu;
@@ -480,7 +573,7 @@ struct OverlayDATA_232
 			struct Instance *inst;
 
 			// 0x10 -- size
-		} PauseMember[0xe];
+		} PauseMember[AH_PAUSE_MEMBER_COUNT];
 
 		// 0xE0
 		struct Thread *t;
@@ -502,7 +595,8 @@ struct OverlayDATA_232
 	s16 padding4;
 
 	// 800b5670
-	s16 unkModeHubItems;
+	// Suppresses lower-priority hub-route arrows when an open boss/warppad arrow is drawn.
+	s16 mapPriorityArrowDrawn;
 	s16 padding_800b5672;
 };
 

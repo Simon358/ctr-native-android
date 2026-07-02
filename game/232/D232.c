@@ -55,7 +55,7 @@ struct OverlayDATA_232
             .levelID = -1,
 
             // 800b4e88
-            .timeCrystalChallenge =
+            .battleCrystalChallengeTime =
                 {
                     0x1c200, // NITRO_COURT
                     0x13ec0, // RAMPAGE_RUINS
@@ -76,20 +76,20 @@ struct OverlayDATA_232
             .primOffsetXY_HubArrow = {0, 0, -2, 0, 2, 0, 0, -1, 0, 1},
 
             // 800b4ed4
-            .hubItems_hub1 = {{0xB780, 0x3D00, 0, 4}, {0xC824, 0x46e, 0, -2}, {0xFB50, 0x44c0, 0xc00, -3}, {0xbcd0, 0x1482, 0x800, 100}, {-1}},
+            .hubItems_hub1 = {{0xB780, 0x3D00, 0, AH_HUB_ITEM_OXIDE_WARPPAD}, {0xC824, 0x46e, 0, AH_HUB_ITEM_ROUTE_OPEN_A}, {0xFB50, 0x44c0, 0xc00, AH_HUB_ITEM_ROUTE_OPEN_B}, {0xbcd0, 0x1482, 0x800, AH_HUB_ITEM_SAVE_LOAD_MARKER}, {-1}},
 
             // 800b4efc
-            .hubItems_hub2 = {{0xC178, 0xE493, 0, 0}, {0xD6FC, 0x1093, 0x800, -1}, {0xE890, 0xDECC, 0xc00, -4}, {0xCC0C, 0xE764, 0x400, 100}, {-1}},
+            .hubItems_hub2 = {{0xC178, 0xE493, 0, AH_HUB_ITEM_RIPPER_ROO_GARAGE}, {0xD6FC, 0x1093, 0x800, AH_HUB_ITEM_ROUTE_KEY1_IF_BEACH}, {0xE890, 0xDECC, 0xc00, AH_HUB_ITEM_ROUTE_KEY2}, {0xCC0C, 0xE764, 0x400, AH_HUB_ITEM_SAVE_LOAD_MARKER}, {-1}},
 
             // 800b4f24
-            .hubItems_hub3 = {{0x1099, 0x38b3, 0, 1}, {0x23C9, 0x1ffc, 0, -4}, {0xDE99, 0x3EB3, 0x400, -1}, {0xEA6, 0x4556, 0x400, 100}, {-1}},
+            .hubItems_hub3 = {{0x1099, 0x38b3, 0, AH_HUB_ITEM_PAPU_PAPU_GARAGE}, {0x23C9, 0x1ffc, 0, AH_HUB_ITEM_ROUTE_KEY2}, {0xDE99, 0x3EB3, 0x400, AH_HUB_ITEM_ROUTE_KEY1_IF_BEACH}, {0xEA6, 0x4556, 0x400, AH_HUB_ITEM_SAVE_LOAD_MARKER}, {-1}},
 
             // 800b4f4c
             .hubItems_hub4 =
-                {{0x2AF8, 0xEE13, 0, 2}, {0xd5f8, 0xc993, 0x400, -2}, {0x1678, 0xc593, 0, -5}, {0x2ee0, 0x32c8, 0x800, -3}, {0x109a, 0xdcd8, 0x576, 100}, {-1}},
+                {{0x2AF8, 0xEE13, 0, AH_HUB_ITEM_KOMODO_JOE_GARAGE}, {0xd5f8, 0xc993, 0x400, AH_HUB_ITEM_ROUTE_OPEN_A}, {0x1678, 0xc593, 0, AH_HUB_ITEM_ROUTE_KEY3}, {0x2ee0, 0x32c8, 0x800, AH_HUB_ITEM_ROUTE_OPEN_B}, {0x109a, 0xdcd8, 0x576, AH_HUB_ITEM_SAVE_LOAD_MARKER}, {-1}},
 
             // 800b4f7c
-            .hubItems_hub5 = {{0x9f8, 0xac93, 0, 3}, {0x5dc, 0xd493, 0x800, -4}, {0x157c, 0xab3c, 0, 100}, {-1}},
+            .hubItems_hub5 = {{0x9f8, 0xac93, 0, AH_HUB_ITEM_PINSTRIPE_GARAGE}, {0x5dc, 0xd493, 0x800, AH_HUB_ITEM_ROUTE_KEY2}, {0x157c, 0xab3c, 0, AH_HUB_ITEM_SAVE_LOAD_MARKER}, {-1}},
 
             .hubItemsXY_ptrArray =
                 {
@@ -167,15 +167,15 @@ struct OverlayDATA_232
             .advPausePages =
                 {
                     // hubs and bosses
-                    {0x19, -1, 0, 0xF},
-                    {0x1A, -1, 0, 0xA},
-                    {0x1B, -1, 0, 0x9},
-                    {0x1C, -1, 0, 0xB},
-                    {0x1D, -1, 0, 0x8},
+                    {0x19, -1, AH_PAUSE_PAGE_HUB, 0xF},
+                    {0x1A, -1, AH_PAUSE_PAGE_HUB, 0xA},
+                    {0x1B, -1, AH_PAUSE_PAGE_HUB, 0x9},
+                    {0x1C, -1, AH_PAUSE_PAGE_HUB, 0xB},
+                    {0x1D, -1, AH_PAUSE_PAGE_HUB, 0x8},
 
                     // gems and relics
-                    {-1, 0x10, 1, 0},
-                    {-1, 0x11, 2, 0},
+                    {-1, 0x10, AH_PAUSE_PAGE_TOKEN_TOTALS, 0},
+                    {-1, 0x11, AH_PAUSE_PAGE_RELIC_TOTALS, 0},
                 },
 
             .advPauseInst =

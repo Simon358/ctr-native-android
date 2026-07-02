@@ -15,7 +15,7 @@ void AH_Pause_Destroy(void)
 	}
 
 	// loop through 14 instances, destroy them
-	for (i = 0; i < 0xe; i++)
+	for (i = 0; i < AH_PAUSE_MEMBER_COUNT; i++)
 	{
 		INSTANCE_Death(ptrPauseObject->PauseMember[i].inst);
 	}
@@ -83,18 +83,18 @@ void AH_Pause_Draw(int pageID, int posX)
 	struct PauseObject *ptrPauseObject = D232.ptrPauseObject;
 
 	// loop through 14 instances
-	for (int i = 0; i < 0xe; i++)
+	for (int i = 0; i < AH_PAUSE_MEMBER_COUNT; i++)
 	{
 		// assume no awards won
 		ptrPauseObject->PauseMember[i].unlockFlag &= ~(1);
 
 		// dont draw instance
-		ptrPauseObject->PauseMember[i].indexAdvPauseInst = -1;
+		ptrPauseObject->PauseMember[i].indexAdvPauseInst = AH_PAUSE_ICON_NONE;
 	}
 
 	int type = D232.advPausePages[pageID].type;
 
-	if (type == 0)
+	if (type == AH_PAUSE_PAGE_HUB)
 	{
 		int hubID = levelID - GEM_STONE_VALLEY;
 		int rowIndex = 0;
@@ -143,7 +143,7 @@ void AH_Pause_Draw(int pageID, int posX)
 					inst->matrix.t[1] = UI_ConvertY_2(rowY + 0x2f, 0x100);
 				}
 
-				ptrPauseObject->PauseMember[pauseIndex].indexAdvPauseInst = 14;
+				ptrPauseObject->PauseMember[pauseIndex].indexAdvPauseInst = AH_PAUSE_ICON_TROPHY;
 				ptrPauseObject->PauseMember[pauseIndex].unlockFlag |= CHECK_ADV_BIT(adv->rewards, trackID + ADV_REWARD_FIRST_TROPHY);
 				pauseIndex++;
 			}
@@ -160,16 +160,16 @@ void AH_Pause_Draw(int pageID, int posX)
 			if (CHECK_ADV_BIT(adv->rewards, trackID + ADV_REWARD_FIRST_PLATINUM_RELIC) != 0)
 			{
 				ptrPauseObject->PauseMember[pauseIndex].unlockFlag |= 1;
-				ptrPauseObject->PauseMember[pauseIndex].indexAdvPauseInst = 8;
+				ptrPauseObject->PauseMember[pauseIndex].indexAdvPauseInst = AH_PAUSE_ICON_PLATINUM_RELIC;
 			}
 			else if (CHECK_ADV_BIT(adv->rewards, trackID + ADV_REWARD_FIRST_GOLD_RELIC) != 0)
 			{
 				ptrPauseObject->PauseMember[pauseIndex].unlockFlag |= 1;
-				ptrPauseObject->PauseMember[pauseIndex].indexAdvPauseInst = 7;
+				ptrPauseObject->PauseMember[pauseIndex].indexAdvPauseInst = AH_PAUSE_ICON_GOLD_RELIC;
 			}
 			else
 			{
-				ptrPauseObject->PauseMember[pauseIndex].indexAdvPauseInst = 6;
+				ptrPauseObject->PauseMember[pauseIndex].indexAdvPauseInst = AH_PAUSE_ICON_SAPPHIRE_RELIC;
 				ptrPauseObject->PauseMember[pauseIndex].unlockFlag |= CHECK_ADV_BIT(adv->rewards, trackID + ADV_REWARD_FIRST_SAPPHIRE_RELIC);
 			}
 
@@ -177,7 +177,7 @@ void AH_Pause_Draw(int pageID, int posX)
 
 			if (hubID != 0)
 			{
-				ptrPauseObject->PauseMember[pauseIndex].indexAdvPauseInst = 9 + mdLev->ctrTokenGroupID;
+				ptrPauseObject->PauseMember[pauseIndex].indexAdvPauseInst = AH_PAUSE_ICON_FIRST_TOKEN + mdLev->ctrTokenGroupID;
 				ptrPauseObject->PauseMember[pauseIndex].unlockFlag |= CHECK_ADV_BIT(adv->rewards, trackID + ADV_REWARD_FIRST_CTR_TOKEN);
 				pauseIndex++;
 			}
@@ -218,7 +218,7 @@ void AH_Pause_Draw(int pageID, int posX)
 
 			pauseIndex = rowIndex;
 
-			for (int i = 0; i < 5; i++)
+			for (int i = 0; i < AH_PAUSE_GEM_ICON_COUNT; i++)
 			{
 				struct Instance *inst = ptrPauseObject->PauseMember[pauseIndex + i].inst;
 
@@ -228,7 +228,7 @@ void AH_Pause_Draw(int pageID, int posX)
 				inst->matrix.t[1] = UI_ConvertY_2(((i & 1) << 4) | 0x6a, 0x100);
 
 				// gem color
-				ptrPauseObject->PauseMember[pauseIndex + i].indexAdvPauseInst = i;
+				ptrPauseObject->PauseMember[pauseIndex + i].indexAdvPauseInst = AH_PAUSE_ICON_FIRST_GEM + i;
 
 				// unlock gem
 				ptrPauseObject->PauseMember[pauseIndex + i].unlockFlag |= CHECK_ADV_BIT(adv->rewards, i + ADV_REWARD_FIRST_GEM);
@@ -243,7 +243,7 @@ void AH_Pause_Draw(int pageID, int posX)
 
 			inst->matrix.t[1] = UI_ConvertY_2(bossRowY + 0x2f, 0x100);
 
-			ptrPauseObject->PauseMember[pauseIndex].indexAdvPauseInst = 5;
+			ptrPauseObject->PauseMember[pauseIndex].indexAdvPauseInst = AH_PAUSE_ICON_BOSS_KEY;
 			ptrPauseObject->PauseMember[pauseIndex].unlockFlag |= CHECK_ADV_BIT(adv->rewards, data.BeatBossPrize[hubID]);
 			pauseIndex++;
 
@@ -261,17 +261,17 @@ void AH_Pause_Draw(int pageID, int posX)
 
 				inst->matrix.t[1] = UI_ConvertY_2(crystalRowY + 0x2f, 0x100);
 
-				ptrPauseObject->PauseMember[pauseIndex].indexAdvPauseInst = 9 + mdLev->ctrTokenGroupID;
+				ptrPauseObject->PauseMember[pauseIndex].indexAdvPauseInst = AH_PAUSE_ICON_FIRST_TOKEN + mdLev->ctrTokenGroupID;
 				ptrPauseObject->PauseMember[pauseIndex].unlockFlag |= CHECK_ADV_BIT(adv->rewards, hubID + ADV_REWARD_PURPLE_TOKEN_HUB_ID_BASE);
 			}
 		}
 	}
 
-	else if (type == 1)
+	else if (type == AH_PAUSE_PAGE_TOKEN_TOTALS)
 	{
-		s16 tokenCount[5] = {0, 0, 0, 0, 0};
+		s16 tokenCount[AH_PAUSE_TOKEN_ICON_COUNT] = {0, 0, 0, 0, 0};
 
-		for (int i = 0; i < 0x10; i++)
+		for (int i = 0; i < AH_PAUSE_CTR_TOKEN_TRACK_COUNT; i++)
 		{
 			if (CHECK_ADV_BIT(adv->rewards, i + ADV_REWARD_FIRST_CTR_TOKEN) != 0)
 			{
@@ -280,20 +280,20 @@ void AH_Pause_Draw(int pageID, int posX)
 		}
 
 		// NOTE(aalhendi): Purple tokens are stored in a separate reward bit range not in ctrTokenGroupID.
-		for (int i = 0; i < 4; i++)
+		for (int i = 0; i < AH_PAUSE_PURPLE_TOKEN_COUNT; i++)
 		{
 			if (CHECK_ADV_BIT(adv->rewards, i + ADV_REWARD_FIRST_PURPLE_TOKEN) != 0)
 			{
-				tokenCount[4]++;
+				tokenCount[AH_PAUSE_PURPLE_TOKEN_INDEX]++;
 			}
 		}
 
-		for (int i = 0; i < 5; i++)
+		for (int i = 0; i < AH_PAUSE_TOKEN_ICON_COUNT; i++)
 		{
 			s16 instPosX = posX + 0xf0 + ((i - 2) * 60);
 			s16 instPosY = (i & 1) * 0x28;
 
-			ptrPauseObject->PauseMember[i].indexAdvPauseInst = i + 9;
+			ptrPauseObject->PauseMember[i].indexAdvPauseInst = AH_PAUSE_ICON_FIRST_TOKEN + i;
 			ptrPauseObject->PauseMember[i].unlockFlag |= 1;
 
 			struct Instance *inst = ptrPauseObject->PauseMember[i].inst;
@@ -310,7 +310,7 @@ void AH_Pause_Draw(int pageID, int posX)
 		}
 	}
 
-	else if (type == 2)
+	else if (type == AH_PAUSE_PAGE_RELIC_TOTALS)
 	{
 		char totalString[32];
 		s16 count[3];
@@ -318,7 +318,7 @@ void AH_Pause_Draw(int pageID, int posX)
 		count[1] = 0;
 		count[2] = 0;
 
-		for (int i = 0; i < 0x12; i++)
+		for (int i = 0; i < AH_PAUSE_RELIC_TRACK_COUNT; i++)
 		{
 			// platinum
 			if (CHECK_ADV_BIT(adv->rewards, i + ADV_REWARD_FIRST_PLATINUM_RELIC) != 0)
@@ -337,11 +337,11 @@ void AH_Pause_Draw(int pageID, int posX)
 			}
 		}
 
-		for (int i = 0; i < 3; i++)
+		for (int i = 0; i < AH_PAUSE_RELIC_ICON_COUNT; i++)
 		{
 			s16 instPosX = posX + 0xf6 + ((i - 1) * 90);
 
-			ptrPauseObject->PauseMember[i].indexAdvPauseInst = i + 6;
+			ptrPauseObject->PauseMember[i].indexAdvPauseInst = AH_PAUSE_ICON_SAPPHIRE_RELIC + i;
 			ptrPauseObject->PauseMember[i].unlockFlag |= 1;
 
 			struct Instance *inst = ptrPauseObject->PauseMember[i].inst;
@@ -393,7 +393,7 @@ void AH_Pause_Draw(int pageID, int posX)
 	// Draw 2D Menu rectangle background
 	RECTMENU_DrawInnerRect(&r, 4, &ot[3]);
 
-	for (int i = 0; i < 0xe; i++)
+	for (int i = 0; i < AH_PAUSE_MEMBER_COUNT; i++)
 	{
 		int index = ptrPauseObject->PauseMember[i].indexAdvPauseInst;
 
@@ -427,11 +427,11 @@ void AH_Pause_Draw(int pageID, int posX)
 
 			int scale = D232.advPauseInst[index].scale;
 
-			if (type == 1)
+			if (type == AH_PAUSE_PAGE_TOKEN_TOTALS)
 			{
 				scale = 0x1000;
 			}
-			else if (type != 0)
+			else if (type != AH_PAUSE_PAGE_HUB)
 			{
 				scale = scale << 2;
 			}
@@ -489,11 +489,11 @@ void AH_Pause_Update()
 		D232.ptrPauseObject = ptrPauseObject;
 		ptrPauseObject->t = t;
 
-		for (int i = 0; i < 0xe; i++)
+		for (int i = 0; i < AH_PAUSE_MEMBER_COUNT; i++)
 		{
 			struct Instance *inst = INSTANCE_Birth3D(gGT->modelPtr[STATIC_GEM], R232.s_pause, t);
 
-			ptrPauseObject->PauseMember[i].indexAdvPauseInst = -1;
+			ptrPauseObject->PauseMember[i].indexAdvPauseInst = AH_PAUSE_ICON_NONE;
 			ptrPauseObject->PauseMember[i].inst = inst;
 			ptrPauseObject->PauseMember[i].rot.x = 0;
 			ptrPauseObject->PauseMember[i].rot.y = 0;
