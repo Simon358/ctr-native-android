@@ -1,5 +1,20 @@
 #include <common.h>
 
+enum
+{
+	MM_HIGHSCORE_MAIN_TRANSITION_MAX_FRAME = 0xc,
+	MM_HIGHSCORE_SLIDE_TRANSITION_FRAMES = 8,
+	MM_HIGHSCORE_LAST_ARCADE_TRACK = 0x11,
+	MM_HIGHSCORE_TRACK_SLIDE_STEP_X = 0x40,
+	MM_HIGHSCORE_ROW_SLIDE_STEP_Y = 0x1b,
+	MM_HIGHSCORE_OFFSCREEN_X = 0x200,
+	MM_HIGHSCORE_OFFSCREEN_Y = 0xd8,
+	MM_HIGHSCORE_WIPE_RECT_W = 0x228,
+	MM_HIGHSCORE_WIPE_RECT_H = 0x19,
+	MM_HIGHSCORE_WIPE_RECT_X_OFFSET = -0x14,
+	MM_HIGHSCORE_WIPE_RECT_Y_OFFSET = 9,
+};
+
 // NOTE(aalhendi): ASM-verified against NTSC-U 926 overlay 230 0x800b2f0c-0x800b2fbc.
 void MM_HighScore_Text3D(char *string, int posX, int posY, s16 font, u32 flags)
 {
@@ -141,7 +156,7 @@ void MM_HighScore_Draw(u16 trackIndex, u32 rowIndex, u32 posX, u32 posY)
 void MM_HighScore_Init(void)
 {
 	D230.highScore_transitionState = ENTERING_MENU;
-	D230.highScore_transitionFrames[0] = 0xc;
+	D230.highScore_transitionFrames[0] = MM_HIGHSCORE_MAIN_TRANSITION_MAX_FRAME;
 	D230.highScore_rowDesired = 0;
 	D230.highScore_rowCurr = 0;
 
@@ -153,44 +168,47 @@ void MM_HighScore_Init(void)
 void MM_HighScore_MenuProc(struct RectMenu *menu_unused)
 {
 	(void)menu_unused;
-	u8 bVar1;
-	s16 sVar2;
-	u32 uVar3;
-	int iVar4;
-	int iVar5;
-	int iVar6;
-	int iVar7;
-	RECT local_20;
+	u8 videoResetRequested;
+	u8 slideReachedTarget;
+	s16 nextFrameCount;
+	u32 trackOpen;
+	s32 menuResult;
+	s32 videoState;
+	s32 nextOffsetX;
+	s32 nextOffsetY;
+	s32 currOffsetX;
+	s32 currOffsetY;
+	RECT wipeRect;
 
-	bVar1 = false;
+	videoResetRequested = false;
 	if (D230.highScore_transitionState != IN_MENU)
 	{
-		sVar2 = D230.highScore_transitionFrames[0];
-		if (D230.highScore_transitionState < 2) // entering_menu, in_menu
+		nextFrameCount = D230.highScore_transitionFrames[0];
+		if (D230.highScore_transitionState < EXITING_MENU) // entering_menu, in_menu
 		{
 			if (D230.highScore_transitionState == ENTERING_MENU)
 			{
-				MM_TransitionInOut(D230.transitionMeta_HighScores, (int)D230.highScore_transitionFrames[0], 8);
-				sVar2 = D230.highScore_transitionFrames[0] + -1;
+				MM_TransitionInOut(D230.transitionMeta_HighScores, (int)D230.highScore_transitionFrames[0], MM_HIGHSCORE_SLIDE_TRANSITION_FRAMES);
+				nextFrameCount = D230.highScore_transitionFrames[0] + -1;
 				if (D230.highScore_transitionFrames[0] == 0)
 				{
 					D230.highScore_transitionState = IN_MENU;
-					sVar2 = D230.highScore_transitionFrames[0];
+					nextFrameCount = D230.highScore_transitionFrames[0];
 				}
 			}
 		}
 		else if (((D230.highScore_transitionState == EXITING_MENU) && (D230.highScore_transitionFrames[1] == 0)) && (D230.highScore_transitionFrames[2] == 0))
 		{
-			MM_TransitionInOut(D230.transitionMeta_HighScores, (int)D230.highScore_transitionFrames[0], 8);
+			MM_TransitionInOut(D230.transitionMeta_HighScores, (int)D230.highScore_transitionFrames[0], MM_HIGHSCORE_SLIDE_TRANSITION_FRAMES);
 			D230.highScore_transitionFrames[0] = D230.highScore_transitionFrames[0] + 1;
-			sVar2 = D230.highScore_transitionFrames[0];
-			if (0xc < D230.highScore_transitionFrames[0])
+			nextFrameCount = D230.highScore_transitionFrames[0];
+			if (MM_HIGHSCORE_MAIN_TRANSITION_MAX_FRAME < D230.highScore_transitionFrames[0])
 			{
 				MM_JumpTo_Title_Returning();
 				return;
 			}
 		}
-		D230.highScore_transitionFrames[0] = sVar2;
+		D230.highScore_transitionFrames[0] = nextFrameCount;
 		if (D230.highScore_transitionState != IN_MENU)
 		{
 			goto LAB_OVR_230__800b3c78;
@@ -200,12 +218,12 @@ void MM_HighScore_MenuProc(struct RectMenu *menu_unused)
 	{
 		if (((sdata->buttonTapPerPlayer[0] & 2) != 0) && (D230.menuHighScore.rowSelected < 1))
 		{
-			bVar1 = true;
+			videoResetRequested = true;
 		}
 	}
 	else if (D230.menuHighScore.rowSelected == 1)
 	{
-		bVar1 = true;
+		videoResetRequested = true;
 	}
 	// if player didn't press any of the "back" buttons
 	if ((sdata->buttonTapPerPlayer[0] & (BTN_SQUARE_one | BTN_TRIANGLE)) == 0)
@@ -214,12 +232,12 @@ void MM_HighScore_MenuProc(struct RectMenu *menu_unused)
 		{
 			if ((sdata->buttonTapPerPlayer[0] & BTN_RIGHT) == 0)
 			{
-				iVar4 = RECTMENU_ProcessInput(&D230.menuHighScore);
-				if ((s16)iVar4 == -1)
+				menuResult = RECTMENU_ProcessInput(&D230.menuHighScore);
+				if ((s16)menuResult == -1)
 				{
 					D230.highScore_transitionState = EXITING_MENU;
 				}
-				else if (((s16)iVar4 == 1) && (D230.menuHighScore.rowSelected == 2))
+				else if (((s16)menuResult == 1) && (D230.menuHighScore.rowSelected == 2))
 				{
 					D230.highScore_transitionState = D230.menuHighScore.rowSelected;
 				}
@@ -235,37 +253,37 @@ void MM_HighScore_MenuProc(struct RectMenu *menu_unused)
 			}
 			else
 			{
-				bVar1 = true;
+				videoResetRequested = true;
 				D230.highScore_horizontalMove[1] = 1;
 				do
 				{
 					D230.highScore_trackDesired = D230.highScore_trackDesired + 1;
-					if (0x11 < D230.highScore_trackDesired)
+					if (MM_HIGHSCORE_LAST_ARCADE_TRACK < D230.highScore_trackDesired)
 					{
 						D230.highScore_trackDesired = 0;
 					}
-					uVar3 = MM_TrackSelect_boolTrackOpen(D230.arcadeTracks + D230.highScore_trackDesired);
-				} while ((uVar3 & 0xffff) == 0);
+					trackOpen = MM_TrackSelect_boolTrackOpen(D230.arcadeTracks + D230.highScore_trackDesired);
+				} while ((trackOpen & 0xffff) == 0);
 			}
 		}
 		else
 		{
-			bVar1 = true;
+			videoResetRequested = true;
 			D230.highScore_horizontalMove[1] = -1;
 			do
 			{
 				D230.highScore_trackDesired = D230.highScore_trackDesired - 1;
-				if ((int)((u32)(u16)D230.highScore_trackDesired << 0x10) < 0)
+				if (D230.highScore_trackDesired < 0)
 				{
-					D230.highScore_trackDesired = 0x11;
+					D230.highScore_trackDesired = MM_HIGHSCORE_LAST_ARCADE_TRACK;
 				}
-				uVar3 = MM_TrackSelect_boolTrackOpen(D230.arcadeTracks + D230.highScore_trackDesired);
-			} while ((uVar3 & 0xffff) == 0);
+				trackOpen = MM_TrackSelect_boolTrackOpen(D230.arcadeTracks + D230.highScore_trackDesired);
+			} while ((trackOpen & 0xffff) == 0);
 		}
 	}
 	else
 	{
-		bVar1 = true;
+		videoResetRequested = true;
 		// NOTE(aalhendi): ASM-verified NTSC-U 926 0x800b3ad8-0x800b3ae4 for high-score back SFX.
 		OtherFX_Play(2, 1);
 		D230.highScore_transitionState = EXITING_MENU;
@@ -273,38 +291,39 @@ void MM_HighScore_MenuProc(struct RectMenu *menu_unused)
 
 LAB_OVR_230__800b3c78:
 
-	iVar4 = 0;
-	if ((((bVar1) || (D230.highScore_transitionFrames[1] != 0)) || (D230.highScore_transitionFrames[2] != 0)) || (D230.highScore_transitionState == 2))
+	videoState = 0;
+	if ((((videoResetRequested) || (D230.highScore_transitionFrames[1] != 0)) || (D230.highScore_transitionFrames[2] != 0)) ||
+	    (D230.highScore_transitionState == EXITING_MENU))
 	{
-		iVar4 = 1;
+		videoState = 1;
 	}
 
-	MM_TrackSelect_Video_State(iVar4);
-	sVar2 = D230.highScore_transitionFrames[1] + -1;
+	MM_TrackSelect_Video_State(videoState);
+	nextFrameCount = D230.highScore_transitionFrames[1] + -1;
 	if (D230.highScore_transitionFrames[1] == 0)
 	{
-		sVar2 = D230.highScore_transitionFrames[2] + -1;
+		nextFrameCount = D230.highScore_transitionFrames[2] + -1;
 		if (D230.highScore_transitionFrames[2] == 0)
 		{
 			if (D230.highScore_trackCurr == D230.highScore_trackDesired)
 			{
 				if (D230.highScore_rowCurr != D230.highScore_rowDesired)
 				{
-					D230.highScore_transitionFrames[2] = 8;
+					D230.highScore_transitionFrames[2] = MM_HIGHSCORE_SLIDE_TRANSITION_FRAMES;
 					D230.highScore_verticalMove[0] = D230.highScore_verticalMove[1];
 				}
 			}
 			else
 			{
-				D230.highScore_transitionFrames[1] = 8;
+				D230.highScore_transitionFrames[1] = MM_HIGHSCORE_SLIDE_TRANSITION_FRAMES;
 				D230.highScore_horizontalMove[0] = D230.highScore_horizontalMove[1];
 			}
 		}
 		else
 		{
-			bVar1 = D230.highScore_transitionFrames[2] == 1;
-			D230.highScore_transitionFrames[2] = sVar2;
-			if (bVar1)
+			slideReachedTarget = D230.highScore_transitionFrames[2] == 1;
+			D230.highScore_transitionFrames[2] = nextFrameCount;
+			if (slideReachedTarget)
 			{
 				D230.highScore_rowCurr = D230.highScore_rowDesired;
 			}
@@ -312,9 +331,9 @@ LAB_OVR_230__800b3c78:
 	}
 	else
 	{
-		bVar1 = D230.highScore_transitionFrames[1] == 1;
-		D230.highScore_transitionFrames[1] = sVar2;
-		if (bVar1)
+		slideReachedTarget = D230.highScore_transitionFrames[1] == 1;
+		D230.highScore_transitionFrames[1] = nextFrameCount;
+		if (slideReachedTarget)
 		{
 			D230.highScore_trackCurr = D230.highScore_trackDesired;
 		}
@@ -322,55 +341,60 @@ LAB_OVR_230__800b3c78:
 
 	RECTMENU_DrawSelf(&D230.menuHighScore, D230.transitionMeta_HighScores[10].currX, D230.transitionMeta_HighScores[10].currY, 0xa4);
 
-	iVar4 = 0;
-	iVar7 = 0;
+	currOffsetY = 0;
+	currOffsetX = 0;
 
 	if (D230.highScore_transitionFrames[1] == 0)
 	{
-		iVar4 = (8 - D230.highScore_transitionFrames[2]) * D230.highScore_verticalMove[0] * 0x1b;
+		currOffsetY =
+		    (MM_HIGHSCORE_SLIDE_TRANSITION_FRAMES - D230.highScore_transitionFrames[2]) * D230.highScore_verticalMove[0] * MM_HIGHSCORE_ROW_SLIDE_STEP_Y;
 	}
 
 	else
 	{
-		iVar7 = (8 - D230.highScore_transitionFrames[1]) * D230.highScore_horizontalMove[0] * 0x40;
+		currOffsetX =
+		    (MM_HIGHSCORE_SLIDE_TRANSITION_FRAMES - D230.highScore_transitionFrames[1]) * D230.highScore_horizontalMove[0] * MM_HIGHSCORE_TRACK_SLIDE_STEP_X;
 	}
 
-	uint32_t *ot = sdata->gGT->backBuffer->otMem.uiOT;
+	u32 *ot = sdata->gGT->backBuffer->otMem.uiOT;
 
-	if (((iVar7 != -0x200) && (iVar7 != 0x200)) && ((iVar4 != -0xd8 && (iVar4 != 0xd8))))
+	if (((currOffsetX != -MM_HIGHSCORE_OFFSCREEN_X) && (currOffsetX != MM_HIGHSCORE_OFFSCREEN_X)) &&
+	    ((currOffsetY != -MM_HIGHSCORE_OFFSCREEN_Y && (currOffsetY != MM_HIGHSCORE_OFFSCREEN_Y))))
 	{
-		MM_HighScore_Draw(D230.highScore_trackCurr, (int)D230.highScore_rowCurr, (int)(s16)iVar7, (int)(s16)iVar4);
+		MM_HighScore_Draw(D230.highScore_trackCurr, (int)D230.highScore_rowCurr, (int)(s16)currOffsetX, (int)(s16)currOffsetY);
 		if (D230.highScore_transitionFrames[2] != 0)
 		{
 			// draw rectangle
-			local_20.w = 0x228;
-			local_20.h = 0x19;
-			local_20.x = D230.transitionMeta_HighScores[0].currX + -0x14;
-			local_20.y = D230.transitionMeta_HighScores[0].currY + (s16)iVar4 + 9;
-			RECTMENU_DrawInnerRect(&local_20, 0, ot);
+			wipeRect.w = MM_HIGHSCORE_WIPE_RECT_W;
+			wipeRect.h = MM_HIGHSCORE_WIPE_RECT_H;
+			wipeRect.x = D230.transitionMeta_HighScores[0].currX + MM_HIGHSCORE_WIPE_RECT_X_OFFSET;
+			wipeRect.y = D230.transitionMeta_HighScores[0].currY + (s16)currOffsetY + MM_HIGHSCORE_WIPE_RECT_Y_OFFSET;
+			RECTMENU_DrawInnerRect(&wipeRect, 0, ot);
 		}
 	}
-	iVar5 = 0;
-	iVar6 = 0;
+	nextOffsetX = 0;
+	nextOffsetY = 0;
 	if (D230.highScore_transitionFrames[1] == 0)
 	{
-		iVar6 = D230.highScore_transitionFrames[2] * -0x1b * (int)D230.highScore_verticalMove[0];
+		nextOffsetY = D230.highScore_transitionFrames[2] * -MM_HIGHSCORE_ROW_SLIDE_STEP_Y * (int)D230.highScore_verticalMove[0];
 	}
 	else
 	{
-		iVar5 = D230.highScore_transitionFrames[1] * -0x40 * (int)D230.highScore_horizontalMove[0];
+		nextOffsetX = D230.highScore_transitionFrames[1] * -MM_HIGHSCORE_TRACK_SLIDE_STEP_X * (int)D230.highScore_horizontalMove[0];
 	}
-	if (((iVar7 != iVar5) || (iVar4 != iVar6)) && ((iVar5 != -0x200 && (((iVar5 != 0x200 && (iVar6 != -0xd8)) && (iVar6 != 0xd8))))))
+	if (((currOffsetX != nextOffsetX) || (currOffsetY != nextOffsetY)) &&
+	    ((nextOffsetX != -MM_HIGHSCORE_OFFSCREEN_X &&
+	      (((nextOffsetX != MM_HIGHSCORE_OFFSCREEN_X && (nextOffsetY != -MM_HIGHSCORE_OFFSCREEN_Y)) && (nextOffsetY != MM_HIGHSCORE_OFFSCREEN_Y))))))
 	{
-		MM_HighScore_Draw(D230.highScore_trackDesired, (int)D230.highScore_rowDesired, (int)(s16)iVar5, (int)(s16)iVar6);
+		MM_HighScore_Draw(D230.highScore_trackDesired, (int)D230.highScore_rowDesired, (int)(s16)nextOffsetX, (int)(s16)nextOffsetY);
 	}
 
 	// draw rectangle
-	local_20.w = 0x228;
-	local_20.h = 0x19;
-	local_20.x = D230.transitionMeta_HighScores[0].currX + -0x14;
-	local_20.y = D230.transitionMeta_HighScores[0].currY + (s16)iVar6 + 9;
-	RECTMENU_DrawInnerRect(&local_20, 0, ot);
+	wipeRect.w = MM_HIGHSCORE_WIPE_RECT_W;
+	wipeRect.h = MM_HIGHSCORE_WIPE_RECT_H;
+	wipeRect.x = D230.transitionMeta_HighScores[0].currX + MM_HIGHSCORE_WIPE_RECT_X_OFFSET;
+	wipeRect.y = D230.transitionMeta_HighScores[0].currY + (s16)nextOffsetY + MM_HIGHSCORE_WIPE_RECT_Y_OFFSET;
+	RECTMENU_DrawInnerRect(&wipeRect, 0, ot);
 
 	return;
 }

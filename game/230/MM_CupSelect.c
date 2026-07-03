@@ -28,7 +28,7 @@ void MM_CupSelect_MenuProc(struct RectMenu *menu)
 	struct GameTracker *gGT = sdata->gGT;
 	RECT cupBox;
 
-	if (menu->unk1e == 0)
+	if (menu->funcState == RECTMENU_FUNC_STATE_INPUT)
 	{
 		D230.cupSel_postTransition_boolStart = (menu->rowSelected != -1);
 		D230.cupSel_transitionState = 2;

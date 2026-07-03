@@ -3,13 +3,10 @@
 // NOTE(aalhendi): ASM-verified against retail 230 0x800abaf0-0x800abcac.
 u8 MM_TransitionInOut(struct TransitionMeta *meta, int framesPassed, int numFrames)
 {
-	u8 bool_Transitioning;
-	int transitionIndex;
+	u8 allTransitionsDone = 1;
+	int transitionIndex = 0;
 	s16 start;
 	s16 framesLeft;
-
-	bool_Transitioning = 1;
-	transitionIndex = 0;
 
 	// last member of array is null-terminated with 0xFFFF
 	for (/**/; meta->headStart > -1; meta++, transitionIndex++)
@@ -17,15 +14,15 @@ u8 MM_TransitionInOut(struct TransitionMeta *meta, int framesPassed, int numFram
 		start = meta->headStart;
 		framesLeft = ((s16)framesPassed - start);
 
-		if ((framesLeft == 4) && (transitionIndex == 0))
+		if ((framesLeft == MM_TRANSITION_SWISH_FRAME) && (transitionIndex == 0))
 		{
 			// Play "swoosh" sound for menu transition
-			OtherFX_Play(0x65, 0);
+			OtherFX_Play(MM_TRANSITION_SWISH_SFX, 0);
 		}
 
 		if (framesLeft < 1)
 		{
-			bool_Transitioning = 0;
+			allTransitionsDone = 0;
 			meta->currX = 0;
 			meta->currY = 0;
 			continue;
@@ -34,7 +31,7 @@ u8 MM_TransitionInOut(struct TransitionMeta *meta, int framesPassed, int numFram
 		// else if
 		if (framesLeft < (s16)numFrames)
 		{
-			bool_Transitioning = 0;
+			allTransitionsDone = 0;
 			meta->currX = framesLeft * meta->distX / (s16)numFrames;
 			meta->currY = framesLeft * meta->distY / (s16)numFrames;
 			continue;
@@ -44,7 +41,7 @@ u8 MM_TransitionInOut(struct TransitionMeta *meta, int framesPassed, int numFram
 		meta->currX = meta->distX;
 		meta->currY = meta->distY;
 	}
-	return bool_Transitioning;
+	return allTransitionsDone;
 }
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800acff4-0x800ad448.
@@ -64,13 +61,13 @@ void MM_MenuProc_Main(struct RectMenu *mainMenu)
 	MM_ToggleRows_PlayerCount();
 
 	// If you are at the highest hierarchy level of main menu
-	if (mainMenu->unk1e == 1)
+	if (mainMenu->funcState == RECTMENU_FUNC_STATE_UPDATE)
 	{
 		MM_Title_MenuUpdate();
 
 		if (
 		    // main menu, "title" exists, and timer >= 230
-		    (D230.MM_State == 1) && (D230.titleObj != NULL) && (229 < D230.timerInTitle))
+		    (D230.titleMenuState == TITLE_MENU_STATE_IN_MENU) && (D230.titleObj != NULL) && (TITLE_INTRO_TM_DRAW_MIN_FRAME < D230.titleIntroFrame))
 		{
 			DecalFont_DrawLineOT(sdata->lngStrings[LNG_TM], 0x10e, 0x9c, FONT_SMALL, ORANGE, &gGT->backBuffer->otMem.uiOT[3]);
 		}
@@ -88,19 +85,18 @@ void MM_MenuProc_Main(struct RectMenu *mainMenu)
 				if (gGT->demoCountdownTimer < 1)
 				{
 					// Transition out of main menu
-					D230.MM_State = 2;
+					D230.titleMenuState = TITLE_MENU_STATE_EXITING;
 
-					// Go to a cutscene of some kind
-					// (either oxide intro or demo mode)
-					D230.desiredMenuIndex = 4;
+					// Go to a cutscene of some kind, either the Oxide intro
+					// or a demo-mode race.
+					D230.desiredMenuIndex = MM_EXIT_ROUTE_DEMO;
 				}
 			}
 
 			// if button pressed, reset timer
 			else
 			{
-				// 900 = 30 seconds at 30fps
-				gGT->demoCountdownTimer = 900;
+				gGT->demoCountdownTimer = TITLE_DEMO_IDLE_FRAMES;
 			}
 		}
 	}
@@ -110,7 +106,7 @@ void MM_MenuProc_Main(struct RectMenu *mainMenu)
 	// if drawing ptrNextBox_InHierarchy
 	if ((mainMenu->state & DRAW_NEXT_MENU_IN_HIERARCHY) != 0)
 	{
-		D230.timerInTitle = 1000;
+		D230.titleIntroFrame = TITLE_INTRO_SKIP_FRAME;
 	}
 
 	// if funcPtr is null
@@ -129,7 +125,7 @@ void MM_MenuProc_Main(struct RectMenu *mainMenu)
 	}
 
 	// if you are at highest level of menu hierarchy
-	if (mainMenu->unk1e != 0)
+	if (mainMenu->funcState != RECTMENU_FUNC_STATE_INPUT)
 	{
 		// leave the function
 		return;
@@ -155,13 +151,13 @@ void MM_MenuProc_Main(struct RectMenu *mainMenu)
 	// Default to 3,
 	// this intentionally disables the 1-lap cheat
 	// in Time Trial and Adventure, DONT change it
-	gGT->numLaps = 3;
+	gGT->numLaps = MM_DEFAULT_LAP_COUNT;
 
 	// get LNG index of row selected
 	choose = mainMenu->rows[mainMenu->rowSelected].stringIndex;
 
 	// Adventure Mode
-	if (choose == 0x4c)
+	if (choose == LNG_ADVENTURE)
 	{
 		// Turn on Adventure Mode, turn off item cheats
 		gGT->gameMode1 |= ADVENTURE_MODE;
@@ -174,13 +170,13 @@ void MM_MenuProc_Main(struct RectMenu *mainMenu)
 	}
 
 	// Time Trial
-	if (choose == 0x4d)
+	if (choose == LNG_TIME_TRIAL)
 	{
 		// Leave main menu hierarchy
-		D230.MM_State = 2;
+		D230.titleMenuState = TITLE_MENU_STATE_EXITING;
 
-		// Set next stage to 2 for Time Trial
-		D230.desiredMenuIndex = 2;
+		// Leave through the normal character-select flow.
+		D230.desiredMenuIndex = MM_EXIT_ROUTE_CHARACTER_SELECT;
 
 		// set game mode to Time Trial Mode
 		gGT->numPlyrNextGame = 1;
@@ -191,12 +187,12 @@ void MM_MenuProc_Main(struct RectMenu *mainMenu)
 	}
 
 	// Arcade Mode
-	if (choose == 0x4e)
+	if (choose == LNG_ARCADE)
 	{
 		// DONT change, should only work in Arcade, and VS
 		if ((gGT->gameMode2 & CHEAT_ONELAP) != 0)
 		{
-			gGT->numLaps = 1;
+			gGT->numLaps = MM_ONE_LAP_CHEAT_COUNT;
 		}
 
 		// set game mode to Arcade Mode
@@ -209,12 +205,12 @@ void MM_MenuProc_Main(struct RectMenu *mainMenu)
 	}
 
 	// Versus
-	if (choose == 0x4f)
+	if (choose == LNG_VS)
 	{
 		// DONT change, should only work in Arcade, and VS
 		if ((gGT->gameMode2 & CHEAT_ONELAP) != 0)
 		{
-			gGT->numLaps = 1;
+			gGT->numLaps = MM_ONE_LAP_CHEAT_COUNT;
 		}
 
 		// next menu is choosing single+cup
@@ -224,7 +220,7 @@ void MM_MenuProc_Main(struct RectMenu *mainMenu)
 	}
 
 	// Battle
-	if (choose == 0x50)
+	if (choose == LNG_BATTLE)
 	{
 		D230.characterSelect_transitionState = 2;
 
@@ -238,61 +234,61 @@ void MM_MenuProc_Main(struct RectMenu *mainMenu)
 	}
 
 	// High Score
-	if (choose == 0x51)
+	if (choose == LNG_HIGH_SCORE)
 	{
 		// Set next stage to high score menu
-		D230.desiredMenuIndex = 3;
+		D230.desiredMenuIndex = MM_EXIT_ROUTE_HIGH_SCORE;
 
 		// Leave main menu hierarchy
-		D230.MM_State = 2;
+		D230.titleMenuState = TITLE_MENU_STATE_EXITING;
 
 		return;
 	}
 
 	// Scrapbook
-	if (choose == 0x234)
+	if (choose == LNG_SCRAPBOOK)
 	{
 		// Set next stage to Scrapbook
-		D230.desiredMenuIndex = 5;
+		D230.desiredMenuIndex = MM_EXIT_ROUTE_SCRAPBOOK;
 
 		// Leave main menu hierarchy
-		D230.MM_State = 2;
+		D230.titleMenuState = TITLE_MENU_STATE_EXITING;
 
 		return;
 	}
 }
 
 // NOTE(aalhendi): ASM-verified against NTSC-U 926 overlay 230 0x800ad448-0x800ad560.
-void MM_ToggleRows_PlayerCount()
+void MM_ToggleRows_PlayerCount(void)
 {
 	int i;
 	struct MenuRow *row;
 
-	for (i = 0; i < 2; i++)
+	for (i = 0; i < MM_PLAYER_1P2P_SELECTABLE_ROWS; i++)
 	{
 		row = &D230.rowsPlayers1P2P[i];
 
 		// unlock row
-		row->stringIndex &= 0x7fff;
+		row->stringIndex &= MENU_ROW_LNG_MASK;
 
 		if ((MainFrame_HaveAllPads(i + 1) & 0xffff) == 0)
 		{
 			// lock row
-			row->stringIndex |= 0x8000;
+			row->stringIndex |= MENU_ROW_LOCKED;
 		}
 	}
 
-	for (i = 0; i < 3; i++)
+	for (i = 0; i < MM_PLAYER_2P3P4P_SELECTABLE_ROWS; i++)
 	{
 		row = &D230.rowsPlayers2P3P4P[i];
 
 		// unlock row
-		row->stringIndex &= 0x7fff;
+		row->stringIndex &= MENU_ROW_LNG_MASK;
 
 		if ((MainFrame_HaveAllPads(i + 2) & 0xffff) == 0)
 		{
 			// lock row
-			row->stringIndex |= 0x8000;
+			row->stringIndex |= MENU_ROW_LOCKED;
 		}
 	}
 }
@@ -302,9 +298,7 @@ void MM_MenuProc_1p2p(struct RectMenu *menu)
 
 {
 	s16 row;
-
-	struct GameTracker *gGT;
-	gGT = sdata->gGT;
+	struct GameTracker *gGT = sdata->gGT;
 
 	row = menu->rowSelected;
 
@@ -321,7 +315,7 @@ void MM_MenuProc_1p2p(struct RectMenu *menu)
 	else
 	{
 		// if on row 0 or 1
-		if ((row >= 0) && (row < 2))
+		if ((row >= 0) && (row < MM_PLAYER_1P2P_SELECTABLE_ROWS))
 		{
 			// row 0 is 1P, row 1 is 2P
 			gGT->numPlyrNextGame = menu->rowSelected + 1;
@@ -329,7 +323,7 @@ void MM_MenuProc_1p2p(struct RectMenu *menu)
 			// go to difficulty box
 			menu->ptrNextBox_InHierarchy = &D230.menuDifficulty;
 
-			menu->state |= 0x14;
+			menu->state |= ONLY_DRAW_TITLE | DRAW_NEXT_MENU_IN_HIERARCHY;
 			return;
 		}
 	}
@@ -340,9 +334,7 @@ void MM_MenuProc_1p2p(struct RectMenu *menu)
 void MM_MenuProc_2p3p4p(struct RectMenu *menu)
 {
 	s16 row;
-
-	struct GameTracker *gGT;
-	gGT = sdata->gGT;
+	struct GameTracker *gGT = sdata->gGT;
 
 	row = menu->rowSelected;
 
@@ -358,15 +350,15 @@ void MM_MenuProc_2p3p4p(struct RectMenu *menu)
 	else
 	{
 		// row is 0, 1, 2
-		if ((row >= 0) && (row < 3))
+		if ((row >= 0) && (row < MM_PLAYER_2P3P4P_SELECTABLE_ROWS))
 		{
 			// row 0 is 2P, row 1 is 3P, row 2 is 4P
 			gGT->numPlyrNextGame = menu->rowSelected + 2;
 
-			D230.MM_State = 2;
-			D230.desiredMenuIndex = 2;
+			D230.titleMenuState = TITLE_MENU_STATE_EXITING;
+			D230.desiredMenuIndex = MM_EXIT_ROUTE_CHARACTER_SELECT;
 
-			menu->state |= 4;
+			menu->state |= ONLY_DRAW_TITLE;
 			return;
 		}
 	}
@@ -376,21 +368,16 @@ void MM_MenuProc_2p3p4p(struct RectMenu *menu)
 // NOTE(aalhendi): ASM-verified against NTSC-U 926 overlay 230 0x800ad678-0x800ad7a4.
 void MM_ToggleRows_Difficulty(void)
 {
-	char bVar1;
-	struct GameTracker *gGT;
-	int iVar3;
+	char shouldCheckNextTrack;
+	struct GameTracker *gGT = sdata->gGT;
 	s16 bitIndex;
-	u16 uVar5;
-	u32 uVar6;
-	int iVar7;
-
-	gGT = sdata->gGT;
-	iVar3 = 0;
+	u16 lngIndex;
+	u32 isUnlocked;
 
 	// check 3 mods (easy, medium, hard)
-	for (iVar7 = 0; iVar7 < 3; iVar7++)
+	for (int difficultyIndex = 0; difficultyIndex < MM_DIFFICULTY_COUNT; difficultyIndex++)
 	{
-		bitIndex = D230.cupDifficultyUnlockFlags[iVar7];
+		bitIndex = D230.cupDifficultyUnlockFlags[difficultyIndex];
 
 		// if -1 (for EASY row), skip
 		if (-1 == bitIndex)
@@ -399,32 +386,32 @@ void MM_ToggleRows_Difficulty(void)
 		}
 
 		// assume unlocked
-		uVar6 = 1;
+		isUnlocked = 1;
 
 		// check 4 bits starting at bitIndex,
 		// one for each track in cup
-		for (iVar3 = 0; iVar3 < 4; iVar3++)
+		for (int trackIndex = 0; trackIndex < MM_CUP_TRACK_COUNT; trackIndex++)
 		{
-			bVar1 = (uVar6 != 0);
-			uVar6 = 0;
+			shouldCheckNextTrack = (isUnlocked != 0);
+			isUnlocked = 0;
 
 			// if not determined locked
-			if (bVar1)
+			if (shouldCheckNextTrack)
 			{
-				uVar6 = (int)bitIndex + iVar3;
+				int unlockBit = (int)bitIndex + trackIndex;
 
 				// check what is unlocked
-				uVar6 = (sdata->gameProgress.unlocks[uVar6 >> 5] >> (uVar6 & 0x1f)) & 1;
+				isUnlocked = (sdata->gameProgress.unlocks[unlockBit >> 5] >> (unlockBit & 0x1f)) & 1;
 			}
 		}
 
 		// get current value of lng index,
 		// for easy, medium, hard
-		uVar5 = D230.cupDifficultyLngIndex[iVar7];
+		lngIndex = D230.cupDifficultyLngIndex[difficultyIndex];
 
 		if (
 		    // if locked
-		    (uVar6 == 0) &&
+		    (isUnlocked == 0) &&
 
 		    // If you're in Arcade mode
 		    ((gGT->gameMode1 & ARCADE_MODE) != 0) &&
@@ -433,11 +420,11 @@ void MM_ToggleRows_Difficulty(void)
 		    ((gGT->gameMode2 & CUP_ANY_KIND) != 0))
 		{
 			// use high bits for "LOCKED"
-			uVar5 = uVar5 | 0x8000;
+			lngIndex |= MENU_ROW_LOCKED;
 		}
 
 		// save new value
-		D230.rowsDifficulty[iVar7].stringIndex = uVar5;
+		D230.rowsDifficulty[difficultyIndex].stringIndex = lngIndex;
 	}
 }
 
@@ -457,15 +444,15 @@ void MM_MenuProc_Difficulty(struct RectMenu *menu)
 	else
 	{
 		// if you are on a valid row
-		if ((row >= 0) && (row < 3))
+		if ((row >= 0) && (row < MM_DIFFICULTY_COUNT))
 		{
 			// set difficulty to value, from array of fixed difficulty values
 			sdata->gGT->arcadeDifficulty = D230.cupDifficultySpeed[row];
 
-			D230.MM_State = 2;
-			D230.desiredMenuIndex = 2;
+			D230.titleMenuState = TITLE_MENU_STATE_EXITING;
+			D230.desiredMenuIndex = MM_EXIT_ROUTE_CHARACTER_SELECT;
 
-			menu->state |= 4;
+			menu->state |= ONLY_DRAW_TITLE;
 			return;
 		}
 	}
@@ -487,7 +474,7 @@ void MM_MenuProc_SingleCup(struct RectMenu *menu)
 		return;
 	}
 
-	if ((row >= 0) && (row < 2))
+	if ((row >= 0) && (row < MM_RACE_TYPE_SELECTABLE_ROWS))
 	{
 		// disable Cup mode
 		gGT->gameMode2 &= ~(CUP_ANY_KIND);
@@ -499,7 +486,7 @@ void MM_MenuProc_SingleCup(struct RectMenu *menu)
 			gGT->gameMode2 |= CUP_ANY_KIND;
 		}
 
-		menu->state |= 0x14;
+		menu->state |= ONLY_DRAW_TITLE | DRAW_NEXT_MENU_IN_HIERARCHY;
 
 		// if mode is Arcade
 		if ((gGT->gameMode1 & ARCADE_MODE) != 0)
@@ -532,7 +519,7 @@ void MM_MenuProc_NewLoad(struct RectMenu *menu)
 		return;
 	}
 
-	if ((row < 0) || (row > 1))
+	if ((row < 0) || (row >= MM_ADV_NEW_LOAD_ROUTE_COUNT))
 	{
 		return;
 	}
@@ -541,9 +528,9 @@ void MM_MenuProc_NewLoad(struct RectMenu *menu)
 	D230.desiredMenuIndex = row;
 
 	// MM_Title transitioning out
-	D230.MM_State = 2;
+	D230.titleMenuState = TITLE_MENU_STATE_EXITING;
 
-	menu->state |= 4;
+	menu->state |= ONLY_DRAW_TITLE;
 	return;
 }
 
@@ -557,7 +544,7 @@ struct RectMenu *MM_AdvNewLoad_GetMenuPtr(void)
 // NOTE(aalhendi): ASM-verified against NTSC-U 926 overlay 230 0x800b42b0-0x800b4334.
 void MM_ResetAllMenus(void)
 {
-	for (int i = 0; i < 9; i++)
+	for (int i = 0; i < MM_MENU_RESET_COUNT; i++)
 	{
 		struct RectMenu *menu = D230.arrayMenuPtrs[i];
 
@@ -584,19 +571,19 @@ void MM_ResetAllMenus(void)
 	}
 
 	// unused
-	sdata->framesRemainingInMenu = 0xF;
+	sdata->framesRemainingInMenu = MM_MENU_RESET_DONE_FRAMES;
 }
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800b4334-0x800b4364.
 void MM_JumpTo_Title_Returning(void)
 {
 	// return to main menu from another menu
-	D230.MM_State = 3;
+	D230.titleMenuState = TITLE_MENU_STATE_RETURNING;
 
 	// return to main menu
 	sdata->ptrDesiredMenu = &D230.menuMainMenu;
 
-	D230.countMeta0xD = D230.title_numFrameTotal;
+	D230.titleMenuTransitionFrame = D230.titleMenuTransitionFrameCount;
 }
 
 // NOTE(aalhendi): ASM-verified against NTSC-U 926 overlay 230 0x800b4364-0x800b43f4.
@@ -625,21 +612,21 @@ void MM_JumpTo_Title_FirstTime(void)
 	sdata->ptrActiveMenu = &D230.menuMainMenu;
 #endif
 
-	D230.timerInTitle = 0;
+	D230.titleIntroFrame = 0;
 
 	// first time in main menu
 	// (play crash trophy anim)
-	D230.MM_State = 0;
+	D230.titleMenuState = TITLE_MENU_STATE_INTRO;
 
 	// reset countdown clock for battle or crystal challenge
-	gGT->originalEventTime = 0x2a300;
+	gGT->originalEventTime = TITLE_INITIAL_EVENT_TIME;
 
 	D230.menuMainMenu.state &= ~(EXECUTE_FUNCPTR | ONLY_DRAW_TITLE);
 	D230.menuMainMenu.state |= DISABLE_INPUT_ALLOW_FUNCPTRS;
 
 	// distance to screen (perspective)
-	gGT->pushBuffer[0].distanceToScreen_PREV = 0x100;
-	gGT->pushBuffer[0].distanceToScreen_CURR = 0x100;
+	gGT->pushBuffer[0].distanceToScreen_PREV = TITLE_DEFAULT_DISTANCE_TO_SCREEN;
+	gGT->pushBuffer[0].distanceToScreen_CURR = TITLE_DEFAULT_DISTANCE_TO_SCREEN;
 	gGT->gameMode1 &= ~(TIME_TRIAL);
 }
 

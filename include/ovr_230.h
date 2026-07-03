@@ -22,6 +22,125 @@ enum TransitionState
 	EXITING_MENU,
 };
 
+enum TitleMenuState
+{
+	TITLE_MENU_STATE_INTRO = 0,
+	TITLE_MENU_STATE_IN_MENU = 1,
+	TITLE_MENU_STATE_EXITING = 2,
+	TITLE_MENU_STATE_RETURNING = 3,
+};
+
+enum
+{
+	MM_EXIT_ROUTE_ADV_NEW = 0,
+	MM_EXIT_ROUTE_ADV_LOAD = 1,
+	MM_EXIT_ROUTE_CHARACTER_SELECT = 2,
+	MM_EXIT_ROUTE_HIGH_SCORE = 3,
+	MM_EXIT_ROUTE_DEMO = 4,
+	MM_EXIT_ROUTE_SCRAPBOOK = 5,
+};
+typedef s32 MainMenuExitRoute;
+
+enum TitleIntroFrames
+{
+	TITLE_INTRO_MENU_READY_FRAME = 230,
+	TITLE_INTRO_TM_DRAW_MIN_FRAME = TITLE_INTRO_MENU_READY_FRAME - 1,
+	TITLE_INTRO_END_FRAME = 245,
+	TITLE_INTRO_SKIP_FRAME = 1000,
+};
+
+enum TitleIntroConstants
+{
+	TITLE_INSTANCE_COUNT = 6,
+	TITLE_INSTANCE_COUNT_JPN = 7,
+	TITLE_INTRO_SKIP_INPUT = BTN_CROSS_one | BTN_CIRCLE | BTN_SQUARE_one | BTN_TRIANGLE,
+	TITLE_DEMO_IDLE_FRAMES = CTR_SECONDS_TO_FRAMES(30),
+	TITLE_DEMO_RACE_FRAMES = CTR_SECONDS_TO_FRAMES(60),
+	TITLE_DEFAULT_DISTANCE_TO_SCREEN = 0x100,
+	TITLE_INITIAL_EVENT_TIME = 0x2a300,
+	TITLE_CAMERA_MOVE_FRAMES = 0xf,
+	TITLE_TROPHY_HIDE_START_FRAME = 138,
+	TITLE_TROPHY_HIDE_FRAMES = 62,
+	TITLE_TROPHY_ANIM_START_FRAME = 200,
+	TITLE_MATRIX_SCALE = 0x5000,
+	TITLE_SPEC_LIGHT_Y = 0x1000,
+};
+
+CTR_STATIC_ASSERT(TITLE_INSTANCE_COUNT == 6);
+CTR_STATIC_ASSERT(TITLE_INSTANCE_COUNT_JPN == 7);
+CTR_STATIC_ASSERT(sizeof(MainMenuExitRoute) == 0x4);
+CTR_STATIC_ASSERT(MM_EXIT_ROUTE_ADV_NEW == 0);
+CTR_STATIC_ASSERT(MM_EXIT_ROUTE_SCRAPBOOK == 5);
+CTR_STATIC_ASSERT(TITLE_INTRO_SKIP_INPUT == 0x40070);
+CTR_STATIC_ASSERT(TITLE_DEMO_IDLE_FRAMES == 900);
+CTR_STATIC_ASSERT(TITLE_DEMO_RACE_FRAMES == 1800);
+CTR_STATIC_ASSERT(TITLE_DEFAULT_DISTANCE_TO_SCREEN == 0x100);
+CTR_STATIC_ASSERT(TITLE_INITIAL_EVENT_TIME == 0x2a300);
+CTR_STATIC_ASSERT(TITLE_CAMERA_MOVE_FRAMES == 0xf);
+CTR_STATIC_ASSERT(TITLE_TROPHY_HIDE_START_FRAME == 138);
+CTR_STATIC_ASSERT(TITLE_TROPHY_HIDE_FRAMES == 62);
+CTR_STATIC_ASSERT(TITLE_TROPHY_ANIM_START_FRAME == 200);
+CTR_STATIC_ASSERT(TITLE_MATRIX_SCALE == 0x5000);
+CTR_STATIC_ASSERT(TITLE_SPEC_LIGHT_Y == 0x1000);
+
+enum MainMenuCheatConstants
+{
+	MM_CHEAT_SUCCESS_SFX = 0x67,
+	MM_CHEAT_BUTTON_HISTORY_COUNT = 10,
+
+#if BUILD == JpnRetail
+	MM_CHEAT_COUNT = 0x15,
+#else
+	MM_CHEAT_COUNT = 0x16,
+#endif
+};
+
+CTR_STATIC_ASSERT(MM_CHEAT_SUCCESS_SFX == 0x67);
+CTR_STATIC_ASSERT(MM_CHEAT_BUTTON_HISTORY_COUNT == 10);
+#if BUILD == JpnRetail
+CTR_STATIC_ASSERT(MM_CHEAT_COUNT == 0x15);
+#else
+CTR_STATIC_ASSERT(MM_CHEAT_COUNT == 0x16);
+#endif
+
+enum MainMenuFlowConstants
+{
+	MM_TRANSITION_SWISH_SFX = 0x65,
+	MM_TRANSITION_SWISH_FRAME = 4,
+	MM_DEFAULT_LAP_COUNT = 3,
+	MM_ONE_LAP_CHEAT_COUNT = 1,
+	MM_MENU_RESET_DONE_FRAMES = 0xf,
+	MM_PLAYER_1P2P_SELECTABLE_ROWS = 2,
+	MM_PLAYER_2P3P4P_SELECTABLE_ROWS = 3,
+	MM_RACE_TYPE_SELECTABLE_ROWS = 2,
+	MM_ADV_NEW_LOAD_ROUTE_COUNT = 2,
+	MM_DIFFICULTY_COUNT = 3,
+	MM_CUP_TRACK_COUNT = 4,
+
+#if BUILD == EurRetail
+	MM_MENU_RESET_COUNT = 10,
+#else
+	MM_MENU_RESET_COUNT = 9,
+#endif
+};
+
+CTR_STATIC_ASSERT(MM_TRANSITION_SWISH_SFX == 0x65);
+CTR_STATIC_ASSERT(MM_TRANSITION_SWISH_FRAME == 4);
+CTR_STATIC_ASSERT(MM_DEFAULT_LAP_COUNT == 3);
+CTR_STATIC_ASSERT(MM_ONE_LAP_CHEAT_COUNT == 1);
+CTR_STATIC_ASSERT(MM_MENU_RESET_DONE_FRAMES == 0xf);
+CTR_STATIC_ASSERT(MM_PLAYER_1P2P_SELECTABLE_ROWS == 2);
+CTR_STATIC_ASSERT(MM_PLAYER_2P3P4P_SELECTABLE_ROWS == 3);
+CTR_STATIC_ASSERT(MM_RACE_TYPE_SELECTABLE_ROWS == 2);
+CTR_STATIC_ASSERT(MM_ADV_NEW_LOAD_ROUTE_COUNT == 2);
+CTR_STATIC_ASSERT(MM_DIFFICULTY_COUNT == 3);
+CTR_STATIC_ASSERT(MM_CUP_TRACK_COUNT == 4);
+#if BUILD == EurRetail
+CTR_STATIC_ASSERT(MM_MENU_RESET_COUNT == 10);
+#else
+CTR_STATIC_ASSERT(MM_MENU_RESET_COUNT == 9);
+#endif
+
 // MainMenu
 struct Title
 {
@@ -29,7 +148,7 @@ struct Title
 	struct Thread *t;
 
 	// 0x4
-	struct Instance *i[6];
+	struct Instance *i[TITLE_INSTANCE_COUNT];
 
 	// 0x1c
 	SVec3 cameraPosOffset;
@@ -39,6 +158,47 @@ struct Title
 
 	// 0x24 -- size of struct
 };
+
+CTR_STATIC_ASSERT(sizeof(struct Title) == 0x24);
+
+struct TitleInstanceMeta
+{
+	s16 modelID;
+	s16 animStartFrame;
+
+	// Stored as TITLE_INTRO_MENU_READY_FRAME for every NTSC-U row; no current NTSC-U use site is known.
+	s16 unusedMenuReadyFrame;
+
+	u16 isTrophy;
+};
+
+CTR_STATIC_ASSERT(sizeof(struct TitleInstanceMeta) == 0x8);
+
+enum MMVideoFlags
+{
+	MM_VIDEO_FLAG_RGB24 = 0x1,
+	MM_VIDEO_FLAG_HAS_XA_AUDIO = 0x2,
+	MM_VIDEO_FLAG_LOOP = 0x4,
+	MM_VIDEO_FLAG_SCRAPBOOK = 0x8,
+};
+
+CTR_STATIC_ASSERT(MM_VIDEO_FLAG_RGB24 == 0x1);
+CTR_STATIC_ASSERT(MM_VIDEO_FLAG_HAS_XA_AUDIO == 0x2);
+CTR_STATIC_ASSERT(MM_VIDEO_FLAG_LOOP == 0x4);
+CTR_STATIC_ASSERT(MM_VIDEO_FLAG_SCRAPBOOK == 0x8);
+
+enum MMVideoConstants
+{
+	MM_VIDEO_VLC_WAIT_FRAMES = 10,
+	MM_VIDEO_STALL_RECOVERY_FRAMES = 400,
+	MM_VIDEO_STALLED_BACKLOC_FRAMES = 0x40,
+	MM_VIDEO_DEFAULT_RING_SECTORS = 0x40,
+};
+
+CTR_STATIC_ASSERT(MM_VIDEO_VLC_WAIT_FRAMES == 10);
+CTR_STATIC_ASSERT(MM_VIDEO_STALL_RECOVERY_FRAMES == 400);
+CTR_STATIC_ASSERT(MM_VIDEO_STALLED_BACKLOC_FRAMES == 0x40);
+CTR_STATIC_ASSERT(MM_VIDEO_DEFAULT_RING_SECTORS == 0x40);
 
 // array at 0x800b53b0
 struct MainMenu_LevelRow
@@ -115,6 +275,14 @@ struct TransitionMeta
 
 	// 0xA -- size
 };
+
+struct BattleWeaponMenuItem
+{
+	u32 enabledWeaponFlag;
+	s32 iconID;
+};
+
+CTR_STATIC_ASSERT(sizeof(struct BattleWeaponMenuItem) == 0x8);
 
 // 800ab9f0 - UsaRetail
 // 800abe04 - EurRetail
@@ -207,7 +375,7 @@ struct OverlayDATA_230
 	// 800b456c - UsaRetail
 	// 800b4ce0 - EurRetail
 	// 800b7ff0 - JpnRetail
-	struct MenuRow rowsPlayers1P2P[3];
+	struct MenuRow rowsPlayers1P2P[MM_PLAYER_1P2P_SELECTABLE_ROWS + 1];
 
 // ????
 #if (BUILD == EurRetail) || (BUILD == UsaRetail)
@@ -222,7 +390,7 @@ struct OverlayDATA_230
 	// 800b45ac - UsaRetail
 	// 800b4d20 - EurRetail
 	// 800b8030 - JpnRetail
-	struct MenuRow rowsPlayers2P3P4P[4];
+	struct MenuRow rowsPlayers2P3P4P[MM_PLAYER_2P3P4P_SELECTABLE_ROWS + 1];
 
 	// 800b45c4 - UsaRetail
 	// 800b4d38 - EurRetail
@@ -326,9 +494,9 @@ struct OverlayDATA_230
 	// 800b8260 - JpnRetail
 	// array of menu pointers
 #if BUILD == EurRetail
-	struct RectMenu *arrayMenuPtrs[10];
+	struct RectMenu *arrayMenuPtrs[MM_MENU_RESET_COUNT];
 #else
-	struct RectMenu *arrayMenuPtrs[9];
+	struct RectMenu *arrayMenuPtrs[MM_MENU_RESET_COUNT];
 #endif
 
 #if BUILD == JpnRetail
@@ -339,20 +507,11 @@ struct OverlayDATA_230
 	// 800B4800 - UsaRetail
 	// 800b4fdc - EurRetail
 	// 800b87f4 - JpnRetail
-	struct
-	{
-		s16 modelID;
-
-		// related to frame, or sound, idk
-		s16 frameIndex_startMoving;
-		s16 unk2;
-
-		u16 boolTrophy;
-	}
+	struct TitleInstanceMeta
 #if BUILD == JpnRetail
-	titleInstances[7];
+	    titleInstances[TITLE_INSTANCE_COUNT_JPN];
 #else
-	titleInstances[6];
+	    titleInstances[TITLE_INSTANCE_COUNT];
 #endif
 
 	// 800B4830 - UsaRetail
@@ -375,10 +534,10 @@ struct OverlayDATA_230
 	// Full block is 0x84 bytes
 
 	// 800B4840
-	int title_numFrameTotal;
+	int titleMenuTransitionFrameCount;
 
 	// 800B4844
-	int title_numTransition;
+	int titleMenuTransitionCount;
 
 	// 800B4848
 	s16 title_mainPosX;
@@ -401,8 +560,8 @@ struct OverlayDATA_230
 	s16 title_diffPosY;
 
 	// 800B485c
-	SVec3 title_camPos;
-	s16 _pad_title_camPos;
+	SVec3 titleBaseCameraPos;
+	s16 _pad_titleBaseCameraPos;
 
 	// 800B4864
 	struct TransitionMeta transitionMeta_Menu[8];
@@ -437,19 +596,14 @@ struct OverlayDATA_230
 		int holdCode;
 #endif
 		int numButtons;
-		int buttons[10];
+		int buttons[MM_CHEAT_BUTTON_HISTORY_COUNT];
 		void (*funcPtr)(void);
-	}
-#if BUILD == JpnRetail
-	cheats[0x15];
-#else
-	cheats[0x16];
-#endif
+	} cheats[MM_CHEAT_COUNT];
 
 	// 800B4D04 - UsaRetail
 	// 800b54e0 - EurRetail
 	// 800B8D40 - JpnRetail
-	int cheatButtonEntry[10];
+	int cheatButtonEntry[MM_CHEAT_BUTTON_HISTORY_COUNT];
 
 	// 800B4D2C - UsaRetail
 	// 800b5508 - EurRetail
@@ -565,11 +719,11 @@ struct OverlayDATA_230
 	SVec3 csm_instPos;
 	s16 _pad_csm_instPos;
 	SVec3 csm_instRot;
-	s16 moveModels;
+	s16 characterSelect_modelMoveFrames;
 
 	// 800B5370 - UsaRetail
 	// 800b5b4c - EurRetail
-	int unkCharacterWindows;
+	int characterSelect_modelSlideDistance;
 
 	// 800b5374 - UsaRetail
 	// 800b5b50 - EurRetail
@@ -747,27 +901,27 @@ struct OverlayDATA_230
 	// 800b5850 - UsaRetail
 	// 800b6090 - EurRetail
 	// 800b98f4 - JpnRetail
-	int battleWeaponsEnabled[22];
+	struct BattleWeaponMenuItem battleWeaponItems[11];
 
 	// 800b58a8 - UsaRetail
 	// 800b60e8 - EurRetail
 	// 800b994c - JpnRetail
-	u32 FlagesGameMode1_BattleType[3];
+	u32 battleTypeGameMode1Flags[3];
 
 	// 800b58b4 - UsaRetail
 	// 800b60f4 - EurRetail
 	// 800b9958 - JpnRetail
-	char time_3_6_9[4];
-	char time_3_6_INF[4];
-	char lives_3_6_9[4];
-	char points_5_10_15[4];
+	s8 battleTimeLimitMinutes[4];
+	s8 battleLifeTimeMinutes[4];
+	s8 battleLifeLimitValues[4];
+	s8 battlePointLimitValues[4];
 
 	// 800b58c4 - UsaRetail
 	// 800b6104 - EurRetail
 	// 800b9968 - JpnRetail
-	int color1;
-	int color2;
-	int color3;
+	u32 battleWeaponEnabledColor;
+	u32 battleWeaponDisabledColor;
+	u32 battleWeaponPanelColor;
 
 	// ================ High Score CONST ==================
 
@@ -839,32 +993,32 @@ struct OverlayDATA_230
 	// 800b59a4 - UsaRetail
 	// 800b6248 - EurRetail
 	// 800b9a50 - JpnRetail
-	int trackSel_changeTrack_frameCount;
+	int trackSel_trackChangeFrames;
 	// 800b59a8 - UsaRetail
 	// 800b624c - EurRetail
 	// 800b9a54 - JpnRetail
 	s16 trackSel_currTrack;
 	// 800b59aa - UsaRetail
 	// 800b625e - EurRetail
-	s16 trackSel_direction;
+	s16 trackSel_trackChangeDirection;
 	// 800b59ac - UsaRetail
 	// 800b6250 - EurRetail
-	s16 trackSel_boolOpenLapBox;
+	s16 trackSel_lapBoxOpen;
 	// 800b59ae - UsaRetail
 	// 800b6252 - EurRetail
 	s16 trackSel_transitionState;
 	// 800b59b0 - UsaRetail
 	// 800b6254 - EurRetail
-	s16 trackSel_StartRaceAfterFadeOut;
+	s16 trackSel_startRaceAfterFadeOut;
 	// 800b59b2 - UsaRetail
 	// 800b6256 - EurRetail
 	s16 trackSel_transitionFrames;
 	// 800b59b4 - UsaRetail
 	// 800b6258 - EurRetail
-	s16 trackSel_video_frameCount; // video box transition frames instead?
+	s16 trackSel_videoPreviewFrames;
 	// 800b59b6 - UsaRetail
 	// 800b625a - EurRetail
-	s16 trackSel_video_boolAllocated;
+	s16 trackSel_videoMemAllocated;
 
 	// Also used in HighScore menu
 	// 800b59b8 - UsaRetail
@@ -930,22 +1084,22 @@ struct OverlayDATA_230
 	// 800b59dc - UsaRetail
 	// 800b6280 - EurRetail
 	s16 characterSelect_sizeY;
-	s16 unk_aftercharacterselect_sizey;
+	s16 pad_afterCharacterSelectSizeY;
 
 	// 800b59e0 - UsaRetail
 	// 800b6284 - EurRetail
 	// 800b9a8c - JpnRetail
-	int desiredMenuIndex;
+	MainMenuExitRoute desiredMenuIndex;
 
 	// 800b59e4 -- UsaRetail
 	// 800b6288 -- EurRetail
 	// 800b9a90 -- JpnRetail
 	s16 movingToTrackMenu;
-	s16 unk_aftermovingtotrackmenu;
+	s16 pad_afterMovingToTrackMenu;
 
 	// 800b59e8 -- UsaRetail
 	// 800b628c -- EurRetail
-	s16 characterSelect_MoveDir[4];
+	s16 characterSelect_modelMoveDir[4];
 
 	// 800b59f0 -- UsaRetail
 	// 800b6294 -- EurRetail
@@ -975,7 +1129,7 @@ struct OverlayDATA_230
 	// 800b5a14 - UsaRetail
 	// 800b62b8 - EurRetail
 	// 800b9ac0 - JpnRetail
-	int timerInTitle;
+	int titleIntroFrame;
 
 	// 800b5a18 - UsaRetail
 	// 800b62bc - EurRetail
@@ -984,7 +1138,7 @@ struct OverlayDATA_230
 	// 800b5a1c - UsaRetail
 	// 800b62c0 - EurRetail
 	// 800b9ac8 - JpnRetail
-	int MM_State;
+	int titleMenuState;
 
 	// 800b5a20 - UsaRetail
 	// 800b62c4 - EurRetail
@@ -995,7 +1149,7 @@ struct OverlayDATA_230
 	// 800b5a24 - UsaRetail
 	// 800b62c8 - EurRetail
 	// 800b9ad0 - JpnRetail
-	s16 timerPerPlayer[4];
+	s16 characterSelect_modelMoveTimer[4];
 
 #if BUILD == EurRetail
 	// 800b62d0
@@ -1032,7 +1186,7 @@ struct OverlayDATA_230
 	// 800b5a40 - UsaRetail
 	// 800b62e8 - EurRetail
 	// 800b9aec - JpnRetail
-	int countMeta0xD; // this might be related to transitionFrames instead
+	int titleMenuTransitionFrame;
 
 	// 800b5a44 - UsaRetail
 	// 800b62ec - EurRetail
@@ -1054,10 +1208,10 @@ struct OverlayDATA_230
 // starts at 800b67ac
 struct OVR_230_VideoBSS
 {
-	int field0_0x0;
-	int field1_0x4;
-	int field2_0x8;
-	int field3_0xc;
+	int loopStartBackloc;
+	int loopEndBackloc;
+	int loopWrapPending;
+	int cdRetryState;
 
 	// 800b67bc
 	s16 totalFrames;
@@ -1072,29 +1226,29 @@ struct OVR_230_VideoBSS
 	s16 drawNextFrame;
 
 	// 800b67c4
-	s16 field8_0x18;
-	s16 field9_0x1a;
+	s16 endOfStream;
+	s16 decodeState;
 
 	// 800b67c8
-	s16 field10_0x1c;
+	s16 vlcBufferIndex;
 
 	// 800b67ca
 	s16 imgId;
 
 	// 800b67cc
-	s16 field12_0x20;
-	s16 field13_0x22;
+	s16 cdKickState;
+	s16 stalledBacklocFrames;
 
 	// 800b67d0
-	int field14_0x24;
+	int stallRecoveryFrames;
 
 	// 800b67d4
 	int numFrames;
 
 	// 800b67d8
 	int frameCount;
-	int field19_0x30;
-	int field20_0x34;
+	int lastSectorFrameCount;
+	int lastBackloc;
 	int field21_0x38;
 
 	// 800b67e8
@@ -1110,21 +1264,17 @@ struct OVR_230_VideoBSS
 	// 800b67f0
 	u32 isDone;
 
-	int field25_0x48;
+	int vlcBufferSize;
 
-	// field 26,27,28,29
-	char unk800b67f8[4];
+	char pad800b67f8[4];
 
 	// 30,31...
 	// 800b67fc
 	uint32_t *in_Buf[2];
 
-	int field32_0x58;
+	int dctOutSliceSize;
 
-	char field33_0x5c;
-	char field34_0x5d;
-	char field35_0x5e;
-	char field36_0x5f;
+	char pad800b6808[4];
 
 	// 800b680c
 	uint32_t *out_Buf[4];
@@ -1144,6 +1294,8 @@ struct OVR_230_VideoBSS
 	// 800b6830
 	CdlLOC *ptrCdLoc;
 };
+
+CTR_STATIC_ASSERT(sizeof(struct OVR_230_VideoBSS) == 0x88);
 
 extern struct OverlayRDATA_230 R230;
 extern struct OverlayDATA_230 D230;

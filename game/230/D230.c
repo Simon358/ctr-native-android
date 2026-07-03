@@ -49,7 +49,7 @@ struct OverlayDATA_230 D230 = {
             .rows = &D230.rowsMainMenuBasic[0],
             .funcPtr = MM_MenuProc_Main,
 
-            .unk1e = 1,
+            .funcState = RECTMENU_FUNC_STATE_UPDATE,
         },
 
     .rowsPlayers1P2P =
@@ -213,13 +213,21 @@ struct OverlayDATA_230 D230 = {
     .arrayMenuPtrs = {&D230.menuMainMenu, &D230.menuPlayers1P2P, &D230.menuPlayers2P3P4P, &D230.menuAdventure, &D230.menuCharacterSelect, &D230.menuTrackSelect,
                       &D230.menuCupSelect, &D230.menuBattleWeapons, &D230.menuHighScores},
 
-    .titleInstances = {{0x68, 0x4e, 0xe6, 0}, {0x66, 0x0, 0xe6, 1}, {0x67, 0x14, 0xe6, 0}, {0x69, 0x4e, 0xe6, 0}, {0x6a, 0x8c, 0xe6, 0}, {0x6b, 0xd7, 0xe6, 0}},
+    .titleInstances =
+        {
+            {.modelID = 0x68, .animStartFrame = 0x4e, .unusedMenuReadyFrame = TITLE_INTRO_MENU_READY_FRAME, .isTrophy = 0},
+            {.modelID = 0x66, .animStartFrame = 0, .unusedMenuReadyFrame = TITLE_INTRO_MENU_READY_FRAME, .isTrophy = 1},
+            {.modelID = 0x67, .animStartFrame = 0x14, .unusedMenuReadyFrame = TITLE_INTRO_MENU_READY_FRAME, .isTrophy = 0},
+            {.modelID = 0x69, .animStartFrame = 0x4e, .unusedMenuReadyFrame = TITLE_INTRO_MENU_READY_FRAME, .isTrophy = 0},
+            {.modelID = 0x6a, .animStartFrame = 0x8c, .unusedMenuReadyFrame = TITLE_INTRO_MENU_READY_FRAME, .isTrophy = 0},
+            {.modelID = 0x6b, .animStartFrame = 0xd7, .unusedMenuReadyFrame = TITLE_INTRO_MENU_READY_FRAME, .isTrophy = 0},
+        },
 
     .titleCameraPos = {{0x32, 0xFFE2, 0x64}},
     .titleCameraRot = {{0, 0xFF9C, 0}},
 
-    .title_numFrameTotal = 0xC,
-    .title_numTransition = 8,
+    .titleMenuTransitionFrameCount = 0xC,
+    .titleMenuTransitionCount = 8,
 
     .title_mainPosX = 0x180,
     .title_mainPosY = 0x6c,
@@ -233,7 +241,7 @@ struct OverlayDATA_230 D230 = {
     .title_diffPosX = 0,
     .title_diffPosY = 0,
 
-    .title_camPos = {{0x32, 0xFFE2, 0x64}},
+    .titleBaseCameraPos = {{0x32, 0xFFE2, 0x64}},
 
     .transitionMeta_Menu =
         {
@@ -528,9 +536,9 @@ struct OverlayDATA_230 D230 = {
 
     .csm_instRot = {{0x800, 0, 0}},
 
-    .moveModels = 4,
+    .characterSelect_modelMoveFrames = 4,
 
-    .unkCharacterWindows = 0x8C,
+    .characterSelect_modelSlideDistance = 0x8C,
 
     .PlayerNumberStrings = {&R230.s_1[0], &R230.s_2[0], &R230.s_3[0], &R230.s_4[0]},
 
@@ -706,18 +714,19 @@ struct OverlayDATA_230 D230 = {
     .battleMenuArray = {&D230.menuBattleType, &D230.menuBattleLengthTimeTime, &D230.menuBattleLengthPoints, &D230.menuBattleLengthLifeLife,
                         &D230.menuBattleLengthLifeTime},
 
-    .battleWeaponsEnabled = {0x1, 0x2, 0x2, 0x6, 0x4, 0x7, 0x8, 0x8, 0x10, 0x9, 0x40, 0xB, 0x80, 0xC, 0x400, 0xF, 0x800, 0x10, 0x1000, 0x11, 0x2000, 0x12},
+    .battleWeaponItems =
+        {{0x1, 0x2}, {0x2, 0x6}, {0x4, 0x7}, {0x8, 0x8}, {0x10, 0x9}, {0x40, 0xB}, {0x80, 0xC}, {0x400, 0xF}, {0x800, 0x10}, {0x1000, 0x11}, {0x2000, 0x12}},
 
-    .FlagesGameMode1_BattleType = {POINT_LIMIT, TIME_LIMIT, LIFE_LIMIT},
+    .battleTypeGameMode1Flags = {POINT_LIMIT, TIME_LIMIT, LIFE_LIMIT},
 
-    .time_3_6_9 = {3, 6, 9},
-    .time_3_6_INF = {3, 6, 0xFF},
-    .lives_3_6_9 = {3, 6, 9},
-    .points_5_10_15 = {5, 10, 15},
+    .battleTimeLimitMinutes = {3, 6, 9},
+    .battleLifeTimeMinutes = {3, 6, -1},
+    .battleLifeLimitValues = {3, 6, 9},
+    .battlePointLimitValues = {5, 10, 15},
 
-    .color1 = 0x808080,
-    .color2 = 0x101010,
-    .color3 = 0x806050,
+    .battleWeaponEnabledColor = 0x808080,
+    .battleWeaponDisabledColor = 0x101010,
+    .battleWeaponPanelColor = 0x806050,
 
     // HIGH SCORE CONSTS
 
@@ -786,15 +795,15 @@ struct OverlayDATA_230 D230 = {
     .titleObj = 0,
 
     // TRACK SELECT DYN
-    .trackSel_changeTrack_frameCount = 0,
+    .trackSel_trackChangeFrames = 0,
     .trackSel_currTrack = 0,
-    .trackSel_direction = 0,
-    .trackSel_boolOpenLapBox = 0,
+    .trackSel_trackChangeDirection = 0,
+    .trackSel_lapBoxOpen = 0,
     .trackSel_transitionState = 0,
-    .trackSel_StartRaceAfterFadeOut = 0,
+    .trackSel_startRaceAfterFadeOut = 0,
     .trackSel_transitionFrames = 0,
-    .trackSel_video_frameCount = 0,
-    .trackSel_video_boolAllocated = 0,
+    .trackSel_videoPreviewFrames = 0,
+    .trackSel_videoMemAllocated = 0,
     .trackSel_videoStateCurr = 0,
     .trackSel_videoStatePrev = 0,
 
@@ -819,10 +828,10 @@ struct OverlayDATA_230 D230 = {
 
     // CHAR SELECT AND TITLE DYN
     .characterSelect_sizeY = 0,
-    .desiredMenuIndex = 0,
+    .desiredMenuIndex = MM_EXIT_ROUTE_ADV_NEW,
     .movingToTrackMenu = 0,
 
-    .characterSelect_MoveDir = {0, 0, 0, 0},
+    .characterSelect_modelMoveDir = {0, 0, 0, 0},
     .characterSelect_charIDs_desired = {0, 0, 0, 0},
     .characterSelect_charIDs_curr = {0, 0, 0, 0},
     .characterSelect_angle = {0, 0, 0, 0},
@@ -830,12 +839,12 @@ struct OverlayDATA_230 D230 = {
     .characterSelect_ptrWindowXY = 0,
     .characterSelectIconLayout = 0,
 
-    .timerInTitle = 0,
+    .titleIntroFrame = 0,
     .csm_Active = 0,
-    .MM_State = 0,
+    .titleMenuState = TITLE_MENU_STATE_INTRO,
     .isMenuTransitioning = 0,
 
-    .timerPerPlayer = {0, 0, 0, 0},
+    .characterSelect_modelMoveTimer = {0, 0, 0, 0},
 #if 0
 	.langMenuTimer = 0,
 #endif
@@ -844,7 +853,7 @@ struct OverlayDATA_230 D230 = {
     .ptrIntroCam = 0,
     .textPos = 0,
     .ptrTransitionMeta = 0,
-    .countMeta0xD = 0,
+    .titleMenuTransitionFrame = 0,
     .transitionFrames = 0,
 
     .s_SliceBuf = "SliceBuf",

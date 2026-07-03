@@ -111,7 +111,7 @@ void MM_Scrapbook_PlayMovie(struct RectMenu *menu)
 			SpuSetCommonCDVolume(sdata->vol_Music << 7, sdata->vol_Music << 7);
 
 			// Alloc memory to store Scrapbook
-			MM_Video_AllocMem(0x200, 0xd0, 10, 0x40, 1);
+			MM_Video_AllocMem(0x200, 0xd0, MM_VIDEO_FLAG_HAS_XA_AUDIO | MM_VIDEO_FLAG_SCRAPBOOK, MM_VIDEO_DEFAULT_RING_SECTORS, 1);
 
 			cdPos = CdPosToInt(&cdlFile.pos);
 
