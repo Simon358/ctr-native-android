@@ -3,6 +3,9 @@
 #include <platform/native_path.h>
 
 #include <limits.h>
+#if !defined(_WIN32)
+#include <dirent.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -36,14 +39,43 @@ global_variable FILE *s_nativeDiscImageFile;
 global_variable struct NativeDiscImageFile s_nativeDiscImageRoot;
 global_variable int s_nativeDiscImageAvailable;
 
-internal u8 NativeDiscImage_ToUpperAscii(u8 byte)
+internal int NativeDiscImage_FindHostImagePath(char *dst, size_t dstSize, NativeStr8 assetsDir)
 {
-	if ((byte >= 'a') && (byte <= 'z'))
+#if defined(_WIN32)
+	return NativePath_Join(dst, dstSize, assetsDir, NATIVE_STR8_LIT(NATIVE_DISC_IMAGE_BIN_PATH));
+#else
+	char dirPath[NATIVE_DISC_IMAGE_PATH_MAX];
+	DIR *dir;
+	struct dirent *entry;
+	int found = 0;
+
+	if (!NativePath_NormalizeSlashes(dirPath, sizeof(dirPath), assetsDir))
 	{
-		byte = (u8)(byte - ('a' - 'A'));
+		return 0;
 	}
 
-	return byte;
+	dir = opendir(dirPath);
+	if (dir == NULL)
+	{
+		return 0;
+	}
+
+	while ((entry = readdir(dir)) != NULL)
+	{
+		NativeStr8 entryName = NativeStr8_FromCString(entry->d_name);
+
+		if (!NativeStr8_EqualsIgnoreCaseAscii(entryName, NATIVE_STR8_LIT(NATIVE_DISC_IMAGE_BIN_PATH)))
+		{
+			continue;
+		}
+
+		found = NativePath_Join(dst, dstSize, NativeStr8_FromCString(dirPath), entryName);
+		break;
+	}
+
+	closedir(dir);
+	return found;
+#endif
 }
 
 internal u32 NativeDiscImage_ReadLE32(const u8 *data)
@@ -172,7 +204,7 @@ internal int NativeDiscImage_NameEquals(const struct NativeDiscImageDirRecord *r
 
 	for (i = 0; i < componentLen; i++)
 	{
-		if (NativeDiscImage_ToUpperAscii(record->name[i]) != NativeDiscImage_ToUpperAscii(component.ptr[i]))
+		if (NativeStr8_ToUpperAscii(record->name[i]) != NativeStr8_ToUpperAscii(component.ptr[i]))
 		{
 			return 0;
 		}
@@ -345,7 +377,7 @@ int NativeDiscImage_Init(const char *assetsDir)
 		s_nativeDiscImageFile = NULL;
 	}
 
-	if ((assetsDir == NULL) || !NativePath_Join(path, sizeof(path), NativeStr8_FromCString(assetsDir), NATIVE_STR8_LIT(NATIVE_DISC_IMAGE_BIN_PATH)))
+	if ((assetsDir == NULL) || !NativeDiscImage_FindHostImagePath(path, sizeof(path), NativeStr8_FromCString(assetsDir)))
 	{
 		return 0;
 	}

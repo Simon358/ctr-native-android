@@ -46,36 +46,6 @@ global_variable int s_nativeAssetIndexCount;
 global_variable int s_nativeAssetIndexCapacity;
 global_variable int s_nativeAssetIndexBuilt;
 
-internal u8 NativeAssets_ToLowerAscii(u8 byte)
-{
-	if ((byte >= 'A') && (byte <= 'Z'))
-	{
-		byte = (u8)(byte + ('a' - 'A'));
-	}
-
-	return byte;
-}
-
-internal int NativeAssets_Str8EqualsIgnoreCase(NativeStr8 left, NativeStr8 right)
-{
-	size_t i;
-
-	if (left.len != right.len)
-	{
-		return 0;
-	}
-
-	for (i = 0; i < left.len; i++)
-	{
-		if (NativeAssets_ToLowerAscii(left.ptr[i]) != NativeAssets_ToLowerAscii(right.ptr[i]))
-		{
-			return 0;
-		}
-	}
-
-	return 1;
-}
-
 internal int NativeAssets_FileExistsHost(const char *path)
 {
 	FILE *file;
@@ -157,7 +127,7 @@ internal int NativeAssets_FindHostChildCaseInsensitive(NativeStr8 parent, Native
 				break;
 			}
 
-			if ((match[0] == '\0') && NativeAssets_Str8EqualsIgnoreCase(entryName, child))
+			if ((match[0] == '\0') && NativeStr8_EqualsIgnoreCaseAscii(entryName, child))
 			{
 				if (!NativeStr8_CopyToCString(match, sizeof(match), entryName))
 				{
@@ -195,7 +165,7 @@ internal int NativeAssets_FindHostChildCaseInsensitive(NativeStr8 parent, Native
 			break;
 		}
 
-		if ((match[0] == '\0') && NativeAssets_Str8EqualsIgnoreCase(entryName, child))
+		if ((match[0] == '\0') && NativeStr8_EqualsIgnoreCaseAscii(entryName, child))
 		{
 			if (!NativeStr8_CopyToCString(match, sizeof(match), entryName))
 			{
@@ -309,7 +279,7 @@ internal int NativeAssets_NormalizeRelativeKey(NativeStr8 relativePath, char *ds
 	for (i = 0; i < relativePath.len; i++)
 	{
 		u8 byte = relativePath.ptr[i];
-		dst[i] = (char)(NativePath_IsSeparator(byte) ? '/' : NativeAssets_ToLowerAscii(byte));
+		dst[i] = (char)(NativePath_IsSeparator(byte) ? '/' : NativeStr8_ToLowerAscii(byte));
 	}
 
 	dst[relativePath.len] = '\0';
