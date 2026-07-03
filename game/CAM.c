@@ -438,7 +438,7 @@ s32 CAM_Path_GetNumPoints(void)
 }
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80018ba0-0x80018d20
-u8 CAM_Path_Move(s32 frameIndex, s16 *position, s16 *rotation, s16 *getPath)
+u8 CAM_Path_Move(s32 frameIndex, s16 *position, s16 *rotation, s16 *pathFlagsOut)
 {
 	s16 frame = (s16)frameIndex;
 	s16 numPos = CAM_Path_GetNumPoints();
@@ -456,7 +456,7 @@ u8 CAM_Path_Move(s32 frameIndex, s16 *position, s16 *rotation, s16 *getPath)
 	s16 *ptrCam = ptrs[ST1_CAMERA_PATH];
 
 	u16 pathNumNode = (u16)ptrCam[0];
-	u16 pathID = (u16)ptrCam[1];
+	u16 pathFlags = (u16)ptrCam[1];
 	s16 *move = ptrCam + 2;
 
 	while ((s16)pathNumNode <= frame)
@@ -464,14 +464,14 @@ u8 CAM_Path_Move(s32 frameIndex, s16 *position, s16 *rotation, s16 *getPath)
 		frame = (s16)(frame - (s16)pathNumNode);
 		move = move + (s16)pathNumNode * 6;
 		pathNumNode = (u16)move[0];
-		pathID = (u16)move[1];
+		pathFlags = (u16)move[1];
 		move = move + 2;
 	}
 
 	// advance pointer to pos+rot
 	move += (s32)frame * 6;
 
-	*getPath = pathID;
+	*pathFlagsOut = pathFlags;
 
 	// position of frame
 	position[0] = move[0];
@@ -1671,7 +1671,7 @@ LAB_8001ab04:
 			// if startline fly-in is done
 			if (flyInDone)
 			{
-				gGT->hudFlags |= 0x21;
+				gGT->hudFlags |= HUD_FLAG_RACE_HUD | HUD_FLAG_RENDER_LESS;
 				gGT->gameMode1 &= ~(START_OF_RACE);
 			}
 		}

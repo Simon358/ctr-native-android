@@ -1,56 +1,94 @@
 #include <common.h>
 
+enum
+{
+	PARTICLE_POTION_SHATTER_Y_SPEED_THRESHOLD = 0x578,
+	PARTICLE_POTION_SHATTER_XZ_RANDOM_RANGE = 800,
+	PARTICLE_POTION_SHATTER_XZ_RANDOM_CENTER = 400,
+	PARTICLE_POTION_SHATTER_SCALE_RANDOM_RANGE = 0x100,
+	PARTICLE_POTION_SHATTER_SCALE_RANDOM_BASE = 0x100,
+	PARTICLE_POTION_SHATTER_FADE_STEP = 0x1200,
+
+	PARTICLE_SPIT_TIRE_MOUTH_Y_OFFSET = 0x10,
+	PARTICLE_SPIT_TIRE_XZ_RANDOM_RANGE = 0x1640,
+	PARTICLE_SPIT_TIRE_XZ_RANDOM_CENTER = 0xb20,
+	PARTICLE_SPIT_TIRE_FRAME_1 = 0x1000,
+	PARTICLE_SPIT_TIRE_FRAME_2 = 0xfff,
+	PARTICLE_SPIT_TIRE_FRAME_3 = 0xffe,
+	PARTICLE_SPIT_TIRE_FRAME_3_VELOCITY = 0xf801,
+	PARTICLE_SPIT_TIRE_FRAME_1_Y_RANDOM_RANGE = 0x12c0,
+	PARTICLE_SPIT_TIRE_FRAME_1_Y_BASE = 0x1900,
+	PARTICLE_SPIT_TIRE_LATER_Y_RANDOM_RANGE = 800,
+	PARTICLE_SPIT_TIRE_FRAME_2_Y_BASE = 8000,
+	PARTICLE_SPIT_TIRE_FRAME_3_Y_BASE = 6000,
+
+	PARTICLE_EXHAUST_WATER_HEIGHT_THRESHOLD = 3,
+	PARTICLE_EXHAUST_POP_LIFE_THRESHOLD = 27,
+	PARTICLE_EXHAUST_BUBBLEPOP_ICON_GROUP = 8,
+	PARTICLE_EXHAUST_ROTATION_RANDOM_MASK = 0xfff,
+};
+
+CTR_STATIC_ASSERT(PARTICLE_POTION_SHATTER_Y_SPEED_THRESHOLD == 0x578);
+CTR_STATIC_ASSERT(PARTICLE_POTION_SHATTER_FADE_STEP == 0x1200);
+CTR_STATIC_ASSERT(PARTICLE_SPIT_TIRE_MOUTH_Y_OFFSET == 0x10);
+CTR_STATIC_ASSERT(PARTICLE_SPIT_TIRE_FRAME_1 == 0x1000);
+CTR_STATIC_ASSERT(PARTICLE_SPIT_TIRE_FRAME_2 == 0xfff);
+CTR_STATIC_ASSERT(PARTICLE_SPIT_TIRE_FRAME_3 == 0xffe);
+CTR_STATIC_ASSERT(PARTICLE_SPIT_TIRE_FRAME_3_VELOCITY == 0xf801);
+CTR_STATIC_ASSERT(PARTICLE_EXHAUST_BUBBLEPOP_ICON_GROUP == 8);
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x8003eae0-0x8003ec18.
 void Particle_FuncPtr_PotionShatter(struct Particle *p)
 {
-	s16 sVar2;
+	s16 scaleRandomQuotient;
 	int rng;
 
-	if (p->axis[1].velocity < 0x578)
+	if (p->axis[1].velocity < PARTICLE_POTION_SHATTER_Y_SPEED_THRESHOLD)
 	{
 		if (p->axis[0].velocity != 0)
 		{
-			goto LAB_8003ebc8;
+			goto FadeShatterChannel;
 		}
 
 		// random X
 		rng = MixRNG_Scramble();
-		p->axis[0].velocity = rng + (rng / 800) * -800 - 400;
+		p->axis[0].velocity =
+		    rng + (rng / PARTICLE_POTION_SHATTER_XZ_RANDOM_RANGE) * -PARTICLE_POTION_SHATTER_XZ_RANDOM_RANGE - PARTICLE_POTION_SHATTER_XZ_RANDOM_CENTER;
 
 		// random Z
 		rng = MixRNG_Scramble();
-		p->axis[2].velocity = rng + (rng / 800) * -800 - 400;
+		p->axis[2].velocity =
+		    rng + (rng / PARTICLE_POTION_SHATTER_XZ_RANDOM_RANGE) * -PARTICLE_POTION_SHATTER_XZ_RANDOM_RANGE - PARTICLE_POTION_SHATTER_XZ_RANDOM_CENTER;
 
 		// random scale
 		rng = MixRNG_Scramble();
-		sVar2 = (rng >> 8);
+		scaleRandomQuotient = (rng >> 8);
 		if (rng < 0)
 		{
-			sVar2 = ((rng + 0xff) >> 8);
+			scaleRandomQuotient = ((rng + 0xff) >> 8);
 		}
-		p->axis[5].velocity = rng + sVar2 * -0x100 + 0x100;
+		p->axis[5].velocity = rng + scaleRandomQuotient * -PARTICLE_POTION_SHATTER_SCALE_RANDOM_RANGE + PARTICLE_POTION_SHATTER_SCALE_RANDOM_BASE;
 	}
 	if (p->axis[0].velocity == 0)
 	{
 		return;
 	}
 
-LAB_8003ebc8:
+FadeShatterChannel:
 
 	// green shatter or red shatter
 	if (p->modelID == STATIC_SHOCKWAVE_GREEN)
 	{
 		if (0 < p->axis[8].startVal)
 		{
-			p->axis[8].startVal -= 0x1200;
+			p->axis[8].startVal -= PARTICLE_POTION_SHATTER_FADE_STEP;
 		}
 	}
 	else
 	{
 		if (0 < p->axis[7].startVal)
 		{
-			p->axis[7].startVal -= 0x1200;
+			p->axis[7].startVal -= PARTICLE_POTION_SHATTER_FADE_STEP;
 		}
 	}
 }
@@ -60,13 +98,13 @@ LAB_8003ebc8:
 void Particle_FuncPtr_SpitTire(struct Particle *p)
 {
 	int rng;
-	int iVar2;
+	int scaleFrame;
 	int targetY;
 
 	// Wait until tires are 0x10 units above
 	// the ground, which is where the plant
 	// actually "spits" tires from the mouth
-	targetY = p->plantInst->matrix.t[1] + 0x10;
+	targetY = p->plantInst->matrix.t[1] + PARTICLE_SPIT_TIRE_MOUTH_Y_OFFSET;
 
 	if ((p->axis[1].startVal >> 8) >= targetY)
 	{
@@ -75,49 +113,52 @@ void Particle_FuncPtr_SpitTire(struct Particle *p)
 
 	// random X
 	rng = MixRNG_Scramble();
-	p->axis[0].velocity = rng + (rng / 0x1640) * -0x1640 - 0xb20;
+	p->axis[0].velocity = rng + (rng / PARTICLE_SPIT_TIRE_XZ_RANDOM_RANGE) * -PARTICLE_SPIT_TIRE_XZ_RANDOM_RANGE - PARTICLE_SPIT_TIRE_XZ_RANDOM_CENTER;
 
 	// random Z
 	rng = MixRNG_Scramble();
-	p->axis[2].velocity = rng + (rng / 0x1640) * -0x1640 - 0xb20;
+	p->axis[2].velocity = rng + (rng / PARTICLE_SPIT_TIRE_XZ_RANDOM_RANGE) * -PARTICLE_SPIT_TIRE_XZ_RANDOM_RANGE - PARTICLE_SPIT_TIRE_XZ_RANDOM_CENTER;
 
 	// scale value
-	iVar2 = p->axis[5].startVal;
+	scaleFrame = p->axis[5].startVal;
 
-	switch (iVar2)
+	switch (scaleFrame)
 	{
 	// frame #1
-	case 0x1000:
+	case PARTICLE_SPIT_TIRE_FRAME_1:
 	{
 		// random Y
 		rng = MixRNG_Scramble();
-		p->axis[1].velocity = rng + (rng / 0x12c0) * -0x12c0 + 0x1900;
+		p->axis[1].velocity =
+		    rng + (rng / PARTICLE_SPIT_TIRE_FRAME_1_Y_RANDOM_RANGE) * -PARTICLE_SPIT_TIRE_FRAME_1_Y_RANDOM_RANGE + PARTICLE_SPIT_TIRE_FRAME_1_Y_BASE;
 
 		// frame #2
-		p->axis[5].startVal = 0xfff;
+		p->axis[5].startVal = PARTICLE_SPIT_TIRE_FRAME_2;
 		break;
 	}
 
 	// frame #2
-	case 0xfff:
+	case PARTICLE_SPIT_TIRE_FRAME_2:
 	{
 		// random Y
 		rng = MixRNG_Scramble();
-		p->axis[1].velocity = rng + (rng / 800) * -800 + 8000;
+		p->axis[1].velocity =
+		    rng + (rng / PARTICLE_SPIT_TIRE_LATER_Y_RANDOM_RANGE) * -PARTICLE_SPIT_TIRE_LATER_Y_RANDOM_RANGE + PARTICLE_SPIT_TIRE_FRAME_2_Y_BASE;
 
 		// frame #3
-		p->axis[5].startVal = 0xffe;
+		p->axis[5].startVal = PARTICLE_SPIT_TIRE_FRAME_3;
 		break;
 	}
 
 	// frame #3
-	case 0xffe:
+	case PARTICLE_SPIT_TIRE_FRAME_3:
 	{
 		// random Y
 		rng = MixRNG_Scramble();
-		p->axis[1].velocity = rng + (rng / 800) * -800 + 6000;
+		p->axis[1].velocity =
+		    rng + (rng / PARTICLE_SPIT_TIRE_LATER_Y_RANDOM_RANGE) * -PARTICLE_SPIT_TIRE_LATER_Y_RANDOM_RANGE + PARTICLE_SPIT_TIRE_FRAME_3_Y_BASE;
 
-		p->axis[5].velocity = 0xf801;
+		p->axis[5].velocity = PARTICLE_SPIT_TIRE_FRAME_3_VELOCITY;
 		break;
 	}
 
@@ -134,10 +175,11 @@ void Particle_FuncPtr_ExhaustUnderwater(struct Particle *p)
 {
 	struct IconGroup *icon;
 
-	if ((3 < ((p->axis[1].startVal >> 8) + p->driverInst->matrix.t[1])) && (p->framesLeftInLife < 27))
+	if ((PARTICLE_EXHAUST_WATER_HEIGHT_THRESHOLD < ((p->axis[1].startVal >> 8) + p->driverInst->matrix.t[1])) &&
+	    (p->framesLeftInLife < PARTICLE_EXHAUST_POP_LIFE_THRESHOLD))
 	{
 		// bubblepop
-		icon = sdata->gGT->iconGroup[8];
+		icon = sdata->gGT->iconGroup[PARTICLE_EXHAUST_BUBBLEPOP_ICON_GROUP];
 		p->ptrIconGroup = icon;
 
 		if (icon != NULL)
@@ -149,7 +191,7 @@ void Particle_FuncPtr_ExhaustUnderwater(struct Particle *p)
 			p->ptrIconArray = ptrIconArray[0];
 		}
 
-		p->axis[4].startVal = MixRNG_Scramble() & 0xfff;
+		p->axis[4].startVal = MixRNG_Scramble() & PARTICLE_EXHAUST_ROTATION_RANDOM_MASK;
 		p->framesLeftInLife = 0;
 	}
 }

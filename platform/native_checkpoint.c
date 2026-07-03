@@ -222,7 +222,7 @@ internal int NativeCheckpoint_GetRegionSize(u32 kind)
 	case NATIVE_CHECKPOINT_REGION_GAR3:
 		return (int)sizeof(gGarage);
 	case NATIVE_CHECKPOINT_REGION_CRD3:
-		return (int)sizeof(creditsBSS) - OFFSETOF(struct Ovr233_Credits_BSS, CreditThread);
+		return (int)sizeof(creditsBSS) - OFFSETOF(struct Ovr233_Credits_BSS, creditThread);
 	case NATIVE_CHECKPOINT_REGION_MPAK:
 		return Platform_GetMempackBackingSize();
 	case NATIVE_CHECKPOINT_REGION_SCRP:
@@ -267,7 +267,7 @@ internal void *NativeCheckpoint_GetRegionPtr(u32 kind)
 	case NATIVE_CHECKPOINT_REGION_GAR3:
 		return &gGarage;
 	case NATIVE_CHECKPOINT_REGION_CRD3:
-		return &creditsBSS.CreditThread;
+		return &creditsBSS.creditThread;
 	case NATIVE_CHECKPOINT_REGION_MPAK:
 		return Platform_GetMempackBacking();
 	case NATIVE_CHECKPOINT_REGION_SCRP:
@@ -1692,9 +1692,9 @@ internal void NativeCheckpoint_RelocateCreditsObjPointers(const struct NativeChe
 {
 	local_persist const struct NativeCheckpointFieldRelocation fields[] = {
 	    NATIVE_CHECKPOINT_FIELD_PTR(struct CreditsObj, creditDanceInst),
-	    NATIVE_CHECKPOINT_FIELD_PTR(struct CreditsObj, credits_topString),
-	    NATIVE_CHECKPOINT_FIELD_PTR(struct CreditsObj, epilogue_topString),
-	    NATIVE_CHECKPOINT_FIELD_PTR(struct CreditsObj, epilogue_nextString),
+	    NATIVE_CHECKPOINT_FIELD_PTR(struct CreditsObj, creditsTopString),
+	    NATIVE_CHECKPOINT_FIELD_PTR(struct CreditsObj, epilogueTopString),
+	    NATIVE_CHECKPOINT_FIELD_PTR(struct CreditsObj, epilogueNextString),
 	};
 
 	if (creditsObj == NULL)
@@ -1715,8 +1715,8 @@ internal void NativeCheckpoint_RelocateCreditsObjPointers(const struct NativeChe
 
 internal void NativeCheckpoint_RelocateCreditsPointers(const struct NativeCheckpointHeader *oldHeader, const struct NativeCheckpointHeader *liveHeader)
 {
-	NativeCheckpoint_RelocatePointerSlot(oldHeader, liveHeader, &creditsBSS.CreditThread);
-	NativeCheckpoint_RelocatePointerSlot(oldHeader, liveHeader, &creditsBSS.DancerThread);
+	NativeCheckpoint_RelocatePointerSlot(oldHeader, liveHeader, &creditsBSS.creditThread);
+	NativeCheckpoint_RelocatePointerSlot(oldHeader, liveHeader, &creditsBSS.dancerThread);
 	NativeCheckpoint_RelocatePointerSlot(oldHeader, liveHeader, &creditsBSS.dancerInst_invisible);
 	NativeCheckpoint_RelocatePointerSlot(oldHeader, liveHeader, &creditsBSS.ptrStrings);
 

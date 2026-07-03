@@ -3,41 +3,33 @@
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800265c0-0x8002689c.
 void GAMEPROG_AdvPercent(struct AdvProgress *adv)
 {
-	int i;
-	int percent;
-	int oxidePercent;
-	int allGoldOrPlatinumRelics;
-	int numGems;
-	int bitIndex;
-	struct MetaDataLEV *mdLev;
-	struct GameTracker *gGT;
-	gGT = sdata->gGT;
-	mdLev = &data.metaDataLEV[0];
+	struct GameTracker *gGT = sdata->gGT;
+	struct MetaDataLEV *mdLev = &data.metaDataLEV[0];
 
 	// start counter
-	percent = 0;
-	oxidePercent = 0;
-	allGoldOrPlatinumRelics = 1;
-	numGems = 0;
+	s32 percent = 0;
+	s32 oxidePercent = 0;
+	s32 allGoldOrPlatinumRelics = 1;
+	s32 numGems = 0;
 
 	// erase counters
-	for (i = 0; i < 9; i++)
+	for (s32 i = 0; i < 9; i++)
 	{
 		((int *)&gGT->currAdvProfile.numTrophies)[i] = 0;
 	}
 
 	// check all tracks generically
-	for (i = 0; i < 18; i++)
+	for (s32 i = 0; i < ADV_REWARD_RELIC_TRACK_COUNT; i++)
 	{
 		// first bit of blue relic
-		bitIndex = ADV_REWARD_FIRST_SAPPHIRE_RELIC + i;
+		s32 bitIndex = ADV_REWARD_FIRST_SAPPHIRE_RELIC + i;
 		if (CHECK_ADV_BIT(adv->rewards, bitIndex) != 0)
 		{
 			gGT->currAdvProfile.numRelics++;
 		}
 
 		// check 16 trophies
-		if (i < 0x10)
+		if (i < ADV_REWARD_RACE_TRACK_COUNT)
 		{
 			// first bit of trophy
 			bitIndex = ADV_REWARD_FIRST_TROPHY + i;
@@ -60,7 +52,7 @@ void GAMEPROG_AdvPercent(struct AdvProgress *adv)
 		}
 
 		// check 4 keys, and 4 purple tokens
-		if (i < 4)
+		if (i < ADV_REWARD_HUB_COUNT)
 		{
 			// first bit of key
 			bitIndex = ADV_REWARD_FIRST_BOSS_KEY + i;
@@ -78,7 +70,7 @@ void GAMEPROG_AdvPercent(struct AdvProgress *adv)
 		}
 
 		// check 5 gems
-		if (i < 5)
+		if (i < ADV_REWARD_GEM_COUNT)
 		{
 			// first bit of gem
 			bitIndex = ADV_REWARD_FIRST_GEM + i;
@@ -89,7 +81,7 @@ void GAMEPROG_AdvPercent(struct AdvProgress *adv)
 		}
 
 		// first bit is 2%, second bit upgrades the total Oxide bonus to 3%
-		if (i < 2)
+		if (i < ADV_REWARD_OXIDE_BEAT_COUNT)
 		{
 			// first bit of beating oxide
 			bitIndex = ADV_REWARD_BEAT_OXIDE_FIRST + i;
@@ -101,10 +93,10 @@ void GAMEPROG_AdvPercent(struct AdvProgress *adv)
 	}
 
 	// check whether all tracks have gold or platinum relic
-	for (i = 0; i < 18; i++)
+	for (s32 i = 0; i < ADV_REWARD_RELIC_TRACK_COUNT; i++)
 	{
 		// first bit of gold relic
-		bitIndex = ADV_REWARD_FIRST_GOLD_RELIC + i;
+		s32 bitIndex = ADV_REWARD_FIRST_GOLD_RELIC + i;
 		if ((allGoldOrPlatinumRelics != 0) && (CHECK_ADV_BIT(adv->rewards, bitIndex) != 0))
 		{
 			// check next relic
@@ -126,18 +118,10 @@ void GAMEPROG_AdvPercent(struct AdvProgress *adv)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x8002689c-0x80026ae4.
 void GAMEPROG_ResetHighScores(struct GameProgress *gameProg)
 {
-	int i;
-	int j;
-	int k;
-	int characterID;
-	struct HighScoreTrack *track;
-	struct HighScoreEntry *entry;
-	char *name;
-
 	// for every track
-	for (i = 0; i < 18; i++)
+	for (s32 i = 0; i < MEMCARD_HIGH_SCORE_TRACK_COUNT; i++)
 	{
-		track = &gameProg->highScoreTracks[i];
+		struct HighScoreTrack *track = &gameProg->highScoreTracks[i];
 
 #if 0
 		// all but two tracks
@@ -149,19 +133,19 @@ void GAMEPROG_ResetHighScores(struct GameProgress *gameProg)
 #endif
 
 		// for time trial and relic
-		for (j = 0; j < 2; j++)
+		for (s32 j = 0; j < MEMCARD_HIGH_SCORE_MODE_COUNT; j++)
 		{
 			// for every entry
-			for (k = 0; k < 6; k++)
+			for (s32 k = 0; k < MEMCARD_HIGH_SCORE_ENTRIES_PER_MODE; k++)
 			{
-				characterID = i + j + k;
+				s32 characterID = i + j + k;
 				characterID = characterID - PENTA_PENGUIN * (characterID / PENTA_PENGUIN);
 
-				entry = &track->scoreEntry[j * 6 + k];
-				entry->time = 0x8c640;
+				struct HighScoreEntry *entry = &track->scoreEntry[j * MEMCARD_HIGH_SCORE_ENTRIES_PER_MODE + k];
+				entry->time = MEMCARD_HIGH_SCORE_DEFAULT_TIME;
 				entry->characterID = characterID;
 
-				name = sdata->lngStrings[data.MetaDataCharacters[characterID].name_LNG_short];
+				char *name = sdata->lngStrings[data.MetaDataCharacters[characterID].name_LNG_short];
 
 				// can't do an int-copy,
 				// strings in LNG are unaligned
@@ -180,7 +164,7 @@ int GAMEPROG_CheckGhostsBeaten(int ghostID)
 	s16 levelID = gGT->levelID;
 	int flagWordIndex = (s16)ghostID >> 5;
 
-	for (int i = 0; i < 18; i++)
+	for (s32 i = 0; i < MEMCARD_HIGH_SCORE_TRACK_COUNT; i++)
 	{
 		gGT->levelID = i;
 		GAMEPROG_GetPtrHighScoreTrack();
@@ -215,26 +199,24 @@ void GAMEPROG_NewProfile_OutsideAdv(struct GameProgress *gameProg)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80026c24-0x80026cb8.
 void GAMEPROG_InitFullMemcard(struct MemcardProfile *mcp)
 {
-	int i;
-
 	// clear
 	memset(mcp, 0, sizeof(struct MemcardProfile));
 
 	// header
-	mcp->header[0] = 0xffee; // version (-18)
+	mcp->header[0] = MEMCARD_PROFILE_VERSION; // version (-18)
 	mcp->header[1] = sizeof(struct MemcardProfile);
 
 	// GameProgress and GameOptions
 	GAMEPROG_NewProfile_OutsideAdv(&mcp->gameProgress);
 
 	// 4 profiles
-	for (i = 0; i < 4; i++)
+	for (s32 i = 0; i < MEMCARD_ADV_PROFILE_COUNT; i++)
 	{
 		// no character selected
 		mcp->advProgress[i].characterID = -1;
 
 		// N Sane Beach
-		mcp->advProgress[i].HubLevYouSavedOn = 0x1a;
+		mcp->advProgress[i].HubLevYouSavedOn = N_SANITY_BEACH;
 	}
 }
 
@@ -249,33 +231,25 @@ void GAMEPROG_NewProfile_InsideAdv(struct AdvProgress *adv)
 	adv->characterID = -1;
 
 	// N Sane Beach
-	adv->HubLevYouSavedOn = 0x1a;
+	adv->HubLevYouSavedOn = N_SANITY_BEACH;
 }
 
-
-// same as the one in GAMEPROG_AdvPercent
-#define CHECK_PROG_BIT(rewards, bitIndex) ((rewards[bitIndex >> 5] >> (bitIndex & 0x1f)) & 1) != 0
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80026cf4-0x80026d7c.
 void GAMEPROG_SaveCupProgress(void)
 {
-	int i;
-	u32 *prog;
-	int bitIndex1;
-	int bitIndex2;
-
-	prog = &sdata->gameProgress.unlocks[0];
+	u32 *prog = &sdata->gameProgress.unlocks[0];
 
 	// 4 cups, 3 difficulties
-	for (i = 0; i < 12; i++)
+	for (s32 i = 0; i < GAME_PROGRESS_CUP_WIN_COUNT; i++)
 	{
 		// if cup is "currently" beaten
-		bitIndex1 = i + 0xC;
-		if (CHECK_PROG_BIT(prog, bitIndex1))
+		s32 bitIndex1 = i + GAME_PROGRESS_CUP_CURRENT_WIN_FIRST_BIT;
+		if (CHECK_MEMCARD_BIT(prog, bitIndex1) != 0)
 		{
 			// set if cup was "previously" beaten
-			bitIndex2 = bitIndex1 + 0xC;
-			prog[bitIndex2 >> 5] |= 1 << (bitIndex2 & 0x1f);
+			s32 bitIndex2 = bitIndex1 + GAME_PROGRESS_CUP_PREVIOUS_WIN_OFFSET;
+			UNLOCK_MEMCARD_BIT(prog, bitIndex2);
 		}
 	}
 }
@@ -284,31 +258,26 @@ void GAMEPROG_SaveCupProgress(void)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80026d7c-0x80026e48.
 void GAMEPROG_SyncGameAndCard(struct GameProgress *memcardProg, struct GameProgress *currentProg)
 {
-	int i;
-	int memcardFlags;
-	int currentFlags;
-	int joinFlags;
-
 	// combine progress of cups,
 	// characters, track, scrapbook
-	for (i = 0; i < 2; i++)
+	for (s32 i = 0; i < GAME_PROGRESS_UNLOCK_WORD_COUNT; i++)
 	{
-		memcardFlags = memcardProg->unlocks[i];
-		currentFlags = currentProg->unlocks[i];
+		u32 memcardFlags = memcardProg->unlocks[i];
+		u32 currentFlags = currentProg->unlocks[i];
 
-		joinFlags = memcardFlags | currentFlags;
+		u32 joinFlags = memcardFlags | currentFlags;
 
 		memcardProg->unlocks[i] = joinFlags;
 		currentProg->unlocks[i] = joinFlags;
 	}
 
 	// combine progress of beaten ghosts
-	for (i = 0; i < 18; i++)
+	for (s32 i = 0; i < MEMCARD_HIGH_SCORE_TRACK_COUNT; i++)
 	{
-		memcardFlags = memcardProg->highScoreTracks[i].timeTrialFlags;
-		currentFlags = currentProg->highScoreTracks[i].timeTrialFlags;
+		u32 memcardFlags = memcardProg->highScoreTracks[i].timeTrialFlags;
+		u32 currentFlags = currentProg->highScoreTracks[i].timeTrialFlags;
 
-		joinFlags = memcardFlags | currentFlags;
+		u32 joinFlags = memcardFlags | currentFlags;
 
 		memcardProg->highScoreTracks[i].timeTrialFlags = joinFlags;
 		currentProg->highScoreTracks[i].timeTrialFlags = joinFlags;
@@ -338,11 +307,9 @@ void GAMEPROG_NewGame_OnBoot()
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80026e80-0x80026ed8
 void GAMEPROG_GetPtrHighScoreTrack(void)
 {
-	int gameMode1;
-	struct GameTracker *gGT;
+	struct GameTracker *gGT = sdata->gGT;
+	s32 gameMode1 = gGT->gameMode1;
 
-	gGT = sdata->gGT;
-	gameMode1 = gGT->gameMode1;
-
-	sdata->ptrActiveHighScoreEntry = &sdata->gameProgress.highScoreTracks[gGT->levelID].scoreEntry[6 * ((gameMode1 & RELIC_RACE) != 0)];
+	sdata->ptrActiveHighScoreEntry =
+	    &sdata->gameProgress.highScoreTracks[gGT->levelID].scoreEntry[MEMCARD_HIGH_SCORE_ENTRIES_PER_MODE * ((gameMode1 & RELIC_RACE) != 0)];
 }

@@ -2291,7 +2291,7 @@ UpdateTireColorTimer:
 						{
 							SVECTOR v;
 							v.vx = 0xfa;
-							if ((plant->object != NULL) && (((struct Plant *)plant->object)->LeftOrRight != 0))
+							if ((plant->object != NULL) && (((struct Plant *)plant->object)->side != 0))
 							{
 								v.vx = -0xfa;
 							}
