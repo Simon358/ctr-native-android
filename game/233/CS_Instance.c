@@ -152,7 +152,7 @@ int CS_Instance_GetNumAnimFrames(struct Instance *modelInst, int animIndex, int 
 		return 0;
 	}
 
-	if (animIndex >= header->numAnimations)
+	if (animIndex >= (int)header->numAnimations)
 	{
 		return 0;
 	}

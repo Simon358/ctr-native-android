@@ -287,7 +287,7 @@ void RB_Fireball_LInB(struct Instance *inst)
 	}
 	inst->thread = t;
 	t->inst = inst;
-	t->funcThCollide = (void (*)(struct Thread *))RB_Fireball_ThCollide;
+	t->funcThCollide = (void *)RB_Fireball_ThCollide;
 
 	inst->scale.x = 0x4000;
 	inst->scale.y = 0x4000;

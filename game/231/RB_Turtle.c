@@ -128,6 +128,7 @@ void RB_Turtle_ThTick(struct Thread *t)
 
 int RB_Turtle_LInC(struct Instance *inst, struct Thread *driverTh, struct ScratchpadStruct *sps) // unused 3rd param?
 {
+	(void)sps;
 	int speed;
 	int jumpType;
 	struct Driver *driver;

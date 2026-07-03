@@ -35,6 +35,7 @@ int LOAD_HowlHeaderSectors(CdlFILE *cdlFileHWL, void *ptrDestination, int firstS
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x8003254c-0x80032594.
 void LOAD_HowlCallback(u8 result, u8 *unk)
 {
+	(void)unk;
 	// disable callback
 	CdReadCallback(0);
 

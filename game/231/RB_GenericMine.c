@@ -44,7 +44,7 @@ void RB_GenericMine_LInB(struct Instance *inst)
 	// why are these paired to P1 in Crystal Challenge?
 	parentInst = gGT->drivers[0]->instSelf;
 
-	t->funcThCollide = RB_Hazard_ThCollide_Generic;
+	t->funcThCollide = (void *)RB_Hazard_ThCollide_Generic;
 	t->parentThread = parentInst->thread;
 	t->modelIndex = inst->model->id;
 
@@ -360,7 +360,7 @@ void RB_GenericMine_ThTick(struct Thread *t)
 
 				instCrate->thread->funcThDestroy = PROC_DestroyInstance;
 
-				instCrate->thread->funcThCollide = RB_Hazard_ThCollide_Generic;
+				instCrate->thread->funcThCollide = (void *)RB_Hazard_ThCollide_Generic;
 
 				// Get object from thread
 				tnt = instCrate->thread->object;

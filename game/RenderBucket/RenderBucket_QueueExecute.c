@@ -1793,6 +1793,7 @@ static int RenderBucket_BuildDepthRange(struct Instance *inst, struct ModelFrame
                                         struct InstDrawPerPlayer *idpp, struct RenderBucketQueueState *queueState, int viewDepth, int normalDepthBias,
                                         int secondaryDepthBias, u32 *instFlags, const struct RenderBucketSplitState *split, const MATRIX *projectionMvp)
 {
+	(void)inst;
 	struct RenderBucketBounds bounds;
 	int primaryRange;
 	int secondaryRange;
@@ -2836,6 +2837,7 @@ static u8 RenderBucket_SaturateU8(int value)
 
 static int RenderBucket_DrawInstPrim_NormalAtOTEntry(struct RenderBucketDrawContext *ctx, u32 command, struct TextureLayout *tex, uint32_t *otEntry)
 {
+	(void)command;
 	if ((char *)ctx->primMem->cursor + sizeof(POLY_GT3) >= (char *)ctx->primMem->guardEnd)
 	{
 		return -1;
@@ -3042,6 +3044,7 @@ static u32 RenderBucket_DepthFadeColor(u32 color, int sz)
 static int RenderBucket_DrawInstPrim_DepthFadeAtRange(struct RenderBucketDrawContext *ctx, u32 command, struct TextureLayout *tex, int activeRange,
                                                       int depthMac0)
 {
+	(void)command;
 	uint32_t *otEntry;
 	u32 color0;
 	u32 color1;
@@ -3439,6 +3442,7 @@ static int RenderBucket_DrawSplitPrimitiveNormalAtOTEntry(struct RenderBucketDra
                                                           const struct RenderBucketSplitVertex *v0, const struct RenderBucketSplitVertex *v1,
                                                           const struct RenderBucketSplitVertex *v2)
 {
+	(void)command;
 	if ((char *)ctx->primMem->cursor + sizeof(POLY_GT3) >= (char *)ctx->primMem->guardEnd)
 	{
 		return -1;
@@ -3586,6 +3590,7 @@ static int RenderBucket_DrawSplitPrimitiveDepthFadeAtRange(struct RenderBucketDr
                                                            int depthMac0, const struct RenderBucketSplitVertex *v0, const struct RenderBucketSplitVertex *v1,
                                                            const struct RenderBucketSplitVertex *v2)
 {
+	(void)command;
 	uint32_t *otEntry;
 	u32 color0;
 	u32 color1;
@@ -3901,6 +3906,7 @@ static int RenderBucket_DrawSplitPrimitiveAtRange(struct RenderBucketDrawContext
 
 static void RenderBucket_ProjectSplitVertex(struct RenderBucketDrawContext *ctx, struct RenderBucketSplitVertex *v)
 {
+	(void)ctx;
 	// NOTE(aalhendi): Source-backs retail generated-vertex SXY/SZ stores.
 	MTC2(v->xy, 0);
 	MTC2(v->z, 1);

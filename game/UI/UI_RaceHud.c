@@ -495,6 +495,7 @@ void UI_DrawPosSuffix(s16 posX, s16 posY, struct Driver *d, s16 flags)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80050528-0x80050654
 void UI_DrawLapCount(s16 posX, int posY, int param_3, struct Driver *d)
 {
+	(void)param_3;
 	s16 type;
 	s16 currLap;
 	int numLaps;

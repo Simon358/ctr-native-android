@@ -226,7 +226,7 @@ void RB_Orca_LInB(struct Instance *inst)
 	}
 
 	inst->thread = t;
-	t->funcThCollide = (void (*)(struct Thread *))RB_Orca_ThCollide;
+	t->funcThCollide = (void *)RB_Orca_ThCollide;
 	t->inst = inst;
 
 	inst->scale.x = 0xC00;

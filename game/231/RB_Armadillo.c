@@ -161,7 +161,7 @@ void RB_Armadillo_LInB(struct Instance *inst)
 	}
 	inst->thread = t;
 	t->inst = inst;
-	t->funcThCollide = (void (*)(struct Thread *))RB_Armadillo_ThCollide;
+	t->funcThCollide = (void *)RB_Armadillo_ThCollide;
 
 	// rolling animation
 	inst->animIndex = 1;

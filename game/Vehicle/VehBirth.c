@@ -593,6 +593,7 @@ void VehBirth_EngineAudio_AllPlayers(void)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80058c44-0x80058c4c.
 void VehBirth_NullThread(struct Thread *t)
 {
+	(void)t;
 }
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80058c4c-0x80058d2c.

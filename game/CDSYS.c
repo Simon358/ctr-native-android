@@ -266,6 +266,7 @@ int CDSYS_SetXAToLang(int lang)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x8001c7a4-0x8001c7fc.
 void CDSYS_XaCallbackCdSync(u8 result, u8 *unk) //+unk to adhere to *CdlCB
 {
+	(void)unk;
 	u8 com;
 
 	if (result == CdlComplete)
@@ -288,6 +289,7 @@ void CDSYS_XaCallbackCdSync(u8 result, u8 *unk) //+unk to adhere to *CdlCB
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x8001c7fc-0x8001c8e4.
 void CDSYS_XaCallbackCdReady(u8 result, u8 *unk) //+unk to adhere to *CdlCB
 {
+	(void)unk;
 	if (result == CdlDataReady)
 	{
 		CdGetSector(&sdata->cdlFile_CdReady[0], 3);

@@ -279,6 +279,7 @@ void *LOAD_VramFile(void *bigfilePtr, int subfileIndex, void *ptrDestination, u3
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80032110-0x800321b4.
 void LOAD_ReadFileASyncCallback(u8 result, u8 *unk)
 {
+	(void)unk;
 	CdReadCallback(0);
 	result &= 0xff;
 

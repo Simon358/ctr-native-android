@@ -154,7 +154,7 @@ static void PickupBots_UpdateArcade(void)
 		{
 			struct Driver *bot = gGT->driversInRaceOrder[player->driverRank + 1];
 
-			if (PickupBots_IsBotWeaponReady(bot) && (((u32)player->lapIndex < (s8)gGT->numLaps) || (player->distanceToFinish_curr > 16000)) &&
+			if (PickupBots_IsBotWeaponReady(bot) && (((int)player->lapIndex < (int)(s8)gGT->numLaps) || (player->distanceToFinish_curr > 16000)) &&
 			    PickupBots_IsCloseToPlayer(player, bot))
 			{
 				int rng = MixRNG_Scramble() % 800;

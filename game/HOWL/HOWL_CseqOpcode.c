@@ -46,6 +46,7 @@ void cseq_opcode01_noteoff(struct SongSeq *seq)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80029f1c-0x80029f24
 void cseq_opcode02_empty(struct SongSeq *seq)
 {
+	(void)seq;
 	// left empty by ND
 }
 
@@ -70,6 +71,7 @@ void cseq_opcode03(struct SongSeq *seq)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80029f78-0x80029f80
 void cseq_opcode04_empty(struct SongSeq *seq)
 {
+	(void)seq;
 	// left empty by ND
 }
 

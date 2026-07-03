@@ -140,6 +140,7 @@ struct Instance *VehTalkMask_Init()
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800691e4-0x8006924c.
 void VehTalkMask_PlayXA(struct Instance *i, int id)
 {
+	(void)i;
 	struct Driver *d = sdata->gGT->drivers[0];
 
 	if (d != 0)

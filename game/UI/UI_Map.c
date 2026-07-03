@@ -84,6 +84,8 @@ void UI_Map_DrawMap(struct Icon *mapTop, struct Icon *mapBottom, s16 posX, s16 p
 
 void UI_Map_DrawMap_ExtraFunc(struct Icon *icon, POLY_FT4 *p, s16 posX, s16 empty, struct PrimMem *primMem, uint32_t *otMem, u32 transparency)
 {
+	(void)empty;
+	(void)primMem;
 	s16 leftX;
 	s16 sizeX;
 
@@ -199,6 +201,8 @@ void UI_Map_GetIconPos(s16 *m, int *posX, int *posY)
 // Draw dot for Player on 2D Adv Map
 void UI_Map_DrawAdvPlayer(int ptrMap, int *matrix, int unused1, int unused2, s16 param_5, s16 param_6)
 {
+	(void)unused1;
+	(void)unused2;
 	int *arrowColor;
 	int posX;
 	int posY;

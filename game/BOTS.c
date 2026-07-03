@@ -89,6 +89,7 @@ void BOTS_SetGlobalNavData(u16 index)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80012440-0x80012560
 void BOTS_InitNavPath(struct GameTracker *gGT, s16 index)
 {
+	(void)gGT;
 	struct NavHeader *nh = 0;
 	struct NavHeader **LevNavTable = sdata->gGT->level1->LevNavTable;
 
@@ -2755,6 +2756,7 @@ FinishHazardTimerUpdate:
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80016b00-0x80016ec8
 u32 BOTS_ChangeState(struct Driver *driverVictim, int damageType, struct Driver *driverAttacker, int reason)
 {
+	(void)reason;
 	driverVictim->pendingDamageType = 0;
 
 	if (driverVictim->kartState == KS_MASK_GRABBED)

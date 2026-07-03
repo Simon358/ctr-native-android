@@ -1,11 +1,9 @@
 #include <common.h>
 
-typedef int (*MovingExplosiveCollideFunc)(struct Thread *, struct Thread *, void *, struct ScratchpadStruct *);
-
 static void RB_MovingExplosive_CallThCollide(struct Thread *hitTh, struct Thread *sourceTh)
 {
-	void *funcThCollide = (void *)hitTh->funcThCollide;
-	((MovingExplosiveCollideFunc)funcThCollide)(hitTh, sourceTh, funcThCollide, NULL);
+	void *funcThCollide = hitTh->funcThCollide;
+	((ThreadScratchCollideFunc)funcThCollide)(hitTh, sourceTh, funcThCollide, NULL);
 }
 
 // function for moving bomb, shiledbomb, or missile

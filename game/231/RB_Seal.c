@@ -79,7 +79,7 @@ void Seal_CheckColl(struct Instance *sealInst, struct Thread *sealTh, int damage
 	{
 		// all mine ThCollide functions only take one parameter,
 		// all other ThCollide functions are erased due to redundancy
-		hitInst->thread->funcThCollide(hitInst->thread);
+		((ThreadSimpleCollideFunc)hitInst->thread->funcThCollide)(hitInst->thread);
 
 		// dont check other bucket
 		return;
@@ -262,7 +262,7 @@ void RB_Seal_LInB(struct Instance *inst)
 	}
 	inst->thread = t;
 	t->inst = inst;
-	t->funcThCollide = (void (*)(struct Thread *))RB_Seal_ThCollide;
+	t->funcThCollide = (void *)RB_Seal_ThCollide;
 
 	inst->scale.x = 0x2000;
 	inst->scale.y = 0x2000;

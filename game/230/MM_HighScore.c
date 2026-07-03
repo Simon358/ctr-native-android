@@ -152,6 +152,7 @@ void MM_HighScore_Init(void)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 overlay 230 0x800b3954-0x800b3fe4.
 void MM_HighScore_MenuProc(struct RectMenu *menu_unused)
 {
+	(void)menu_unused;
 	u8 bVar1;
 	s16 sVar2;
 	u32 uVar3;

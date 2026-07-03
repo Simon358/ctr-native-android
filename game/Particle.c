@@ -980,6 +980,7 @@ static struct ParticleRenderListMatrix Particle_RenderList_BuildNormalMatrix(str
 static void Particle_RenderList_WriteNormalPrimitive(POLY_FT4 *poly, struct Icon *icon, u16 flagsAxis, u16 flagsSetColor, u32 color,
                                                      struct ParticleRenderListMatrix *matrix, s32 *scratchDepth)
 {
+	(void)flagsAxis;
 	s32 width;
 	s32 height;
 	s32 halfWidth;

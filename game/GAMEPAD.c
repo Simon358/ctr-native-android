@@ -251,11 +251,11 @@ int GAMEPAD_GetNumConnected(struct GamepadSystem *gGamepads)
 	u32 oldVal = *ptrToSet;
 	*ptrToSet = bitwiseConnected;
 
-	if (oldVal == -1)
+	if (oldVal == (u32)-1)
 	{
 		return 0;
 	}
-	if (oldVal == bitwiseConnected)
+	if (oldVal == (u32)bitwiseConnected)
 	{
 		return 0;
 	}

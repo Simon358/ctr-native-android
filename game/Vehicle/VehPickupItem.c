@@ -467,7 +467,7 @@ void VehPickupItem_ShootNow(struct Driver *d, int weaponID, int flags)
 
 		weaponTh = weaponInst->thread;
 		weaponTh->funcThDestroy = PROC_DestroyTracker;
-		weaponTh->funcThCollide = RB_Hazard_ThCollide_Missile;
+		weaponTh->funcThCollide = (void *)RB_Hazard_ThCollide_Missile;
 
 		tw = weaponTh->object;
 		tw->flags = 0;
@@ -591,7 +591,7 @@ void VehPickupItem_ShootNow(struct Driver *d, int weaponID, int flags)
 
 		weaponTh = weaponInst->thread;
 		weaponTh->funcThDestroy = PROC_DestroyInstance;
-		weaponTh->funcThCollide = RB_Hazard_ThCollide_Generic;
+		weaponTh->funcThCollide = (void *)RB_Hazard_ThCollide_Generic;
 
 		PlaySound3D(0x52, weaponInst);
 
@@ -728,7 +728,7 @@ void VehPickupItem_ShootNow(struct Driver *d, int weaponID, int flags)
 
 		weaponTh = weaponInst->thread;
 		weaponTh->funcThDestroy = PROC_DestroyInstance;
-		weaponTh->funcThCollide = RB_Hazard_ThCollide_Generic;
+		weaponTh->funcThCollide = (void *)RB_Hazard_ThCollide_Generic;
 
 		PlaySound3D(0x52, weaponInst);
 

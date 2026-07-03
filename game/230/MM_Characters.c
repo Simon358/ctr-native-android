@@ -575,6 +575,7 @@ void MM_Characters_HideDrivers(void)
 
 void MM_Characters_MenuProc(struct RectMenu *unused)
 {
+	(void)unused;
 	u8 numPlyrNextGame;
 	int bVar2;
 	int bVar3;

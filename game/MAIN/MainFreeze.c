@@ -369,6 +369,7 @@ typedef struct
 
 force_inline void IDENTIFYGAMEPADS_MainFreeze_MenuPtrOptions(struct RectMenu *menu, GAMEPAD_MainFreeze_MenuPtrOptions *gamepad)
 {
+	(void)menu;
 	struct GameTracker *gGT = sdata->gGT;
 
 	// get number of ordinary gamepads and/or "analog controllers" connected, and which players are using which

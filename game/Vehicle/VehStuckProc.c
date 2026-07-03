@@ -573,6 +573,7 @@ void VehStuckProc_PlantEaten_PhysLinear(struct Thread *t, struct Driver *d)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800675c0-0x800677d0.
 void VehStuckProc_PlantEaten_Animate(struct Thread *t, struct Driver *d)
 {
+	(void)t;
 	s32 dist;
 	struct Instance *inst;
 	SVECTOR plantVector;
@@ -1049,6 +1050,7 @@ extern DriverFunc PlayerRevEngineFuncTable[DRIVER_FUNC_COUNT];
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80067f4c-0x8006809c.
 void VehStuckProc_RevEngine_Init(struct Thread *t, struct Driver *d)
 {
+	(void)t;
 	// spawn function that waits for traffic lights
 
 	// kart state to rev
@@ -1132,6 +1134,7 @@ void VehStuckProc_Tumble_PhysLinear(struct Thread *thread, struct Driver *driver
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80068150-0x80068244.
 void VehStuckProc_Tumble_PhysAngular(struct Thread *thread, struct Driver *driver)
 {
+	(void)thread;
 	int elapsedTimeMS = sdata->gGT->elapsedTimeMS;
 
 	driver->numFramesSpentSteering = 10000;
@@ -1157,6 +1160,7 @@ void VehStuckProc_Tumble_PhysAngular(struct Thread *thread, struct Driver *drive
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80068244-0x800682a4.
 void VehStuckProc_Tumble_Animate(struct Thread *thread, struct Driver *driver)
 {
+	(void)thread;
 	int matrixIndex;
 	int arrLength;
 	int quotient;
@@ -1197,6 +1201,7 @@ DriverFunc PlayerBlastedFuncTable[DRIVER_FUNC_COUNT] = {NULL,
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800682a4-0x800683f4.
 void VehStuckProc_Tumble_Init(struct Thread *thread, struct Driver *driver)
 {
+	(void)thread;
 	driver->kartState = KS_BLASTED;
 	driver->turbo_MeterRoomLeft = 0;
 
@@ -1509,6 +1514,7 @@ void VehStuckProc_Warp_AddDustPuff2(struct Driver *d, int *warp)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80068be8-0x80068e04.
 void VehStuckProc_Warp_PhysAngular(struct Thread *th, struct Driver *d)
 {
+	(void)th;
 	int warpTimer;
 	SVec4 flarePos;
 
@@ -1609,6 +1615,7 @@ void VehStuckProc_Warp_PhysAngular(struct Thread *th, struct Driver *d)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80068e04-0x80068f90.
 void VehStuckProc_Warp_Init(struct Thread *th, struct Driver *d)
 {
+	(void)th;
 	if (d->kartState == KS_WARP_PAD)
 	{
 		return;

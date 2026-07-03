@@ -74,7 +74,7 @@ int CS_Thread_UseOpcode(struct Instance *instance, struct CutsceneObj *cs)
 			instance->vertSplit = D233.VertSplitLine;
 		}
 
-		if ((int)instance->model->id == (u32)(u8)gGT->podium_modelIndex_Second)
+		if ((int)instance->model->id == (int)(u8)gGT->podium_modelIndex_Second)
 		{
 			if (D233.PodiumInitUnk2 - 0x65U < 0x87)
 			{
@@ -93,7 +93,7 @@ int CS_Thread_UseOpcode(struct Instance *instance, struct CutsceneObj *cs)
 		}
 	afterPodiumSecondModelCheck:
 
-		if ((int)instance->model->id == (u32)(u8)gGT->podium_modelIndex_First)
+		if ((int)instance->model->id == (int)(u8)gGT->podium_modelIndex_First)
 		{
 			if (D233.PodiumInitUnk2 - 0x83U < 0x69)
 			{

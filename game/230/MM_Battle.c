@@ -106,6 +106,7 @@ void MM_Battle_Init(void)
 
 void MM_Battle_MenuProc(struct RectMenu *unused)
 {
+	(void)unused;
 	char numPlyr;
 	u16 uVar4;
 	s16 sVar6;

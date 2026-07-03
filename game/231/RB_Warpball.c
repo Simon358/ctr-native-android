@@ -782,7 +782,7 @@ void RB_Warpball_ThTick(struct Thread *t)
 		{
 			struct Thread *hitTh = hitInst->thread;
 
-			hitTh->funcThCollide(hitTh);
+			((ThreadSimpleCollideFunc)hitTh->funcThCollide)(hitTh);
 		}
 	}
 

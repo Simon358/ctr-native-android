@@ -4,6 +4,7 @@
 // NOTE(aalhendi): ASM-verified NTSC-U 926 PS1 path 0x8003e740-0x8003e80c; CTR_NATIVE uses host RAM.
 void MEMPACK_Init(int ramSize)
 {
+	(void)ramSize;
 	u32 startPtr;
 	int packSize;
 

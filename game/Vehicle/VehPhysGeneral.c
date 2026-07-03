@@ -6,6 +6,7 @@
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x8005fc8c-0x80060458.
 void VehPhysGeneral_PhysAngular(struct Thread *thread, struct Driver *driver)
 {
+	(void)thread;
 	int speedApprox;
 	int elapsedTimeMS;
 	int classSpeed_original;

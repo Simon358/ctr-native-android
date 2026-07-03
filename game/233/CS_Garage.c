@@ -35,6 +35,7 @@ void CS_Garage_ZoomOut(char zoomState)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800b7834-0x800b854c
 void CS_Garage_MenuProc(struct RectMenu *param_1)
 {
+	(void)param_1;
 	s16 garageFrames;
 	s16 *barLen;
 	u16 classNamePosX;

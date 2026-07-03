@@ -283,7 +283,7 @@ checkCollision:
 			hitInst = (struct Instance *)LinkedCollide_Radius(spiderInst, t, gGT->threadBuckets[MINE].thread, 0x9000);
 			if (hitInst != NULL)
 			{
-				hitInst->thread->funcThCollide(hitInst->thread);
+				((ThreadSimpleCollideFunc)hitInst->thread->funcThCollide)(hitInst->thread);
 			}
 
 			return;
@@ -337,7 +337,7 @@ void RB_Spider_LInB(struct Instance *inst)
 	}
 
 	spider = t->object;
-	t->funcThCollide = (void (*)(struct Thread *))RB_Spider_ThCollide;
+	t->funcThCollide = (void *)RB_Spider_ThCollide;
 	t->inst = inst;
 
 	inst->scale.x = 0x1c00;

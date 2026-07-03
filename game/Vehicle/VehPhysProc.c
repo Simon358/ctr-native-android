@@ -1115,6 +1115,7 @@ SkipSetSteer:
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80062a2c-0x80062a4c.
 void VehPhysProc_Driving_Audio(struct Thread *t, struct Driver *d)
 {
+	(void)t;
 	EngineSound_Player(d);
 }
 
@@ -1179,6 +1180,7 @@ extern DriverFunc PlayerDrivingFuncTable[DRIVER_FUNC_COUNT];
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80062b74-0x80062ca8.
 void VehPhysProc_Driving_Init(struct Thread *t, struct Driver *d)
 {
+	(void)t;
 	struct GameTracker *gGT = sdata->gGT;
 
 	if (((u32)(gGT->levelID - GEM_STONE_VALLEY) >= 5) || (LOAD_IsOpen_AdvHub() != 0))
@@ -1253,6 +1255,7 @@ extern DriverFunc PlayerFreezeFuncTable[DRIVER_FUNC_COUNT];
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80062d04-0x80062db0.
 void VehPhysProc_FreezeEndEvent_Init(struct Thread *t, struct Driver *d)
 {
+	(void)t;
 	if (d->kartState == KS_FREEZE)
 	{
 		return;
@@ -1342,6 +1345,7 @@ extern DriverFunc PlayerAntiVShiftFuncTable[DRIVER_FUNC_COUNT];
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80062e94-0x80062f4c.
 void VehPhysProc_FreezeVShift_Init(struct Thread *t, struct Driver *d)
 {
+	(void)t;
 	d->kartState = KS_ANTIVSHIFT;
 
 	// Turbo meter = full
@@ -1375,6 +1379,7 @@ DriverFunc PlayerAntiVShiftFuncTable[DRIVER_FUNC_COUNT] = {NULL,
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80062f4c-0x80063634.
 void VehPhysProc_PowerSlide_PhysAngular(struct Thread *th, struct Driver *driver)
 {
+	(void)th;
 	struct GameTracker *gGT = sdata->gGT;
 
 	int axisAngleDelta = CTR_MipsSubLo(CTR_MipsAddLo(CTR_MipsSubLo(driver->axisRotationX, driver->angle), 0x800) & 0xfff, 0x800);
@@ -1982,6 +1987,7 @@ void VehPhysProc_PowerSlide_PhysLinear(struct Thread *thread, struct Driver *dri
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80063920-0x80063934.
 void VehPhysProc_PowerSlide_InitSetUpdate(struct Thread *t, struct Driver *d)
 {
+	(void)t;
 	d->funcPtrs[DRIVER_FUNC_INIT] = 0;
 	d->funcPtrs[DRIVER_FUNC_UPDATE] = VehPhysProc_PowerSlide_Update;
 }
@@ -1992,6 +1998,7 @@ extern DriverFunc PlayerDriftingFuncTable[DRIVER_FUNC_COUNT];
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80063934-0x80063a44.
 void VehPhysProc_PowerSlide_Init(struct Thread *t, struct Driver *d)
 {
+	(void)t;
 	d->kartState = KS_DRIFTING;
 
 	// Character's Drift stat + ((Turning multiplier? << 2) / 5) * 100
@@ -2046,6 +2053,7 @@ DriverFunc PlayerDriftingFuncTable[DRIVER_FUNC_COUNT] = {
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80063a44-0x80063af8.
 void VehPhysProc_SlamWall_PhysAngular(struct Thread *t, struct Driver *d)
 {
+	(void)t;
 	int elapsedTimeMS = sdata->gGT->elapsedTimeMS;
 
 	d->angle = (s16)(CTR_MipsAddLo((u16)d->angle, CTR_MipsSra(CTR_MipsMulLo(d->ampTurnState, elapsedTimeMS), 0xd)) & 0xfff);
@@ -2063,6 +2071,8 @@ void VehPhysProc_SlamWall_PhysAngular(struct Thread *t, struct Driver *d)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80063af8-0x80063b00.
 void VehPhysProc_SlamWall_Update(struct Thread *t, struct Driver *d)
 {
+	(void)t;
+	(void)d;
 }
 
 
@@ -2124,6 +2134,7 @@ DriverFunc PlayerCrashingFuncTable[DRIVER_FUNC_COUNT] = {
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80063bd4-0x80063cf4.
 void VehPhysProc_SlamWall_Init(struct Thread *t, struct Driver *d)
 {
+	(void)t;
 	int i;
 	struct Instance *inst;
 	inst = d->instSelf;
@@ -2225,6 +2236,7 @@ void VehPhysProc_SpinFirst_PhysLinear(struct Thread *t, struct Driver *d)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80063dc8-0x80063eac.
 void VehPhysProc_SpinFirst_PhysAngular(struct Thread *t, struct Driver *d)
 {
+	(void)t;
 	int elapsedTimeMS = sdata->gGT->elapsedTimeMS;
 
 	d->numFramesSpentSteering = 10000;
@@ -2249,6 +2261,7 @@ void VehPhysProc_SpinFirst_PhysAngular(struct Thread *t, struct Driver *d)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80063eac-0x80063ec0.
 void VehPhysProc_SpinFirst_InitSetUpdate(struct Thread *t, struct Driver *d)
 {
+	(void)t;
 	d->funcPtrs[DRIVER_FUNC_INIT] = 0;
 	d->funcPtrs[DRIVER_FUNC_UPDATE] = VehPhysProc_SpinFirst_Update;
 }
@@ -2271,6 +2284,7 @@ DriverFunc PlayerSpinningFuncTable[DRIVER_FUNC_COUNT] = {VehPhysProc_SpinFirst_I
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80063ec0-0x8006402c.
 void VehPhysProc_SpinFirst_Init(struct Thread *t, struct Driver *d)
 {
+	(void)t;
 	int i;
 	int feedback;
 
@@ -2349,6 +2363,7 @@ void VehPhysProc_SpinLast_PhysLinear(struct Thread *t, struct Driver *d)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800640a4-0x80064254.
 void VehPhysProc_SpinLast_PhysAngular(struct Thread *t, struct Driver *d)
 {
+	(void)t;
 	int elapsedTimeMS = sdata->gGT->elapsedTimeMS;
 	int driftAngleCurr;
 	driftAngleCurr = d->turnAngleCurr;
@@ -2429,6 +2444,7 @@ DriverFunc PlayerLastSpinFuncTable[DRIVER_FUNC_COUNT] = {0,
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80064254-0x800642ec.
 void VehPhysProc_SpinLast_Init(struct Thread *t, struct Driver *d)
 {
+	(void)t;
 	int i;
 
 	for (i = 0; i < DRIVER_FUNC_COUNT; i++)
@@ -2441,6 +2457,8 @@ void VehPhysProc_SpinLast_Init(struct Thread *t, struct Driver *d)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800642ec-0x800642f4.
 void VehPhysProc_SpinStop_Update(struct Thread *t, struct Driver *d)
 {
+	(void)t;
+	(void)d;
 }
 
 
@@ -2457,6 +2475,7 @@ void VehPhysProc_SpinStop_PhysLinear(struct Thread *t, struct Driver *d)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x80064320-0x800643d4.
 void VehPhysProc_SpinStop_PhysAngular(struct Thread *t, struct Driver *d)
 {
+	(void)t;
 	int elapsedTimeMS = sdata->gGT->elapsedTimeMS;
 
 	d->angle = (s16)(CTR_MipsAddLo((u16)d->angle, CTR_MipsSra(CTR_MipsMulLo(d->ampTurnState, elapsedTimeMS), 0xd)) & 0xfff);
@@ -2526,6 +2545,7 @@ void VehPhysProc_SpinStop_Animate(struct Thread *t, struct Driver *d)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800644d0-0x80064568.
 void VehPhysProc_SpinStop_Init(struct Thread *t, struct Driver *d)
 {
+	(void)t;
 	d->funcPtrs[DRIVER_FUNC_INIT] = NULL;
 	d->funcPtrs[DRIVER_FUNC_UPDATE] = VehPhysProc_SpinStop_Update;
 	d->funcPtrs[DRIVER_FUNC_PHYS_LINEAR] = VehPhysProc_SpinStop_PhysLinear;

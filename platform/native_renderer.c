@@ -37,7 +37,7 @@ extern SDL_Window *g_window;
 #define MAX_NUM_VERTEX_BUFFERS          (2)
 #define PSX_SCREEN_ASPECT               (240.0f / 320.0f) // PSX screen is mapped always to this aspect
 
-global_variable int s_previousBlendMode = BM_NONE;
+global_variable BlendMode s_previousBlendMode = BM_NONE;
 global_variable int s_previousDepthMode = 0;
 global_variable int s_previousStencilMode = 0;
 global_variable int s_previousScissorState = 0;
@@ -45,18 +45,18 @@ global_variable int s_previousOffscreenState = 0;
 global_variable RECT16 s_previousFramebuffer = {0, 0, 0, 0};
 global_variable RECT16 s_previousOffscreen = {0, 0, 0, 0};
 
-global_variable ShaderID s_previousShader = -1;
+global_variable ShaderID s_previousShader = (ShaderID)-1;
 
 global_variable TextureID s_vramTexturesDouble[2];
 global_variable TextureID s_vramTexture;
-global_variable TextureID s_rgLutTexture = -1;
+global_variable TextureID s_rgLutTexture = (TextureID)-1;
 global_variable int s_vramTextureIndex = 0;
 
-global_variable TextureID s_framebufferTexture = -1;
-global_variable TextureID s_offscreenRenderTexture = -1;
+global_variable TextureID s_framebufferTexture = (TextureID)-1;
+global_variable TextureID s_offscreenRenderTexture = (TextureID)-1;
 
-global_variable TextureID s_whiteTexture = -1;
-global_variable TextureID s_lastBoundTexture = -1;
+global_variable TextureID s_whiteTexture = (TextureID)-1;
+global_variable TextureID s_lastBoundTexture = (TextureID)-1;
 
 TextureID NativeRenderer_GetVRAMTexture(void)
 {
@@ -469,14 +469,14 @@ GLint u_psxTextureOutputStpLoc;
 	"	uniform sampler2D s_texture;\n"                              \
 	"	vec2 VRAM(vec2 uv) { return texture2D(s_texture, uv).rg; }\n"
 
-#define GPU_STP_PASS_FUNC                                                                                       \
-	"	float texelVisible(vec2 rg) { return float(rg.x + rg.y > 0.0); }\n"                                      \
-	"	float stpWeight(vec2 rg) { return step(0.5, rg.y); }\n"                                                  \
-	"	bool discardForSemiTransPass(float visible, float stpVisible, float nonStpVisible) {\n"                  \
-	"		if(visible < 0.5) { return true; }\n"                                                                  \
-	"		if(psxSemiTransPass == 1 && nonStpVisible < 0.5) { return true; }\n"                                  \
-	"		if(psxSemiTransPass == 2 && stpVisible < 0.5) { return true; }\n"                                     \
-	"		return false;\n"                                                                                       \
+#define GPU_STP_PASS_FUNC                                                                     \
+	"	float texelVisible(vec2 rg) { return float(rg.x + rg.y > 0.0); }\n"                     \
+	"	float stpWeight(vec2 rg) { return step(0.5, rg.y); }\n"                                 \
+	"	bool discardForSemiTransPass(float visible, float stpVisible, float nonStpVisible) {\n" \
+	"		if(visible < 0.5) { return true; }\n"                                                  \
+	"		if(psxSemiTransPass == 1 && nonStpVisible < 0.5) { return true; }\n"                   \
+	"		if(psxSemiTransPass == 2 && stpVisible < 0.5) { return true; }\n"                      \
+	"		return false;\n"                                                                       \
 	"	}\n"
 
 #define GPU_DITHERING                                             \
@@ -519,10 +519,10 @@ GLint u_psxTextureOutputStpLoc;
 	    "		float s21 = v21 * stpWeight(C21);\n"                                                                                                       \
 	    "		float s12 = v12 * stpWeight(C12);\n"                                                                                                       \
 	    "		float s22 = v22 * stpWeight(C22);\n"                                                                                                       \
-	    "		float n11 = v11 - s11;\n"                                                                                                                   \
-	    "		float n21 = v21 - s21;\n"                                                                                                                   \
-	    "		float n12 = v12 - s12;\n"                                                                                                                   \
-	    "		float n22 = v22 - s22;\n"                                                                                                                   \
+	    "		float n11 = v11 - s11;\n"                                                                                                                  \
+	    "		float n21 = v21 - s21;\n"                                                                                                                  \
+	    "		float n12 = v12 - s12;\n"                                                                                                                  \
+	    "		float n22 = v22 - s22;\n"                                                                                                                  \
 	    "		float ax1 = mix(v11, v21, frac.x);\n"                                                                                                      \
 	    "		float ax2 = mix(v12, v22, frac.x);\n"                                                                                                      \
 	    "		float axm = mix(ax1, ax2, frac.y);\n"                                                                                                      \
@@ -987,7 +987,7 @@ void NativeRenderer_SetupClipMode(const RECT16 *rect, const DISPENV *displayEnv,
 
 	// [A] isinterlaced dirty hack for widescreen
 	const bool scissorOn = enable && (displayEnv->isinter || (rect->x - displayEnv->disp.x > 0 || rect->y - displayEnv->disp.y > 0 ||
-	                                                         rect->w < displayEnv->disp.w || rect->h < displayEnv->disp.h));
+	                                                          rect->w < displayEnv->disp.w || rect->h < displayEnv->disp.h));
 
 	NativeRenderer_SetScissorState(scissorOn);
 
@@ -1167,7 +1167,7 @@ void NativeRenderer_SetPSXDrawMaskSet(int maskSet)
 
 internal void NativeRenderer_DestroyTexture(TextureID texture)
 {
-	if (texture == -1)
+	if (texture == (TextureID)-1)
 	{
 		return;
 	}
@@ -1302,6 +1302,10 @@ void NativeRenderer_SaveVRAM(const char *outputFileName, int x, int y, int width
 {
 #define FLIP_Y (VRAM_HEIGHT - i - 1)
 
+	(void)x;
+	(void)y;
+	(void)bReadFromFrameBuffer;
+
 	FILE *fp = fopen(outputFileName, "wb");
 	if (fp == NULL)
 	{
@@ -1413,7 +1417,7 @@ void NativeRenderer_ReadFramebufferDataToVRAM(void)
 		// NOTE(aalhendi): Keep the CPU-side VRAM mirror packed like PS1 VRAM.
 		// Host texture bindings are invalid after this direct GL texture read.
 		NativeRenderer_CopyRGBAFramebufferToVRAM(pixels, x, y, w, h, 1, 0);
-		s_lastBoundTexture = -1;
+		s_lastBoundTexture = (TextureID)-1;
 
 		free(pixels);
 	}
@@ -1577,8 +1581,8 @@ void NativeRenderer_StoreFrameBuffer(int x, int y, int w, int h)
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0); // source is backbuffer
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, s_glBlitFramebuffer);
 
-		glBlitFramebuffer(s_presentViewport.x, s_presentViewport.y, s_presentViewport.x + s_presentViewport.w, s_presentViewport.y + s_presentViewport.h, x, y + h,
-		                  x + w, y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		glBlitFramebuffer(s_presentViewport.x, s_presentViewport.y, s_presentViewport.x + s_presentViewport.w, s_presentViewport.y + s_presentViewport.h, x,
+		                  y + h, x + w, y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
 		// done, unbind
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
@@ -1698,8 +1702,8 @@ int NativeRenderer_RestoreVRAMState(const void *src, int srcSize)
 	s_previousFramebuffer = zeroRect;
 	s_previousOffscreen = zeroRect;
 	s_previousOffscreenState = 0;
-	s_previousShader = -1;
-	s_lastBoundTexture = -1;
+	s_previousShader = (ShaderID)-1;
+	s_lastBoundTexture = (TextureID)-1;
 	return 1;
 }
 
@@ -1979,7 +1983,7 @@ internal void NativeRenderer_BindVertexBuffer(void)
 void NativeRenderer_UpdateVertexBuffer(const GrVertex *vertices, int num_vertices)
 {
 	NativePerf_BeginScope(NATIVE_PERF_BUCKET_RENDERER_VERTEX_UPLOAD);
-	if (num_vertices >= MAX_VERTEX_BUFFER_SIZE)
+	if ((u32)num_vertices >= MAX_VERTEX_BUFFER_SIZE)
 	{
 		NATIVE_RENDERER_ERROR("MAX_VERTEX_BUFFER_SIZE reached, expect rendering errors\n");
 		num_vertices = MAX_VERTEX_BUFFER_SIZE;
