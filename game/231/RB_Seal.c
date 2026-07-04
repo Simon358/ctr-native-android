@@ -12,7 +12,7 @@ void Seal_CheckColl(struct Instance *sealInst, struct Thread *sealTh, int damage
 	struct Instance *hitInst;
 	struct Driver *hitDriver;
 	b32 boolHurt;
-	char kartStatePrev;
+	u8 kartStatePrev;
 
 	gGT = sdata->gGT;
 

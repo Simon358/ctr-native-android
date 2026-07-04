@@ -254,7 +254,7 @@ int RB_CrateWeapon_ThCollide(struct Thread *crateThread, struct Thread *collidin
 				return 1;
 			}
 
-			if ((driver->heldItemID != 0xf) && (driver->noItemTimer == 0))
+			if ((driver->heldItemID != HELD_ITEM_NONE) && (driver->noItemTimer == 0))
 			{
 				return 1;
 			}
@@ -282,7 +282,7 @@ int RB_CrateWeapon_ThCollide(struct Thread *crateThread, struct Thread *collidin
 				return 1;
 			}
 
-			driver->heldItemID = 0x10;
+			driver->heldItemID = HELD_ITEM_ROULETTE;
 			driver->numTimesHitWeaponBox++;
 			driver->itemRollTimer = 90;
 
@@ -295,9 +295,9 @@ int RB_CrateWeapon_ThCollide(struct Thread *crateThread, struct Thread *collidin
 			driver->PickupTimeboxHUD.cooldown = 5;
 			driver->noItemTimer = 0;
 
-			if (driver->numWumpas == 10)
+			if (driver->numWumpas == DRIVER_WUMPA_JUICED_COUNT)
 			{
-				driver->BattleHUD.juicedUpCooldown = 10;
+				driver->BattleHUD.juicedUpCooldown = DRIVER_WUMPA_JUICED_HUD_COOLDOWN_FRAMES;
 			}
 
 			pb = &sdata->gGT->pushBuffer[driver->driverID];

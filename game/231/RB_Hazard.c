@@ -24,7 +24,7 @@ int RB_Hazard_HurtDriver(struct Driver *driverVictim, int damageType, struct Dri
 }
 
 // NOTE(aalhendi): ASM-verified against NTSC-U 926 overlay 231 0x800ac220-0x800ac350.
-struct Instance *RB_Hazard_CollideWithDrivers(struct Instance *weaponInst, char boolCanSkipParent, int hitRadius, struct Instance *mineDriverInst)
+struct Instance *RB_Hazard_CollideWithDrivers(struct Instance *weaponInst, s16 parentSafetyFrames, int hitRadius, struct Instance *mineDriverInst)
 {
 	int j;
 
@@ -71,7 +71,7 @@ struct Instance *RB_Hazard_CollideWithDrivers(struct Instance *weaponInst, char 
 		// 2D collision, or 3D sphere
 		if (distCheck < (u32)hitRadius)
 		{
-			if ((boolCanSkipParent != 0) && (driverInst == mineDriverInst))
+			if ((parentSafetyFrames != 0) && (driverInst == mineDriverInst))
 			{
 				continue;
 			}
@@ -89,7 +89,7 @@ struct Instance *RB_Hazard_CollideWithDrivers(struct Instance *weaponInst, char 
 }
 
 // NOTE(aalhendi): ASM-verified against NTSC-U 926 overlay 231 0x800ac350-0x800ac3f8.
-struct Instance *RB_Hazard_CollideWithBucket(struct Instance *weaponInst, struct Thread *weaponTh, struct Thread *bucket, char boolCanSkipParent, int hitRadius,
+struct Instance *RB_Hazard_CollideWithBucket(struct Instance *weaponInst, struct Thread *weaponTh, struct Thread *bucket, s16 parentSafetyFrames, int hitRadius,
                                              struct Instance *mineDriverInst)
 {
 	int i;
@@ -112,7 +112,7 @@ struct Instance *RB_Hazard_CollideWithBucket(struct Instance *weaponInst, struct
 
 		if (distCheck < (u32)hitRadius)
 		{
-			if ((boolCanSkipParent != 0) && (threadInst == mineDriverInst))
+			if ((parentSafetyFrames != 0) && (threadInst == mineDriverInst))
 			{
 				continue;
 			}

@@ -80,7 +80,7 @@ void RB_TNT_ThTick_SitOnHead(struct Thread *t)
 {
 	struct Instance *inst;
 	struct MineWeapon *mw;
-	char state;
+	u8 state;
 	s16 numFrames;
 	u16 scaleXZ;
 	int rng;

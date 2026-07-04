@@ -84,8 +84,7 @@ void RB_MaskWeapon_FadeAway(struct Thread *t)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800afdbc-0x800b0278.
 void RB_MaskWeapon_ThTick(struct Thread *maskTh)
 {
-	char i;
-	char numPlyr;
+	u8 numPlyr;
 	s16 numAnimFrames;
 	struct GameTracker *gGT;
 	struct PushBuffer *pb;
@@ -113,25 +112,25 @@ void RB_MaskWeapon_ThTick(struct Thread *maskTh)
 
 	if (d->invisibleTimer == 0)
 	{
-		for (i = 0; i < numPlyr; i++)
+		for (int i = 0; i < numPlyr; i++)
 		{
-			pb = &gGT->pushBuffer[(s32)i];
-			maskIdpp[(s32)i].pushBuffer = pb;
-			beamIdpp[(s32)i].pushBuffer = pb;
+			pb = &gGT->pushBuffer[i];
+			maskIdpp[i].pushBuffer = pb;
+			beamIdpp[i].pushBuffer = pb;
 		}
 	}
 
 	else
 	{
-		for (i = 0; i < numPlyr; i++)
+		for (int i = 0; i < numPlyr; i++)
 		{
 			if (i == d->driverID)
 			{
 				continue;
 			}
 
-			maskIdpp[(s32)i].pushBuffer = NULL;
-			beamIdpp[(s32)i].pushBuffer = NULL;
+			maskIdpp[i].pushBuffer = NULL;
+			beamIdpp[i].pushBuffer = NULL;
 		}
 	}
 
@@ -172,7 +171,7 @@ void RB_MaskWeapon_ThTick(struct Thread *maskTh)
 	// Second time is BeamInst
 	for (int i = 0; i < 2; i++)
 	{
-		if ((mask->rot.z & 1) == 0)
+		if ((mask->rot.z & MASK_HEAD_ROT_WORLD_SPACE) == 0)
 		{
 			LHMatrix_Parent(instCurr, driverInst, &mhs->posOffset);
 			ConvertRotToMatrix(&mhs->m, &mhs->rot);
@@ -736,7 +735,7 @@ void RB_RainCloud_ThTick(struct Thread *t)
 				return;
 			}
 
-			if (d->heldItemID == 0xf)
+			if (d->heldItemID == HELD_ITEM_NONE)
 			{
 				return;
 			}
@@ -747,7 +746,7 @@ void RB_RainCloud_ThTick(struct Thread *t)
 			}
 
 			// set weapon to "weapon roulette" to make it spin
-			d->heldItemID = 0x10;
+			d->heldItemID = HELD_ITEM_ROULETTE;
 
 			// you are always 5 frames away from new weapon,
 			// so you get weapon 5 frames after cloud dies
@@ -763,7 +762,7 @@ void RB_RainCloud_ThTick(struct Thread *t)
 		if ((rcloud->effect == RAIN_CLOUD_EFFECT_ITEM_ROLL) &&
 
 		    // If your weapon is not "no weapon"
-		    (d->heldItemID != 0xf))
+		    (d->heldItemID != HELD_ITEM_NONE))
 		{
 			d->itemRollTimer = 0;
 
@@ -838,7 +837,7 @@ void RB_RainCloud_Init(struct Driver *d)
 
 		if (
 		    // if driver has no weapon
-		    (d->heldItemID == 0xf) ||
+		    (d->heldItemID == HELD_ITEM_NONE) ||
 
 		    (d->noItemTimer != 0))
 		{
