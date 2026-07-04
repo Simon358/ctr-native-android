@@ -277,12 +277,12 @@ void AH_Pause_Draw(s32 pageID, s32 posX)
 
 			struct AHPauseMember *member = &ptrPauseObject->members[pauseIndex];
 
-			if (CHECK_ADV_BIT(adv->rewards, trackID + ADV_REWARD_FIRST_PLATINUM_RELIC) != 0)
+			if (CHECK_ADV_BIT(adv->rewards, trackID + ADV_REWARD_FIRST_PLATINUM_RELIC))
 			{
 				member->unlockFlags |= AH_PAUSE_MEMBER_UNLOCKED;
 				member->iconIndex = AH_PAUSE_ICON_PLATINUM_RELIC;
 			}
-			else if (CHECK_ADV_BIT(adv->rewards, trackID + ADV_REWARD_FIRST_GOLD_RELIC) != 0)
+			else if (CHECK_ADV_BIT(adv->rewards, trackID + ADV_REWARD_FIRST_GOLD_RELIC))
 			{
 				member->unlockFlags |= AH_PAUSE_MEMBER_UNLOCKED;
 				member->iconIndex = AH_PAUSE_ICON_GOLD_RELIC;
@@ -317,7 +317,7 @@ void AH_Pause_Draw(s32 pageID, s32 posX)
 			s32 bossStarColor = AH_PAUSE_BOSS_STAR_LOCKED_COLOR;
 
 			// set to alternate color slot (if beaten oxide at least once)
-			if (CHECK_ADV_BIT(adv->rewards, data.BeatBossPrize[0]) != 0)
+			if (CHECK_ADV_BIT(adv->rewards, data.BeatBossPrize[0]))
 			{
 				bossStarColor = AH_PAUSE_BOSS_STAR_UNLOCKED_COLOR;
 			}
@@ -397,7 +397,7 @@ void AH_Pause_Draw(s32 pageID, s32 posX)
 
 		for (s32 i = 0; i < AH_PAUSE_CTR_TOKEN_TRACK_COUNT; i++)
 		{
-			if (CHECK_ADV_BIT(adv->rewards, i + ADV_REWARD_FIRST_CTR_TOKEN) != 0)
+			if (CHECK_ADV_BIT(adv->rewards, i + ADV_REWARD_FIRST_CTR_TOKEN))
 			{
 				tokenTotals[data.metaDataLEV[i].ctrTokenGroupID]++;
 			}
@@ -406,7 +406,7 @@ void AH_Pause_Draw(s32 pageID, s32 posX)
 		// NOTE(aalhendi): Purple tokens are stored in a separate reward bit range not in ctrTokenGroupID.
 		for (s32 i = 0; i < AH_PAUSE_PURPLE_TOKEN_COUNT; i++)
 		{
-			if (CHECK_ADV_BIT(adv->rewards, i + ADV_REWARD_FIRST_PURPLE_TOKEN) != 0)
+			if (CHECK_ADV_BIT(adv->rewards, i + ADV_REWARD_FIRST_PURPLE_TOKEN))
 			{
 				tokenTotals[AH_PAUSE_PURPLE_TOKEN_INDEX]++;
 			}
@@ -443,17 +443,17 @@ void AH_Pause_Draw(s32 pageID, s32 posX)
 		for (s32 i = 0; i < AH_PAUSE_RELIC_TRACK_COUNT; i++)
 		{
 			// platinum
-			if (CHECK_ADV_BIT(adv->rewards, i + ADV_REWARD_FIRST_PLATINUM_RELIC) != 0)
+			if (CHECK_ADV_BIT(adv->rewards, i + ADV_REWARD_FIRST_PLATINUM_RELIC))
 			{
 				relicTotals[2]++;
 			}
 			// gold
-			else if (CHECK_ADV_BIT(adv->rewards, i + ADV_REWARD_FIRST_GOLD_RELIC) != 0)
+			else if (CHECK_ADV_BIT(adv->rewards, i + ADV_REWARD_FIRST_GOLD_RELIC))
 			{
 				relicTotals[1]++;
 			}
 			// sapphire
-			else if (CHECK_ADV_BIT(adv->rewards, i + ADV_REWARD_FIRST_SAPPHIRE_RELIC) != 0)
+			else if (CHECK_ADV_BIT(adv->rewards, i + ADV_REWARD_FIRST_SAPPHIRE_RELIC))
 			{
 				relicTotals[0]++;
 			}

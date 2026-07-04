@@ -27,7 +27,7 @@ void AH_MaskHint_Start(s16 hintId, u16 bool_interruptWarppad)
 	// If Aku / Uka model pointer is nullptr
 	if (sdata->modelMaskHints3D == NULL)
 	{
-		LOAD_TalkingMask(LOAD_GetAdvPackIndex(), (VehPickupItem_MaskBoolGoodGuy(d) & 0xffff) == 0);
+		LOAD_TalkingMask(LOAD_GetAdvPackIndex(), !VehPickupItem_MaskBoolGoodGuy(d));
 
 		// 3.0s to spawn mask
 		D232.maskSpawnFrame = AH_MASKHINT_LONG_SPAWN_FRAMES;
@@ -56,7 +56,7 @@ void AH_MaskHint_Start(s16 hintId, u16 bool_interruptWarppad)
 }
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800b3f88-0x800b3f98.
-int AH_MaskHint_boolCanSpawn()
+b32 AH_MaskHint_boolCanSpawn(void)
 {
 	// 0 - aku is gone,
 	// 1 - aku is speaking
@@ -424,7 +424,7 @@ void AH_MaskHint_Update()
 			D232.maskWarppadDelayFrames--;
 		}
 
-		if ((delayComplete && ((VehTalkMask_boolNoXA() != 0) || ((sdata->gGamepads->gamepad[0].buttonsTapped & BTN_TRIANGLE) != 0))) &&
+		if ((delayComplete && (VehTalkMask_boolNoXA() || ((sdata->gGamepads->gamepad[0].buttonsTapped & BTN_TRIANGLE) != 0))) &&
 		    (sdata->AkuAkuHintState++,
 
 		     // If you're in Adventure Arena

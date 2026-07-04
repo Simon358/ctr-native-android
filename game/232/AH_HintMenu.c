@@ -65,7 +65,7 @@ void AH_HintMenu_MenuProc(struct RectMenu *menu)
 		int hintID = (ptrLngID[0] - AH_HINTMENU_HINT_LNG_FIRST) / 2;
 		int bitIndex = hintID + ADV_REWARD_FIRST_HINT;
 
-		if (CHECK_ADV_BIT(sdata->advProgress.rewards, bitIndex) != 0)
+		if (CHECK_ADV_BIT(sdata->advProgress.rewards, bitIndex))
 		{
 			hintsFound[numHintsFound] = i;
 			numHintsFound++;
@@ -98,7 +98,7 @@ void AH_HintMenu_MenuProc(struct RectMenu *menu)
 		}
 
 		// If you press Cross, Square, Triangle, or Circle
-		if (((sdata->buttonTapPerPlayer[0] & AH_HINTMENU_INPUT_VIEW_EXIT) != 0) && (((VehTalkMask_boolNoXA() & 0xffff) != 0) || (D232.maskCooldown == 0)))
+		if (((sdata->buttonTapPerPlayer[0] & AH_HINTMENU_INPUT_VIEW_EXIT) != 0) && (VehTalkMask_boolNoXA() || (D232.maskCooldown == 0)))
 		{
 			D232.hintMenu_boolViewHint = 0;
 

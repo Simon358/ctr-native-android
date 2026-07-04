@@ -45,7 +45,7 @@ void AH_SaveObj_ThTick(struct Thread *t)
 		}
 
 		// If hint is not unlocked
-		if (CHECK_ADV_BIT(sdata->advProgress.rewards, ADV_REWARD_HINT_SAVE_LOAD_SCREEN) == 0)
+		if (!CHECK_ADV_BIT(sdata->advProgress.rewards, ADV_REWARD_HINT_SAVE_LOAD_SCREEN))
 		{
 			// Aku Hint "This is the load/save screen..."
 			MainFrame_RequestMaskHint(ADV_MASK_HINT_ID_SAVE_LOAD_SCREEN, 0);
@@ -53,7 +53,7 @@ void AH_SaveObj_ThTick(struct Thread *t)
 
 		// Check if Aku Aku is giving a hint:
 		// 0 - speaking, 1 - gone.
-		if ((driver->speed < AH_SAVEOBJ_ENTRY_SPEED_MAX) && ((AH_MaskHint_boolCanSpawn() & 0xffff) != 0))
+		if ((driver->speed < AH_SAVEOBJ_ENTRY_SPEED_MAX) && AH_MaskHint_boolCanSpawn())
 		{
 			s16 scanlineFrame = save->scanlineFrame - 1;
 			save->scanlineFrame = scanlineFrame;

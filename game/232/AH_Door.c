@@ -56,7 +56,7 @@ void AH_Door_ThDestroy(struct Thread *t)
 	return;
 }
 
-static char AH_Door_IsOpenByRewards(s16 levelID, AdventureHubDoorID doorID)
+static b32 AH_Door_IsOpenByRewards(s16 levelID, AdventureHubDoorID doorID)
 {
 	if ((levelID == N_SANITY_BEACH) && (doorID == AH_DOOR_BEACH_TO_GLACIER_PARK))
 	{
@@ -89,7 +89,7 @@ static char AH_Door_IsOpenByRewards(s16 levelID, AdventureHubDoorID doorID)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 overlay 232 0x800afa60-0x800b072c.
 void AH_Door_ThTick(struct Thread *t)
 {
-	char doorIsOpen;
+	b32 doorIsOpen;
 	AdventureHubDoorID doorID;
 	s16 lev;
 	s16 numKeys;
@@ -592,7 +592,6 @@ void AH_Door_ThTick(struct Thread *t)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800b072c-0x800b0b98.
 void AH_Door_LInB(struct Instance *inst)
 {
-	char i;
 	int levelID;
 	int ratio;
 	SVec3 leftRot;
@@ -641,9 +640,9 @@ void AH_Door_LInB(struct Instance *inst)
 
 	// Key slots are next to each other.
 	instPtrArr = &woodDoor->keyInst[0];
-	for (i = 0; i < AH_WOOD_DOOR_KEY_COUNT; i++)
+	for (int i = 0; i < AH_WOOD_DOOR_KEY_COUNT; i++)
 	{
-		instPtrArr[(s32)i] = NULL;
+		instPtrArr[i] = NULL;
 	}
 
 	woodDoor->frameCount_unused = 0;
@@ -657,9 +656,9 @@ void AH_Door_LInB(struct Instance *inst)
 	woodDoor->doorRot.z = 0;
 	woodDoor->doorID = 0;
 
-	for (i = 5; inst->name[(s32)i] != '\0'; i++)
+	for (int i = 5; inst->name[i] != '\0'; i++)
 	{
-		woodDoor->doorID = woodDoor->doorID * 10 + inst->name[(s32)i] - '0';
+		woodDoor->doorID = woodDoor->doorID * 10 + inst->name[i] - '0';
 	}
 
 	// Level ID is Glacier Park

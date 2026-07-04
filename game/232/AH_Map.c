@@ -343,7 +343,7 @@ void AH_Map_HubItems(struct UIMap *map, s16 *arrowCounter)
 	struct HubItem *item = D232.hubItemsXY_ptrArray[levelID - GEM_STONE_VALLEY];
 	Vec3 pos3D;
 
-	if (item->posX != -1)
+	if (item->posX != AH_HUB_ITEM_LIST_END_POS_X)
 	{
 		do
 		{
@@ -374,7 +374,7 @@ void AH_Map_HubItems(struct UIMap *map, s16 *arrowCounter)
 					{
 						u32 bit = i + ADV_REWARD_FIRST_BOSS_KEY;
 
-						if (CHECK_ADV_BIT(adv->rewards, bit) == 0)
+						if (!CHECK_ADV_BIT(adv->rewards, bit))
 						{
 							open = false;
 							break;
@@ -410,7 +410,7 @@ void AH_Map_HubItems(struct UIMap *map, s16 *arrowCounter)
 
 					for (int i = 0; i < AH_HUB_TRACK_COUNT; i++)
 					{
-						if (CHECK_ADV_BIT(adv->rewards, trophies[i] + ADV_REWARD_FIRST_TROPHY) == 0)
+						if (!CHECK_ADV_BIT(adv->rewards, trophies[i] + ADV_REWARD_FIRST_TROPHY))
 						{
 							open = false;
 							break;
@@ -530,7 +530,7 @@ void AH_Map_HubItems(struct UIMap *map, s16 *arrowCounter)
 				UI_Map_DrawRawIcon(map, pos3D.v, AH_MAP_ICON_BOSS_STAR, bossIconColor, 0, 0x1000);
 			}
 			item++;
-		} while (item->posX != -1);
+		} while (item->posX != AH_HUB_ITEM_LIST_END_POS_X);
 	}
 }
 
@@ -656,9 +656,9 @@ void AH_Map_Main(void)
 
 	if (
 	    // if Aku Hint is not unlocked
-	    (CHECK_ADV_BIT(sdata->advProgress.rewards, ADV_REWARD_HINT_WELCOME_TO_ARENA) == 0) &&
+	    !CHECK_ADV_BIT(sdata->advProgress.rewards, ADV_REWARD_HINT_WELCOME_TO_ARENA) &&
 
-	    (RaceFlag_IsFullyOffScreen() != 0))
+	    RaceFlag_IsFullyOffScreen())
 	{
 		// Trigger Aku Hint:
 		// Welcome to Adventure Arena

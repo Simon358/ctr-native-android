@@ -204,7 +204,7 @@ LAB_800aeb6c:
 		// check all boss keys
 		for (i = 0; i < AH_BOSS_KEY_COUNT; i++)
 		{
-			if (CHECK_ADV_BIT(adv->rewards, bitIndex) == 0)
+			if (!CHECK_ADV_BIT(adv->rewards, bitIndex))
 			{
 				goto LAB_800aebd0;
 			}
@@ -219,7 +219,7 @@ LAB_800aeb6c:
 		for (i = 0; i < AH_HUB_TRACK_COUNT; i++)
 		{
 			// if any trophy on this hub is not unlocked
-			if (CHECK_ADV_BIT(adv->rewards, check[i] + ADV_REWARD_FIRST_TROPHY) == 0)
+			if (!CHECK_ADV_BIT(adv->rewards, check[i] + ADV_REWARD_FIRST_TROPHY))
 			{
 				// boss is not open
 				goto LAB_800aebd0;
@@ -273,7 +273,7 @@ LAB_800aec34:
 	if (levelID == GEM_STONE_VALLEY)
 	{
 		// if hint is not unlocked "need 4 keys for oxide"
-		if (CHECK_ADV_BIT(sdata->advProgress.rewards, ADV_REWARD_HINT_NEED_FOUR_KEYS_FOR_OXIDE) == 0)
+		if (!CHECK_ADV_BIT(sdata->advProgress.rewards, ADV_REWARD_HINT_NEED_FOUR_KEYS_FOR_OXIDE))
 		{
 			// HintID: need four keys to race oxide
 			hintMask = ADV_MASK_HINT_ID_NEED_FOUR_KEYS_FOR_OXIDE;
@@ -283,7 +283,7 @@ LAB_800aec34:
 	else
 	{
 		//  if hint is not unlocked "to access this boss garage..."
-		if (CHECK_ADV_BIT(sdata->advProgress.rewards, ADV_REWARD_HINT_NEED_FOUR_TROPHIES_FOR_BOSS) == 0)
+		if (!CHECK_ADV_BIT(sdata->advProgress.rewards, ADV_REWARD_HINT_NEED_FOUR_TROPHIES_FOR_BOSS))
 		{
 			// HintID: need four trophies to enter boss
 			hintMask = ADV_MASK_HINT_ID_NEED_FOUR_TROPHIES_FOR_BOSS;
@@ -448,7 +448,7 @@ void AH_Garage_LInB(struct Instance *inst)
 		// check all boss keys
 		for (i = 0; i < AH_BOSS_KEY_COUNT; i++)
 		{
-			if (CHECK_ADV_BIT(adv->rewards, bitIndex) == 0)
+			if (!CHECK_ADV_BIT(adv->rewards, bitIndex))
 			{
 				goto GarageLocked;
 			}
@@ -465,7 +465,7 @@ void AH_Garage_LInB(struct Instance *inst)
 		for (i = 0; i < AH_HUB_TRACK_COUNT; i++)
 		{
 			// if any trophy on this hub is not unlocked
-			if (CHECK_ADV_BIT(adv->rewards, check[i] + ADV_REWARD_FIRST_TROPHY) == 0)
+			if (!CHECK_ADV_BIT(adv->rewards, check[i] + ADV_REWARD_FIRST_TROPHY))
 			{
 				// boss is not open
 				goto GarageLocked;
@@ -478,7 +478,7 @@ void AH_Garage_LInB(struct Instance *inst)
 	{
 		// check if boss was NOT beaten on this hub (levelID - 0x19)
 		bitIndex = data.BeatBossPrize[levelID - GEM_STONE_VALLEY];
-		t->modelIndex = (CHECK_ADV_BIT(adv->rewards, bitIndex) != 0) ? 2 : 1;
+		t->modelIndex = CHECK_ADV_BIT(adv->rewards, bitIndex) ? 2 : 1;
 	}
 
 	// if boss is not open
