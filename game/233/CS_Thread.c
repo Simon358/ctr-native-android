@@ -19,11 +19,108 @@ enum CsPathModelKind
 	CS_PATH_MODEL_KIND_COUNT = STATIC_OXIDESPEAKER - STATIC_PPOINTTHINGINTRO + 1,
 };
 
+enum CsThreadConstants
+{
+	CS_DECODED_OPCODE_WORD_COUNT = 5,
+	CS_PODIUM_SECOND_HIDE_START_FRAME = 0x65,
+	CS_PODIUM_SECOND_HIDE_FRAME_COUNT = 0x87,
+	CS_PODIUM_SECOND_DEPTH_BIAS_RESTORE = 2,
+	CS_PODIUM_FIRST_HIDE_START_FRAME = 0x83,
+	CS_PODIUM_FIRST_HIDE_FRAME_COUNT = 0x69,
+	CS_PODIUM_FIRST_DEPTH_BIAS_RESTORE = 6,
+	CS_FADE_FROM_BLACK_CURRENT = 0x1fff,
+	CS_FADE_FROM_BLACK_TARGET = FP_ONE,
+	CS_FADE_FROM_BLACK_STEP = -0x2aa,
+	CS_RANDOM_DURATION_SHIFT = 2,
+	CS_RANDOM_DURATION_MASK = ANG_TWO_PI - 1,
+	CS_FRAME32_SHIFT = 5,
+	CS_FRAME32_UNIT = 1 << CS_FRAME32_SHIFT,
+	CS_FRAME32_MASK = CS_FRAME32_UNIT - 1,
+	CS_CAMERA_PATH_TIME_NUMERATOR_SHIFT = 11,
+	CS_CAMERA_PATH_TIME_DENOMINATOR_SHIFT = 16,
+	CS_CAMERA_DISTANCE_DEFAULT = 0x100,
+	CS_CAMERA_DISTANCE_CLOSE = 0x50,
+	CS_CAMERA_DISTANCE_OXIDE_SHIP = 0x278,
+	CS_CAMERA_DISTANCE_INTRO_WIDE = 0x1eb,
+	CS_CAMERA_DISTANCE_INTRO_MEDIUM = 0x14d,
+	CS_ND_CRATE_CAMERA_DISTANCE = 0x140,
+	CS_ND_CRATE_SKIP_MIN_FRAME32 = 0xb5,
+	CS_CREDITS_LEVEL_COUNT = SCRAPBOOK - CREDITS_CRASH,
+	CS_OXIDE_ENDING_LEVEL_COUNT = OXIDE_TRUE_ENDING - OXIDE_ENDING + 1,
+	CS_ADV_HUB_LEVEL_COUNT = INTRO_RACE_TODAY - GEM_STONE_VALLEY,
+	CS_INTRO_MODEL_SCRIPT_COUNT = 0x10,
+	CS_BOX_MODEL_SCRIPT_COUNT = 0x2b,
+	CS_DANCE_MODEL_SCRIPT_COUNT = 0x10,
+	CS_TAWNA_MODEL_SCRIPT_COUNT = 4,
+	CS_PINHEAD_DEFAULT_SCRIPT_COUNT = 5,
+	CS_KART_FRAME_OVERRIDE_COUNT = 4,
+	CS_MASK_KART_MODEL_COUNT = 2,
+	CS_CREDITS_ND_CRATE_SCRIPT_OFFSET = 0x18,
+	CS_TRUE_ENDING_SCRIPT_OFFSET = 0x30,
+	CS_DEFAULT_SCALE = FP_ONE,
+	CS_PODIUM_CHARACTER_SCALE = 0x2800,
+	CS_DEFAULT_PARTICLE_ID = 0xff,
+	CS_DEFAULT_COLOR_WORD = 0x2e808080,
+	CS_RANDOM_BYTE_MASK = 0xff,
+	CS_ANIM_INDEX_LOW_BYTE_MASK = 0xff,
+	CS_CONDITION_RESULT_MASK = 0xffff,
+	CS_RANDOM_ALPHA_MASK = 0x7ff,
+	CS_RANDOM_ALPHA_BASE = 0x400,
+	CS_MODEL_LOD_DISTANCE_VISIBLE = 20000,
+	CS_RANDOM_CLEAR_BOX_MASK = 0xf,
+	CS_INTERPOLATE_LINE_COLOR_CODE = 0x42000000,
+	CS_INTERPOLATE_LINE_OT_TAG = 0x05000000,
+	CS_INTERPOLATE_LINE_DEPTH_MIN = 1,
+	CS_INTERPOLATE_LINE_DEPTH_RANGE = 0x11ff,
+	CS_INTERPOLATE_LINE_FADE_START_DEPTH = 0xa00,
+	CS_INTERPOLATE_LINE_FADE_END_DEPTH = 0x1200,
+	CS_INTERPOLATE_LINE_MAX_COLOR = 0x3f,
+	CS_INTERPOLATE_LINE_FADE_SHIFT = 11,
+	CS_INTERPOLATE_LINE_OT_SHIFT = 6,
+	CS_INTERPOLATE_LINE_MAX_OT_INDEX = 0x3ff,
+	CS_SUBTITLE_TEXT_MAX_WIDTH = 460,
+	CS_SUBTITLE_BOX_HALF_WIDTH = 236,
+	CS_SUBTITLE_BOX_Y_OFFSET = 4,
+	CS_SUBTITLE_BOX_WIDTH = 472,
+	CS_SUBTITLE_BOX_HEIGHT_PADDING = 8,
+	CS_SUBTITLE_BOX_DRAW_STYLE = 4,
+	CS_XA_ANIM_SYNC_NUMERATOR = 0x1e00,
+	CS_XA_ANIM_SYNC_DENOMINATOR = 0xac44,
+	CS_AUDIO_VOLUME_FX_BYTE_OFFSET = 2,
+	CS_AUDIO_VOLUME_MUSIC_BYTE_OFFSET = 4,
+	CS_AUDIO_VOLUME_VOICE_BYTE_OFFSET = 6,
+	CS_BOSS_END_OVERLAY_TRANSITION_FRAMES = 3,
+};
+
 CTR_STATIC_ASSERT(offsetof(struct CSThreadParentFrameScratch, parentPos) == 0x00);
 CTR_STATIC_ASSERT(offsetof(struct CSThreadParentFrameScratch, parentRot) == 0x10);
 CTR_STATIC_ASSERT(CS_PATH_MODEL_KIND_COUNT == 63);
+CTR_STATIC_ASSERT(CS_DECODED_OPCODE_WORD_COUNT == 5);
+CTR_STATIC_ASSERT((u16)CS_FADE_FROM_BLACK_STEP == 0xfd56);
+CTR_STATIC_ASSERT(CS_FRAME32_UNIT == 0x20);
+CTR_STATIC_ASSERT(CS_CREDITS_LEVEL_COUNT == 20);
+CTR_STATIC_ASSERT(CS_OXIDE_ENDING_LEVEL_COUNT == 2);
+CTR_STATIC_ASSERT(CS_ADV_HUB_LEVEL_COUNT == 5);
+CTR_STATIC_ASSERT(CS_INTRO_MODEL_SCRIPT_COUNT ==
+                  sizeof(((struct OverlayRDATA_233 *)0)->introModelScripts) / sizeof(((struct OverlayRDATA_233 *)0)->introModelScripts[0]));
+CTR_STATIC_ASSERT(CS_BOX_MODEL_SCRIPT_COUNT ==
+                  sizeof(((struct OverlayRDATA_233 *)0)->boxModelScripts) / sizeof(((struct OverlayRDATA_233 *)0)->boxModelScripts[0]));
+CTR_STATIC_ASSERT(CS_DANCE_MODEL_SCRIPT_COUNT ==
+                  sizeof(((struct OverlayRDATA_233 *)0)->danceFirstScripts) / sizeof(((struct OverlayRDATA_233 *)0)->danceFirstScripts[0]));
+CTR_STATIC_ASSERT(CS_DANCE_MODEL_SCRIPT_COUNT ==
+                  sizeof(((struct OverlayRDATA_233 *)0)->danceOtherScripts) / sizeof(((struct OverlayRDATA_233 *)0)->danceOtherScripts[0]));
+CTR_STATIC_ASSERT(CS_KART_FRAME_OVERRIDE_COUNT ==
+                  sizeof(((struct OverlayDATA_233 *)0)->cs_initMatrixTable) / sizeof(((struct OverlayDATA_233 *)0)->cs_initMatrixTable[0]));
+CTR_STATIC_ASSERT(CS_CREDITS_ND_CRATE_SCRIPT_OFFSET == 0x18);
+CTR_STATIC_ASSERT(CS_TRUE_ENDING_SCRIPT_OFFSET == 0x30);
+CTR_STATIC_ASSERT(CS_INTERPOLATE_LINE_FADE_END_DEPTH - CS_INTERPOLATE_LINE_FADE_START_DEPTH == 0x800);
+CTR_STATIC_ASSERT(OFFSETOF(union CsOpcodeMeta, animIndex) == CS_AUDIO_VOLUME_FX_BYTE_OFFSET);
+CTR_STATIC_ASSERT(OFFSETOF(union CsOpcodeMeta, frameStart) == CS_AUDIO_VOLUME_MUSIC_BYTE_OFFSET);
+CTR_STATIC_ASSERT(OFFSETOF(union CsOpcodeMeta, frameEnd) == CS_AUDIO_VOLUME_VOICE_BYTE_OFFSET);
 
-static void CS_SaveDecodedOpcode(const struct CutsceneObj *cs, int out[5])
+static const u32 CS_INTERPOLATE_LINE_DRAW_MODE = 0xe1000a20u;
+
+static void CS_SaveDecodedOpcode(const struct CutsceneObj *cs, int out[CS_DECODED_OPCODE_WORD_COUNT])
 {
 	out[0] = cs->decodedOpcode.words[0];
 	out[1] = cs->decodedOpcode.words[1];
@@ -32,7 +129,7 @@ static void CS_SaveDecodedOpcode(const struct CutsceneObj *cs, int out[5])
 	out[4] = cs->decodedOpcode.words[4];
 }
 
-static void CS_RestoreDecodedOpcode(struct CutsceneObj *cs, const int in[5])
+static void CS_RestoreDecodedOpcode(struct CutsceneObj *cs, const int in[CS_DECODED_OPCODE_WORD_COUNT])
 {
 	cs->decodedOpcode.words[0] = in[0];
 	cs->decodedOpcode.words[1] = in[1];
@@ -51,24 +148,20 @@ int CS_Thread_UseOpcode(struct Instance *instance, struct CutsceneObj *cs)
 	u16 clockEffectFlags;
 	u16 cutsceneFlags;
 	u32 conditionMet;
-	int iVar8;
+	int lodIndexState;
 	char *const *cutsceneOpcodes;
-	int iVar10;
 	s16 levelToLoad;
 	int distanceToScreen;
 	struct Thread *dancerThread;
 	char *opcodeAt;
-	int iVar12;
+	int animFrame32;
 	union CsOpcodeMeta *opcodeMeta;
 	s16 *opcodeMetaShorts;
 	struct CsInitMatrixEntry *frameData;
-	int rotInterpNumerator;
-	int rotInterpStartFrame;
-	int rotInterpFrameRange;
 	int nextFrameTime;
 	int lodIndex;
 	struct ModelHeader *modelHeader;
-	int metadataBackup[5];
+	int metadataBackup[CS_DECODED_OPCODE_WORD_COUNT];
 	SVec3 camRot;
 	SVec3 camPos;
 	s16 camPathFlags[2];
@@ -89,7 +182,7 @@ int CS_Thread_UseOpcode(struct Instance *instance, struct CutsceneObj *cs)
 
 		if ((int)instance->model->id == (int)(u8)gGT->podium_modelIndex_Second)
 		{
-			if (D233.podiumCameraFrame - 0x65U < 0x87)
+			if ((u32)(D233.podiumCameraFrame - CS_PODIUM_SECOND_HIDE_START_FRAME) < CS_PODIUM_SECOND_HIDE_FRAME_COUNT)
 			{
 				instance->flags |= HIDE_MODEL;
 			}
@@ -99,8 +192,8 @@ int CS_Thread_UseOpcode(struct Instance *instance, struct CutsceneObj *cs)
 				{
 					goto afterPodiumSecondModelCheck;
 				}
-				instance->depthBiasNormal -= 2;
-				instance->depthBiasSecondary -= 2;
+				instance->depthBiasNormal -= CS_PODIUM_SECOND_DEPTH_BIAS_RESTORE;
+				instance->depthBiasSecondary -= CS_PODIUM_SECOND_DEPTH_BIAS_RESTORE;
 				instance->flags &= ~HIDE_MODEL;
 			}
 		}
@@ -108,7 +201,7 @@ int CS_Thread_UseOpcode(struct Instance *instance, struct CutsceneObj *cs)
 
 		if ((int)instance->model->id == (int)(u8)gGT->podium_modelIndex_First)
 		{
-			if (D233.podiumCameraFrame - 0x83U < 0x69)
+			if ((u32)(D233.podiumCameraFrame - CS_PODIUM_FIRST_HIDE_START_FRAME) < CS_PODIUM_FIRST_HIDE_FRAME_COUNT)
 			{
 				instance->flags |= HIDE_MODEL;
 			}
@@ -118,8 +211,8 @@ int CS_Thread_UseOpcode(struct Instance *instance, struct CutsceneObj *cs)
 				{
 					goto afterPodiumFirstModelCheck;
 				}
-				instance->depthBiasNormal -= 6;
-				instance->depthBiasSecondary -= 6;
+				instance->depthBiasNormal -= CS_PODIUM_FIRST_DEPTH_BIAS_RESTORE;
+				instance->depthBiasSecondary -= CS_PODIUM_FIRST_DEPTH_BIAS_RESTORE;
 				instance->flags &= ~HIDE_MODEL;
 			}
 		}
@@ -127,23 +220,25 @@ int CS_Thread_UseOpcode(struct Instance *instance, struct CutsceneObj *cs)
 
 		if ((cs->flags & CS_FLAG_ADV_CHAR_SELECT_LOGIC) != 0)
 		{
-			if (((int)instance->model->id + -0xce == (int)gGarage.garageCharacterIDs[sdata->advCharSelectIndex_curr]) && (gGarage.boolSelected == 1))
+			if (((int)instance->model->id - STATIC_CRASHSELECT == (int)gGarage.garageCharacterIDs[sdata->advCharSelectIndex_curr]) &&
+			    (gGarage.boolSelected == 1))
 			{
 				if ((cs->flags & CS_FLAG_ADV_CHAR_SELECT_SELECTED) == 0)
 				{
-					gGT->pushBuffer[0].fadeFromBlack_currentValue = 0x1fff;
-					gGT->pushBuffer[0].fadeFromBlack_desiredResult = 0x1000;
-					gGT->pushBuffer[0].fade_step = 0xfd56;
+					gGT->pushBuffer[0].fadeFromBlack_currentValue = CS_FADE_FROM_BLACK_CURRENT;
+					gGT->pushBuffer[0].fadeFromBlack_desiredResult = CS_FADE_FROM_BLACK_TARGET;
+					gGT->pushBuffer[0].fade_step = CS_FADE_FROM_BLACK_STEP;
 					cs->flags |= CS_FLAG_ADV_CHAR_SELECT_SELECTED;
 					CS_ScriptCmd_OpcodeAt(cs, R233.advCharSelectSelectOpcodes[(int)instance->model->id - STATIC_CRASHSELECT]);
 					CS_SaveDecodedOpcode(cs, metadataBackup);
 				reloadAdvCharSelectOpcodeState:
 					cs->animFrame32 = cs->decodedOpcode.words[2];
-					iVar8 = MixRNG_Scramble();
+					int rng = MixRNG_Scramble();
 					opcodeMeta = cs->metadataMeta;
 					opcodeMetaShorts = (s16 *)opcodeMeta;
-					cs->opcodeDuration =
-					    opcodeMeta->frameStart + (s16)((int)((iVar8 >> 2 & 0xfff) * (((int)opcodeMeta->frameEnd - (int)opcodeMeta->frameStart) + 1)) >> 0xc);
+					cs->opcodeDuration = opcodeMeta->frameStart + (s16)((int)(((rng >> CS_RANDOM_DURATION_SHIFT) & CS_RANDOM_DURATION_MASK) *
+					                                                          (((int)opcodeMeta->frameEnd - (int)opcodeMeta->frameStart) + 1)) >>
+					                                                    FRACTIONAL_BITS);
 				}
 			}
 			else
@@ -160,8 +255,8 @@ int CS_Thread_UseOpcode(struct Instance *instance, struct CutsceneObj *cs)
 	}
 
 	opcodeDuration = (int)cs->opcodeDuration;
-	iVar12 = cs->animFrame32;
-	iVar8 = (int)cs->lodIndex;
+	animFrame32 = cs->animFrame32;
+	lodIndexState = (int)cs->lodIndex;
 	elapsedTimeRemaining = gGT->elapsedTimeMS;
 	opcodeMeta = cs->metadataMeta;
 	opcodeMetaShorts = (s16 *)opcodeMeta;
@@ -172,16 +267,16 @@ int CS_Thread_UseOpcode(struct Instance *instance, struct CutsceneObj *cs)
 		numCamPathPoints = CAM_Path_GetNumPoints();
 		if ((int)numCamPathPoints != 0)
 		{
-			iVar10 = ((s32)((u32)gGT->msInThisLEV << 11)) >> 16;
-			if (iVar10 < (int)numCamPathPoints + -1)
+			int cameraPathFrame = ((s32)((u32)gGT->msInThisLEV << CS_CAMERA_PATH_TIME_NUMERATOR_SHIFT)) >> CS_CAMERA_PATH_TIME_DENOMINATOR_SHIFT;
+			if (cameraPathFrame < (int)numCamPathPoints + -1)
 			{
-				CAM_Path_Move(iVar10, camPos.v, camRot.v, camPathFlags);
+				CAM_Path_Move(cameraPathFrame, camPos.v, camRot.v, camPathFlags);
 				gGT->pushBuffer[0].pos = camPos;
 				gGT->pushBuffer[0].rot = camRot;
 			}
 			else
 			{
-				if (opcodeMeta->opcode == 0x14)
+				if (opcodeMeta->opcode == CS_OPCODE_YIELD)
 				{
 					CS_ScriptCmd_OpcodeNext(cs);
 				}
@@ -189,41 +284,41 @@ int CS_Thread_UseOpcode(struct Instance *instance, struct CutsceneObj *cs)
 			}
 
 			clockEffectFlags = gGT->clockEffectEnabled;
-			gGT->clockEffectEnabled = clockEffectFlags & 0xfffe;
+			gGT->clockEffectEnabled = clockEffectFlags & ~CAM_PATH_FLAG_CLOCK_EFFECT;
 			if ((camPathFlags[0] & CAM_PATH_FLAG_CLOCK_EFFECT) != 0)
 			{
-				gGT->clockEffectEnabled = (clockEffectFlags & 0xfffe) | CAM_PATH_FLAG_CLOCK_EFFECT;
+				gGT->clockEffectEnabled = (clockEffectFlags & ~CAM_PATH_FLAG_CLOCK_EFFECT) | CAM_PATH_FLAG_CLOCK_EFFECT;
 			}
 
 			if ((cs->flags & CS_FLAG_CAMERA_DISTANCE_OVERRIDE) == 0)
 			{
-				gGT->pushBuffer[0].distanceToScreen_PREV = 0x100;
+				gGT->pushBuffer[0].distanceToScreen_PREV = CS_CAMERA_DISTANCE_DEFAULT;
 				if ((camPathFlags[0] & CAM_PATH_FLAG_DISTANCE_TO_SCREEN_0x50) != 0)
 				{
-					gGT->pushBuffer[0].distanceToScreen_PREV = 0x50;
+					gGT->pushBuffer[0].distanceToScreen_PREV = CS_CAMERA_DISTANCE_CLOSE;
 				}
 				if ((camPathFlags[0] & CAM_PATH_FLAG_DISTANCE_TO_SCREEN_0x278) != 0)
 				{
-					gGT->pushBuffer[0].distanceToScreen_PREV = 0x278;
+					gGT->pushBuffer[0].distanceToScreen_PREV = CS_CAMERA_DISTANCE_OXIDE_SHIP;
 				}
 				if ((camPathFlags[0] & CAM_PATH_FLAG_DISTANCE_TO_SCREEN_0x1EB) != 0)
 				{
-					gGT->pushBuffer[0].distanceToScreen_PREV = 0x1eb;
+					gGT->pushBuffer[0].distanceToScreen_PREV = CS_CAMERA_DISTANCE_INTRO_WIDE;
 				}
 				if ((camPathFlags[0] & CAM_PATH_FLAG_DISTANCE_TO_SCREEN_0x14D) != 0)
 				{
-					gGT->pushBuffer[0].distanceToScreen_PREV = 0x14d;
+					gGT->pushBuffer[0].distanceToScreen_PREV = CS_CAMERA_DISTANCE_INTRO_MEDIUM;
 				}
 			}
 
-			if (((camPathFlags[0] & CAM_PATH_FLAG_RANDOM_CLEAR_BOX) != 0) && ((MixRNG_Scramble() & 0xf) == 0))
+			if (((camPathFlags[0] & CAM_PATH_FLAG_RANDOM_CLEAR_BOX) != 0) && ((MixRNG_Scramble() & CS_RANDOM_CLEAR_BOX_MASK) == 0))
 			{
 				CTR_Box_DrawClearBox(&R233.introClearBoxRect, &R233.introClearBoxColor, 1, gGT->backBuffer->otMem.uiOT);
 			}
 
-			if (gGT->levelID == 0x29)
+			if (gGT->levelID == NAUGHTY_DOG_CRATE)
 			{
-				gGT->pushBuffer[0].distanceToScreen_PREV = 0x140;
+				gGT->pushBuffer[0].distanceToScreen_PREV = CS_ND_CRATE_CAMERA_DISTANCE;
 			}
 
 			gGT->pushBuffer[0].distanceToScreen_CURR = gGT->pushBuffer[0].distanceToScreen_PREV;
@@ -231,18 +326,18 @@ int CS_Thread_UseOpcode(struct Instance *instance, struct CutsceneObj *cs)
 
 		if ((sdata->gGamepads->gamepad[0].buttonsTapped & BTN_START) != 0)
 		{
-			gGT->clockEffectEnabled &= 0xfffe;
-			if (0x13 < gGT->levelID - 0x2cU)
+			gGT->clockEffectEnabled &= ~CAM_PATH_FLAG_CLOCK_EFFECT;
+			if ((u32)(gGT->levelID - CREDITS_CRASH) >= CS_CREDITS_LEVEL_COUNT)
 			{
-				if (gGT->levelID == 0x29)
+				if (gGT->levelID == NAUGHTY_DOG_CRATE)
 				{
-					if ((u32)gGT->msInThisLEV >> 5 < 0xb5)
+					if ((u32)gGT->msInThisLEV >> CS_FRAME32_SHIFT < CS_ND_CRATE_SKIP_MIN_FRAME32)
 					{
 						goto afterCameraAndSkipChecks;
 					}
 					RaceFlag_SetCanDraw(1);
-					iVar8 = RaceFlag_IsTransitioning();
-					if ((iVar8 == 0) && (iVar8 = RaceFlag_IsFullyOnScreen(), iVar8 == 0))
+					int raceFlagState = RaceFlag_IsTransitioning();
+					if ((raceFlagState == 0) && (raceFlagState = RaceFlag_IsFullyOnScreen(), raceFlagState == 0))
 					{
 						RaceFlag_SetFullyOffScreen();
 					}
@@ -250,13 +345,13 @@ int CS_Thread_UseOpcode(struct Instance *instance, struct CutsceneObj *cs)
 				else
 				{
 					RaceFlag_SetCanDraw(1);
-					iVar8 = RaceFlag_IsTransitioning();
-					if ((iVar8 == 0) && (iVar8 = RaceFlag_IsFullyOnScreen(), iVar8 == 0))
+					int raceFlagState = RaceFlag_IsTransitioning();
+					if ((raceFlagState == 0) && (raceFlagState = RaceFlag_IsFullyOnScreen(), raceFlagState == 0))
 					{
 						RaceFlag_SetFullyOffScreen();
 					}
 					levelToLoad = CREDITS_CRASH;
-					if (gGT->levelID - 0x2aU < 2)
+					if ((u32)(gGT->levelID - OXIDE_ENDING) < CS_OXIDE_ENDING_LEVEL_COUNT)
 					{
 						goto requestSkipLevelLoad;
 					}
@@ -281,45 +376,45 @@ afterCameraAndSkipChecks:
 	if (elapsedTimeRemaining == 0)
 	{
 	updateInstanceAndReturn:
-		cs->animFrame32 = iVar12;
+		cs->animFrame32 = animFrame32;
 		cs->animIndex = (char)animIndex;
-		cs->lodIndex = (s16)iVar8;
+		cs->lodIndex = (s16)lodIndexState;
 		cs->opcodeDuration = (s16)opcodeDuration;
-		iVar10 = (int)opcodeMeta->rotStart;
-		iVar12 = iVar12 >> 5;
-		if (iVar10 != (int)opcodeMeta->rotEnd)
+		int rotY = (int)opcodeMeta->rotStart;
+		int animFrame = animFrame32 >> CS_FRAME32_SHIFT;
+		if (rotY != (int)opcodeMeta->rotEnd)
 		{
-			rotInterpStartFrame = opcodeMeta->arg0.i;
+			int rotInterpStartFrame = opcodeMeta->arg0.i;
 			if (opcodeMeta->arg1.i != rotInterpStartFrame)
 			{
-				rotInterpNumerator = (((((int)opcodeMeta->rotEnd - iVar10) + 0x800U) & 0xfff) - 0x800) * (iVar12 - rotInterpStartFrame);
-				rotInterpFrameRange = opcodeMeta->arg1.i - rotInterpStartFrame;
+				int rotInterpNumerator = (((((int)opcodeMeta->rotEnd - rotY) + (u32)ANG_PI) & (ANG_TWO_PI - 1)) - ANG_PI) * (animFrame - rotInterpStartFrame);
+				int rotInterpFrameRange = opcodeMeta->arg1.i - rotInterpStartFrame;
 				if (rotInterpFrameRange < 0)
 				{
 					rotInterpFrameRange = -rotInterpFrameRange;
 				}
-				iVar10 = iVar10 + rotInterpNumerator / rotInterpFrameRange;
+				rotY = rotY + rotInterpNumerator / rotInterpFrameRange;
 			}
 		}
-		iVar10 = iVar10 + cs->baseRotY;
-		if ((iVar10 != (int)cs->rot.y) && (cs->rot.y = (s16)iVar10, instance != 0))
+		rotY = rotY + cs->baseRotY;
+		if ((rotY != (int)cs->rot.y) && (cs->rot.y = (s16)rotY, instance != 0))
 		{
 			ConvertRotToMatrix(&instance->matrix, &cs->rot);
 		}
-		iVar8 = CS_Instance_SafeCheckAnimFrame(instance, animIndex, iVar8, iVar12);
-		if (iVar12 != iVar8)
+		int checkedAnimFrame = CS_Instance_SafeCheckAnimFrame(instance, animIndex, lodIndexState, animFrame);
+		if (animFrame != checkedAnimFrame)
 		{
-			animIndex &= ~0xff;
-			iVar12 = 0;
+			animIndex &= ~CS_ANIM_INDEX_LOW_BYTE_MASK;
+			animFrame = 0;
 		}
 		if (instance != 0)
 		{
-			instance->animFrame = (s16)iVar12;
+			instance->animFrame = (s16)animFrame;
 			instance->animIndex = (char)animIndex;
 		}
 		if (cs->frameOverrideRoot != 0)
 		{
-			frameData = &cs->frameOverrideRoot->data[iVar12];
+			frameData = &cs->frameOverrideRoot->data[animFrame];
 			CTR_WriteU32LE((u8 *)&instance->matrix + 0x00, CTR_ReadU32LE(&frameData->rotScaleOrMatrix[0]));
 			CTR_WriteU32LE((u8 *)&instance->matrix + 0x04, CTR_ReadU32LE(&frameData->rotScaleOrMatrix[2]));
 			CTR_WriteU32LE((u8 *)&instance->matrix + 0x08, CTR_ReadU32LE(&frameData->rotScaleOrMatrix[4]));
@@ -335,30 +430,31 @@ afterCameraAndSkipChecks:
 processOpcode:
 	switch (opcodeMeta->opcode)
 	{
-	case 0:
-	case 0x2a:
-	case 0x2b:
+	case CS_OPCODE_ANIM_ROT_RANGE:
+	case CS_OPCODE_ANIM_SYNC_MARKER:
+	case CS_OPCODE_ANIM_RANGE:
 		if (instance != 0)
 		{
 			cutsceneFlags = cs->flags;
 			if ((cutsceneFlags & CS_FLAG_XA_SYNC_ANIMATION) != 0)
 			{
-				if (((cutsceneFlags & CS_FLAG_XA_PLAYBACK_STARTED) == 0) && (sdata->XA_State == 3))
+				if (((cutsceneFlags & CS_FLAG_XA_PLAYBACK_STARTED) == 0) && (sdata->XA_State == XA_PLAYING))
 				{
 					cs->flags = cutsceneFlags | CS_FLAG_XA_PLAYBACK_STARTED;
 				}
-				if (sdata->XA_State != 0)
+				if (sdata->XA_State != XA_IDLE)
 				{
 					if ((cs->flags & CS_FLAG_XA_PLAYBACK_STARTED) == 0)
 					{
-						iVar12 = 0;
+						animFrame32 = 0;
 					}
 					else
 					{
-						iVar12 = CS_Instance_SafeCheckAnimFrame(instance, animIndex, iVar8, (sdata->XA_CurrOffset * 0x1e00) / 0xac44);
-						iVar12 = iVar12 << 5;
+						animFrame32 = CS_Instance_SafeCheckAnimFrame(instance, animIndex, lodIndexState,
+						                                             (sdata->XA_CurrOffset * CS_XA_ANIM_SYNC_NUMERATOR) / CS_XA_ANIM_SYNC_DENOMINATOR);
+						animFrame32 = animFrame32 << CS_FRAME32_SHIFT;
 					}
-					if (opcodeMeta->arg1.i << 5 < iVar12)
+					if (opcodeMeta->arg1.i << CS_FRAME32_SHIFT < animFrame32)
 					{
 						break;
 					}
@@ -370,37 +466,39 @@ processOpcode:
 		if (opcodeChanged != 0)
 		{
 			animIndex = (int)opcodeMeta->animIndex;
-			iVar12 = CS_Instance_SafeCheckAnimFrame(instance, animIndex, iVar8, opcodeMeta->arg0.i);
-			iVar12 = iVar12 << 5;
-			iVar10 = MixRNG_Scramble();
+			animFrame32 = CS_Instance_SafeCheckAnimFrame(instance, animIndex, lodIndexState, opcodeMeta->arg0.i);
+			animFrame32 = animFrame32 << CS_FRAME32_SHIFT;
+			int rng = MixRNG_Scramble();
 			opcodeChanged = 0;
 			opcodeDuration =
-			    ((int)((iVar10 >> 2 & 0xfff) * (((int)opcodeMeta->frameEnd - (int)opcodeMeta->frameStart) + 1)) >> 0xc) + (int)opcodeMeta->frameStart;
+			    ((int)(((rng >> CS_RANDOM_DURATION_SHIFT) & CS_RANDOM_DURATION_MASK) * (((int)opcodeMeta->frameEnd - (int)opcodeMeta->frameStart) + 1)) >>
+			     FRACTIONAL_BITS) +
+			    (int)opcodeMeta->frameStart;
 		}
 		frameBoundaryHit = 0;
 		if (opcodeMeta->arg1.i < opcodeMeta->arg0.i)
 		{
-			iVar10 = opcodeMeta->arg1.i * 0x20;
-			iVar12 = iVar12 - elapsedTimeRemaining;
-			if (iVar12 < iVar10)
+			int targetFrameTime = opcodeMeta->arg1.i * CS_FRAME32_UNIT;
+			animFrame32 = animFrame32 - elapsedTimeRemaining;
+			if (animFrame32 < targetFrameTime)
 			{
-				elapsedTimeRemaining = iVar10 - iVar12;
+				elapsedTimeRemaining = targetFrameTime - animFrame32;
 			markAnimationBoundary:
 				frameBoundaryHit = 1;
 			}
 		}
 		else
 		{
-			iVar10 = CS_Instance_SafeCheckAnimFrame(instance, animIndex, iVar8, opcodeMeta->arg1.i);
-			nextFrameTime = (iVar10 + 1) * 0x20;
-			iVar12 = iVar12 + elapsedTimeRemaining;
-			if (nextFrameTime <= iVar12)
+			int endFrame = CS_Instance_SafeCheckAnimFrame(instance, animIndex, lodIndexState, opcodeMeta->arg1.i);
+			nextFrameTime = (endFrame + 1) * CS_FRAME32_UNIT;
+			animFrame32 = animFrame32 + elapsedTimeRemaining;
+			if (nextFrameTime <= animFrame32)
 			{
 				frameBoundaryHit = 1;
 				elapsedTimeRemaining = 0;
 				if (nextFrameTime != 0)
 				{
-					elapsedTimeRemaining = iVar12 + (iVar10 + 1) * -0x20;
+					elapsedTimeRemaining = animFrame32 + (endFrame + 1) * -CS_FRAME32_UNIT;
 					goto markAnimationBoundary;
 				}
 			}
@@ -415,8 +513,8 @@ processOpcode:
 			}
 			else
 			{
-				iVar12 = CS_Instance_SafeCheckAnimFrame(instance, animIndex, iVar8, opcodeMeta->arg0.i);
-				iVar12 = iVar12 << 5;
+				animFrame32 = CS_Instance_SafeCheckAnimFrame(instance, animIndex, lodIndexState, opcodeMeta->arg0.i);
+				animFrame32 = animFrame32 << CS_FRAME32_SHIFT;
 			}
 		}
 		else
@@ -425,12 +523,12 @@ processOpcode:
 		}
 		goto finishOpcodeStep;
 
-	case 1:
+	case CS_OPCODE_GOTO:
 		opcodeChanged = 1;
 		CS_ScriptCmd_OpcodeAt(cs, opcodeMeta->arg1.ptr);
 		goto finishOpcodeStep;
 
-	case 2:
+	case CS_OPCODE_HIDE_INSTANCE_AND_END_THREAD:
 		if (instance != 0)
 		{
 			instance->flags |= HIDE_MODEL;
@@ -438,7 +536,7 @@ processOpcode:
 		CS_RestoreDecodedOpcode(cs, metadataBackup);
 		return 1;
 
-	case 3:
+	case CS_OPCODE_SPAWN_CHILD:
 		if (instance != 0)
 		{
 			// Retail builds this opcode 3 init data at scratchpad 0x1f800108.
@@ -465,9 +563,10 @@ processOpcode:
 		}
 		break;
 
-	case 4:
-		iVar10 = MixRNG_Scramble();
-		if (opcodeMeta->arg0.i < (int)(iVar10 >> 2 & 0xff))
+	case CS_OPCODE_BRANCH_IF_RANDOM_LE:
+	{
+		int rng = MixRNG_Scramble();
+		if (opcodeMeta->arg0.i < (int)((rng >> CS_RANDOM_DURATION_SHIFT) & CS_RANDOM_BYTE_MASK))
 		{
 			CS_ScriptCmd_OpcodeNext(cs);
 		}
@@ -477,49 +576,50 @@ processOpcode:
 		}
 		opcodeChanged = 1;
 		goto finishOpcodeStep;
+	}
 
-	case 5:
-		if (gGT->levelID == 0x28)
+	case CS_OPCODE_PLAY_CONTEXT_FX:
+		if (gGT->levelID == ADVENTURE_GARAGE)
 		{
 			if (instance != 0)
 			{
-				Garage_PlayFX(opcodeMeta->arg1.u, (int)instance->model->id + -0xce);
+				Garage_PlayFX(opcodeMeta->arg1.u, (int)instance->model->id - STATIC_CRASHSELECT);
 			}
 		}
 		else
 		{
-			iVar10 = CS_Instance_BoolPlaySound(cs, instance);
-			if (iVar10 != 0)
+			int canPlaySound = CS_Instance_BoolPlaySound(cs, instance);
+			if (canPlaySound != 0)
 			{
 				OtherFX_Play((u32)(u16)opcodeMetaShorts[6], 1);
 			}
 		}
 		break;
 
-	case 6:
+	case CS_OPCODE_STOP_FX:
 		OtherFX_Stop2((u32)(u16)opcodeMetaShorts[6]);
 		break;
 
-	case 7:
+	case CS_OPCODE_START_MUSIC:
 		CseqMusic_Start((u32)(u16)opcodeMetaShorts[6], 0, 0, 0, opcodeMeta->arg0.i);
 		break;
 
-	case 8:
+	case CS_OPCODE_RESTART_MUSIC:
 		CseqMusic_Restart((u32)(u16)opcodeMetaShorts[6], 1);
 		break;
 
-	case 9:
+	case CS_OPCODE_SET_VISIBLE_LOD:
 		if (instance != 0)
 		{
-			iVar10 = (int)instance->model->numHeaders;
-			if ((iVar10 != 0) && (modelHeader = instance->model->headers, modelHeader != 0))
+			int numHeaders = (int)instance->model->numHeaders;
+			if ((numHeaders != 0) && (modelHeader = instance->model->headers, modelHeader != 0))
 			{
 				lodIndex = opcodeMeta->arg1.i;
-				iVar8 = lodIndex;
-				if (iVar10 <= lodIndex)
+				lodIndexState = lodIndex;
+				if (numHeaders <= lodIndex)
 				{
-					lodIndex = iVar10 + -1;
-					iVar8 = lodIndex;
+					lodIndex = numHeaders + -1;
+					lodIndexState = lodIndex;
 				}
 				while (lodIndex != 0)
 				{
@@ -527,12 +627,12 @@ processOpcode:
 					lodIndex = lodIndex + -1;
 					modelHeader++;
 				}
-				modelHeader->maxDistanceLOD = 20000;
+				modelHeader->maxDistanceLOD = CS_MODEL_LOD_DISTANCE_VISIBLE;
 			}
 		}
 		break;
 
-	case 10:
+	case CS_OPCODE_SET_PATH_MOTION:
 		if (opcodeMeta->arg1.i == -1)
 		{
 			cutsceneFlags = cs->flags | CS_FLAG_PATH_MOTION_DISABLED;
@@ -545,58 +645,62 @@ processOpcode:
 		cs->flags = cutsceneFlags;
 		break;
 
-	case 0xb:
+	case CS_OPCODE_SCALE_TO:
 		cs->desiredScale = opcodeMetaShorts[4];
 		cs->scaleSpeed = opcodeMetaShorts[6];
 		CS_ScriptCmd_OpcodeNext(cs);
 		goto finishOpcodeStep;
 
-	case 0xc:
-		gGT->pushBuffer[0].fadeFromBlack_currentValue = 0x1fff;
-		gGT->pushBuffer[0].fadeFromBlack_desiredResult = 0x1000;
-		gGT->pushBuffer[0].fade_step = 0xfd56;
+	case CS_OPCODE_FADE_FROM_BLACK:
+		gGT->pushBuffer[0].fadeFromBlack_currentValue = CS_FADE_FROM_BLACK_CURRENT;
+		gGT->pushBuffer[0].fadeFromBlack_desiredResult = CS_FADE_FROM_BLACK_TARGET;
+		gGT->pushBuffer[0].fade_step = CS_FADE_FROM_BLACK_STEP;
 		CS_ScriptCmd_OpcodeNext(cs);
 		goto finishOpcodeStep;
 
-	case 0xd:
+	case CS_OPCODE_SET_CUTSCENE_FLAGS:
 		cutsceneFlags = cs->flags | opcodeMetaShorts[6];
 		goto setFlagsAndAdvanceOpcode;
 
-	case 0xe:
+	case CS_OPCODE_CLEAR_CUTSCENE_FLAGS:
 		cs->flags &= ~opcodeMetaShorts[6];
 		CS_ScriptCmd_OpcodeNext(cs);
 		goto finishOpcodeStep;
 
-	case 0xf:
+	case CS_OPCODE_RESELECT_LEVEL_SCRIPT:
+	{
 		gGT->bool_AdvHub_NeedToSwapLEV = 1;
+		int scriptIndex;
 		if ((gGT->gameMode2 & CREDITS) == 0)
 		{
 			cutsceneOpcodes = R233.introCutsceneOpcodes;
-			iVar10 = gGT->levelID + -0x1e;
+			scriptIndex = gGT->levelID - INTRO_RACE_TODAY;
 		}
 		else
 		{
 			cutsceneOpcodes = R233.creditsCutsceneOpcodes;
-			iVar10 = gGT->levelID + -0x2c;
+			scriptIndex = gGT->levelID - CREDITS_CRASH;
 		}
-		CS_ScriptCmd_OpcodeAt(cs, cutsceneOpcodes[iVar10]);
+		CS_ScriptCmd_OpcodeAt(cs, cutsceneOpcodes[scriptIndex]);
 		goto updateInstanceAndReturn;
+	}
 
-	case 0x10:
-		iVar10 = opcodeMeta->arg1.i;
-		gGT->levelID = iVar10;
-		if (iVar10 == 0x1e)
+	case CS_OPCODE_REQUEST_LEVEL:
+	{
+		int requestedLevelID = opcodeMeta->arg1.i;
+		gGT->levelID = requestedLevelID;
+		if (requestedLevelID == INTRO_RACE_TODAY)
 		{
 			RaceFlag_SetCanDraw(0);
 		requestDirectLevelLoad:
 			gGT->gameMode2 &= ~VEH_FREEZE_PODIUM;
-			MainRaceTrack_RequestLoad((int)(s16)iVar10);
+			MainRaceTrack_RequestLoad((int)(s16)requestedLevelID);
 		}
 		else
 		{
-			if (iVar10 < 0x1f)
+			if (requestedLevelID < INTRO_COCO)
 			{
-				if (iVar10 == 0x19)
+				if (requestedLevelID == GEM_STONE_VALLEY)
 				{
 					levelToLoad = GEM_STONE_VALLEY;
 				requestMappedLevelLoad:
@@ -607,48 +711,49 @@ processOpcode:
 			}
 			else
 			{
-				if (iVar10 == 0x27)
+				if (requestedLevelID == MAIN_MENU_LEVEL)
 				{
 					RaceFlag_SetDrawOrder(0);
 					levelToLoad = MAIN_MENU_LEVEL;
 					goto requestMappedLevelLoad;
 				}
-				if (iVar10 == 0x2c)
+				if (requestedLevelID == CREDITS_CRASH)
 				{
 					goto requestDirectLevelLoad;
 				}
 			}
 			D233.boolLoadNextSwap = 1;
-			LOAD_Hub_ReadFile(sdata->ptrBigfileCdPos_2, iVar10, 3 - (int)gGT->activeMempackIndex);
+			LOAD_Hub_ReadFile(sdata->ptrBigfileCdPos_2, requestedLevelID, 3 - (int)gGT->activeMempackIndex);
 		}
 		break;
+	}
 
-	case 0x11:
+	case CS_OPCODE_WAIT_SWAP_QUEUE:
 		if ((D233.boolLoadNextSwap == 0) || (sdata->queueReady == 0) || (sdata->queueLength != 0))
 		{
 			goto updateInstanceAndReturn;
 		}
 		break;
 
-	case 0x12:
+	case CS_OPCODE_PLAY_XA:
 		CDSYS_XAPlay(opcodeMeta->arg0.i, opcodeMeta->arg1.i);
-		if (sdata->XA_State != 0)
+		if (sdata->XA_State != XA_IDLE)
 		{
 			cs->flags = (cs->flags & ~CS_FLAG_XA_PLAYBACK_STARTED) | CS_FLAG_XA_SYNC_ANIMATION;
 		}
 		break;
 
-	case 0x13:
-		if (sdata->XA_State == 0)
+	case CS_OPCODE_WAIT_XA_DONE:
+		if (sdata->XA_State == XA_IDLE)
 		{
 			cutsceneFlags = cs->flags & ~CS_FLAG_XA_SYNC_ANIMATION;
 			goto setFlagsAndAdvanceOpcode;
 		}
 
-	case 0x14:
+	case CS_OPCODE_YIELD:
 		goto updateInstanceAndReturn;
 
-	case 0x15:
+	case CS_OPCODE_LOAD_LEVEL_STARS:
 		numPlayers = gGT->numPlyrCurrGame;
 		gGT->stars.numStars = (s16)((int)gGT->level1->stars.numStars / (int)(u32)numPlayers);
 		gGT->stars.spread = gGT->level1->stars.spread;
@@ -658,47 +763,51 @@ processOpcode:
 		CS_ScriptCmd_OpcodeNext(cs);
 		goto finishOpcodeStep;
 
-	case 0x16:
-		iVar10 = RaceFlag_IsFullyOffScreen();
-		if (iVar10 == 1)
+	case CS_OPCODE_RACEFLAG_TRANSITION1_IF_OFFSCREEN:
+	{
+		int raceFlagState = RaceFlag_IsFullyOffScreen();
+		if (raceFlagState == 1)
 		{
 			RaceFlag_SetCanDraw(1);
 			RaceFlag_BeginTransition(1);
 		}
 		break;
+	}
 
-	case 0x17:
+	case CS_OPCODE_ADVANCE_IF_RACEFLAG_ONSCREEN:
 		conditionMet = RaceFlag_IsFullyOnScreen();
 		goto advanceIfConditionMet;
 
-	case 0x18:
-		iVar10 = RaceFlag_IsFullyOnScreen();
-		if (iVar10 == 1)
+	case CS_OPCODE_RACEFLAG_TRANSITION2_IF_ONSCREEN:
+	{
+		int raceFlagState = RaceFlag_IsFullyOnScreen();
+		if (raceFlagState == 1)
 		{
 			RaceFlag_BeginTransition(2);
 		}
 		break;
+	}
 
-	case 0x19:
+	case CS_OPCODE_SET_PARTICLE_ID:
 		cs->particleID = opcodeMetaShorts[6];
 		CS_ScriptCmd_OpcodeNext(cs);
 		goto finishOpcodeStep;
 
-	case 0x1a:
+	case CS_OPCODE_HIDE_INSTANCE:
 		if (instance != 0)
 		{
 			instance->flags |= HIDE_MODEL;
 		}
 		break;
 
-	case 0x1b:
+	case CS_OPCODE_SHOW_INSTANCE:
 		if (instance != 0)
 		{
 			instance->flags &= ~HIDE_MODEL;
 		}
 		break;
 
-	case 0x1c:
+	case CS_OPCODE_ADD_INSTANCE_DEPTH_BIAS:
 		if (instance != 0)
 		{
 			instance->depthBiasNormal += (char)opcodeMeta->arg1.i;
@@ -706,43 +815,43 @@ processOpcode:
 		}
 		break;
 
-	case 0x1d:
+	case CS_OPCODE_SET_INSTANCE_FLAGS:
 		if (instance != 0)
 		{
 			instance->flags |= opcodeMeta->arg1.u;
 		}
 		break;
 
-	case 0x1e:
+	case CS_OPCODE_CLEAR_INSTANCE_FLAGS:
 		if (instance != 0)
 		{
 			instance->flags &= ~opcodeMeta->arg1.u;
 		}
 		break;
 
-	case 0x1f:
+	case CS_OPCODE_SET_UNK4_1333:
 		cs->unk4 = 0x1333;
 		break;
 
-	case 0x20:
+	case CS_OPCODE_END_BOSS_CUTSCENE:
 		D233.isCutsceneOver = 1;
 		CS_DestroyPodium_StartDriving();
 		D233.bossCutsceneIndex = -1;
-		gGT->overlayTransition = 3;
+		gGT->overlayTransition = CS_BOSS_END_OVERLAY_TRANSITION_FRAMES;
 		gGT->gameMode2 &= ~VEH_FREEZE_PODIUM;
 		CS_ScriptCmd_OpcodeNext(cs);
 		goto finishOpcodeStep;
 
-	case 0x21:
+	case CS_OPCODE_SET_BOSS_CUTSCENE_INDEX:
 		D233.bossCutsceneIndex = opcodeMeta->arg1.i;
-		if ((D233.bossCutsceneIndex == 0) && (0x11 < gGT->currAdvProfile.numRelics))
+		if ((D233.bossCutsceneIndex == 0) && (gGT->currAdvProfile.numRelics >= ADV_OXIDE_FINAL_RELIC_COUNT))
 		{
 			D233.bossCutsceneIndex = 9;
 		}
 		D233.cutsceneState = CS_WAIT_INPUT;
 		break;
 
-	case 0x22:
+	case CS_OPCODE_SET_CAMERA_DISTANCE:
 		distanceToScreen = opcodeMeta->arg1.i;
 		gGT->pushBuffer[0].distanceToScreen_PREV = distanceToScreen;
 		gGT->pushBuffer[0].distanceToScreen_CURR = distanceToScreen;
@@ -752,11 +861,11 @@ processOpcode:
 		CS_ScriptCmd_OpcodeNext(cs);
 		goto finishOpcodeStep;
 
-	case 0x23:
+	case CS_OPCODE_ADVANCE_IF_CREDITS_TEXT_VALID:
 		conditionMet = CS_Credits_IsTextValid();
 		goto advanceIfConditionMet;
 
-	case 0x24:
+	case CS_OPCODE_CREDITS_DANCER:
 	{
 		// Retail builds this credits dancer init data at scratchpad 0x1f800108.
 		struct CsThreadInitData *initData = CTR_SCRATCHPAD_PTR(struct CsThreadInitData, 0x108);
@@ -783,7 +892,7 @@ processOpcode:
 		}
 		if (dancerModelID == STATIC_CRASHDANCE)
 		{
-			initData->rot.y += 0x800;
+			initData->rot.y += ANG_PI;
 		}
 
 		initData->rot.x += R233.creditsDancerRotOffset.x;
@@ -795,17 +904,17 @@ processOpcode:
 	}
 	break;
 
-	case 0x25:
+	case CS_OPCODE_ADVANCE_IF_CREDITS_GHOSTS_READY:
 		conditionMet = CS_Credits_NewCreditGhosts();
 	advanceIfConditionMet:
-		conditionMet &= 0xffff;
+		conditionMet &= CS_CONDITION_RESULT_MASK;
 		if (conditionMet == 0)
 		{
 			goto updateInstanceAndReturn;
 		}
 		break;
 
-	case 0x26:
+	case CS_OPCODE_BRANCH_ADV_CHAR_SELECT:
 		if (opcodeMeta->frameEnd == 0)
 		{
 			if ((opcodeMeta->arg0.i != (int)gGarage.garageCharacterIDs[sdata->advCharSelectIndex_curr]) || (gGarage.boolSelected == 0))
@@ -826,47 +935,47 @@ processOpcode:
 		}
 		break;
 
-	case 0x27:
-		if ((u32)gGT->msInThisLEV >> 5 < opcodeMeta->arg1.u)
+	case CS_OPCODE_ADVANCE_IF_LEVEL_TIME_REACHED:
+		if ((u32)gGT->msInThisLEV >> CS_FRAME32_SHIFT < opcodeMeta->arg1.u)
 		{
 			goto updateInstanceAndReturn;
 		}
 		break;
 
-	case 0x28:
-		iVar12 = CS_Instance_SafeCheckAnimFrame(instance, animIndex, iVar8, iVar12 >> 5);
-		iVar12 = iVar12 << 5;
+	case CS_OPCODE_SYNC_ANIM_FRAME:
+		animFrame32 = CS_Instance_SafeCheckAnimFrame(instance, animIndex, lodIndexState, animFrame32 >> CS_FRAME32_SHIFT);
+		animFrame32 = animFrame32 << CS_FRAME32_SHIFT;
 		goto updateInstanceAndReturn;
 
-	case 0x29:
+	case CS_OPCODE_END_CREDITS:
 		CS_Credits_End();
 		CS_RestoreDecodedOpcode(cs, metadataBackup);
 		return 1;
 
-	case 0x2c:
+	case CS_OPCODE_SET_GAME_MODE_FLAGS:
 		gameModeTarget = opcodeMeta->animIndex;
-		if (gameModeTarget == 1)
+		if (gameModeTarget == CS_GAME_MODE_TARGET_GAME_MODE2)
 		{
 			gGT->gameMode2 |= opcodeMeta->arg1.u;
 		}
 		else
 		{
-			if (gameModeTarget < 2)
+			if (gameModeTarget < CS_GAME_MODE_TARGET_RENDER_FLAGS_SET)
 			{
-				if (gameModeTarget == 0)
+				if (gameModeTarget == CS_GAME_MODE_TARGET_GAME_MODE1)
 				{
 					gGT->gameMode1 |= opcodeMeta->arg1.u;
 				}
 			}
 			else
 			{
-				if (gameModeTarget == 2)
+				if (gameModeTarget == CS_GAME_MODE_TARGET_RENDER_FLAGS_SET)
 				{
 					gGT->renderFlags |= opcodeMeta->arg1.u;
 				}
 				else
 				{
-					if (gameModeTarget == 3)
+					if (gameModeTarget == CS_GAME_MODE_TARGET_RENDER_FLAGS_CLEAR)
 					{
 						gGT->renderFlags &= ~opcodeMeta->arg1.u;
 					}
@@ -875,7 +984,7 @@ processOpcode:
 		}
 		break;
 
-	case 0x2d:
+	case CS_OPCODE_SET_SUBTITLE:
 		cs->Subtitles.textPos.x = opcodeMeta->animIndex;
 		cs->Subtitles.textPos.y = opcodeMeta->frameStart;
 		cs->Subtitles.lngIndex = opcodeMeta->frameEnd;
@@ -884,25 +993,29 @@ processOpcode:
 		CS_ScriptCmd_OpcodeNext(cs);
 		goto finishOpcodeStep;
 
-	case 0x2e:
+	case CS_OPCODE_UI_FADE_TO_BLACK:
 		gGT->pushBuffer_UI.fadeFromBlack_desiredResult = 0;
-		gGT->pushBuffer_UI.fade_step = 0xfd56;
+		gGT->pushBuffer_UI.fade_step = CS_FADE_FROM_BLACK_STEP;
 		CS_ScriptCmd_OpcodeNext(cs);
 		goto finishOpcodeStep;
 
-	case 0x2f:
+	case CS_OPCODE_WAIT_UI_FADE:
 		if (0 < gGT->pushBuffer_UI.fadeFromBlack_currentValue)
 		{
 			goto updateInstanceAndReturn;
 		}
 		break;
 
-	case 0x30:
+	case CS_OPCODE_SET_AUDIO_VOLUME:
+	{
+		const u8 *opcodeBytes = (const u8 *)opcodeMeta;
+
 		D233.CutsceneManipulatesAudio = 1;
-		howl_VolumeSet(0, (u32) * ((u8 *)opcodeMeta + 2));
-		howl_VolumeSet(1, (u32) * ((u8 *)opcodeMeta + 4));
-		howl_VolumeSet(2, (u32) * ((u8 *)opcodeMeta + 6));
+		howl_VolumeSet(HOWL_VOLUME_TYPE_FX, opcodeBytes[CS_AUDIO_VOLUME_FX_BYTE_OFFSET]);
+		howl_VolumeSet(HOWL_VOLUME_TYPE_MUSIC, opcodeBytes[CS_AUDIO_VOLUME_MUSIC_BYTE_OFFSET]);
+		howl_VolumeSet(HOWL_VOLUME_TYPE_VOICE, opcodeBytes[CS_AUDIO_VOLUME_VOICE_BYTE_OFFSET]);
 		break;
+	}
 
 	default:
 		CS_RestoreDecodedOpcode(cs, metadataBackup);
@@ -1022,9 +1135,9 @@ void CS_Thread_MoveOnPath(struct Thread *t)
 		}
 
 		pathFrame32 = cs->pathProgress32;
-		segmentIndex = (s16)pathFrame32 >> 5;
+		segmentIndex = (s16)pathFrame32 >> CS_FRAME32_SHIFT;
 		cs->pathProgress32 = (u16)(pathFrame32 + (u16)gGT->elapsedTimeMS);
-		segmentFrac32 = pathFrame32 & 0x1f;
+		segmentFrac32 = pathFrame32 & CS_FRAME32_MASK;
 
 		if (segmentIndex >= spawnEntry->numCoords - 1)
 		{
@@ -1033,7 +1146,7 @@ void CS_Thread_MoveOnPath(struct Thread *t)
 			if (modelID == STATIC_OXIDESPEAKER)
 			{
 				segmentIndex = spawnEntry->numCoords - 2;
-				cs->pathProgress32 = segmentIndex << 5;
+				cs->pathProgress32 = segmentIndex << CS_FRAME32_SHIFT;
 			}
 			else
 			{
@@ -1044,9 +1157,9 @@ void CS_Thread_MoveOnPath(struct Thread *t)
 		currPoint = &pathPoints[segmentIndex];
 		nextPoint = &currPoint[1];
 
-		inst->matrix.t[0] = currPoint->x + ((segmentFrac32 * (nextPoint->x - currPoint->x)) >> 5);
-		inst->matrix.t[1] = currPoint->y + ((segmentFrac32 * (nextPoint->y - currPoint->y)) >> 5);
-		inst->matrix.t[2] = currPoint->z + ((segmentFrac32 * (nextPoint->z - currPoint->z)) >> 5);
+		inst->matrix.t[0] = currPoint->x + ((segmentFrac32 * (nextPoint->x - currPoint->x)) >> CS_FRAME32_SHIFT);
+		inst->matrix.t[1] = currPoint->y + ((segmentFrac32 * (nextPoint->y - currPoint->y)) >> CS_FRAME32_SHIFT);
+		inst->matrix.t[2] = currPoint->z + ((segmentFrac32 * (nextPoint->z - currPoint->z)) >> CS_FRAME32_SHIFT);
 
 		if (segmentIndex >= spawnEntry->numCoords - 1)
 		{
@@ -1087,7 +1200,7 @@ void CS_Thread_MoveOnPath(struct Thread *t)
 
 		pathFrame32 = cs->pathProgress32;
 		cs->pathProgress32 = (u16)(pathFrame32 + (u16)gGT->elapsedTimeMS);
-		segmentIndex = (s16)pathFrame32 >> 5;
+		segmentIndex = (s16)pathFrame32 >> CS_FRAME32_SHIFT;
 
 		if (segmentIndex >= spawnEntry->numCoords - 1)
 		{
@@ -1130,9 +1243,9 @@ void CS_Thread_MoveOnPath(struct Thread *t)
 				prog = cs->animFrame32;
 			}
 
-			segmentFrac32 = prog & 0x1f;
+			segmentFrac32 = prog & CS_FRAME32_MASK;
 			int numCoords = spawnEntry->numCoords;
-			segmentIndex = prog >> 5;
+			segmentIndex = prog >> CS_FRAME32_SHIFT;
 
 			if (segmentIndex < numCoords - 1)
 			{
@@ -1153,9 +1266,9 @@ void CS_Thread_MoveOnPath(struct Thread *t)
 				nextPoint = currPoint;
 			}
 
-			inst->matrix.t[0] = currPoint->x + ((segmentFrac32 * (nextPoint->x - currPoint->x)) >> 5);
-			inst->matrix.t[1] = currPoint->y + ((segmentFrac32 * (nextPoint->y - currPoint->y)) >> 5);
-			inst->matrix.t[2] = currPoint->z + ((segmentFrac32 * (nextPoint->z - currPoint->z)) >> 5);
+			inst->matrix.t[0] = currPoint->x + ((segmentFrac32 * (nextPoint->x - currPoint->x)) >> CS_FRAME32_SHIFT);
+			inst->matrix.t[1] = currPoint->y + ((segmentFrac32 * (nextPoint->y - currPoint->y)) >> CS_FRAME32_SHIFT);
+			inst->matrix.t[2] = currPoint->z + ((segmentFrac32 * (nextPoint->z - currPoint->z)) >> CS_FRAME32_SHIFT);
 		}
 
 		return;
@@ -1280,46 +1393,46 @@ void CS_Thread_InterpolateFramesMS(struct Thread *t)
 	gte_SetRotMatrix(&gGT->pushBuffer[0].matrix_ViewProj);
 	gte_SetTransMatrix(&gGT->pushBuffer[0].matrix_ViewProj);
 
-	MTC2((u32)(u16)curr.x | ((u32)(u16)curr.y << 16), 0);
-	MTC2((u32)(u16)curr.z, 1);
-	MTC2((u32)(u16)next.x | ((u32)(u16)next.y << 16), 2);
-	MTC2((u32)(u16)next.z, 3);
+	MTC2(CTR_PackS16Pair(curr.x, curr.y), 0);
+	MTC2(CTR_PackS16Pair(curr.z, 0), 1);
+	MTC2(CTR_PackS16Pair(next.x, next.y), 2);
+	MTC2(CTR_PackS16Pair(next.z, 0), 3);
 	gte_rtpt();
 
 	packet->xy0 = MFC2(12);
 	packet->xy1 = MFC2(13);
 
 	depth = MFC2(17);
-	if ((u32)(depth - 1) < 0x11ff)
+	if ((u32)(depth - CS_INTERPOLATE_LINE_DEPTH_MIN) < CS_INTERPOLATE_LINE_DEPTH_RANGE)
 	{
-		u32 color = 0x3f;
+		u32 color = CS_INTERPOLATE_LINE_MAX_COLOR;
 		int otIndex;
 		u32 *ot;
 
-		packet->drawMode = 0xe1000a20;
+		packet->drawMode = CS_INTERPOLATE_LINE_DRAW_MODE;
 		packet->pad = 0;
 
-		if (depth > 0xa00)
+		if (depth > CS_INTERPOLATE_LINE_FADE_START_DEPTH)
 		{
-			int fade = (0x1200 - depth) * 0x3f;
+			int fade = (CS_INTERPOLATE_LINE_FADE_END_DEPTH - depth) * CS_INTERPOLATE_LINE_MAX_COLOR;
 
-			color = fade >> 11;
+			color = fade >> CS_INTERPOLATE_LINE_FADE_SHIFT;
 			if (fade < 0)
 			{
-				color = (fade + 0x7ff) >> 11;
+				color = (fade + ((1 << CS_INTERPOLATE_LINE_FADE_SHIFT) - 1)) >> CS_INTERPOLATE_LINE_FADE_SHIFT;
 			}
 		}
 
-		packet->colorAndCode = color | (color << 8) | (color << 16) | 0x42000000;
+		packet->colorAndCode = color | (color << 8) | (color << 16) | CS_INTERPOLATE_LINE_COLOR_CODE;
 
-		otIndex = depth >> 6;
-		if (otIndex > 0x3ff)
+		otIndex = depth >> CS_INTERPOLATE_LINE_OT_SHIFT;
+		if (otIndex > CS_INTERPOLATE_LINE_MAX_OT_INDEX)
 		{
-			otIndex = 0x3ff;
+			otIndex = CS_INTERPOLATE_LINE_MAX_OT_INDEX;
 		}
 
 		ot = (u32 *)&gGT->pushBuffer[0].ptrOT[otIndex];
-		packet->tag = CtrGpu_PackOTTag(*ot, 0x05000000);
+		packet->tag = CtrGpu_PackOTTag(*ot, CS_INTERPOLATE_LINE_OT_TAG);
 		*ot = CtrGpu_PrimToOTLink24(packet);
 		packet++;
 	}
@@ -1342,7 +1455,7 @@ void CS_Thread_LInB(struct Instance *inst)
 		goto check_polar;
 	}
 
-	t = PROC_BirthWithObject(SIZE_RELATIVE_POOL_BUCKET(0x60, NONE, MEDIUM, STATIC), CS_Thread_ThTick, R233.s_introguy, 0);
+	t = PROC_BirthWithObject(SIZE_RELATIVE_POOL_BUCKET(sizeof(struct CutsceneObj), NONE, MEDIUM, STATIC), CS_Thread_ThTick, R233.s_introguy, 0);
 
 	inst->thread = t;
 
@@ -1363,7 +1476,7 @@ void CS_Thread_LInB(struct Instance *inst)
 
 	if (modelID < NDI_BOX_BOX_01)
 	{
-		if ((u16)(modelID - STATIC_CRASHINTRO) < 0x10)
+		if ((u16)(modelID - STATIC_CRASHINTRO) < CS_INTRO_MODEL_SCRIPT_COUNT)
 		{
 			scriptPtr = R233.introModelScripts[modelID - STATIC_CRASHINTRO];
 		}
@@ -1396,16 +1509,17 @@ void CS_Thread_LInB(struct Instance *inst)
 		cs->flags = 0;
 		cs->scaleSpeed = 0;
 		cs->frameOverrideRoot = 0;
-		cs->desiredScale = 0x1000;
-		cs->particleID = 0xff;
+		cs->desiredScale = CS_DEFAULT_SCALE;
+		cs->particleID = CS_DEFAULT_PARTICLE_ID;
 
-		cs->opcodeDuration = frameStart + (s16)(((rng >> 2 & 0xfff) * ((frameEnd - frameStart) + 1)) >> 0xc);
+		cs->opcodeDuration =
+		    frameStart + (s16)((((rng >> CS_RANDOM_DURATION_SHIFT) & CS_RANDOM_DURATION_MASK) * ((frameEnd - frameStart) + 1)) >> FRACTIONAL_BITS);
 
 		struct GameTracker *gGT = sdata->gGT;
 
 		cs->unk4 = 0;
 		cs->unk6 = 0;
-		cs->unk8 = 0x2e808080;
+		cs->unk8 = CS_DEFAULT_COLOR_WORD;
 		cs->unk_C = 0;
 		cs->unk_E = 0;
 
@@ -1413,7 +1527,7 @@ void CS_Thread_LInB(struct Instance *inst)
 	}
 
 check_polar:
-	if (sdata->gGT->levelID == 0x21)
+	if (sdata->gGT->levelID == INTRO_POLAR)
 	{
 		inst->vertSplit = 0;
 		inst->flags |= REFLECTIVE;
@@ -1435,7 +1549,7 @@ void CS_Thread_ThTick(struct Thread *t)
 	{
 		t->flags |= THREAD_FLAG_DEAD;
 
-		if ((sdata->gGT->gameMode2 & 0x80) != 0)
+		if ((sdata->gGT->gameMode2 & CREDITS) != 0)
 		{
 			return;
 		}
@@ -1480,7 +1594,7 @@ void CS_Thread_ThTick(struct Thread *t)
 			goto thTick_subtitles;
 		}
 
-		// ASM: 0x800ae6b4 - flag 0x8 writes bone Y to overlay-233 mutable state.
+		// ASM: 0x800ae6b4 - CS_FLAG_WRITE_VERT_SPLIT_LINE writes bone Y to overlay-233 mutable state.
 		if ((cs->flags & CS_FLAG_WRITE_VERT_SPLIT_LINE) != 0)
 		{
 			CS_Instance_GetFrameData(inst, inst->animIndex, inst->animFrame, &bonePos, 0, 0);
@@ -1494,14 +1608,14 @@ void CS_Thread_ThTick(struct Thread *t)
 			}
 		}
 
-		// ASM: 0x800ae6fc - flag 0x2: random alphaScale for fade effect
+		// ASM: 0x800ae6fc - CS_FLAG_RANDOM_ALPHA_SCALE jitters alphaScale for fade effect.
 		if ((cs->flags & CS_FLAG_RANDOM_ALPHA_SCALE) != 0)
 		{
 			inst->alphaScale = 0;
 
 			if ((sdata->gGT->timer & 0x1) != 0)
 			{
-				inst->alphaScale = (MixRNG_Scramble() & 0x7ff) + 1024;
+				inst->alphaScale = (MixRNG_Scramble() & CS_RANDOM_ALPHA_MASK) + CS_RANDOM_ALPHA_BASE;
 			}
 		}
 	}
@@ -1511,18 +1625,18 @@ thTick_subtitles:
 	if (cs->Subtitles.lngIndex > 0)
 	{
 		struct GameTracker *gGT = sdata->gGT;
-		int textWidth;
+		int textHeight;
 		RECT textRect;
 
-		textWidth = DecalFont_DrawMultiLine(sdata->lngStrings[cs->Subtitles.lngIndex], cs->Subtitles.textPos.x, cs->Subtitles.textPos.y, 460,
-		                                    cs->Subtitles.font, cs->Subtitles.colors);
+		textHeight = DecalFont_DrawMultiLine(sdata->lngStrings[cs->Subtitles.lngIndex], cs->Subtitles.textPos.x, cs->Subtitles.textPos.y,
+		                                     CS_SUBTITLE_TEXT_MAX_WIDTH, cs->Subtitles.font, cs->Subtitles.colors);
 
-		textRect.x = (s16)((u16)cs->Subtitles.textPos.x - 236);
-		textRect.y = (s16)((u16)cs->Subtitles.textPos.y - 4);
-		textRect.w = 472;
-		textRect.h = (s16)textWidth + 8;
+		textRect.x = (s16)((u16)cs->Subtitles.textPos.x - CS_SUBTITLE_BOX_HALF_WIDTH);
+		textRect.y = (s16)((u16)cs->Subtitles.textPos.y - CS_SUBTITLE_BOX_Y_OFFSET);
+		textRect.w = CS_SUBTITLE_BOX_WIDTH;
+		textRect.h = (s16)textHeight + CS_SUBTITLE_BOX_HEIGHT_PADDING;
 
-		RECTMENU_DrawInnerRect(&textRect, 4, gGT->backBuffer->otMem.uiOT);
+		RECTMENU_DrawInnerRect(&textRect, CS_SUBTITLE_BOX_DRAW_STYLE, gGT->backBuffer->otMem.uiOT);
 	}
 
 	// ASM: 0x800ae7dc - check isCutsceneOver, re-apply death flag
@@ -1547,7 +1661,7 @@ struct Thread *CS_Thread_Init(s16 modelID, const char *name, struct CsThreadInit
 	{
 		inst = NULL;
 
-		t = PROC_BirthWithObject(SIZE_RELATIVE_POOL_BUCKET(0x60, NONE, MEDIUM, CAMERA), CS_Thread_ThTick, name, parent);
+		t = PROC_BirthWithObject(SIZE_RELATIVE_POOL_BUCKET(sizeof(struct CutsceneObj), NONE, MEDIUM, CAMERA), CS_Thread_ThTick, name, parent);
 
 		if (t == NULL)
 		{
@@ -1558,17 +1672,17 @@ struct Thread *CS_Thread_Init(s16 modelID, const char *name, struct CsThreadInit
 	{
 		bucket = OTHER;
 
-		if ((u32)(modelID - NDI_KART6) < 2)
+		if ((u32)(modelID - NDI_KART6) < CS_MASK_KART_MODEL_COUNT)
 		{
 			bucket = AKUAKU;
 		}
 
-		if ((u32)(modelID - NDI_KART0) < 4)
+		if ((u32)(modelID - NDI_KART0) < CS_KART_FRAME_OVERRIDE_COUNT)
 		{
 			bucket = GHOST;
 		}
 
-		inst = INSTANCE_BirthWithThread(modelID, name, MEDIUM, bucket, CS_Thread_ThTick, 0x60, parent);
+		inst = INSTANCE_BirthWithThread(modelID, name, MEDIUM, bucket, CS_Thread_ThTick, sizeof(struct CutsceneObj), parent);
 
 		if (inst == NULL)
 		{
@@ -1592,7 +1706,7 @@ struct Thread *CS_Thread_Init(s16 modelID, const char *name, struct CsThreadInit
 
 		if (level == NAUGHTY_DOG_CRATE)
 		{
-			scriptPtr = (char *)&R233.creditsOpcodeData[0x18];
+			scriptPtr = (char *)&R233.creditsOpcodeData[CS_CREDITS_ND_CRATE_SCRIPT_OFFSET];
 		}
 		else if (level == OXIDE_ENDING)
 		{
@@ -1600,7 +1714,7 @@ struct Thread *CS_Thread_Init(s16 modelID, const char *name, struct CsThreadInit
 		}
 		else if (level == OXIDE_TRUE_ENDING)
 		{
-			scriptPtr = (char *)&R233.introEndingOpcodeData[0x30];
+			scriptPtr = (char *)&R233.introEndingOpcodeData[CS_TRUE_ENDING_SCRIPT_OFFSET];
 		}
 		else if ((gGT->gameMode2 & CREDITS) == 0)
 		{
@@ -1615,7 +1729,7 @@ struct Thread *CS_Thread_Init(s16 modelID, const char *name, struct CsThreadInit
 	{
 		if (modelID >= NDI_BOX_BOX_01)
 		{
-			if ((u32)(modelID - NDI_BOX_BOX_01) < 0x2b)
+			if ((u32)(modelID - NDI_BOX_BOX_01) < CS_BOX_MODEL_SCRIPT_COUNT)
 			{
 				scriptPtr = R233.boxModelScripts[modelID - NDI_BOX_BOX_01];
 			}
@@ -1626,7 +1740,7 @@ struct Thread *CS_Thread_Init(s16 modelID, const char *name, struct CsThreadInit
 
 			CS_ScriptCmd_OpcodeAt(cs, scriptPtr);
 
-			if ((u32)(modelID - NDI_KART0) < 4)
+			if ((u32)(modelID - NDI_KART0) < CS_KART_FRAME_OVERRIDE_COUNT)
 			{
 				cs->frameOverrideRoot = &D233.cs_initMatrixTable[modelID - NDI_KART0];
 			}
@@ -1634,7 +1748,7 @@ struct Thread *CS_Thread_Init(s16 modelID, const char *name, struct CsThreadInit
 			goto after_opcode;
 		}
 
-		if ((u32)(modelID - STATIC_PINHEAD) < 5)
+		if ((u32)(modelID - STATIC_PINHEAD) < CS_PINHEAD_DEFAULT_SCRIPT_COUNT)
 		{
 			scriptPtr = (char *)R233.script_default;
 		}
@@ -1642,7 +1756,7 @@ struct Thread *CS_Thread_Init(s16 modelID, const char *name, struct CsThreadInit
 		{
 			scriptPtr = (char *)R233.script_dingofire;
 		}
-		else if ((u32)(modelID - STATIC_TAWNA1) < 4)
+		else if ((u32)(modelID - STATIC_TAWNA1) < CS_TAWNA_MODEL_SCRIPT_COUNT)
 		{
 			if (gGT->gameMode2 & CREDITS)
 			{
@@ -1653,7 +1767,7 @@ struct Thread *CS_Thread_Init(s16 modelID, const char *name, struct CsThreadInit
 				scriptPtr = (char *)R233.script_tawnaNormal;
 			}
 		}
-		else if ((u32)(modelID - STATIC_CRASHDANCE) < 0x10)
+		else if ((u32)(modelID - STATIC_CRASHDANCE) < CS_DANCE_MODEL_SCRIPT_COUNT)
 		{
 			char *const *base;
 			int off = (modelID - STATIC_CRASHDANCE);
@@ -1682,30 +1796,31 @@ after_opcode:
 	cs->animFrame32 = cs->metadata[2];
 
 	meta = cs->metadataShorts;
-	cs->opcodeDuration = meta[2] + (s16)(((MixRNG_Scramble() >> 2 & 0xfff) * ((meta[3] - meta[2]) + 1)) >> 0xc);
+	cs->opcodeDuration =
+	    meta[2] + (s16)((((MixRNG_Scramble() >> CS_RANDOM_DURATION_SHIFT) & CS_RANDOM_DURATION_MASK) * ((meta[3] - meta[2]) + 1)) >> FRACTIONAL_BITS);
 
 	if (inst != NULL)
 	{
+		s32 transformedCharacterPos[3];
+
 		MTC2(CTR_PackS16Pair(initData->characterPos.x, initData->characterPos.y), 0);
 		MTC2(CTR_PackS16Pair(initData->characterPos.z, initData->characterPos.w), 1);
 		gte_llv0();
 
-		int rx = MFC2(25);
-		int ry = MFC2(26);
-		int rz = MFC2(27);
+		CTR_GteStoreMAC(transformedCharacterPos);
 
-		inst->matrix.t[0] = rx + initData->podiumPos.x;
-		inst->matrix.t[1] = ry + initData->podiumPos.y;
-		inst->matrix.t[2] = rz + initData->podiumPos.z;
+		inst->matrix.t[0] = transformedCharacterPos[0] + initData->podiumPos.x;
+		inst->matrix.t[1] = transformedCharacterPos[1] + initData->podiumPos.y;
+		inst->matrix.t[2] = transformedCharacterPos[2] + initData->podiumPos.z;
 
 		if (gGT->levelID != NAUGHTY_DOG_CRATE)
 		{
-			inst->scale.x = 0x2800;
-			inst->scale.y = 0x2800;
-			inst->scale.z = 0x2800;
+			inst->scale.x = CS_PODIUM_CHARACTER_SCALE;
+			inst->scale.y = CS_PODIUM_CHARACTER_SCALE;
+			inst->scale.z = CS_PODIUM_CHARACTER_SCALE;
 		}
 
-		if ((u32)(gGT->levelID - GEM_STONE_VALLEY) < 5)
+		if ((u32)(gGT->levelID - GEM_STONE_VALLEY) < CS_ADV_HUB_LEVEL_COUNT)
 		{
 			inst->depthBiasNormal -= 4;
 			inst->depthBiasSecondary -= 4;
@@ -1717,22 +1832,22 @@ after_opcode:
 
 		ConvertRotToMatrix(&inst->matrix, &initData->derivedRot.vec);
 
-		cs->baseRotY = initData->derivedRot.y & 0xfff;
-		cs->rot.x = initData->derivedRot.x & 0xfff;
-		cs->rot.y = initData->derivedRot.y & 0xfff;
-		cs->rot.z = initData->derivedRot.z & 0xfff;
+		cs->baseRotY = ANG_MODULO_TWO_PI(initData->derivedRot.y);
+		cs->rot.x = ANG_MODULO_TWO_PI(initData->derivedRot.x);
+		cs->rot.y = ANG_MODULO_TWO_PI(initData->derivedRot.y);
+		cs->rot.z = ANG_MODULO_TWO_PI(initData->derivedRot.z);
 	}
 
-	cs->particleID = 0xff;
+	cs->particleID = CS_DEFAULT_PARTICLE_ID;
 	cs->pathProgress32 = 0;
 	cs->lodIndex = 0;
 	cs->flags = 0;
 	cs->scaleSpeed = 0;
-	cs->desiredScale = 0x2800;
+	cs->desiredScale = CS_PODIUM_CHARACTER_SCALE;
 
 	cs->unk4 = 0;
 	cs->unk6 = 0;
-	cs->unk8 = 0x2e808080;
+	cs->unk8 = CS_DEFAULT_COLOR_WORD;
 	cs->unk_C = 0;
 	cs->unk_E = 0;
 

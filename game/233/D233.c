@@ -8,6 +8,8 @@ CTR_STATIC_ASSERT(sizeof(void *) == 4);
 
 struct OverlayDATA_233 D233;
 
+#define OVR233_GARAGE_CLASS_STRING_IDS {LNG_BEGINNER, LNG_INTERMEDIATE, LNG_ADVANCED, 0}
+
 #define OVR233_GARAGE_INITIALIZER                          \
 	{                                                      \
 	    .menuGarage =                                      \
@@ -27,7 +29,7 @@ struct OverlayDATA_233 D233;
 	    .fovMin = 0x12c,                                   \
 	    .fovMax = 0x190,                                   \
 	    .garageCharacterIDs = {0, 1, 2, 3, 4, 5, 6, 7},    \
-	    .classStringIDs = {0x248, 0x249, 0x24a, 0},        \
+	    .classStringIDs = OVR233_GARAGE_CLASS_STRING_IDS,  \
 	    .statBarTargetLengths =                            \
 	        {                                              \
 	            0x37,                                      \
@@ -96,7 +98,7 @@ static void OVR233_ResetD233(void)
 	D233.FXVolumeBackup = R233.FXVolumeBackup;
 	D233.MusicVolumeBackup = R233.MusicVolumeBackup;
 	D233.VoiceVolumeBackup = R233.VoiceVolumeBackup;
-	D233.volumeunknown = R233.volumeunknown;
+	D233.audioVolumeBackupPad = R233.audioVolumeBackupPad;
 	D233.podiumPrizeDropReady = R233.podiumPrizeDropReady;
 	D233.cutsceneState = R233.cutsceneState;
 	D233.ptrModelBossHead = R233.ptrModelBossHead;
@@ -191,3 +193,4 @@ static void OVR233_ResetCreditsBSS(void)
 
 #undef OVR233_CREDITS_BSS_INITIALIZER
 #undef OVR233_GARAGE_INITIALIZER
+#undef OVR233_GARAGE_CLASS_STRING_IDS

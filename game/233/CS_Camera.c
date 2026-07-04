@@ -1,12 +1,25 @@
 #include <common.h>
 
+enum CutsceneCameraConstants
+{
+	CS_CAMERA_FADE_FULL = FP_ONE,
+	CS_CAMERA_FADE_STEP = 0x400,
+	CS_BOSS_MODEL_SCALE = FP_ONE,
+	CS_BOSS_CAMERA_ROT_X_OFFSET = ANG_PI,
+	CS_PODIUM_PATH_FRAME_FRACTION_BITS = 5,
+	CS_PODIUM_PATH_FRAME_UNIT = 1 << CS_PODIUM_PATH_FRAME_FRACTION_BITS,
+	CS_PODIUM_PRIZE_DROP_LEAD_TIME = 0x12c0,
+	CS_PODIUM_CONTINUE_TEXT_X = 0x100,
+	CS_PODIUM_CONTINUE_TEXT_Y = 0xbe,
+};
+
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800aed48-0x800aedf8
 u8 CS_Camera_BoolGotoBoss(void)
 {
 	struct GameTracker *gGT = sdata->gGT;
 
 	// If just got 18th relic
-	if ((gGT->podiumRewardID == STATIC_RELIC) && (gGT->currAdvProfile.numRelics >= 18))
+	if ((gGT->podiumRewardID == STATIC_RELIC) && (gGT->currAdvProfile.numRelics >= ADV_OXIDE_FINAL_RELIC_COUNT))
 	{
 		// If Oxide was not beaten twice yet
 		if (CHECK_ADV_BIT(sdata->advProgress.rewards, ADV_REWARD_BEAT_OXIDE_SECOND) == 0)
@@ -69,7 +82,7 @@ void CS_Camera_ThTick_Boss(struct Thread *t)
 	case CS_CAMERA_PAN:
 	case CS_WAIT_INPUT:
 		gGT->pushBuffer_UI.fadeFromBlack_desiredResult = 0;
-		gGT->pushBuffer_UI.fade_step = -0x400;
+		gGT->pushBuffer_UI.fade_step = -CS_CAMERA_FADE_STEP;
 		D233.cutsceneState = CS_FADE_OUT;
 		break;
 
@@ -170,10 +183,10 @@ void CS_Camera_ThTick_Boss(struct Thread *t)
 			}
 
 			// body
-			inst->scale.x = 0x1000;
-			inst->scale.y = 0x1000;
-			inst->scale.z = 0x1000;
-			cs->desiredScale = 0x1000;
+			inst->scale.x = CS_BOSS_MODEL_SCALE;
+			inst->scale.y = CS_BOSS_MODEL_SCALE;
+			inst->scale.z = CS_BOSS_MODEL_SCALE;
+			cs->desiredScale = CS_BOSS_MODEL_SCALE;
 		}
 
 		// set camera position and rotation for cutscene
@@ -181,20 +194,20 @@ void CS_Camera_ThTick_Boss(struct Thread *t)
 		gGT->pushBuffer[0].pos.y = bcd->camPos.y;
 		gGT->pushBuffer[0].pos.z = bcd->camPos.z;
 
-		gGT->pushBuffer[0].rot.x = bcd->camRot.x + 0x800;
+		gGT->pushBuffer[0].rot.x = bcd->camRot.x + CS_BOSS_CAMERA_ROT_X_OFFSET;
 		gGT->pushBuffer[0].rot.y = bcd->camRot.y;
 		gGT->pushBuffer[0].rot.z = bcd->camRot.z;
 
 		// fade back in
-		gGT->pushBuffer_UI.fadeFromBlack_desiredResult = 0x1000;
-		gGT->pushBuffer_UI.fade_step = 0x400;
+		gGT->pushBuffer_UI.fadeFromBlack_desiredResult = CS_CAMERA_FADE_FULL;
+		gGT->pushBuffer_UI.fade_step = CS_CAMERA_FADE_STEP;
 		D233.cutsceneState = CS_FADE_IN;
 		break;
 
 	case CS_FADE_IN:
 
 		// wait for fade
-		if (gGT->pushBuffer_UI.fadeFromBlack_currentValue != 0x1000)
+		if (gGT->pushBuffer_UI.fadeFromBlack_currentValue != CS_CAMERA_FADE_FULL)
 		{
 			break;
 		}
@@ -226,7 +239,7 @@ void CS_Camera_ThTick_Podium(struct Thread *th)
 		gGT->drivers[0]->funcPtrs[DRIVER_FUNC_INIT] = VehStuckProc_RIP_Init;
 	}
 
-	if (gGT->cameraDC[0].cameraMode != 3)
+	if (gGT->cameraDC[0].cameraMode != CAMERA_MODE_FREECAM)
 	{
 		if (D233.cutsceneState < CS_WAIT_INPUT)
 		{
@@ -238,11 +251,11 @@ void CS_Camera_ThTick_Podium(struct Thread *th)
 
 	if (((D233.cutsceneState != CS_CAMERA_PAN || D233.boolStartToSkip != 0) && ((gGT->gameMode2 & CUP_NEW_WIN) != 0)) && sdata->ptrActiveMenu == NULL)
 	{
-		s16 stringIndex = 0x236;
+		s16 stringIndex = LNG_SAVE_YOUR_CUP_PROGRESS;
 
 		if ((gGT->gameMode2 & CUP_NEW_BATTLE) != 0)
 		{
-			stringIndex = 0x237;
+			stringIndex = LNG_SAVE_YOUR_CUP_PROGRESS_NEW_BATTLE_ARENA_OPENED;
 		}
 
 		TakeCupProgress_Activate(stringIndex);
@@ -252,7 +265,7 @@ void CS_Camera_ThTick_Podium(struct Thread *th)
 	if (D233.cutsceneState == CS_CAMERA_PAN || sdata->ptrActiveMenu != NULL)
 	{
 		int numPoints = CAM_Path_GetNumPoints();
-		int maxFrame = (numPoints << 0x15) >> 0x10;
+		int maxFrame = numPoints * CS_PODIUM_PATH_FRAME_UNIT;
 
 		if (maxFrame != 0)
 		{
@@ -263,14 +276,14 @@ void CS_Camera_ThTick_Podium(struct Thread *th)
 			s16 camPath[4];
 			int frame;
 
-			if (maxFrame - 0x12c0 < frameTimeSigned)
+			if (maxFrame - CS_PODIUM_PRIZE_DROP_LEAD_TIME < frameTimeSigned)
 			{
 				D233.podiumPrizeDropReady = 1;
 			}
 
 			if (maxFrame <= frameTimeSigned)
 			{
-				frameTime = numPoints * 0x20 - 1;
+				frameTime = numPoints * CS_PODIUM_PATH_FRAME_UNIT - 1;
 
 				if (D233.cutsceneState < CS_WAIT_INPUT)
 				{
@@ -278,7 +291,7 @@ void CS_Camera_ThTick_Podium(struct Thread *th)
 				}
 			}
 
-			frame = ((int)frameTime << 16) >> 21;
+			frame = ((int)frameTime << 16) >> (16 + CS_PODIUM_PATH_FRAME_FRACTION_BITS);
 			D233.podiumCameraFrame = frame;
 			podium->pathFrame32 = frameTime;
 
@@ -295,7 +308,7 @@ void CS_Camera_ThTick_Podium(struct Thread *th)
 			goto check_skip_button;
 		}
 
-		DecalFont_DrawLine(sdata->lngStrings[LNG_PRESS_TO_CONTINUE], 0x100, 0xbe, FONT_BIG, JUSTIFY_CENTER | ORANGE);
+		DecalFont_DrawLine(sdata->lngStrings[LNG_PRESS_TO_CONTINUE], CS_PODIUM_CONTINUE_TEXT_X, CS_PODIUM_CONTINUE_TEXT_Y, FONT_BIG, JUSTIFY_CENTER | ORANGE);
 	}
 
 	if (((gGT->gameMode2 & CUP_NEW_WIN) == 0) && sdata->ptrActiveMenu == NULL)
@@ -358,7 +371,7 @@ void CS_Camera_ThTick_Podium(struct Thread *th)
 
 				if ((VehPickupItem_MaskBoolGoodGuy(gGT->drivers[0]) & 0xffff) == 0)
 				{
-					hintID += 0x1f;
+					hintID += ADV_MASK_HINT_UKA_UKA_XA_OFFSET;
 				}
 
 				CDSYS_XAPauseForce();
@@ -376,7 +389,7 @@ void CS_Camera_ThTick_Podium(struct Thread *th)
 				return;
 			}
 
-			if (gGT->currAdvProfile.numRelics < 18)
+			if (gGT->currAdvProfile.numRelics < ADV_OXIDE_FINAL_RELIC_COUNT)
 			{
 				D233.bossCutsceneIndex = -1;
 				return;

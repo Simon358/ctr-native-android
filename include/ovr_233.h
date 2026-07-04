@@ -156,6 +156,67 @@ union CsOpcodeMeta
 	s16 shorts[10];
 };
 
+enum CutsceneOpcode
+{
+	CS_OPCODE_ANIM_ROT_RANGE = 0x00,
+	CS_OPCODE_GOTO = 0x01,
+	CS_OPCODE_HIDE_INSTANCE_AND_END_THREAD = 0x02,
+	CS_OPCODE_SPAWN_CHILD = 0x03,
+	CS_OPCODE_BRANCH_IF_RANDOM_LE = 0x04,
+	CS_OPCODE_PLAY_CONTEXT_FX = 0x05,
+	CS_OPCODE_STOP_FX = 0x06,
+	CS_OPCODE_START_MUSIC = 0x07,
+	CS_OPCODE_RESTART_MUSIC = 0x08,
+	CS_OPCODE_SET_VISIBLE_LOD = 0x09,
+	CS_OPCODE_SET_PATH_MOTION = 0x0a,
+	CS_OPCODE_SCALE_TO = 0x0b,
+	CS_OPCODE_FADE_FROM_BLACK = 0x0c,
+	CS_OPCODE_SET_CUTSCENE_FLAGS = 0x0d,
+	CS_OPCODE_CLEAR_CUTSCENE_FLAGS = 0x0e,
+	CS_OPCODE_RESELECT_LEVEL_SCRIPT = 0x0f,
+	CS_OPCODE_REQUEST_LEVEL = 0x10,
+	CS_OPCODE_WAIT_SWAP_QUEUE = 0x11,
+	CS_OPCODE_PLAY_XA = 0x12,
+	CS_OPCODE_WAIT_XA_DONE = 0x13,
+	CS_OPCODE_YIELD = 0x14,
+	CS_OPCODE_LOAD_LEVEL_STARS = 0x15,
+	CS_OPCODE_RACEFLAG_TRANSITION1_IF_OFFSCREEN = 0x16,
+	CS_OPCODE_ADVANCE_IF_RACEFLAG_ONSCREEN = 0x17,
+	CS_OPCODE_RACEFLAG_TRANSITION2_IF_ONSCREEN = 0x18,
+	CS_OPCODE_SET_PARTICLE_ID = 0x19,
+	CS_OPCODE_HIDE_INSTANCE = 0x1a,
+	CS_OPCODE_SHOW_INSTANCE = 0x1b,
+	CS_OPCODE_ADD_INSTANCE_DEPTH_BIAS = 0x1c,
+	CS_OPCODE_SET_INSTANCE_FLAGS = 0x1d,
+	CS_OPCODE_CLEAR_INSTANCE_FLAGS = 0x1e,
+	CS_OPCODE_SET_UNK4_1333 = 0x1f,
+	CS_OPCODE_END_BOSS_CUTSCENE = 0x20,
+	CS_OPCODE_SET_BOSS_CUTSCENE_INDEX = 0x21,
+	CS_OPCODE_SET_CAMERA_DISTANCE = 0x22,
+	CS_OPCODE_ADVANCE_IF_CREDITS_TEXT_VALID = 0x23,
+	CS_OPCODE_CREDITS_DANCER = 0x24,
+	CS_OPCODE_ADVANCE_IF_CREDITS_GHOSTS_READY = 0x25,
+	CS_OPCODE_BRANCH_ADV_CHAR_SELECT = 0x26,
+	CS_OPCODE_ADVANCE_IF_LEVEL_TIME_REACHED = 0x27,
+	CS_OPCODE_SYNC_ANIM_FRAME = 0x28,
+	CS_OPCODE_END_CREDITS = 0x29,
+	CS_OPCODE_ANIM_SYNC_MARKER = 0x2a,
+	CS_OPCODE_ANIM_RANGE = 0x2b,
+	CS_OPCODE_SET_GAME_MODE_FLAGS = 0x2c,
+	CS_OPCODE_SET_SUBTITLE = 0x2d,
+	CS_OPCODE_UI_FADE_TO_BLACK = 0x2e,
+	CS_OPCODE_WAIT_UI_FADE = 0x2f,
+	CS_OPCODE_SET_AUDIO_VOLUME = 0x30,
+};
+
+enum CutsceneGameModeTarget
+{
+	CS_GAME_MODE_TARGET_GAME_MODE1 = 0,
+	CS_GAME_MODE_TARGET_GAME_MODE2 = 1,
+	CS_GAME_MODE_TARGET_RENDER_FLAGS_SET = 2,
+	CS_GAME_MODE_TARGET_RENDER_FLAGS_CLEAR = 3,
+};
+
 enum CsOpcodeMetaFlags
 {
 	CS_OPCODE_META_HAS_ANIM_INDEX = 0x01,
@@ -167,6 +228,11 @@ enum CsOpcodeMetaFlags
 	CS_OPCODE_META_HAS_ROT_START = 0x40,
 	CS_OPCODE_META_HAS_ROT_END = 0x80,
 };
+
+CTR_STATIC_ASSERT(CS_GAME_MODE_TARGET_GAME_MODE1 == 0);
+CTR_STATIC_ASSERT(CS_GAME_MODE_TARGET_GAME_MODE2 == 1);
+CTR_STATIC_ASSERT(CS_GAME_MODE_TARGET_RENDER_FLAGS_SET == 2);
+CTR_STATIC_ASSERT(CS_GAME_MODE_TARGET_RENDER_FLAGS_CLEAR == 3);
 
 CTR_STATIC_ASSERT(CS_OPCODE_META_HAS_ANIM_INDEX == 0x01);
 CTR_STATIC_ASSERT(CS_OPCODE_META_HAS_FRAME_START == 0x02);
@@ -249,7 +315,7 @@ struct CutsceneObj
 	s16 baseRotY;
 	s16 lodIndex;
 	SVec3 rot;
-	s16 unk26;
+	s16 rotPad;
 	u16 pathProgress32;
 
 	// 0x2a
@@ -283,10 +349,7 @@ struct CutsceneObj
 
 	// 0x44
 	char particleID;
-	// 0x45
-	char unk45;
-	// 0x46
-	char unk46;
+	u8 pad_45[2];
 	// 0x47
 	u8 animIndex;
 
@@ -299,6 +362,11 @@ struct CutsceneObj
 
 #ifndef CTR_NATIVE
 CTR_STATIC_ASSERT(sizeof(union CsOpcodeMeta) == 0x14);
+CTR_STATIC_ASSERT(OFFSETOF(struct CutsceneObj, rotPad) == 0x26);
+CTR_STATIC_ASSERT(OFFSETOF(struct CutsceneObj, pathProgress32) == 0x28);
+CTR_STATIC_ASSERT(OFFSETOF(struct CutsceneObj, particleID) == 0x44);
+CTR_STATIC_ASSERT(OFFSETOF(struct CutsceneObj, pad_45) == 0x45);
+CTR_STATIC_ASSERT(OFFSETOF(struct CutsceneObj, animIndex) == 0x47);
 CTR_STATIC_ASSERT(OFFSETOF(struct CutsceneObj, frameOverrideRoot) == 0x48);
 CTR_STATIC_ASSERT(OFFSETOF(struct CutsceneObj, decodedOpcode) == 0x4c);
 CTR_STATIC_ASSERT(sizeof(struct CutsceneObj) == 0x60);
@@ -589,8 +657,8 @@ struct OverlayRDATA_233
 	s16 MusicVolumeBackup;
 	// 800b776c
 	s16 VoiceVolumeBackup;
-
-	s16 volumeunknown;
+	// 800b776e
+	s16 audioVolumeBackupPad;
 
 	// 800b7770
 	int podiumPrizeDropReady;
@@ -620,7 +688,7 @@ struct OverlayDATA_233
 	s16 FXVolumeBackup;
 	s16 MusicVolumeBackup;
 	s16 VoiceVolumeBackup;
-	s16 volumeunknown;
+	s16 audioVolumeBackupPad;
 	int podiumPrizeDropReady;
 	CutscenePhase cutsceneState;
 	struct Model *ptrModelBossHead;
@@ -712,6 +780,7 @@ OVR233_LAYOUT_ASSERT(podiumCameraFrame, 0xbd74, 0x4);
 OVR233_LAYOUT_ASSERT(FXVolumeBackup, 0xbd78, 0x2);
 OVR233_LAYOUT_ASSERT(MusicVolumeBackup, 0xbd7a, 0x2);
 OVR233_LAYOUT_ASSERT(VoiceVolumeBackup, 0xbd7c, 0x2);
+OVR233_LAYOUT_ASSERT(audioVolumeBackupPad, 0xbd7e, 0x2);
 OVR233_LAYOUT_ASSERT(podiumPrizeDropReady, 0xbd80, 0x4);
 OVR233_LAYOUT_ASSERT(cutsceneState, 0xbd84, 0x4);
 OVR233_LAYOUT_ASSERT(ptrModelBossHead, 0xbd88, 0x4);
@@ -836,19 +905,24 @@ CTR_STATIC_ASSERT(OFFSETOF(struct CreditsLevHeader, numStrings) == 0x4);
 CTR_STATIC_ASSERT(sizeof(struct CreditsLevHeader) == 0x8);
 #endif
 
+enum CreditsConstants
+{
+	CS_CREDITS_GHOST_COUNT = 5,
+};
+
 struct CreditsObj
 {
 	// 800b94bc (000)
-	struct Model *creditGhostModel[5]; // duplicates
+	struct Model *creditGhostModel[CS_CREDITS_GHOST_COUNT]; // duplicates
 
 	// 800b94d0 (014)
-	struct Instance *creditGhostInst[5];
+	struct Instance *creditGhostInst[CS_CREDITS_GHOST_COUNT];
 
 	// 800b94e4 (028)
-	struct ModelHeader creditGhostHeaders[5][2];
+	struct ModelHeader creditGhostHeaders[CS_CREDITS_GHOST_COUNT][2];
 
 	// 800b9764 (2a8)
-	struct Model creditGhostModelCopies[5];
+	struct Model creditGhostModelCopies[CS_CREDITS_GHOST_COUNT];
 
 	// 800b97dc (320)
 	s16 countdown;
