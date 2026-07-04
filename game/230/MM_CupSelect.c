@@ -16,16 +16,7 @@ void MM_CupSelect_Init(void)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 overlay 230 0x800b0eec-0x800b164c.
 void MM_CupSelect_MenuProc(struct RectMenu *menu)
 {
-	u8 cupIndex;
-	u8 starIndex;
-	u8 trackIndex;
-	s16 elapsedFrames;
-	u32 txtColor;
-	u32 *starColor;
-	int startX;
-	int startY;
 	struct GameTracker *gGT = sdata->gGT;
-	RECT cupBox;
 
 	if (menu->funcState == RECTMENU_FUNC_STATE_INPUT)
 	{
@@ -36,7 +27,7 @@ void MM_CupSelect_MenuProc(struct RectMenu *menu)
 		return;
 	}
 
-	elapsedFrames = D230.cupSelectTransition.frame;
+	s16 elapsedFrames = D230.cupSelectTransition.frame;
 
 	// if not stationary
 	if (D230.cupSelectTransition.state != IN_MENU)
@@ -110,23 +101,23 @@ void MM_CupSelect_MenuProc(struct RectMenu *menu)
 	                   D230.transitionMeta_cupSel[MM_CUP_SELECT_TITLE_META_INDEX].currY + MM_CUP_SELECT_TITLE_Y_OFFSET, FONT_BIG, MM_CUP_SELECT_TEXT_COLOR);
 
 	// Loop through all four cups
-	for (cupIndex = 0; cupIndex < GAME_PROGRESS_CUP_COUNT; cupIndex++)
+	for (u8 cupIndex = 0; cupIndex < GAME_PROGRESS_CUP_COUNT; cupIndex++)
 	{
 		// Use solid color
-		txtColor = MM_CUP_SELECT_TEXT_COLOR;
+		u32 txtColor = MM_CUP_SELECT_TEXT_COLOR;
 
 		// If this cup is the one you selected
 		if (cupIndex == menu->rowSelected)
 		{
 			// Make text flash
-			if ((sdata->frameCounter & 2) != 0)
+			if ((sdata->frameCounter & MM_CUP_SELECT_FLASH_FRAME_BIT) != 0)
 			{
 				txtColor |= MM_CUP_SELECT_FLASH_COLOR_BIT;
 			}
 		}
 
-		startX = (s16)D230.transitionMeta_cupSel[cupIndex].currX + (cupIndex & 1) * MM_CUP_SELECT_COLUMN_WIDTH;
-		startY = (s16)D230.transitionMeta_cupSel[cupIndex].currY + (cupIndex >> 1) * MM_CUP_SELECT_ROW_HEIGHT;
+		int startX = (s16)D230.transitionMeta_cupSel[cupIndex].currX + (cupIndex & 1) * MM_CUP_SELECT_COLUMN_WIDTH;
+		int startY = (s16)D230.transitionMeta_cupSel[cupIndex].currY + (cupIndex >> 1) * MM_CUP_SELECT_ROW_HEIGHT;
 
 		// draw the name of the cup
 		DecalFont_DrawLine(sdata->lngStrings[data.ArcadeCups[cupIndex].lngIndex_CupName], startX + MM_CUP_SELECT_NAME_X_OFFSET,
@@ -136,12 +127,12 @@ void MM_CupSelect_MenuProc(struct RectMenu *menu)
 		startY = startY + MM_CUP_SELECT_CONTENT_Y_OFFSET;
 
 		// loop through 3 stars to draw
-		for (starIndex = 0; starIndex < GAME_PROGRESS_CUP_DIFFICULTY_COUNT; starIndex++)
+		for (u8 starIndex = 0; starIndex < GAME_PROGRESS_CUP_DIFFICULTY_COUNT; starIndex++)
 		{
 			int cupWinBitIndex = D230.cupSelectStars.winBitBase[starIndex] + cupIndex;
-			if (CHECK_ADV_BIT(sdata->gameProgress.unlocks, cupWinBitIndex) != 0)
+			if (CHECK_ADV_BIT(sdata->gameProgress.unlocks, cupWinBitIndex))
 			{
-				starColor = data.ptrColor[D230.cupSelectStars.colorIndex[starIndex]];
+				u32 *starColor = data.ptrColor[D230.cupSelectStars.colorIndex[starIndex]];
 
 				struct Icon **iconPtrArray = ICONGROUP_GETICONS(gGT->iconGroup[MM_CUP_SELECT_STAR_ICON_GROUP]);
 
@@ -153,7 +144,7 @@ void MM_CupSelect_MenuProc(struct RectMenu *menu)
 		}
 
 		// loop through all four track icons in one cup
-		for (trackIndex = 0; trackIndex < MM_CUP_TRACK_COUNT; trackIndex++)
+		for (u8 trackIndex = 0; trackIndex < MM_CUP_TRACK_COUNT; trackIndex++)
 		{
 			int posX = startX + (trackIndex & 1) * MM_CUP_SELECT_TRACK_X_STEP;
 			int posY = startY + (trackIndex >> 1) * MM_CUP_SELECT_TRACK_Y_STEP;
@@ -163,6 +154,8 @@ void MM_CupSelect_MenuProc(struct RectMenu *menu)
 			                     gGT->pushBuffer_UI.ptrOT, D230.cupSel_Color.self, D230.cupSel_Color.self, D230.cupSel_Color.self, D230.cupSel_Color.self, 0,
 			                     FP(0.5));
 		}
+
+		RECT cupBox;
 
 		if (cupIndex == menu->rowSelected)
 		{

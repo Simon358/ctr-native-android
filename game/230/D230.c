@@ -24,7 +24,7 @@ struct OverlayDATA_230 D230 =
                 {0x4F, 2, 4, 3, 3},
                 {0x50, 3, 5, 4, 4},
                 {0x51, 4, 5, 5, 5},
-                {-1},
+                {RECTMENU_STRING_NONE},
             },
 
         .rowsMainMenuWithScrapbook =
@@ -36,12 +36,12 @@ struct OverlayDATA_230 D230 =
                 {0x50, 3, 5, 4, 4},
                 {0x51, 4, 6, 5, 5},
                 {0x234, 5, 6, 6, 6},
-                {-1},
+                {RECTMENU_STRING_NONE},
             },
 
         .menuMainMenu =
             {
-                .stringIndexTitle = -1,
+                .stringIndexTitle = RECTMENU_STRING_NONE,
 
                 .posX_curr = 0x180,
                 .posY_curr = 0x6c,
@@ -56,7 +56,7 @@ struct OverlayDATA_230 D230 =
             {
                 {0x54, 0, 1, 0, 0},
                 {0x55, 0, 1, 1, 1},
-                {-1},
+                {RECTMENU_STRING_NONE},
             },
 
         .menuPlayers1P2P =
@@ -73,7 +73,7 @@ struct OverlayDATA_230 D230 =
                 {0x55, 0, 1, 0, 0},
                 {0x56, 0, 2, 1, 1},
                 {0x57, 1, 2, 2, 2},
-                {-1},
+                {RECTMENU_STRING_NONE},
             },
 
         .menuPlayers2P3P4P =
@@ -90,7 +90,7 @@ struct OverlayDATA_230 D230 =
                 {0x15A, 0, 1, 0, 0},
                 {0x15B, 0, 2, 1, 1},
                 {0x15C, 1, 2, 2, 2},
-                {-1},
+                {RECTMENU_STRING_NONE},
             },
 
         .menuDifficulty =
@@ -106,7 +106,7 @@ struct OverlayDATA_230 D230 =
             {
                 {0x15E, 0, 1, 0, 0},
                 {0x15F, 0, 1, 1, 1},
-                {-1},
+                {RECTMENU_STRING_NONE},
             },
 
         .menuRaceType =
@@ -122,12 +122,12 @@ struct OverlayDATA_230 D230 =
             {
                 {0x8d, 0, 1, 0, 0},
                 {0x8e, 0, 1, 1, 1},
-                {-1},
+                {RECTMENU_STRING_NONE},
             },
 
         .menuAdventure =
             {
-                .stringIndexTitle = -1,
+                .stringIndexTitle = RECTMENU_STRING_NONE,
 
                 .state = CENTER_ON_X,
                 .rows = &D230.rowsAdventure[0],
@@ -145,12 +145,12 @@ struct OverlayDATA_230 D230 =
 		{0x88, 2,4,3,3},
 		{0x89, 3,5,4,4},
 		{0x8a, 4,5,5,5},
-		{-1}
+		{RECTMENU_STRING_NONE}
 	},
 
 	.menuLanguage =
 	{
-		.stringIndexTitle = -1,
+		.stringIndexTitle = RECTMENU_STRING_NONE,
 
 		.state = 0x400001,
 		.rows = &D230.rowsLngBoot,
@@ -161,7 +161,7 @@ struct OverlayDATA_230 D230 =
 
         .menuCharacterSelect =
             {
-                .stringIndexTitle = -1,
+                .stringIndexTitle = RECTMENU_STRING_NONE,
 
                 .state = DISABLE_INPUT_ALLOW_FUNCPTRS,
                 .funcPtr = MM_Characters_MenuProc,
@@ -169,26 +169,26 @@ struct OverlayDATA_230 D230 =
 
         .menuTrackSelect =
             {
-                .stringIndexTitle = -1,
+                .stringIndexTitle = RECTMENU_STRING_NONE,
 
                 .state = DISABLE_INPUT_ALLOW_FUNCPTRS,
                 .funcPtr = MM_TrackSelect_MenuProc,
             },
 
-        .rowsCupSelect = {{0, 0, 2, 0, 1}, {0, 1, 3, 0, 1}, {0, 0, 2, 2, 3}, {0, 1, 3, 2, 3}, {-1}},
+        .rowsCupSelect = {{0, 0, 2, 0, 1}, {0, 1, 3, 0, 1}, {0, 0, 2, 2, 3}, {0, 1, 3, 2, 3}, {RECTMENU_STRING_NONE}},
 
         .menuCupSelect =
             {
-                .stringIndexTitle = -1,
+                .stringIndexTitle = RECTMENU_STRING_NONE,
 
-                .state = 0x2400,
+                .state = INVISIBLE | EXECUTE_FUNCPTR,
                 .rows = &D230.rowsCupSelect[0],
                 .funcPtr = MM_CupSelect_MenuProc,
             },
 
         .menuBattleWeapons =
             {
-                .stringIndexTitle = -1,
+                .stringIndexTitle = RECTMENU_STRING_NONE,
 
                 .state = DISABLE_INPUT_ALLOW_FUNCPTRS,
                 .funcPtr = MM_Battle_MenuProc,
@@ -196,7 +196,7 @@ struct OverlayDATA_230 D230 =
 
         .menuHighScores =
             {
-                .stringIndexTitle = -1,
+                .stringIndexTitle = RECTMENU_STRING_NONE,
 
                 .state = DISABLE_INPUT_ALLOW_FUNCPTRS,
                 .funcPtr = MM_HighScore_MenuProc,
@@ -204,7 +204,7 @@ struct OverlayDATA_230 D230 =
 
         .menuScrapbook =
             {
-                .stringIndexTitle = -1,
+                .stringIndexTitle = RECTMENU_STRING_NONE,
 
                 .state = DISABLE_INPUT_ALLOW_FUNCPTRS,
                 .funcPtr = MM_Scrapbook_PlayMovie,
@@ -614,7 +614,7 @@ struct OverlayDATA_230 D230 =
 
         .lapCountByRow = {{3, 0}, {5, 0}, {7, 0}, {0, 0}},
 
-        .rowsLapSel = {{0x9b, 0, 1, 0, 0}, {0x9c, 0, 2, 1, 1}, {0x9d, 1, 2, 2, 2}, {-1}},
+        .rowsLapSel = {{0x9b, 0, 1, 0, 0}, {0x9c, 0, 2, 1, 1}, {0x9d, 1, 2, 2, 2}, {RECTMENU_STRING_NONE}},
 
         .menuLapSel =
             {
@@ -670,49 +670,49 @@ struct OverlayDATA_230 D230 =
                                   {0, -100, 0, 0, 0},
                                   {0, 0, -1, 0, 0}},
 
-        .rowsBattleType = {{0x92, 0, 1, 0, 0}, {0x93, 0, 2, 1, 1}, {0x94, 1, 2, 2, 2}, {-1}},
+        .rowsBattleType = {{0x92, 0, 1, 0, 0}, {0x93, 0, 2, 1, 1}, {0x94, 1, 2, 2, 2}, {RECTMENU_STRING_NONE}},
 
-        .menuBattleType = {.stringIndexTitle = -1,
+        .menuBattleType = {.stringIndexTitle = RECTMENU_STRING_NONE,
 
                            .state = KEEP_INPUTS_IN_SUBMENU | CENTER_MENU_TEXT | USE_SMALL_FONT,
                            .rows = &D230.rowsBattleType[0],
                            .funcPtr = MM_Battle_CloseSubMenu},
 
-        .rowsBattleLengthLifeTime = {{0xA4, 0, 1, 0, 0}, {0xA5, 0, 2, 1, 1}, {0xA6, 1, 2, 2, 2}, {-1}},
+        .rowsBattleLengthLifeTime = {{0xA4, 0, 1, 0, 0}, {0xA5, 0, 2, 1, 1}, {0xA6, 1, 2, 2, 2}, {RECTMENU_STRING_NONE}},
 
-        .menuBattleLengthLifeTime = {.stringIndexTitle = -1,
+        .menuBattleLengthLifeTime = {.stringIndexTitle = RECTMENU_STRING_NONE,
 
                                      .state = KEEP_INPUTS_IN_SUBMENU | CENTER_MENU_TEXT | USE_SMALL_FONT,
                                      .rows = &D230.rowsBattleLengthLifeTime[0],
                                      .funcPtr = MM_Battle_CloseSubMenu},
 
-        .rowsBattleLengthTimeTime = {{0xA7, 0, 1, 0, 0}, {0xA8, 0, 2, 1, 1}, {0xA9, 1, 2, 2, 2}, {-1}},
+        .rowsBattleLengthTimeTime = {{0xA7, 0, 1, 0, 0}, {0xA8, 0, 2, 1, 1}, {0xA9, 1, 2, 2, 2}, {RECTMENU_STRING_NONE}},
 
-        .menuBattleLengthTimeTime = {.stringIndexTitle = -1,
+        .menuBattleLengthTimeTime = {.stringIndexTitle = RECTMENU_STRING_NONE,
 
                                      .state = KEEP_INPUTS_IN_SUBMENU | CENTER_MENU_TEXT | USE_SMALL_FONT,
                                      .rows = &D230.rowsBattleLengthTimeTime[0],
                                      .funcPtr = MM_Battle_CloseSubMenu},
 
-        .rowsBattleLengthPoints = {{0xA1, 0, 1, 0, 0}, {0xA2, 0, 2, 1, 1}, {0xA3, 1, 2, 2, 2}, {-1}},
+        .rowsBattleLengthPoints = {{0xA1, 0, 1, 0, 0}, {0xA2, 0, 2, 1, 1}, {0xA3, 1, 2, 2, 2}, {RECTMENU_STRING_NONE}},
 
-        .menuBattleLengthPoints = {.stringIndexTitle = -1,
+        .menuBattleLengthPoints = {.stringIndexTitle = RECTMENU_STRING_NONE,
 
                                    .state = KEEP_INPUTS_IN_SUBMENU | CENTER_MENU_TEXT | USE_SMALL_FONT,
                                    .rows = &D230.rowsBattleLengthPoints[0],
                                    .funcPtr = MM_Battle_CloseSubMenu},
 
-        .rowsBattleLengthLifeLife = {{0x9e, 0, 1, 0, 0}, {0x9f, 0, 2, 1, 1}, {0xA0, 1, 2, 2, 2}, {-1}},
+        .rowsBattleLengthLifeLife = {{0x9e, 0, 1, 0, 0}, {0x9f, 0, 2, 1, 1}, {0xA0, 1, 2, 2, 2}, {RECTMENU_STRING_NONE}},
 
-        .menuBattleLengthLifeLife = {.stringIndexTitle = -1,
+        .menuBattleLengthLifeLife = {.stringIndexTitle = RECTMENU_STRING_NONE,
 
                                      .state = KEEP_INPUTS_IN_SUBMENU | CENTER_MENU_TEXT | USE_SMALL_FONT,
                                      .rows = &D230.rowsBattleLengthLifeLife[0],
                                      .funcPtr = MM_Battle_CloseSubMenu},
 
-        .rowsBattleStartGame = {{0xAE, 0, 0, 0, 0}, {-1}},
+        .rowsBattleStartGame = {{0xAE, 0, 0, 0, 0}, {RECTMENU_STRING_NONE}},
 
-        .menuBattleStartGame = {.stringIndexTitle = -1,
+        .menuBattleStartGame = {.stringIndexTitle = RECTMENU_STRING_NONE,
 
                                 .state = KEEP_INPUTS_IN_SUBMENU | CENTER_MENU_TEXT | USE_SMALL_FONT,
                                 .rows = &D230.rowsBattleStartGame[0],
@@ -770,9 +770,9 @@ struct OverlayDATA_230 D230 =
 
         .highscore_iconColor = {.self = 0x808080},
 
-        .rowsHighScore = {{0xAF, 0, 1, 0, 0}, {0xB1, 0, 2, 0, 0}, {0xB2, 1, 2, 0, 0}, {-1}},
+        .rowsHighScore = {{0xAF, 0, 1, 0, 0}, {0xB1, 0, 2, 0, 0}, {0xB2, 1, 2, 0, 0}, {RECTMENU_STRING_NONE}},
 
-        .menuHighScore = {.stringIndexTitle = -1,
+        .menuHighScore = {.stringIndexTitle = RECTMENU_STRING_NONE,
                           .posX_curr = 0x17C,
                           .posY_curr = 0xAF,
 
@@ -799,17 +799,17 @@ struct OverlayDATA_230 D230 =
 		{0x88, 2,4,3,3},
 		{0x89, 3,5,4,4},
 		{0x8a, 4,5,5,5},
-		{-1}
+		{RECTMENU_STRING_NONE}
 	}
 
 	.menuLngBoot =
 	{
-		.stringIndexTitle = -1,
+		.stringIndexTitle = RECTMENU_STRING_NONE,
 
 		.posX_curr = 256,
 		.posY_curr = 118,
 
-		.state = RECTMENU_UNKNOWN_0x800 | EXECUTE_FUNCPTR | CENTER_ON_COORDS,
+		.state = RECTMENU_STATE_EXEC_CENTERED,
 		.rows = &D230.rowsLngBoot,
 		.funcPtr = MM_MenuProc_LanguageBoot
 	}

@@ -73,8 +73,7 @@ void MM_Characters_AnimateColors(u8 *colorData, s16 playerID, s16 flag)
 
 	// access int RGBA as a char array,
 	// for editing components of color
-	u8 *ptrColor;
-	ptrColor = (u8 *)data.ptrColor[playerID + PLAYER_BLUE];
+	u8 *ptrColor = (u8 *)data.ptrColor[playerID + PLAYER_BLUE];
 
 	trigApprox = 0;
 
@@ -127,7 +126,7 @@ int MM_Characters_GetNextDriver(s16 direction, s16 characterID)
 	    // if desired driver is not unlocked by default
 	    (unlocked != MM_CHARACTER_UNLOCK_ALWAYS) &&
 
-	    (((sdata->gameProgress.unlocks[unlocked >> 5] >> (unlocked & 0x1f)) & 1) == 0))
+	    !CHECK_ADV_BIT(sdata->gameProgress.unlocks, unlocked))
 	{
 		// set new driver to the driver you already have
 		newDriver = characterID;
@@ -398,7 +397,7 @@ void MM_Characters_SetMenuLayout(void)
 		// OG game code
 		u16 unlocked = D230.characterSelectMeta1P2P[iconIndex].unlockFlags;
 
-		if (((sdata->gameProgress.unlocks[unlocked >> 5] >> (unlocked & 0x1f)) & 1) != 0)
+		if (CHECK_ADV_BIT(sdata->gameProgress.unlocks, unlocked))
 		{
 			expandRoster = true;
 			break;
@@ -549,7 +548,7 @@ void MM_Characters_RestoreIDs(void)
 		    (unlocked != MM_CHARACTER_UNLOCK_ALWAYS) &&
 
 		    // If Character is Locked
-		    (((sdata->gameProgress.unlocks[unlocked >> 5] >> (unlocked & 0x1f)) & 1) == 0))
+		    !CHECK_ADV_BIT(sdata->gameProgress.unlocks, unlocked))
 		{
 			// change character to Crash
 			*currID = CRASH_BANDICOOT;
@@ -594,42 +593,20 @@ void MM_Characters_HideDrivers(void)
 void MM_Characters_MenuProc(struct RectMenu *unused)
 {
 	(void)unused;
-	u8 numPlyrNextGame;
 	b32 candidateInUseByOtherPlayer;
 	b32 deadEndCandidateAvailable;
-	u16 playerSelectFlag;
 	s16 nextIcon;
-	u32 button;
 	int intermediateIcon;
-	u32 characterSelectType;
-	u32 fontType;
-	Color iconColor;
 	s16 previousCandidateIcon;
 	int nextIconCopy;
 	s16 alternateIcon;
-	s16 currentIcon;
-	s16 candidateIcon;
-	s16 *playerIconSlot;
-	struct CharacterSelectMeta *preInputCharacterMeta;
 	s16 iconPerPlayer[4];
-	Color playerColor;
-	Color outlineColor;
-	Color animatedColor;
 
-	RECT r1;
-	RECT *r = &r1;
-	RECT r58;
+	RECT drawRect;
 
 	s16 hitNavigationDeadEnd;
-	s16 *iconPerPlayerPtr;
 
-	int posX;
-	int posY;
-	s16 playerIcon;
 	int direction;
-
-	SVec2 *windowPos;
-	struct CharacterSelectMeta *activeCharacterSelectMeta;
 
 	struct GameTracker *gGT = sdata->gGT;
 
@@ -702,9 +679,10 @@ void MM_Characters_MenuProc(struct RectMenu *unused)
 		}
 	}
 
-	posX = D230.characterSelectTransitionMeta[MM_CHARACTER_SELECT_TITLE_TRANSITION_INDEX].currX;
-	posY = D230.characterSelectTransitionMeta[MM_CHARACTER_SELECT_TITLE_TRANSITION_INDEX].currY;
+	int posX = D230.characterSelectTransitionMeta[MM_CHARACTER_SELECT_TITLE_TRANSITION_INDEX].currX;
+	int posY = D230.characterSelectTransitionMeta[MM_CHARACTER_SELECT_TITLE_TRANSITION_INDEX].currY;
 
+	u32 characterSelectType;
 	char *characterSelectString;
 	switch (D230.characterSelectLayoutIndex)
 	{
@@ -767,29 +745,25 @@ void MM_Characters_MenuProc(struct RectMenu *unused)
 
 dontDrawSelectCharacter:
 
-	iconPerPlayerPtr = &iconPerPlayer[0];
-
 	for (s32 playerIndex = 0; playerIndex < gGT->numPlyrNextGame; playerIndex++)
 	{
-		playerSelectFlag = (u16)(1 << playerIndex);
-		currentIcon = iconPerPlayerPtr[playerIndex];
-		candidateIcon = currentIcon;
+		u16 playerSelectFlag = (u16)(1 << playerIndex);
+		s16 currentIcon = iconPerPlayer[playerIndex];
+		s16 candidateIcon = currentIcon;
+		b32 playerSelectedBeforeInput = (((int)(s16)sdata->characterSelectFlags >> playerIndex) & 1U) != 0;
 
+		Color playerColor;
 		MM_Characters_AnimateColors((u8 *)&playerColor, playerIndex, (int)(s16)(sdata->characterSelectFlags & playerSelectFlag));
 
-		preInputCharacterMeta = &D230.activeCharacterSelectMeta[currentIcon];
+		struct CharacterSelectMeta *preInputCharacterMeta = &D230.activeCharacterSelectMeta[currentIcon];
+		u32 button = sdata->buttonTapPerPlayer[playerIndex];
 
-		if (
-
-		    (D230.characterSelectMenuState == IN_MENU) && (
-		                                                      // get input from this player
-		                                                      button = sdata->buttonTapPerPlayer[playerIndex],
-
-		                                                      // If you press the D-Pad, or Cross, Square, Triangle, Circle
-		                                                      button & (MM_CHARACTER_SELECT_INPUT_DPAD | MM_CHARACTER_SELECT_INPUT_MENU)))
+		if ((D230.characterSelectMenuState == IN_MENU) &&
+		    // If you press the D-Pad, or Cross, Square, Triangle, Circle
+		    ((button & (MM_CHARACTER_SELECT_INPUT_DPAD | MM_CHARACTER_SELECT_INPUT_MENU)) != 0))
 		{
 			// if character has not been selected by this player
-			if (((int)(s16)sdata->characterSelectFlags >> playerIndex & 1U) == 0)
+			if (!playerSelectedBeforeInput)
 			{
 				// If you pressed any of the D-pad buttons
 				if ((button & MM_CHARACTER_SELECT_INPUT_DPAD) != 0)
@@ -847,7 +821,6 @@ dontDrawSelectCharacter:
 						D230.characterSelectPlayerState.modelMoveDir[playerIndex] = MM_CHARACTER_SELECT_MODEL_MOVE_PREV;
 					}
 
-					playerIconSlot = &iconPerPlayerPtr[playerIndex];
 					previousCandidateIcon = candidateIcon;
 					do
 					{
@@ -857,42 +830,40 @@ dontDrawSelectCharacter:
 						if (candidateIcon == previousCandidateIcon)
 						{
 							hitNavigationDeadEnd = 1;
-							nextIcon = MM_Characters_GetNextDriver(direction, (int)(s16)*playerIconSlot);
+							nextIcon = MM_Characters_GetNextDriver(direction, (int)(s16)currentIcon);
 							nextIconCopy = (int)nextIcon;
 							candidateIcon = MM_Characters_GetNextDriver(D230.characterSelectFallbackDirection1[direction], nextIconCopy);
 							intermediateIcon = (int)(s16)candidateIcon;
 
 							if ((((intermediateIcon == alternateIcon) || (nextIconCopy == alternateIcon)) || (nextIconCopy == intermediateIcon)) ||
-							    (button = MM_Characters_boolIsInvalid(iconPerPlayerPtr, intermediateIcon, playerIndex), (button & 0xffff) != 0))
+							    MM_Characters_boolIsInvalid(iconPerPlayer, intermediateIcon, playerIndex))
 							{
-								nextIcon = MM_Characters_GetNextDriver(D230.characterSelectFallbackDirection1[direction], (int)(s16)*playerIconSlot);
+								nextIcon = MM_Characters_GetNextDriver(D230.characterSelectFallbackDirection1[direction], (int)(s16)currentIcon);
 								intermediateIcon = (int)nextIcon;
 								candidateIcon = MM_Characters_GetNextDriver(direction, intermediateIcon);
 								alternateIcon = (int)(s16)candidateIcon;
 
 								if (((alternateIcon == previousCandidateIcon) || (intermediateIcon == previousCandidateIcon)) ||
-								    ((intermediateIcon == alternateIcon ||
-								      (button = MM_Characters_boolIsInvalid(iconPerPlayerPtr, alternateIcon, playerIndex), (button & 0xffff) != 0))))
+								    ((intermediateIcon == alternateIcon || MM_Characters_boolIsInvalid(iconPerPlayer, alternateIcon, playerIndex))))
 								{
-									nextIcon = MM_Characters_GetNextDriver(direction, (int)(s16)*playerIconSlot);
+									nextIcon = MM_Characters_GetNextDriver(direction, (int)(s16)currentIcon);
 									intermediateIcon = (int)nextIcon;
 									candidateIcon = MM_Characters_GetNextDriver(D230.characterSelectFallbackDirection2[direction], intermediateIcon);
 									alternateIcon = (int)(s16)candidateIcon;
 
 									if (((alternateIcon == previousCandidateIcon) || (intermediateIcon == previousCandidateIcon)) ||
-									    ((intermediateIcon == alternateIcon ||
-									      (button = MM_Characters_boolIsInvalid(iconPerPlayerPtr, alternateIcon, playerIndex), (button & 0xffff) != 0))))
+									    ((intermediateIcon == alternateIcon || MM_Characters_boolIsInvalid(iconPerPlayer, alternateIcon, playerIndex))))
 									{
-										nextIcon = MM_Characters_GetNextDriver(D230.characterSelectFallbackDirection2[direction], (int)(s16)*playerIconSlot);
+										nextIcon = MM_Characters_GetNextDriver(D230.characterSelectFallbackDirection2[direction], (int)(s16)currentIcon);
 										intermediateIcon = (int)nextIcon;
 										candidateIcon = MM_Characters_GetNextDriver(direction, intermediateIcon);
 										alternateIcon = (int)(s16)candidateIcon;
 
 										if ((((alternateIcon == previousCandidateIcon) || (intermediateIcon == previousCandidateIcon)) ||
 										     (intermediateIcon == alternateIcon)) ||
-										    (button = MM_Characters_boolIsInvalid(iconPerPlayerPtr, alternateIcon, playerIndex), (button & 0xffff) != 0))
+										    MM_Characters_boolIsInvalid(iconPerPlayer, alternateIcon, playerIndex))
 										{
-											candidateIcon = (u32)*playerIconSlot;
+											candidateIcon = (u32)currentIcon;
 										}
 									}
 								}
@@ -902,7 +873,7 @@ dontDrawSelectCharacter:
 
 						for (s32 otherPlayerIndex = 0; otherPlayerIndex < gGT->numPlyrNextGame; otherPlayerIndex++)
 						{
-							if ((otherPlayerIndex != playerIndex) && ((s16)candidateIcon == iconPerPlayerPtr[otherPlayerIndex]))
+							if ((otherPlayerIndex != playerIndex) && ((s16)candidateIcon == iconPerPlayer[otherPlayerIndex]))
 							{
 								candidateInUseByOtherPlayer = true;
 								break;
@@ -923,7 +894,7 @@ dontDrawSelectCharacter:
 							{
 								break;
 							}
-							candidateIcon = (u32)*playerIconSlot;
+							candidateIcon = (u32)currentIcon;
 						}
 						previousCandidateIcon = candidateIcon;
 					} while (candidateInUseByOtherPlayer);
@@ -932,9 +903,9 @@ dontDrawSelectCharacter:
 
 				for (s32 otherPlayerIndex = 0; otherPlayerIndex < gGT->numPlyrNextGame; otherPlayerIndex++)
 				{
-					if ((otherPlayerIndex != playerIndex) && ((s16)candidateIcon == iconPerPlayerPtr[otherPlayerIndex]))
+					if ((otherPlayerIndex != playerIndex) && ((s16)candidateIcon == iconPerPlayer[otherPlayerIndex]))
 					{
-						candidateIcon = (u32)(u16)iconPerPlayerPtr[playerIndex];
+						candidateIcon = (u32)(u16)iconPerPlayer[playerIndex];
 					}
 					currentIcon = (u16)candidateIcon;
 				}
@@ -945,7 +916,7 @@ dontDrawSelectCharacter:
 					// this player has now selected a character
 					sdata->characterSelectFlags = sdata->characterSelectFlags | (u16)(1 << playerIndex);
 
-					numPlyrNextGame = gGT->numPlyrNextGame;
+					u8 numPlyrNextGame = gGT->numPlyrNextGame;
 
 					// Play sound
 					// NOTE(aalhendi): ASM-verified NTSC-U 926 0x800aefa4-0x800aefe4 for character confirm SFX.
@@ -994,13 +965,15 @@ dontDrawSelectCharacter:
 			sdata->buttonTapPerPlayer[playerIndex] = 0;
 		}
 
-		iconPerPlayerPtr[playerIndex] = currentIcon;
+		iconPerPlayer[playerIndex] = currentIcon;
 
 		// transition of each icon
 		struct TransitionMeta *currentIconTransition = &D230.characterSelectTransitionMeta[currentIcon];
 
 		// if player has not selected a character
-		if (((sdata->characterSelectFlags >> playerIndex) & 1U) == 0)
+		b32 playerSelectedAfterInput = ((sdata->characterSelectFlags >> playerIndex) & 1U) != 0;
+		Color outlineColor;
+		if (!playerSelectedAfterInput)
 		{
 			// draw string
 			// "1", "2", "3", "4", above the character icon
@@ -1013,39 +986,40 @@ dontDrawSelectCharacter:
 			outlineColor = D230.characterSelect_Outline;
 		}
 
-		r->x = currentIconTransition->currX + preInputCharacterMeta->posX;
-		r->y = currentIconTransition->currY + preInputCharacterMeta->posY;
-		r->w = MM_CHARACTER_SELECT_ICON_RECT_W;
-		r->h = MM_CHARACTER_SELECT_ICON_RECT_H;
+		drawRect.x = currentIconTransition->currX + preInputCharacterMeta->posX;
+		drawRect.y = currentIconTransition->currY + preInputCharacterMeta->posY;
+		drawRect.w = MM_CHARACTER_SELECT_ICON_RECT_W;
+		drawRect.h = MM_CHARACTER_SELECT_ICON_RECT_H;
 
-		RECTMENU_DrawOuterRect_HighLevel(r, outlineColor, 0, ot);
+		RECTMENU_DrawOuterRect_HighLevel(&drawRect, outlineColor, 0, ot);
 	}
 
 	MM_Characters_PreventOverlap();
 
-	activeCharacterSelectMeta = D230.activeCharacterSelectMeta;
+	struct CharacterSelectMeta *iconDrawMeta = D230.activeCharacterSelectMeta;
 
 	// loop through character icons
 	for (s32 iconIndex = 0; iconIndex < MM_CHARACTER_SELECT_ICON_COUNT; iconIndex++)
 	{
-		s16 unlockRequirement = activeCharacterSelectMeta->unlockFlags;
+		s16 unlockRequirement = iconDrawMeta->unlockFlags;
 		if (
 		    // If Icon is unlocked by default,
 		    (unlockRequirement == MM_CHARACTER_UNLOCK_ALWAYS) ||
 
 		    // if character is unlocked
-		    // from 4-byte variable that handles all rewards
+		    // from the global unlock bitfield
 		    // also the variable written by cheats
-		    (((sdata->gameProgress.unlocks[unlockRequirement >> 5] >> (unlockRequirement & 0x1f)) & 1) != 0))
+		    CHECK_ADV_BIT(sdata->gameProgress.unlocks, unlockRequirement))
 		{
-			iconColor = D230.characterSelect_NeutralColor;
+			Color iconColor = D230.characterSelect_NeutralColor;
 
 			for (s32 playerIndex = 0; playerIndex < gGT->numPlyrNextGame; playerIndex++)
 			{
+				b32 playerSelected = (((int)(s16)sdata->characterSelectFlags >> (playerIndex & 0x1fU)) & 1U) != 0;
 				if (((s16)iconIndex == iconPerPlayer[playerIndex]) &&
 
 				    // if player selected a character
-				    (((int)(s16)sdata->characterSelectFlags >> (playerIndex & 0x1fU) & 1U) != 0))
+				    playerSelected)
 				{
 					iconColor = D230.characterSelect_ChosenColor;
 				}
@@ -1053,20 +1027,20 @@ dontDrawSelectCharacter:
 
 			struct TransitionMeta *iconTransition = &D230.characterSelectTransitionMeta[iconIndex];
 
-			RECTMENU_DrawPolyGT4(gGT->ptrIcons[data.MetaDataCharacters[activeCharacterSelectMeta->characterID].iconID],
-			                     iconTransition->currX + activeCharacterSelectMeta->posX + MM_CHARACTER_SELECT_ICON_DECAL_OFFSET_X,
-			                     iconTransition->currY + activeCharacterSelectMeta->posY + MM_CHARACTER_SELECT_ICON_DECAL_OFFSET_Y,
+			RECTMENU_DrawPolyGT4(gGT->ptrIcons[data.MetaDataCharacters[iconDrawMeta->characterID].iconID],
+			                     iconTransition->currX + iconDrawMeta->posX + MM_CHARACTER_SELECT_ICON_DECAL_OFFSET_X,
+			                     iconTransition->currY + iconDrawMeta->posY + MM_CHARACTER_SELECT_ICON_DECAL_OFFSET_Y,
 
 			                     &gGT->backBuffer->primMem, gGT->pushBuffer_UI.ptrOT,
 
 			                     iconColor.self, iconColor.self, iconColor.self, iconColor.self, TRANS_50_DECAL, FP(1.0));
 		}
 
-		activeCharacterSelectMeta++;
+		iconDrawMeta++;
 	}
 
 	// reset
-	activeCharacterSelectMeta = D230.activeCharacterSelectMeta;
+	struct CharacterSelectMeta *activeCharacterSelectMeta = D230.activeCharacterSelectMeta;
 
 	for (s32 playerIndex = 0; playerIndex < MM_CHARACTER_SELECT_MAX_PLAYERS; playerIndex++)
 	{
@@ -1075,16 +1049,19 @@ dontDrawSelectCharacter:
 
 	for (s32 playerIndex = 0; playerIndex < gGT->numPlyrNextGame; playerIndex++)
 	{
-		playerIcon = iconPerPlayer[playerIndex];
+		s16 playerIcon = iconPerPlayer[playerIndex];
 		activeCharacterSelectMeta = &D230.activeCharacterSelectMeta[playerIcon];
+		b32 playerSelected = (((int)(s16)sdata->characterSelectFlags >> playerIndex) & 1U) != 0;
 
 		// if player has not selected a character
-		if (((int)(s16)sdata->characterSelectFlags >> playerIndex & 1U) == 0)
+		if (!playerSelected)
 		{
+			Color animatedColor;
+			u16 selectedPlayerFlag = (u16)(1 << playerIndex);
 			MM_Characters_AnimateColors((u8 *)&animatedColor, playerIndex,
 
 			                            // flags of which characters are selected
-			                            (int)(s16)(sdata->characterSelectFlags & (u16)(1 << playerIndex)));
+			                            (int)(s16)(sdata->characterSelectFlags & selectedPlayerFlag));
 
 			animatedColor.r = (u8)((int)((u32)animatedColor.r << 2) / 5);
 			animatedColor.g = (u8)((int)((u32)animatedColor.g << 2) / 5);
@@ -1092,22 +1069,22 @@ dontDrawSelectCharacter:
 
 			struct TransitionMeta *selectedIconTransition = &D230.characterSelectTransitionMeta[playerIcon];
 
-			r->x = selectedIconTransition->currX + activeCharacterSelectMeta->posX + MM_CHARACTER_SELECT_HIGHLIGHT_OFFSET_X;
-			r->y = selectedIconTransition->currY + activeCharacterSelectMeta->posY + MM_CHARACTER_SELECT_HIGHLIGHT_OFFSET_Y;
-			r->w = MM_CHARACTER_SELECT_HIGHLIGHT_W;
-			r->h = MM_CHARACTER_SELECT_HIGHLIGHT_H;
+			drawRect.x = selectedIconTransition->currX + activeCharacterSelectMeta->posX + MM_CHARACTER_SELECT_HIGHLIGHT_OFFSET_X;
+			drawRect.y = selectedIconTransition->currY + activeCharacterSelectMeta->posY + MM_CHARACTER_SELECT_HIGHLIGHT_OFFSET_Y;
+			drawRect.w = MM_CHARACTER_SELECT_HIGHLIGHT_W;
+			drawRect.h = MM_CHARACTER_SELECT_HIGHLIGHT_H;
 
 			// this draws the flashing blue square that appears when you highlight a character in the character select screen
-			CTR_Box_DrawSolidBox(r, animatedColor, ot);
+			CTR_Box_DrawSolidBox(&drawRect, animatedColor, ot);
 		}
 		if ((D230.characterSelectModelMoveTimer[playerIndex] == 0) &&
 		    (D230.characterSelectPlayerState.currentCharacterID[playerIndex] == data.characterIDs[playerIndex]))
 		{
 			// get number of players
-			numPlyrNextGame = gGT->numPlyrNextGame;
+			u8 numPlyrNextGame = gGT->numPlyrNextGame;
 
 			// if number of players is 1 or 2
-			fontType = FONT_CREDITS;
+			u32 fontType = FONT_CREDITS;
 
 			// if number of players is 3 or 4
 			if (numPlyrNextGame >= 3)
@@ -1154,48 +1131,51 @@ dontDrawSelectCharacter:
 		    (unlockRequirement == MM_CHARACTER_UNLOCK_ALWAYS) ||
 
 		    // if character is unlocked
-		    // from 4-byte variable that handles all rewards
+		    // from the global unlock bitfield
 		    // also the variable written by cheats
-		    ((sdata->gameProgress.unlocks[unlockRequirement >> 5] >> (unlockRequirement & 0x1fU) & 1) != 0))
+		    CHECK_ADV_BIT(sdata->gameProgress.unlocks, unlockRequirement))
 		{
 			struct TransitionMeta *iconTransition = &D230.characterSelectTransitionMeta[iconIndex];
 
-			r->x = iconTransition->currX + activeCharacterSelectMeta[iconIndex].posX;
-			r->y = iconTransition->currY + activeCharacterSelectMeta[iconIndex].posY;
-			r->w = MM_CHARACTER_SELECT_ICON_RECT_W;
-			r->h = MM_CHARACTER_SELECT_ICON_RECT_H;
+			drawRect.x = iconTransition->currX + activeCharacterSelectMeta[iconIndex].posX;
+			drawRect.y = iconTransition->currY + activeCharacterSelectMeta[iconIndex].posY;
+			drawRect.w = MM_CHARACTER_SELECT_ICON_RECT_W;
+			drawRect.h = MM_CHARACTER_SELECT_ICON_RECT_H;
 
 			// Draw 2D Menu rectangle background
-			RECTMENU_DrawInnerRect(r, 0, ot);
+			RECTMENU_DrawInnerRect(&drawRect, 0, ot);
 		}
 	}
 
-	windowPos = D230.activeCharacterSelectWindowPos;
+	SVec2 *windowPos = D230.activeCharacterSelectWindowPos;
 
 	for (s32 playerIndex = 0; playerIndex < gGT->numPlyrNextGame; playerIndex++)
 	{
 		struct TransitionMeta *driverWindowTransition = &D230.characterSelectTransitionMeta[playerIndex + MM_CHARACTER_SELECT_DRIVER_WINDOW_TRANSITION_FIRST];
+		b32 playerSelected = (((int)(s16)sdata->characterSelectFlags >> playerIndex) & 1U) != 0;
+		Color animatedColor;
 
 		// store window width and height in one 4-byte variable
-		r->x = driverWindowTransition->currX + windowPos->x;
-		r->y = driverWindowTransition->currY + windowPos->y;
-		r->w = D230.characterSelectWindowWidth;
-		r->h = D230.characterSelectWindowHeight;
+		drawRect.x = driverWindowTransition->currX + windowPos->x;
+		drawRect.y = driverWindowTransition->currY + windowPos->y;
+		drawRect.w = D230.characterSelectWindowWidth;
+		drawRect.h = D230.characterSelectWindowHeight;
 
 		MM_Characters_AnimateColors((u8 *)&animatedColor, playerIndex,
 
 		                            // flags of which characters are selected
-		                            ((int)(s16)sdata->characterSelectFlags >> playerIndex ^ 1U) & 1);
+		                            playerSelected ^ 1);
 
-		RECTMENU_DrawOuterRect_HighLevel(r, animatedColor, 0, ot);
+		RECTMENU_DrawOuterRect_HighLevel(&drawRect, animatedColor, 0, ot);
 
 		// if player selected a character
-		if (((int)(s16)sdata->characterSelectFlags >> playerIndex & 1U) != 0)
+		if (playerSelected)
 		{
-			r58.x = r->x;
-			r58.y = r->y;
-			r58.w = r->w;
-			r58.h = r->h;
+			RECT r58;
+			r58.x = drawRect.x;
+			r58.y = drawRect.y;
+			r58.w = drawRect.w;
+			r58.h = drawRect.h;
 
 			for (s32 borderIndex = 0; borderIndex < MM_CHARACTER_SELECT_SELECTED_BORDER_COUNT; borderIndex++)
 			{
@@ -1214,14 +1194,14 @@ dontDrawSelectCharacter:
 		windowPos++;
 
 		// Draw 2D Menu rectangle background
-		RECTMENU_DrawInnerRect(r, 9, &ot[3]);
+		RECTMENU_DrawInnerRect(&drawRect, 9, &ot[3]);
 
 		// not screen-space anymore,
 		// this is viewport-space
-		r->x = 0;
-		r->y = 0;
+		drawRect.x = 0;
+		drawRect.y = 0;
 
-		RECTMENU_DrawRwdBlueRect(r, &D230.characterSelect_BlueRectColors[0], &gGT->pushBuffer[playerIndex].ptrOT[0x3ff], &gGT->backBuffer->primMem);
+		RECTMENU_DrawRwdBlueRect(&drawRect, &D230.characterSelect_BlueRectColors[0], &gGT->pushBuffer[playerIndex].ptrOT[0x3ff], &gGT->backBuffer->primMem);
 	}
 	return;
 }

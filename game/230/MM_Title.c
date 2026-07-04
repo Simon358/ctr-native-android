@@ -287,23 +287,17 @@ void MM_Title_KillThread(void)
 // NOTE(aalhendi): ASM-verified against NTSC-U 926 overlay 230 0x800ac178-0x800ac1f0.
 void MM_Title_SetTrophyDPP(void)
 {
-	u32 secondaryFlags;
-	struct InstDrawPerPlayer *idpp1;
-	struct InstDrawPerPlayer *idpp2;
 	struct Title *title = D230.titleObj;
-	int otRangeNormal;
-	int otRangeSecondary;
-	int depthOffset;
 
 	if (title == NULL)
 	{
 		return;
 	}
 
-	idpp1 = INST_GETIDPP(title->i[1]); // "title"
-	idpp2 = INST_GETIDPP(title->i[2]); // another "title"
+	struct InstDrawPerPlayer *idpp1 = INST_GETIDPP(title->i[1]); // "title"
+	struct InstDrawPerPlayer *idpp2 = INST_GETIDPP(title->i[2]); // another "title"
 
-	secondaryFlags = idpp2->instFlags;
+	u32 secondaryFlags = idpp2->instFlags;
 	if ((secondaryFlags & PUSHBUFFER_EXISTS) != 0)
 	{
 		return;
@@ -312,9 +306,9 @@ void MM_Title_SetTrophyDPP(void)
 	secondaryFlags |= ~DRAW_SUCCESSFUL;
 	idpp1->instFlags &= secondaryFlags;
 
-	otRangeNormal = idpp2->otRangeNormal;
-	otRangeSecondary = idpp2->otRangeSecondary;
-	depthOffset = CTR_ReadU32LE(&idpp2->depthOffset[0]);
+	int otRangeNormal = idpp2->otRangeNormal;
+	int otRangeSecondary = idpp2->otRangeSecondary;
+	int depthOffset = CTR_ReadU32LE(&idpp2->depthOffset[0]);
 
 	idpp1->otRangeNormal = otRangeNormal;
 	idpp1->otRangeSecondary = otRangeSecondary;
@@ -324,17 +318,13 @@ void MM_Title_SetTrophyDPP(void)
 // NOTE(aalhendi): ASM-verified against NTSC-U 926 overlay 230 0x800ac1f0-0x800ac350.
 void MM_Title_CameraMove(struct Title *title, s32 frameIndex)
 {
-	s32 result;
-	const struct TitleCameraPathFrame *cameraFrame;
-	struct GameTracker *gGT;
-
 	// after frame 0xe6, make the intro models transition from the center
 	// of the screen, to the left of the screen, over the course of 15 frames
-	result = RaceFlag_MoveModels(D230.titleIntroFrame - TITLE_INTRO_MENU_READY_FRAME, TITLE_CAMERA_MOVE_FRAMES);
+	s32 result = RaceFlag_MoveModels(D230.titleIntroFrame - TITLE_INTRO_MENU_READY_FRAME, TITLE_CAMERA_MOVE_FRAMES);
 
-	gGT = sdata->gGT;
+	struct GameTracker *gGT = sdata->gGT;
 
-	cameraFrame = &D230.titleIntroCameraPath[frameIndex];
+	const struct TitleCameraPathFrame *cameraFrame = &D230.titleIntroCameraPath[frameIndex];
 
 	for (s32 axisIndex = 0; axisIndex < 3; axisIndex++)
 	{
@@ -394,13 +384,8 @@ static void MM_Title_UpdateTrophySpecLight(struct Instance *titleInst)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 overlay 230 0x800ac350-0x800ac6dc.
 void MM_Title_ThTick(struct Thread *title)
 {
-	s16 animFram;
-	struct Instance *titleInst;
-	s32 timer;
-	struct Title *ptrTitle;
-
 	// frame counters
-	timer = D230.titleIntroFrame;
+	s32 timer = D230.titleIntroFrame;
 
 	// If you press Cross, Circle, Triangle, or Square
 	if ((sdata->buttonTapPerPlayer[0] & TITLE_INTRO_SKIP_INPUT) != 0)
@@ -429,18 +414,18 @@ void MM_Title_ThTick(struct Thread *title)
 	}
 
 	// copy pointer to title object
-	ptrTitle = (struct Title *)title->object;
+	struct Title *ptrTitle = (struct Title *)title->object;
 
 	// loop through title instances
 	for (s32 instanceIndex = 0; instanceIndex < TITLE_INSTANCE_COUNT; instanceIndex++)
 	{
 		// current instance
-		titleInst = ptrTitle->i[instanceIndex];
+		struct Instance *titleInst = ptrTitle->i[instanceIndex];
 
 		titleInst->flags &= ~HIDE_MODEL;
 
 		// the frame of title screen that each instance should start animation
-		animFram = D230.titleInstances[instanceIndex].animStartFrame;
+		s16 animFram = D230.titleInstances[instanceIndex].animStartFrame;
 
 		// set all instances to first animation
 		titleInst->animIndex = 0;
@@ -507,9 +492,6 @@ void MM_Title_ThTick(struct Thread *title)
 void MM_Title_Init(void)
 {
 	struct GameTracker *gGT = sdata->gGT;
-	struct Thread *t;
-	struct Instance *inst;
-	struct Title *title;
 
 	if (
 	    // if "title" object is nullptr
@@ -537,9 +519,9 @@ void MM_Title_Init(void)
 		// pointer to Intro Cam, to view Crash holding Trophy in main menu
 		D230.titleIntroCameraPath = pointers[ST1_CAMERA_PATH];
 
-		t = PROC_BirthWithObject(SIZE_RELATIVE_POOL_BUCKET(sizeof(struct Title), NONE, MEDIUM, OTHER), MM_Title_ThTick, 0, 0);
+		struct Thread *t = PROC_BirthWithObject(SIZE_RELATIVE_POOL_BUCKET(sizeof(struct Title), NONE, MEDIUM, OTHER), MM_Title_ThTick, 0, 0);
 
-		title = t->object;
+		struct Title *title = t->object;
 
 		D230.titleObj = title;
 
@@ -550,7 +532,7 @@ void MM_Title_Init(void)
 		// create title instances
 		for (s32 instanceIndex = 0; instanceIndex < TITLE_INSTANCE_COUNT; instanceIndex++)
 		{
-			inst = INSTANCE_Birth3D(gGT->modelPtr[D230.titleInstances[instanceIndex].modelID], 0, t);
+			struct Instance *inst = INSTANCE_Birth3D(gGT->modelPtr[D230.titleInstances[instanceIndex].modelID], 0, t);
 
 			// store instance
 			title->i[instanceIndex] = inst;

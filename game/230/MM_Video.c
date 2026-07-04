@@ -340,7 +340,7 @@ void MM_Video_StartStream(int cdStartSector, int streamFrameCount)
 	CdIntToPos(cdStartSector, &V230.cdLocation1);
 
 	// next parameter (0) = START_FRAME
-	StSetStream((V230.flags & MM_VIDEO_FLAG_RGB24), 0, 0xffffffff, 0, 0);
+	StSetStream((V230.flags & MM_VIDEO_FLAG_RGB24), 0, MM_VIDEO_STREAM_END_FRAME_NONE, 0, 0);
 
 	// NOTE(aalhendi): ASM-verified NTSC-U 926 0x800b6210-0x800b621c for video CD stream mode.
 	CDSYS_SetMode_StreamData();
@@ -359,7 +359,7 @@ void MM_Video_StopStream(void)
 {
 	// NOTE(aalhendi): ASM-verified NTSC-U 926 0x800b6260-0x800b62d8.
 	int cdReady = CdDiskReady(1);
-	if (cdReady == 2)
+	if (cdReady == CdlComplete)
 	{
 		do
 		{
@@ -386,10 +386,6 @@ void MM_Video_StopStream(void)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800b62d8-0x800b64d4.
 void MM_Video_AllocMem(u32 width, u16 height, u32 flags, int ringSectorCount, int vlcBufferShift)
 {
-	b32 isRGB24;
-	u32 paddedHeight;
-	int bytesPerPixel;
-
 	MEMPACK_PushState();
 
 	// just in case
@@ -403,13 +399,13 @@ void MM_Video_AllocMem(u32 width, u16 height, u32 flags, int ringSectorCount, in
 		V230.ringSectorCount = MM_VIDEO_DEFAULT_RING_SECTORS;
 	}
 
-	isRGB24 = (flags & MM_VIDEO_FLAG_RGB24);
+	b32 isRGB24 = (flags & MM_VIDEO_FLAG_RGB24);
 
-	bytesPerPixel = (isRGB24) ? 3 : 2;
+	int bytesPerPixel = (isRGB24) ? 3 : 2;
 
 	V230.dctMode = (u16)isRGB24;
 
-	paddedHeight = (((height - 1) >> 4) + 1) * 0x10;
+	u32 paddedHeight = (((height - 1) >> 4) + 1) * 0x10;
 	V230.finalSliceIndex = (((width - 1) >> 4) + 1U) - 1;
 	V230.dctOutBufferIndex = 0;
 	V230.vlcBufferIndex = 0;
@@ -450,10 +446,10 @@ void MM_Video_ClearMem(void)
 #ifndef CTR_NATIVE
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800b64f4-0x800b6674.
-u32 MM_Video_DecodeFrame(s16 offsetX, s16 offsetY)
+b32 MM_Video_DecodeFrame(s16 offsetX, s16 offsetY)
 {
 	int cdReady = CdDiskReady(1);
-	u32 boolDraw;
+	b32 canDrawFrame;
 
 	if (V230.cdRetryState == 1)
 	{
@@ -467,7 +463,7 @@ u32 MM_Video_DecodeFrame(s16 offsetX, s16 offsetY)
 	}
 	else
 	{
-		if (cdReady == 0x10)
+		if (cdReady == CdlStatShellOpen)
 		{
 			V230.decodeState = 1;
 			V230.stallRecoveryFrames = 0;
@@ -479,7 +475,7 @@ u32 MM_Video_DecodeFrame(s16 offsetX, s16 offsetY)
 	if (V230.cdRetryState == 1)
 	{
 		V230.drawNextFrame = 0;
-		boolDraw = 0;
+		canDrawFrame = false;
 	}
 	else
 	{
@@ -492,7 +488,7 @@ u32 MM_Video_DecodeFrame(s16 offsetX, s16 offsetY)
 
 		// if value is zero, return zero,
 		// not ready to draw
-		boolDraw = V230.drawNextFrame;
+		canDrawFrame = V230.drawNextFrame != 0;
 
 		if (V230.drawNextFrame == 1)
 		{
@@ -510,32 +506,21 @@ u32 MM_Video_DecodeFrame(s16 offsetX, s16 offsetY)
 			DecDCTout(V230.out_Buf[V230.dctOutBufferIndex], V230.dctOutSliceSize);
 
 			// return 1, ready to draw
-			boolDraw = (u32)V230.drawNextFrame;
+			canDrawFrame = V230.drawNextFrame != 0;
 		}
 	}
-	return boolDraw;
+	return canDrawFrame;
 }
 
 // NOTE(aalhendi): ASM-verified NTSC-U 926 PSX path 0x800b6674-0x800b67ac.
-u32 MM_Video_CheckIfFinished(int pollCdReady)
+b32 MM_Video_CheckIfFinished(b32 pollCdReady)
 {
-	b32 cdReadError;
-	u32 isFinished;
+	b32 isFinished;
 	int cdReady;
-	int timeoutFrames;
-	int cdPollTimer;
+	int timeoutFrames = MM_VIDEO_DCT_OUTPUT_TIMEOUT_POLLS;
+	int cdPollTimer = MM_VIDEO_CD_READY_POLL_INTERVAL;
 
-#ifdef CTR_NATIVE
-	// NOTE(aalhendi): Native compiler optimizes this delay loop differently;
-	// retail PSX uses 40000.
-	timeoutFrames = 90000;
-#else
-	timeoutFrames = 40000;
-#endif
-
-	cdPollTimer = 0x28;
-
-	cdReadError = false;
+	b32 cdReadError = false;
 
 	if (V230.drawNextFrame == 0)
 	{
@@ -549,14 +534,14 @@ u32 MM_Video_CheckIfFinished(int pollCdReady)
 			{
 				cdReady = CdDiskReady(1);
 
-				if (cdReady == 0x10)
+				if (cdReady == CdlStatShellOpen)
 				{
 					cdReadError = true;
 					V230.dctOutputDone = 1;
 				}
 				else
 				{
-					cdPollTimer = 0x28;
+					cdPollTimer = MM_VIDEO_CD_READY_POLL_INTERVAL;
 				}
 			}
 
@@ -571,7 +556,7 @@ u32 MM_Video_CheckIfFinished(int pollCdReady)
 
 		do
 		{
-			cdReady = IsIdleGPU(10000);
+			cdReady = IsIdleGPU(MM_VIDEO_GPU_IDLE_TIMEOUT);
 
 		} while (cdReady != 0);
 
@@ -587,7 +572,7 @@ u32 MM_Video_CheckIfFinished(int pollCdReady)
 		}
 
 		// end of scrapbook
-		isFinished = (u32)V230.endOfStream;
+		isFinished = V230.endOfStream != 0;
 	}
 	return isFinished;
 }

@@ -78,28 +78,19 @@ void MM_HighScore_Text3D(char *string, int posX, int posY, s16 font, u32 flags)
 // NOTE(aalhendi): ASM-verified NTSC-U 926 overlay 230 0x800b2fbc-0x800b3914.
 void MM_HighScore_Draw(u16 trackIndex, u32 rowIndex, u32 posX, u32 posY)
 {
-	s16 numColor;
-	s16 lineWidth;
-	u32 *colorPtr;
-	s16 levelID;
-	struct HighScoreEntry *entry;
-	RECT videoBox;
-	s16 offsetX;
-	s16 offsetY;
-
 	struct GameTracker *gGT = sdata->gGT;
 
-	offsetX = (s16)posX;
-	offsetY = (s16)posY;
+	s16 offsetX = (s16)posX;
+	s16 offsetY = (s16)posY;
 
-	levelID = D230.arcadeTracks[trackIndex].levID;
+	s16 levelID = D230.arcadeTracks[trackIndex].levID;
 
-	lineWidth = DecalFont_GetLineWidth(sdata->lngStrings[data.metaDataLEV[levelID].name_LNG], FONT_BIG);
+	s16 lineWidth = DecalFont_GetLineWidth(sdata->lngStrings[data.metaDataLEV[levelID].name_LNG], FONT_BIG);
 	lineWidth = lineWidth >> 1;
 
 	// get color data
-	numColor = ((sdata->frameCounter & MM_HIGHSCORE_FLASH_TIMER_BIT) == 0) ? RED : ORANGE;
-	colorPtr = data.ptrColor[numColor];
+	s16 numColor = ((sdata->frameCounter & MM_HIGHSCORE_FLASH_TIMER_BIT) == 0) ? RED : ORANGE;
+	u32 *colorPtr = data.ptrColor[numColor];
 
 	struct Icon **iconPtrArray = ICONGROUP_GETICONS(gGT->iconGroup[MM_HIGHSCORE_ARROW_ICON_GROUP]);
 	const struct TransitionMeta *titleMeta = &D230.transitionMeta_HighScores[MM_HIGHSCORE_TITLE_META_INDEX];
@@ -125,7 +116,7 @@ void MM_HighScore_Draw(u16 trackIndex, u32 rowIndex, u32 posX, u32 posY)
 	                    bestTrackMeta->currY + offsetY + MM_HIGHSCORE_BEST_TRACK_LABEL_Y_OFFSET, FONT_SMALL, 0);
 
 	// first entry: Time Trial or Relic
-	entry = &sdata->gameProgress.highScoreTracks[levelID].scoreEntry[rowIndex * MEMCARD_HIGH_SCORE_ENTRIES_PER_MODE];
+	struct HighScoreEntry *entry = &sdata->gameProgress.highScoreTracks[levelID].scoreEntry[rowIndex * MEMCARD_HIGH_SCORE_ENTRIES_PER_MODE];
 
 	// if Time Trial
 	// with ghost stars, and Best Lap
@@ -211,6 +202,7 @@ void MM_HighScore_Draw(u16 trackIndex, u32 rowIndex, u32 posX, u32 posY)
 		    FONT_SMALL, 0);
 	}
 
+	RECT videoBox;
 	videoBox.w = MM_HIGHSCORE_VIDEO_BOX_W;
 	videoBox.h = MM_HIGHSCORE_VIDEO_BOX_H;
 	videoBox.x = D230.transitionMeta_HighScores[MM_HIGHSCORE_VIDEO_META_INDEX].currX + offsetX + MM_HIGHSCORE_VIDEO_BOX_X_OFFSET;
@@ -235,19 +227,10 @@ void MM_HighScore_Init(void)
 void MM_HighScore_MenuProc(struct RectMenu *menu_unused)
 {
 	(void)menu_unused;
-	u8 videoResetRequested;
-	u8 slideReachedTarget;
 	s16 nextFrameCount;
-	u32 trackOpen;
-	s32 menuResult;
-	s32 videoState;
-	s32 nextOffsetX;
-	s32 nextOffsetY;
-	s32 currOffsetX;
-	s32 currOffsetY;
 	RECT wipeRect;
 
-	videoResetRequested = false;
+	b32 videoResetRequested = false;
 	if (D230.highScoreTransition.state != IN_MENU)
 	{
 		nextFrameCount = D230.highScoreTransition.mainFrame;
@@ -299,7 +282,7 @@ void MM_HighScore_MenuProc(struct RectMenu *menu_unused)
 		{
 			if ((sdata->buttonTapPerPlayer[0] & BTN_RIGHT) == 0)
 			{
-				menuResult = RECTMENU_ProcessInput(&D230.menuHighScore);
+				s32 menuResult = RECTMENU_ProcessInput(&D230.menuHighScore);
 				if ((s16)menuResult == -1)
 				{
 					D230.highScoreTransition.state = EXITING_MENU;
@@ -322,6 +305,7 @@ void MM_HighScore_MenuProc(struct RectMenu *menu_unused)
 			{
 				videoResetRequested = true;
 				D230.highScoreTransition.pendingHorizontalMove = 1;
+				b32 trackOpen;
 				do
 				{
 					D230.highScoreSelection.targetTrack = D230.highScoreSelection.targetTrack + 1;
@@ -330,13 +314,14 @@ void MM_HighScore_MenuProc(struct RectMenu *menu_unused)
 						D230.highScoreSelection.targetTrack = 0;
 					}
 					trackOpen = MM_TrackSelect_boolTrackOpen(D230.arcadeTracks + D230.highScoreSelection.targetTrack);
-				} while ((trackOpen & 0xffff) == 0);
+				} while (!trackOpen);
 			}
 		}
 		else
 		{
 			videoResetRequested = true;
 			D230.highScoreTransition.pendingHorizontalMove = -1;
+			b32 trackOpen;
 			do
 			{
 				D230.highScoreSelection.targetTrack = D230.highScoreSelection.targetTrack - 1;
@@ -345,7 +330,7 @@ void MM_HighScore_MenuProc(struct RectMenu *menu_unused)
 					D230.highScoreSelection.targetTrack = MM_HIGHSCORE_LAST_ARCADE_TRACK;
 				}
 				trackOpen = MM_TrackSelect_boolTrackOpen(D230.arcadeTracks + D230.highScoreSelection.targetTrack);
-			} while ((trackOpen & 0xffff) == 0);
+			} while (!trackOpen);
 		}
 	}
 	else
@@ -358,14 +343,11 @@ void MM_HighScore_MenuProc(struct RectMenu *menu_unused)
 
 LAB_OVR_230__800b3c78:
 
-	videoState = 0;
-	if ((((videoResetRequested) || (D230.highScoreTransition.trackFrame != 0)) || (D230.highScoreTransition.rowFrame != 0)) ||
-	    (D230.highScoreTransition.state == EXITING_MENU))
-	{
-		videoState = 1;
-	}
-
+{
+	b32 videoState = (((videoResetRequested) || (D230.highScoreTransition.trackFrame != 0)) || (D230.highScoreTransition.rowFrame != 0)) ||
+	                 (D230.highScoreTransition.state == EXITING_MENU);
 	MM_TrackSelect_Video_State(videoState);
+}
 	nextFrameCount = D230.highScoreTransition.trackFrame + -1;
 	if (D230.highScoreTransition.trackFrame == 0)
 	{
@@ -388,7 +370,7 @@ LAB_OVR_230__800b3c78:
 		}
 		else
 		{
-			slideReachedTarget = D230.highScoreTransition.rowFrame == 1;
+			u8 slideReachedTarget = D230.highScoreTransition.rowFrame == 1;
 			D230.highScoreTransition.rowFrame = nextFrameCount;
 			if (slideReachedTarget)
 			{
@@ -398,7 +380,7 @@ LAB_OVR_230__800b3c78:
 	}
 	else
 	{
-		slideReachedTarget = D230.highScoreTransition.trackFrame == 1;
+		u8 slideReachedTarget = D230.highScoreTransition.trackFrame == 1;
 		D230.highScoreTransition.trackFrame = nextFrameCount;
 		if (slideReachedTarget)
 		{
@@ -409,8 +391,8 @@ LAB_OVR_230__800b3c78:
 	RECTMENU_DrawSelf(&D230.menuHighScore, D230.transitionMeta_HighScores[MM_HIGHSCORE_MENU_META_INDEX].currX,
 	                  D230.transitionMeta_HighScores[MM_HIGHSCORE_MENU_META_INDEX].currY, MM_HIGHSCORE_MENU_WIDTH);
 
-	currOffsetY = 0;
-	currOffsetX = 0;
+	s32 currOffsetY = 0;
+	s32 currOffsetX = 0;
 
 	if (D230.highScoreTransition.trackFrame == 0)
 	{
@@ -441,8 +423,8 @@ LAB_OVR_230__800b3c78:
 			RECTMENU_DrawInnerRect(&wipeRect, 0, ot);
 		}
 	}
-	nextOffsetX = 0;
-	nextOffsetY = 0;
+	s32 nextOffsetX = 0;
+	s32 nextOffsetY = 0;
 	if (D230.highScoreTransition.trackFrame == 0)
 	{
 		nextOffsetY = D230.highScoreTransition.rowFrame * -MM_HIGHSCORE_ROW_SLIDE_STEP_Y * (int)D230.highScoreTransition.activeVerticalMove;

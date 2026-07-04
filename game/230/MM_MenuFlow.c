@@ -5,14 +5,12 @@ u8 MM_TransitionInOut(struct TransitionMeta *meta, int framesPassed, int numFram
 {
 	u8 allTransitionsDone = 1;
 	int transitionIndex = 0;
-	s16 start;
-	s16 framesLeft;
 
 	// last member of array is null-terminated with 0xFFFF
 	for (/**/; meta->headStart > -1; meta++, transitionIndex++)
 	{
-		start = meta->headStart;
-		framesLeft = ((s16)framesPassed - start);
+		s16 start = meta->headStart;
+		s16 framesLeft = ((s16)framesPassed - start);
 
 		if ((framesLeft == MM_TRANSITION_SWISH_FRAME) && (transitionIndex == 0))
 		{
@@ -47,11 +45,10 @@ u8 MM_TransitionInOut(struct TransitionMeta *meta, int framesPassed, int numFram
 // NOTE(aalhendi): ASM-verified NTSC-U 926 0x800acff4-0x800ad448.
 void MM_MenuProc_Main(struct RectMenu *mainMenu)
 {
-	s16 choose;
 	struct GameTracker *gGT = sdata->gGT;
 
 	// if scrapbook is unlocked, change "rows" to extended array
-	if (CHECK_ADV_BIT(sdata->gameProgress.unlocks, GAME_UNLOCK_BIT_SCRAPBOOK) != 0)
+	if (CHECK_ADV_BIT(sdata->gameProgress.unlocks, GAME_UNLOCK_BIT_SCRAPBOOK))
 	{
 		mainMenu->rows = &D230.rowsMainMenuWithScrapbook[0];
 	}
@@ -155,7 +152,7 @@ void MM_MenuProc_Main(struct RectMenu *mainMenu)
 	gGT->numLaps = MM_DEFAULT_LAP_COUNT;
 
 	// get LNG index of row selected
-	choose = mainMenu->rows[mainMenu->rowSelected].stringIndex;
+	s16 choose = mainMenu->rows[mainMenu->rowSelected].stringIndex;
 
 	// Adventure Mode
 	if (choose == LNG_ADVENTURE)
@@ -269,7 +266,7 @@ void MM_ToggleRows_PlayerCount(void)
 		// unlock row
 		row->stringIndex &= MENU_ROW_LNG_MASK;
 
-		if ((MainFrame_HaveAllPads(rowIndex + 1) & 0xffff) == 0)
+		if (!MainFrame_HaveAllPads(rowIndex + 1))
 		{
 			// lock row
 			row->stringIndex |= MENU_ROW_LOCKED;
@@ -283,7 +280,7 @@ void MM_ToggleRows_PlayerCount(void)
 		// unlock row
 		row->stringIndex &= MENU_ROW_LNG_MASK;
 
-		if ((MainFrame_HaveAllPads(rowIndex + 2) & 0xffff) == 0)
+		if (!MainFrame_HaveAllPads(rowIndex + 2))
 		{
 			// lock row
 			row->stringIndex |= MENU_ROW_LOCKED;
@@ -293,12 +290,9 @@ void MM_ToggleRows_PlayerCount(void)
 
 // NOTE(aalhendi): ASM-verified against NTSC-U 926 overlay 230 0x800ad560-0x800ad5e8.
 void MM_MenuProc_1p2p(struct RectMenu *menu)
-
 {
-	s16 row;
 	struct GameTracker *gGT = sdata->gGT;
-
-	row = menu->rowSelected;
+	s16 row = menu->rowSelected;
 
 	// if uninitialized
 	if (row == -1)
@@ -331,10 +325,8 @@ void MM_MenuProc_1p2p(struct RectMenu *menu)
 // NOTE(aalhendi): ASM-verified against NTSC-U 926 overlay 230 0x800ad5e8-0x800ad678.
 void MM_MenuProc_2p3p4p(struct RectMenu *menu)
 {
-	s16 row;
 	struct GameTracker *gGT = sdata->gGT;
-
-	row = menu->rowSelected;
+	s16 row = menu->rowSelected;
 
 	// if uninitialized
 	if (row == -1)
@@ -367,14 +359,11 @@ void MM_MenuProc_2p3p4p(struct RectMenu *menu)
 void MM_ToggleRows_Difficulty(void)
 {
 	struct GameTracker *gGT = sdata->gGT;
-	s16 bitIndex;
-	u16 lngIndex;
-	u32 isUnlocked;
 
 	// check 3 mods (easy, medium, hard)
 	for (s32 difficultyIndex = 0; difficultyIndex < MM_DIFFICULTY_COUNT; difficultyIndex++)
 	{
-		bitIndex = D230.cupDifficulty.firstUnlockBit[difficultyIndex];
+		s16 bitIndex = D230.cupDifficulty.firstUnlockBit[difficultyIndex];
 
 		// if -1 (for EASY row), skip
 		if (-1 == bitIndex)
@@ -383,7 +372,7 @@ void MM_ToggleRows_Difficulty(void)
 		}
 
 		// assume unlocked
-		isUnlocked = 1;
+		u32 isUnlocked = 1;
 
 		// check 4 bits starting at bitIndex,
 		// one for each track in cup
@@ -398,13 +387,13 @@ void MM_ToggleRows_Difficulty(void)
 				s32 unlockBit = (s32)bitIndex + trackIndex;
 
 				// check what is unlocked
-				isUnlocked = (sdata->gameProgress.unlocks[unlockBit >> 5] >> (unlockBit & 0x1f)) & 1;
+				isUnlocked = CHECK_ADV_BIT(sdata->gameProgress.unlocks, unlockBit);
 			}
 		}
 
 		// get current value of lng index,
 		// for easy, medium, hard
-		lngIndex = D230.cupDifficulty.stringIndex[difficultyIndex];
+		u16 lngIndex = D230.cupDifficulty.stringIndex[difficultyIndex];
 
 		if (
 		    // if locked
@@ -457,11 +446,8 @@ void MM_MenuProc_Difficulty(struct RectMenu *menu)
 // NOTE(aalhendi): ASM-verified against NTSC-U 926 overlay 230 0x800ad828-0x800ad8f0.
 void MM_MenuProc_SingleCup(struct RectMenu *menu)
 {
-	s16 row;
-	struct GameTracker *gGT;
-
-	gGT = sdata->gGT;
-	row = menu->rowSelected;
+	struct GameTracker *gGT = sdata->gGT;
+	s16 row = menu->rowSelected;
 
 	if (row == -1)
 	{
@@ -503,10 +489,8 @@ void MM_MenuProc_SingleCup(struct RectMenu *menu)
 // NOTE(aalhendi): ASM-verified against NTSC-U 926 overlay 230 0x800ad8f0-0x800ad980.
 void MM_MenuProc_NewLoad(struct RectMenu *menu)
 {
-	s16 row;
-
 	// row number
-	row = menu->rowSelected;
+	s16 row = menu->rowSelected;
 
 	if (row == -1)
 	{
@@ -552,7 +536,7 @@ void MM_ResetAllMenus(void)
 #endif
 
 			// Close menu
-			menu->state |= 8;
+			menu->state |= RECTMENU_CLOSE_TRANSIENT;
 			menu->state &= ~(ONLY_DRAW_TITLE | DRAW_NEXT_MENU_IN_HIERARCHY);
 
 			// Reset ptrNext and ptrPrev

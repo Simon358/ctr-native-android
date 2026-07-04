@@ -22,7 +22,6 @@ void MM_Scrapbook_Init(void)
 #define SCRAPBOOK_NATIVE_XA_CHANNEL    1
 #define SCRAPBOOK_NATIVE_FRAME_Y_PAD   4
 #define SCRAPBOOK_NATIVE_DISPLAY_WIDTH SCREEN_WIDTH
-#define SCRAPBOOK_NATIVE_FRAME_VBLANKS 4
 
 global_variable s32 s_scrapbookNativeNextVBlank;
 
@@ -53,8 +52,6 @@ CTR_GCC_OPTIMIZE_O0 int ScrapBookPlayMovie_DecodeFrame()
 // NOTE(aalhendi): ASM-verified NTSC-U 926 overlay 230 0x800b4014-0x800b42b0 PSX path.
 void MM_Scrapbook_PlayMovie(struct RectMenu *menu)
 {
-	s16 lev;
-	int getButtonPress = 0;
 	struct GameTracker *gGT = sdata->gGT;
 
 	// book state (0,1,2,3,4)
@@ -63,7 +60,7 @@ void MM_Scrapbook_PlayMovie(struct RectMenu *menu)
 	// Init State,
 	// alter checkered flag
 	case SCRAP_INIT:
-		if (RaceFlag_IsFullyOnScreen() == 1)
+		if (RaceFlag_IsFullyOnScreen())
 		{
 			// checkered flag, begin transition off-screen
 			RaceFlag_BeginTransition(2);
@@ -80,7 +77,7 @@ void MM_Scrapbook_PlayMovie(struct RectMenu *menu)
 	case SCRAP_LOAD:
 
 		// if not fully off screen
-		if (RaceFlag_IsFullyOffScreen() != 1)
+		if (!RaceFlag_IsFullyOffScreen())
 		{
 			// quit, dont start video yet
 			return;
@@ -99,7 +96,7 @@ void MM_Scrapbook_PlayMovie(struct RectMenu *menu)
 				NativeSTR_Stop();
 				goto GO_BACK;
 			}
-			s_scrapbookNativeNextVBlank = Platform_GetVBlankCount() + SCRAPBOOK_NATIVE_FRAME_VBLANKS;
+			s_scrapbookNativeNextVBlank = Platform_GetVBlankCount() + SCRAPBOOK_FRAME_VBLANKS;
 			D230.scrapbookState = SCRAP_PLAY;
 			return;
 		}
@@ -111,16 +108,10 @@ void MM_Scrapbook_PlayMovie(struct RectMenu *menu)
 			SpuSetCommonCDVolume(sdata->vol_Music << 7, sdata->vol_Music << 7);
 
 			// Alloc memory to store Scrapbook
-			MM_Video_AllocMem(0x200, 0xd0, MM_VIDEO_FLAG_HAS_XA_AUDIO | MM_VIDEO_FLAG_SCRAPBOOK, MM_VIDEO_DEFAULT_RING_SECTORS, 1);
+			MM_Video_AllocMem(SCRAPBOOK_VIDEO_WIDTH, SCRAPBOOK_VIDEO_HEIGHT, MM_VIDEO_FLAG_HAS_XA_AUDIO | MM_VIDEO_FLAG_SCRAPBOOK,
+			                  MM_VIDEO_DEFAULT_RING_SECTORS, 1);
 
 			cdPos = CdPosToInt(&cdlFile.pos);
-
-			// scrapbook runs 15fps,
-			// see bottom of Duckstation screen while running
-
-			// scrapbook is 4.91 min, 4 mins + 54 sec,
-			// (4424 total / 15fps / 60 sec per min) mins,
-			// 0x1148 = 4424 = stream frames
 
 			// CD position of video, and stream frame count
 			MM_Video_StartStream(cdPos, SCRAPBOOK_STREAM_FRAMES);
@@ -136,6 +127,8 @@ void MM_Scrapbook_PlayMovie(struct RectMenu *menu)
 
 	// Actually play the movie
 	case SCRAP_PLAY:
+	{
+		int getButtonPress;
 
 #ifndef CTR_NATIVE
 		// infinite loop (cause this is scrapbook),
@@ -187,16 +180,17 @@ void MM_Scrapbook_PlayMovie(struct RectMenu *menu)
 			// elapsed decode vblanks toward the retail 15fps cadence instead of
 			// adding them on top of a fresh VSync(4).
 			Platform_WaitUntilVBlank(s_scrapbookNativeNextVBlank);
-			s_scrapbookNativeNextVBlank += SCRAPBOOK_NATIVE_FRAME_VBLANKS;
+			s_scrapbookNativeNextVBlank += SCRAPBOOK_FRAME_VBLANKS;
 		}
 		else
 		{
-			VSync(SCRAPBOOK_NATIVE_FRAME_VBLANKS);
+			VSync(SCRAPBOOK_FRAME_VBLANKS);
 		}
 #else
-		VSync(4);
+		VSync(SCRAPBOOK_FRAME_VBLANKS);
 #endif
 		break;
+	}
 
 	// return disc to normal,
 	// return checkered flag to normal
@@ -212,7 +206,7 @@ void MM_Scrapbook_PlayMovie(struct RectMenu *menu)
 		NativeSTR_Stop();
 #endif
 
-		if (RaceFlag_IsFullyOffScreen() == 1)
+		if (RaceFlag_IsFullyOffScreen())
 		{
 			RaceFlag_BeginTransition(1);
 		}
@@ -222,8 +216,10 @@ void MM_Scrapbook_PlayMovie(struct RectMenu *menu)
 		break;
 
 	case SCRAP_EXIT:
-		if (RaceFlag_IsFullyOnScreen() == 1)
+		if (RaceFlag_IsFullyOnScreen())
 		{
+			s16 lev;
+
 			// change checkered flag back
 			RaceFlag_SetDrawOrder(0);
 
