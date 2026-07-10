@@ -37,6 +37,7 @@ __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 // NEAREST sampling RG8 returns byte/255 exactly, identical to what the shader
 // got from RG32F, so CLUT/texture-page reconstruction is unchanged.
 #define VRAM_INTERNAL_FORMAT GL_RG8
+#endif
 
 extern SDL_Window *g_window;
 
