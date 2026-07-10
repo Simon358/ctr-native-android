@@ -64,7 +64,7 @@ CTR_STATIC_ASSERT(sizeof(struct MatrixND) == 0x20);
 CTR_STATIC_ASSERT(offsetof(struct MatrixND, bakedOffset) == 0x0);
 CTR_STATIC_ASSERT(offsetof(struct MatrixND, authoredRot) == 0x8);
 CTR_STATIC_ASSERT(offsetof(struct MatrixND, authoredScale) == 0x10);
-CTR_STATIC_ASSERT(MATRIX_ND_BAKED_MATRIX_OFFSET == offsetof(struct MatrixND, m[1][1]));
+CTR_STATIC_ASSERT(MATRIX_ND_BAKED_MATRIX_OFFSET == CTR_OFFSET_OF_2D_ARRAY(struct MatrixND, m, 1, 1));
 CTR_STATIC_ASSERT(MATRIX_ND_BAKED_MATRIX_OFFSET == offsetof(struct MatrixND, authoredRot));
 CTR_STATIC_ASSERT(offsetof(struct MatrixND, matrix) == 0x0);
 CTR_STATIC_ASSERT(BAKED_GTE_MATRIX_NONE == 0);
@@ -5226,7 +5226,7 @@ CTR_STATIC_ASSERT(sizeof(struct MetaDataMODEL) == 0xC);
 #define OFFSETOF_SDATA(ELEMENT) ((u32)0x8008cf6c + OFFSETOF(struct sData, ELEMENT))
 #define OFFSETOF_DATA(ELEMENT)  ((u32)0x800809a0 + OFFSETOF(struct Data, ELEMENT))
 
-CTR_STATIC_ASSERT(OFFSETOF_DATA(rowsQuit[0]) == 0x800841BC);
+CTR_STATIC_ASSERT(OFFSETOF_DATA(rowsQuit) == 0x800841BC);
 CTR_STATIC_ASSERT(OFFSETOF_DATA(menuQuit) == 0x800841D0);
 CTR_STATIC_ASSERT(OFFSETOF_DATA(playerIconAdvMap) == 0x80086418);
 CTR_STATIC_ASSERT(OFFSETOF_SDATA(AkuAkuHintState) == 0x8008D874);

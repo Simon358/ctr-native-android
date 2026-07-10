@@ -71,7 +71,7 @@ enum DrawLevelOvr1PGridSlotMode
 	DRAW_LEVEL_OVR1P_GRID_SLOT_WORD,
 };
 
-static const u32 DRAW_LEVEL_OVR1P_SLOT_WORD_PRESERVE = 0xffffffff;
+#define DRAW_LEVEL_OVR1P_SLOT_WORD_PRESERVE UINT32_C(0xffffffff)
 static int sDrawLevelOvr1P_FullDynamicInheritedOtIndex;
 static struct QuadBlock **sDrawLevelOvr1P_RenderedOverflowBase;
 static u8 *sDrawLevelOvr1P_ClipRecordStart;

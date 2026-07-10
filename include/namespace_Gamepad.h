@@ -67,7 +67,9 @@ enum Plug
 	PLUGGED = 0
 };
 
-struct __attribute__((packed)) ControllerPacket
+CTR_PACKED_BEGIN
+
+struct ControllerPacket
 {
 	// 0x0
 	u8 plugged;
@@ -131,7 +133,7 @@ struct __attribute__((packed)) ControllerPacket
 	// 8 bytes
 };
 
-struct __attribute__((packed)) MultitapPacket
+struct MultitapPacket
 {
 	union
 	{
@@ -161,6 +163,8 @@ struct __attribute__((packed)) MultitapPacket
 
 	// 34 bytes
 };
+
+CTR_PACKED_END
 
 CTR_STATIC_ASSERT(sizeof(struct ControllerPacket) == 8);
 CTR_STATIC_ASSERT(sizeof(struct MultitapPacket) == 34);

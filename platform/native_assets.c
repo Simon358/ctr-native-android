@@ -535,6 +535,7 @@ internal int NativeAssets_SetBaseDir(NativeStr8 baseDir)
 int NativeAssets_Init(const char *executableBasePath)
 {
 	char parentDir[NATIVE_ASSETS_PATH_MAX];
+	char grandparentDir[NATIVE_ASSETS_PATH_MAX];
 	NativeStr8 exeDir;
 
 	if ((executableBasePath == NULL) || (executableBasePath[0] == '\0'))
@@ -556,6 +557,16 @@ int NativeAssets_Init(const char *executableBasePath)
 		if (NativeAssets_BaseHasRequiredFile(parent))
 		{
 			return NativeAssets_SetBaseDir(parent);
+		}
+
+		if (NativePath_Parent(grandparentDir, sizeof(grandparentDir), parent))
+		{
+			NativeStr8 grandparent = NativeStr8_FromCString(grandparentDir);
+
+			if (NativeAssets_BaseHasRequiredFile(grandparent))
+			{
+				return NativeAssets_SetBaseDir(grandparent);
+			}
 		}
 	}
 

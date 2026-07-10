@@ -203,7 +203,7 @@ static inline s32 CTR_MipsDiv(s32 dividend, s32 divisor)
 
 	if ((divisor == 0) || ((divisor == -1) && (dividend == minS32)))
 	{
-		__builtin_trap();
+		CTR_TRAP();
 	}
 
 	return dividend / divisor;
@@ -213,7 +213,7 @@ static inline u32 CTR_MipsDivU(u32 dividend, u32 divisor)
 {
 	if (divisor == 0)
 	{
-		__builtin_trap();
+		CTR_TRAP();
 	}
 
 	return dividend / divisor;
