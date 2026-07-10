@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.20)
 project(CTR-Native C CXX)
 include(CheckCCompilerFlag)
 
-set(CMAKE_C_STANDARD 99)
-set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_C_EXTENSIONS ON)
 set(CTR_NATIVE_VERSION "0.1.0-beta.7.1")
 
 if(NOT ANDROID)
@@ -38,8 +35,7 @@ execute_process(
 if(CTR_NATIVE_GIT_DIRTY EQUAL 0)
     set(CTR_NATIVE_BUILD_ID "${CTR_NATIVE_GIT_HASH}")
 else()
-    string(TIMESTAMP CTR_NATIVE_BUILD_TIMESTAMP "%Y%m%d%H%M%S" UTC)
-    set(CTR_NATIVE_BUILD_ID "${CTR_NATIVE_GIT_HASH}-dirty-${CTR_NATIVE_BUILD_TIMESTAMP}")
+    set(CTR_NATIVE_BUILD_ID "${CTR_NATIVE_GIT_HASH}-dirty")
 endif()
 
 if(NOT ANDROID)
@@ -103,15 +99,39 @@ target_compile_definitions(ctr_native PRIVATE
     CTR_NATIVE_VERSION=\"${CTR_NATIVE_VERSION}\"
     CTR_NATIVE_BUILD_ID=\"${CTR_NATIVE_BUILD_ID}\"
 )
-target_compile_options(ctr_native PRIVATE -O2)
-if(CMAKE_C_COMPILER_ID MATCHES "Clang|GNU")
-    target_compile_options(ctr_native PRIVATE -Wenum-conversion -Wenum-compare -Wswitch-enum -Wformat -Wparentheses)
+if(CTR_NATIVE_MSVC_FRONTEND)
+    target_compile_options(ctr_native PRIVATE
+        /W4 #TODO(aalhendi): fix warnings
+        /bigobj
+        /arch:SSE2
+        /wd4152
+        /wd4244
+        /wd4245
+        /wd4310
+        /wd5287
+    )
+else()
+    target_compile_options(ctr_native PRIVATE
+        -msse
+        -Wenum-conversion
+        -Wenum-compare
+        -Wswitch-enum
+        -Wformat
+        -Wparentheses
+        $<$<CONFIG:Release>:-O2>
+        $<$<CONFIG:Release>:-g>
+    )
+
+    if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+        target_compile_options(ctr_native PRIVATE -Wall -Wextra -Wstrict-aliasing=2)
+        ctr_native_add_label_warning_if_supported(ctr_native -Wfree-labels CTR_HAS_WFREE_LABELS)
+    elseif(CMAKE_C_COMPILER_ID MATCHES "Clang")
+        ctr_native_add_label_warning_if_supported(ctr_native -Wc23-extensions CTR_HAS_WC23_EXTENSIONS)
+    endif()
 endif()
+target_link_libraries(ctr_native SDL3::SDL3)
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    target_compile_options(ctr_native PRIVATE -Wall -Wextra -Wstrict-aliasing=2)
-    ctr_native_add_label_warning_if_supported(ctr_native -Wfree-labels CTR_HAS_WFREE_LABELS)
-elseif(CMAKE_C_COMPILER_ID MATCHES "Clang")
-    ctr_native_add_label_warning_if_supported(ctr_native -Wc23-extensions CTR_HAS_WC23_EXTENSIONS)
+    target_link_options(ctr_native PRIVATE -static-libgcc)
 endif()
 target_link_libraries(ctr_native SDL3::SDL3)
 if(ANDROID)
@@ -120,4 +140,10 @@ endif()
 target_link_options(ctr_native PRIVATE -static-libgcc)
 if(WIN32)
     target_link_options(ctr_native PRIVATE -static)
+endif()
+
+include(CTest)
+if(BUILD_TESTING)
+    add_test(NAME ctr_native_version COMMAND $<TARGET_FILE:ctr_native> --version)
+    set_tests_properties(ctr_native_version PROPERTIES PASS_REGULAR_EXPRESSION "^CTR Native ")
 endif()

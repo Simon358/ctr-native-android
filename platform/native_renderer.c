@@ -41,8 +41,8 @@ __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 
 extern SDL_Window *g_window;
 
-#define NATIVE_RENDERER_LOG(fmt, ...)   Platform_Log("[CTR Renderer] " fmt, ##__VA_ARGS__)
-#define NATIVE_RENDERER_ERROR(fmt, ...) Platform_LogError("[CTR Renderer] [%s] - " fmt, __func__, ##__VA_ARGS__)
+#define NATIVE_RENDERER_LOG(fmt, ...)   Platform_Log("[CTR Renderer] " fmt, __VA_ARGS__)
+#define NATIVE_RENDERER_ERROR(fmt, ...) Platform_LogError("[CTR Renderer] [%s] - " fmt, __func__, __VA_ARGS__)
 
 #define MAX_NUM_VERTEX_BUFFERS          (2)
 #define PSX_SCREEN_ASPECT               (240.0f / 320.0f) // PSX screen is mapped always to this aspect
@@ -149,7 +149,7 @@ internal int NativeRenderer_InitialiseGLContext(char *windowName, int fullscreen
 
 	if (g_window == NULL)
 	{
-		NATIVE_RENDERER_ERROR("Failed to initialise SDL window!\n");
+		NATIVE_RENDERER_ERROR("%s\n", "Failed to initialise SDL window!");
 		return 0;
 	}
 
@@ -233,13 +233,13 @@ int NativeRenderer_InitialiseRender(char *windowName, int width, int height, int
 
 	if (!NativeRenderer_InitialiseGLContext(windowName, fullscreen))
 	{
-		NATIVE_RENDERER_ERROR("Failed to Initialise GL Context!\n");
+		NATIVE_RENDERER_ERROR("%s\n", "Failed to Initialise GL Context!");
 		return 0;
 	}
 
 	if (!NativeRenderer_InitialiseGLExt())
 	{
-		NATIVE_RENDERER_ERROR("Failed to Intialise GL extensions\n");
+		NATIVE_RENDERER_ERROR("%s\n", "Failed to Intialise GL extensions");
 		return 0;
 	}
 
@@ -762,7 +762,7 @@ internal ShaderID NativeRenderer_Shader_Compile(const char *source, bool isPsxSh
 
 		if (NativeRenderer_Shader_CheckShaderStatus(vertexShader) == 0)
 		{
-			NATIVE_RENDERER_ERROR("Failed to compile Vertex Shader!\n");
+			NATIVE_RENDERER_ERROR("%s\n", "Failed to compile Vertex Shader!");
 		}
 
 		glAttachShader(program, vertexShader);
@@ -776,7 +776,7 @@ internal ShaderID NativeRenderer_Shader_Compile(const char *source, bool isPsxSh
 
 		if (NativeRenderer_Shader_CheckShaderStatus(fragmentShader) == 0)
 		{
-			NATIVE_RENDERER_ERROR("Failed to compile Fragment Shader!\n");
+			NATIVE_RENDERER_ERROR("%s\n", "Failed to compile Fragment Shader!");
 		}
 
 		glAttachShader(program, fragmentShader);
@@ -791,7 +791,7 @@ internal ShaderID NativeRenderer_Shader_Compile(const char *source, bool isPsxSh
 	glLinkProgram(program);
 	if (NativeRenderer_Shader_CheckProgramStatus(program) == 0)
 	{
-		NATIVE_RENDERER_ERROR("Failed to link Shader!\n");
+		NATIVE_RENDERER_ERROR("%s\n", "Failed to link Shader!");
 	}
 
 	GLint textureSampler = 0;
@@ -2287,7 +2287,7 @@ void NativeRenderer_UpdateVertexBuffer(const GrVertex *vertices, int num_vertice
 	NativePerf_BeginScope(NATIVE_PERF_BUCKET_RENDERER_VERTEX_UPLOAD);
 	if ((u32)num_vertices >= MAX_VERTEX_BUFFER_SIZE)
 	{
-		NATIVE_RENDERER_ERROR("MAX_VERTEX_BUFFER_SIZE reached, expect rendering errors\n");
+		NATIVE_RENDERER_ERROR("%s\n", "MAX_VERTEX_BUFFER_SIZE reached, expect rendering errors");
 		num_vertices = MAX_VERTEX_BUFFER_SIZE;
 	}
 
