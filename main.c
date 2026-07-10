@@ -144,6 +144,10 @@ static int NativeArg_IsVersion(const char *arg)
 }
 
 
+#ifdef __ANDROID__
+#include <SDL3/SDL_system.h>
+#endif
+
 int main(int argc, char *argv[])
 {
 	for (int argIndex = 1; argIndex < argc; argIndex++)
@@ -155,41 +159,46 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	printf("[CTR Native] Starting...\n");
-	fflush(stdout);
+	Platform_Log("[CTR Native] Starting...\n");
+
+	SDL_SetAppMetadata("CTR Native", CTR_NATIVE_VERSION, "com.ctrnative");
 
 	const char *sdlBasePath = NULL;
 #ifdef __ANDROID__
-    // On Android, we search for assets in the app's external files directory
-    sdlBasePath = SDL_GetPrefPath("CTR-Native", "assets");
-    // The above usually returns /data/user/0/com.ctrnative/files/assets/
-    // We might want to look at the external files dir too.
+    // Try external storage first as it's easier for users to access
+    sdlBasePath = SDL_GetAndroidExternalStoragePath();
+    if (sdlBasePath == NULL || !NativeAssets_BaseHasRequiredFile(NativeStr8_FromCString(sdlBasePath)))
+    {
+        // Fallback to internal storage
+        sdlBasePath = SDL_GetPrefPath("CTR-Native", "assets");
+    }
 #else
 	sdlBasePath = SDL_GetBasePath();
 #endif
-	printf("[CTR Native] SDL base path: %s\n", sdlBasePath ? sdlBasePath : "(null)");
-	fflush(stdout);
+	Platform_Log("[CTR Native] SDL base path: %s\n", sdlBasePath ? sdlBasePath : "(null)");
 
 	if (!NativeAssets_Init(sdlBasePath))
 	{
-		fprintf(stderr, "[CTR Native] Failed to initialize asset paths.\n");
+		Platform_LogError("[CTR Native] Failed to initialize asset paths.\n");
 		return NativeConsole_Return(1);
 	}
 
-	printf("[CTR Native] Version: %s (%s)\n", CTR_NATIVE_VERSION, CTR_NATIVE_BUILD_ID);
-	printf("[CTR Native] Built with: " CC "\n");
-	printf("[CTR Native] Base: %s\n", NativeAssets_GetBaseDir());
-	printf("[CTR Native] Assets: %s\n", NativeAssets_GetAssetDir());
-	fflush(stdout);
+	Platform_Log("[CTR Native] Version: %s (%s)\n", CTR_NATIVE_VERSION, CTR_NATIVE_BUILD_ID);
+	Platform_Log("[CTR Native] Built with: " CC "\n");
+	Platform_Log("[CTR Native] Base: %s\n", NativeAssets_GetBaseDir());
+	Platform_Log("[CTR Native] Assets: %s\n", NativeAssets_GetAssetDir());
 
 	if (chdir(NativeAssets_GetBaseDir()) != 0)
 	{
-		fprintf(stderr, "[CTR Native] Failed to enter base directory: %s\n", NativeAssets_GetBaseDir());
+		Platform_LogError("[CTR Native] Failed to enter base directory: %s\n", NativeAssets_GetBaseDir());
 		return NativeConsole_Return(1);
 	}
 
 	if (!NativeAssets_Validate())
 	{
+#ifdef __ANDROID__
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Missing Assets", "Please place NTSC-U retail assets (BIGFILE.BIG or disc image) in your phone's storage:\n/Android/data/com.ctrnative/files/assets/", NULL);
+#endif
 		return NativeConsole_Return(1);
 	}
 
@@ -201,10 +210,10 @@ int main(int argc, char *argv[])
 #endif
 
 #ifdef USE_16BY9
-	printf("[CTR Native] Widescreen\n");
+	Platform_Log("[CTR Native] Widescreen\n");
 	Platform_Init("Crash Team Racing", 1280, 720);
 #else
-	printf("[CTR Native] 4:3\n");
+	Platform_Log("[CTR Native] 4:3\n");
 	Platform_Init("Crash Team Racing", 800, 600);
 #endif
 

@@ -1619,9 +1619,15 @@ internal void NativeRenderer_SyncGpuVRAMToCPU(void)
 	NativeRenderer_UpdateVRAM();
 
 	NativePerf_BeginScope(NATIVE_PERF_BUCKET_FRAMEBUFFER_READBACK);
+#ifdef __ANDROID__
+	glBindFramebuffer(GL_FRAMEBUFFER, s_glVramFramebuffer);
+	glReadPixels(0, 0, VRAM_WIDTH, VRAM_HEIGHT, VRAM_FORMAT, GL_UNSIGNED_BYTE, vram);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+#else
 	glBindTexture(GL_TEXTURE_2D, s_vramTexture);
 	glGetTexImage(GL_TEXTURE_2D, 0, VRAM_FORMAT, GL_UNSIGNED_BYTE, vram);
 	glBindTexture(GL_TEXTURE_2D, 0);
+#endif
 	NativePerf_EndScope(NATIVE_PERF_BUCKET_FRAMEBUFFER_READBACK);
 
 	s_cpuVRAMMirrorStale = 0;

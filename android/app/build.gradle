@@ -11,10 +11,14 @@ android {
         versionCode 1
         versionName "1.0"
 
+        ndk {
+            abiFilters 'armeabi-v7a', 'x86'
+        }
+
         externalNativeBuild {
             cmake {
                 arguments "-DANDROID_STL=c++_static", "-DCTR_NATIVE=ON"
-                abiFilters 'armeabi-v7a'
+                abiFilters 'armeabi-v7a', 'x86'
             }
         }
     }
