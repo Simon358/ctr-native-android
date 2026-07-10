@@ -155,7 +155,7 @@ internal int NativeRenderer_InitialiseGLContext(char *windowName, int fullscreen
 
 #ifdef __ANDROID__
 	int major_version = 3;
-	int minor_version = 0;
+	int minor_version = 2; // Start from 3.2 and go down
 	int profile = SDL_GL_CONTEXT_PROFILE_ES;
 #else
 	int major_version = 3;
