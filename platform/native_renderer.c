@@ -89,11 +89,10 @@ int g_dbg_texturelessMode = 0;
 
 int g_cfg_bilinearFiltering = 0;
 
-// NOTE(penta3): GPU-side framebuffer pack pipeline (see NativeRenderer_StoreFrameBuffer).
-// Packs the RGBA framebuffer texture into the RG8 VRAM texture on the GPU instead of a
-// GPU->CPU readback + CPU pack + re-upload.
+// NOTE(aalhendi): Pack native RGBA render targets into the persistent RG8 VRAM
+// texture on the GPU instead of a GPU-to-CPU-to-GPU round trip.
 global_variable GLuint s_packShader = 0;
-global_variable GLint s_packSrcLoc = -1;
+global_variable GLint s_packFlipYLoc = -1;
 global_variable GLuint s_presentVramShader = 0;
 global_variable GLint s_presentVramSourceRectLoc = -1;
 global_variable GLuint s_vramQuadVAO = 0;
@@ -125,6 +124,7 @@ internal void NativeRenderer_BindVertexBuffer(void);
 global_variable GLuint s_glVertexArray[2];
 global_variable GLuint s_glVertexBuffer[2];
 global_variable int s_curVertexBuffer = 0;
+global_variable int s_boundVertexBuffer = -1;
 
 global_variable GLuint s_glBlitFramebuffer;
 
@@ -460,6 +460,7 @@ internal void NativeRenderer_Ortho2D(float left, float right, float bottom, floa
 internal void NativeRenderer_SetShader(const ShaderID shader);
 internal void NativeRenderer_CopyRGBAFramebufferToVRAM(u32 *src, int x, int y, int w, int h, int update_vram, int flip_y);
 internal void NativeRenderer_SyncGpuVRAMToCPU(void);
+internal void NativeRenderer_GpuPackTextureToVRAM(TextureID sourceTexture, int x, int y, int w, int h, b32 flipY);
 
 global_variable GTEShader s_gteShader4;
 global_variable GTEShader s_gteShader8;
@@ -828,16 +829,16 @@ internal void NativeRenderer_InitialisePSXShaders(void)
 	NativeRenderer_CompilePSXShader(&s_gteShader32Rgba, gte_shader_32_rgba);
 }
 
-// NOTE(penta3): GPU framebuffer pack. Samples the RGBA framebuffer texture and
-// writes 16-bit PS1 pixels (r5|g5<<5|b5<<10|stp<<15) into the RG8 VRAM texture,
-// low byte in R and high byte in G - the exact layout CopyRGBAFramebufferToVRAM
-// produces on the CPU. Integer ops keep it bit-exact; NEAREST sampling returns the
-// stored byte so `*255+0.5` recovers it without rounding drift.
+// NOTE(aalhendi): GPU VRAM pack. Samples an RGBA render texture and writes PS1
+// 5:5:5:1 pixels into RG8 VRAM, low byte in R and high byte in G. Integer ops
+// match CopyRGBAFramebufferToVRAM; NEAREST sampling recovers each source byte.
 global_variable const char *ctr_pack_shader = "#ifdef VERTEX\n"
                                               "attribute vec2 a_position;\n"
                                               "varying vec2 v_uv;\n"
+                                              "uniform int flipY;\n"
                                               "void main() {\n"
                                               "	v_uv = a_position * 0.5 + 0.5;\n"
+                                              "	if (flipY != 0) { v_uv.y = 1.0 - v_uv.y; }\n"
                                               "	gl_Position = vec4(a_position, 0.0, 1.0);\n"
                                               "}\n"
                                               "#endif\n"
@@ -882,8 +883,9 @@ internal void NativeRenderer_InitVRAMPipelines(void)
 
 	s_packShader = NativeRenderer_Shader_Compile(ctr_pack_shader, false);
 	glUseProgram(s_packShader);
-	s_packSrcLoc = glGetUniformLocation(s_packShader, "s_src");
-	glUniform1i(s_packSrcLoc, 0);
+	const GLint packSrcLoc = glGetUniformLocation(s_packShader, "s_src");
+	s_packFlipYLoc = glGetUniformLocation(s_packShader, "flipY");
+	glUniform1i(packSrcLoc, 0);
 	glUseProgram(0);
 
 	s_presentVramShader = NativeRenderer_Shader_Compile(ctr_present_vram_shader, false);
@@ -1672,27 +1674,10 @@ internal void NativeRenderer_FlushOffscreenToVRAM(void)
 		return;
 	}
 
-	// NOTE(aalhendi): Native offscreen draws produce RGBA pixels. Publish the
-	// packed 5:5:5:1 result to both VRAM mirrors; a direct RGBA-to-RG8 blit only
-	// copies the R/G channels and does not represent a PS1 pixel.
-	{
-		u32 *pixels = NativeRenderer_GetReadbackScratch(s_previousOffscreen.w * s_previousOffscreen.h);
-		if (pixels == NULL)
-		{
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			return;
-		}
-
-		glBindTexture(GL_TEXTURE_2D, s_offscreenRenderTexture);
-		glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-		glBindTexture(GL_TEXTURE_2D, 0);
-
-		NativeRenderer_CopyRGBAFramebufferToVRAM(pixels, s_previousOffscreen.x, s_previousOffscreen.y, s_previousOffscreen.w, s_previousOffscreen.h, 1, 1);
-		NativeRenderer_UpdateVRAM();
-	}
-
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	s_lastBoundTexture = (TextureID)-1;
+	// NOTE(aalhendi): Native offscreen draws produce RGBA pixels. Pack them into
+	// the persistent 5:5:5:1 VRAM texture instead of reading them through the CPU.
+	NativeRenderer_GpuPackTextureToVRAM(s_offscreenRenderTexture, s_previousOffscreen.x, s_previousOffscreen.y, s_previousOffscreen.w, s_previousOffscreen.h,
+	                                    true);
 }
 
 internal void NativeRenderer_SetScissorState(int enable)
@@ -1823,12 +1808,13 @@ internal void NativeRenderer_BlitBackbufferToFramebufferTex(int x, int y, int w,
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-// NOTE(penta3): Pack the RGBA framebuffer texture straight into the RG8 VRAM
-// texture on the GPU, no CPU round-trip. Writes the same (x,y,w,h) VRAM region the
-// CPU path targets. Restores/invalidates the render-state caches it disturbs so the
-// in-progress submit run keeps working.
-internal void NativeRenderer_GpuPackFramebufferToVRAM(int x, int y, int w, int h)
+// NOTE(aalhendi): Pack an RGBA render texture straight into the RG8 VRAM texture
+// on the GPU, no CPU round trip. Restore or invalidate the render-state caches
+// disturbed by this native bridge before the submit run continues.
+internal void NativeRenderer_GpuPackTextureToVRAM(TextureID sourceTexture, int x, int y, int w, int h, b32 flipY)
 {
+	NativeRenderer_UpdateVRAM();
+
 	glBindFramebuffer(GL_FRAMEBUFFER, s_glVramFramebuffer);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, s_vramTexture, 0);
 
@@ -1838,12 +1824,19 @@ internal void NativeRenderer_GpuPackFramebufferToVRAM(int x, int y, int w, int h
 
 	glUseProgram(s_packShader);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, s_framebufferTexture);
-	glUniform1i(s_packSrcLoc, 0);
+	glBindTexture(GL_TEXTURE_2D, sourceTexture);
+	glUniform1i(s_packFlipYLoc, flipY);
 
 	glBindVertexArray(s_vramQuadVAO);
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-	glBindVertexArray(0);
+	NativeRenderer_DrawTriangles(0, 2);
+	if (s_boundVertexBuffer >= 0)
+	{
+		glBindVertexArray(s_glVertexArray[s_boundVertexBuffer]);
+	}
+	else
+	{
+		glBindVertexArray(0);
+	}
 
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -1853,6 +1846,7 @@ internal void NativeRenderer_GpuPackFramebufferToVRAM(int x, int y, int w, int h
 	s_lastBoundTexture = -1;
 	s_previousBlendMode = BM_NONE;
 	s_previousScissorState = 0;
+	s_cpuVRAMMirrorStale = 1;
 }
 
 // NOTE(aalhendi): PS1 draws into VRAM and can texture from that same VRAM. Native
@@ -1863,10 +1857,8 @@ void NativeRenderer_StoreFrameBuffer(int x, int y, int w, int h)
 {
 	NativePerf_BeginScope(NATIVE_PERF_BUCKET_FRAMEBUFFER_STORE);
 
-	NativeRenderer_UpdateVRAM();
 	NativeRenderer_BlitBackbufferToFramebufferTex(x, y, w, h);
-	NativeRenderer_GpuPackFramebufferToVRAM(x, y, w, h);
-	s_cpuVRAMMirrorStale = 1;
+	NativeRenderer_GpuPackTextureToVRAM(s_framebufferTexture, x, y, w, h, false);
 	s_framebufferNeedsUpdate = 1;
 	s_lastBoundTexture = -1;
 
@@ -2123,6 +2115,7 @@ internal void NativeRenderer_SetWireframe(int enable)
 
 internal void NativeRenderer_BindVertexBuffer(void)
 {
+	s_boundVertexBuffer = s_curVertexBuffer;
 	glBindVertexArray(s_glVertexArray[s_curVertexBuffer]);
 
 	glEnableVertexAttribArray(a_position);
