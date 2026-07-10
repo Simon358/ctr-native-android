@@ -41,6 +41,26 @@ extern SDL_Window *g_window;
 #define MAX_NUM_VERTEX_BUFFERS          (2)
 #define PSX_SCREEN_ASPECT               (240.0f / 320.0f) // PSX screen is mapped always to this aspect
 
+#if defined(CTR_INTERNAL)
+#ifndef GL_TIME_ELAPSED
+#define GL_TIME_ELAPSED 0x88BF
+#endif
+#define NATIVE_GPU_TIMER_QUERY_COUNT 8
+
+struct NativeGpuTimerQuery
+{
+	GLuint id;
+	u32 frameIndex;
+	b32 pending;
+};
+
+global_variable struct NativeGpuTimerQuery s_gpuTimerQueries[NATIVE_GPU_TIMER_QUERY_COUNT];
+global_variable u32 s_gpuTimerFrameIndex;
+global_variable s32 s_gpuTimerNextQuery;
+global_variable b32 s_gpuTimerSupported;
+global_variable b32 s_gpuTimerActive;
+#endif
+
 global_variable BlendMode s_previousBlendMode = BM_NONE;
 global_variable int s_previousDepthMode = 0;
 global_variable int s_previousStencilMode = 0;
@@ -125,6 +145,9 @@ internal void NativeRenderer_SetPresentationAspect(int width, int height);
 internal void NativeRenderer_UpdatePresentationViewport(void);
 internal void NativeRenderer_ClearPresentationBars(void);
 internal void NativeRenderer_SetWireframe(int enable);
+#if defined(CTR_INTERNAL)
+internal void NativeRenderer_ResolveGpuMeasurements(b32 waitForResults);
+#endif
 
 global_variable GLuint s_glVertexArray[2];
 global_variable GLuint s_glVertexBuffer[2];
@@ -255,6 +278,35 @@ void NativeRenderer_Shutdown(void)
 	glDeleteBuffers(1, &s_vramQuadVBO);
 }
 
+#if defined(CTR_INTERNAL)
+internal void NativeRenderer_ResolveGpuMeasurements(b32 waitForResults)
+{
+	for (s32 i = 0; i < NATIVE_GPU_TIMER_QUERY_COUNT; i++)
+	{
+		struct NativeGpuTimerQuery *query = &s_gpuTimerQueries[i];
+		if (!query->pending)
+		{
+			continue;
+		}
+
+		GLint available = 0;
+		if (!waitForResults)
+		{
+			glGetQueryObjectiv(query->id, GL_QUERY_RESULT_AVAILABLE, &available);
+			if (!available)
+			{
+				continue;
+			}
+		}
+
+		GLuint elapsedNanoseconds;
+		glGetQueryObjectuiv(query->id, GL_QUERY_RESULT, &elapsedNanoseconds);
+		NativePerf_RecordGpuFrame(query->frameIndex, (f64)elapsedNanoseconds / 1000000.0);
+		query->pending = false;
+	}
+}
+#endif
+
 void NativeRenderer_UpdateSwapIntervalState(int swapInterval)
 {
 	SDL_GL_SetSwapInterval(swapInterval);
@@ -262,6 +314,23 @@ void NativeRenderer_UpdateSwapIntervalState(int swapInterval)
 
 void NativeRenderer_BeginScene(void)
 {
+#if defined(CTR_INTERNAL)
+	NativeRenderer_ResolveGpuMeasurements(false);
+	const u32 gpuFrameIndex = s_gpuTimerFrameIndex++;
+	if (s_gpuTimerSupported && NativePerf_IsEnabled())
+	{
+		struct NativeGpuTimerQuery *query = &s_gpuTimerQueries[s_gpuTimerNextQuery];
+		if (!query->pending)
+		{
+			query->frameIndex = gpuFrameIndex;
+			query->pending = true;
+			glBeginQuery(GL_TIME_ELAPSED, query->id);
+			s_gpuTimerActive = true;
+			s_gpuTimerNextQuery = (s_gpuTimerNextQuery + 1) % NATIVE_GPU_TIMER_QUERY_COUNT;
+		}
+	}
+#endif
+
 	NativePerf_BeginScope(NATIVE_PERF_BUCKET_RENDERER_BEGIN_SCENE);
 	s_lastBoundTexture = 0;
 
@@ -280,6 +349,36 @@ void NativeRenderer_BeginScene(void)
 		glClear(GL_COLOR_BUFFER_BIT);
 	}
 	NativePerf_EndScope(NATIVE_PERF_BUCKET_RENDERER_BEGIN_SCENE);
+}
+
+void NativeRenderer_EndGpuFrame(void)
+{
+#if defined(CTR_INTERNAL)
+	if (s_gpuTimerActive)
+	{
+		glEndQuery(GL_TIME_ELAPSED);
+		s_gpuTimerActive = false;
+	}
+#endif
+}
+
+void NativeRenderer_FinishGpuMeasurements(void)
+{
+#if defined(CTR_INTERNAL)
+	NativeRenderer_EndGpuFrame();
+	if (!s_gpuTimerSupported)
+	{
+		return;
+	}
+
+	NativeRenderer_ResolveGpuMeasurements(true);
+	for (s32 i = 0; i < NATIVE_GPU_TIMER_QUERY_COUNT; i++)
+	{
+		glDeleteQueries(1, &s_gpuTimerQueries[i].id);
+	}
+	SDL_memset(s_gpuTimerQueries, 0, sizeof(s_gpuTimerQueries));
+	s_gpuTimerSupported = false;
+#endif
 }
 
 void NativeRenderer_EndScene(void)
@@ -931,6 +1030,23 @@ int NativeRenderer_InitialisePSX(void)
 	NativeRenderer_GenerateCommonTextures();
 	NativeRenderer_InitialisePSXShaders();
 	NativeRenderer_InitVRAMPipelines();
+
+#if defined(CTR_INTERNAL)
+	GLint glMajor = 0;
+	GLint glMinor = 0;
+	glGetIntegerv(GL_MAJOR_VERSION, &glMajor);
+	glGetIntegerv(GL_MINOR_VERSION, &glMinor);
+	s_gpuTimerSupported = (glMajor > 3) || ((glMajor == 3) && (glMinor >= 3)) || SDL_GL_ExtensionSupported("GL_ARB_timer_query");
+	if (s_gpuTimerSupported)
+	{
+		GLuint queryIds[NATIVE_GPU_TIMER_QUERY_COUNT];
+		glGenQueries(NATIVE_GPU_TIMER_QUERY_COUNT, queryIds);
+		for (s32 i = 0; i < NATIVE_GPU_TIMER_QUERY_COUNT; i++)
+		{
+			s_gpuTimerQueries[i].id = queryIds[i];
+		}
+	}
+#endif
 
 	glDepthFunc(GL_LEQUAL);
 	glEnable(GL_STENCIL_TEST);

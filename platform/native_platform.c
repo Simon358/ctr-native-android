@@ -277,6 +277,7 @@ void Platform_Shutdown(void)
 
 	s_platformInitialized = 0;
 #if defined(CTR_INTERNAL)
+	NativeRenderer_FinishGpuMeasurements();
 	NativePerf_Shutdown();
 	NativeReplayScheduler_Shutdown();
 #endif
@@ -357,6 +358,7 @@ void Platform_EndScene(void)
 		{
 			NativeRenderer_PresentVRAMDisplay();
 		}
+		NativeRenderer_EndGpuFrame();
 		NativeRenderer_SwapWindow();
 		s_pinnedVramDisplayFrames--;
 		if (s_pinnedVramDisplayFrames <= 0)
@@ -371,6 +373,7 @@ void Platform_EndScene(void)
 	// effects without forcing a CPU readback.
 	NativeRenderer_StoreFrameBuffer(activeDispEnv.disp.x, activeDispEnv.disp.y, activeDispEnv.disp.w, activeDispEnv.disp.h);
 
+	NativeRenderer_EndGpuFrame();
 	NativeRenderer_SwapWindow();
 	NativePerf_EndScope(NATIVE_PERF_BUCKET_PLATFORM_END_SCENE);
 }
