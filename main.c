@@ -9,17 +9,16 @@
 
 #if defined(_WIN32)
 #include <io.h>
+#include "platform/native_win32.h"
 #else
 #include <unistd.h>
 #endif
 
-#if __GNUC__
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 #define _EnterCriticalSection(x)
 #define EnterCriticalSection(x)
 #define ExitCriticalSection()
-#endif
 
 #include "platform/native_assets.h"
 #include "platform/native_log.h"
@@ -27,10 +26,6 @@
 #include "platform/native_perf.h"
 #include "platform/native_replay_scheduler.h"
 #include "platform/native_savestate.h"
-
-#ifndef __GNUC__
-#define __attribute__(x)
-#endif
 
 #include <platform.h>
 
@@ -73,7 +68,7 @@
 #include "platform/native_str.c"
 
 #ifndef CC
-#if __GNUC__
+#if defined(__GNUC__)
 #if _WIN32
 #ifndef __clang__
 #define CC "MINGW-GCC"

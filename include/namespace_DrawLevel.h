@@ -19,21 +19,27 @@ struct DrawLevelOvr1PRenderList
 	struct QuadBlock **ptrQuadBlocksRendered_FullDynamic;
 };
 
+#define DRAW_LEVEL_OVR1P_LIST_OFFSET(INDEX, MEMBER)                                                                                 \
+	(offsetof(struct DrawLevelOvr1PRenderList, list) + (INDEX) * sizeof(struct DrawLevelOvr1PRenderListSlot) +                       \
+	 offsetof(struct DrawLevelOvr1PRenderListSlot, MEMBER))
+
 enum DrawLevelOvr1PRenderListOffset
 {
-	DRAW_LEVEL_OVR1P_RENDER_LIST_OFFSET_4X4_RENDERED = offsetof(struct DrawLevelOvr1PRenderList, list[0].ptrQuadBlocksRendered),
-	DRAW_LEVEL_OVR1P_RENDER_LIST_OFFSET_4X4_LIST = offsetof(struct DrawLevelOvr1PRenderList, list[0].bspListStart),
-	DRAW_LEVEL_OVR1P_RENDER_LIST_OFFSET_DYNAMIC_RENDERED = offsetof(struct DrawLevelOvr1PRenderList, list[1].ptrQuadBlocksRendered),
-	DRAW_LEVEL_OVR1P_RENDER_LIST_OFFSET_DYNAMIC_LIST = offsetof(struct DrawLevelOvr1PRenderList, list[1].bspListStart),
-	DRAW_LEVEL_OVR1P_RENDER_LIST_OFFSET_4X2_RENDERED = offsetof(struct DrawLevelOvr1PRenderList, list[2].ptrQuadBlocksRendered),
-	DRAW_LEVEL_OVR1P_RENDER_LIST_OFFSET_4X2_LIST = offsetof(struct DrawLevelOvr1PRenderList, list[2].bspListStart),
-	DRAW_LEVEL_OVR1P_RENDER_LIST_OFFSET_4X1_RENDERED = offsetof(struct DrawLevelOvr1PRenderList, list[3].ptrQuadBlocksRendered),
-	DRAW_LEVEL_OVR1P_RENDER_LIST_OFFSET_4X1_LIST = offsetof(struct DrawLevelOvr1PRenderList, list[3].bspListStart),
-	DRAW_LEVEL_OVR1P_RENDER_LIST_OFFSET_WATER_RENDERED = offsetof(struct DrawLevelOvr1PRenderList, list[4].ptrQuadBlocksRendered),
-	DRAW_LEVEL_OVR1P_RENDER_LIST_OFFSET_WATER_LIST = offsetof(struct DrawLevelOvr1PRenderList, list[4].bspListStart),
+	DRAW_LEVEL_OVR1P_RENDER_LIST_OFFSET_4X4_RENDERED = DRAW_LEVEL_OVR1P_LIST_OFFSET(0, ptrQuadBlocksRendered),
+	DRAW_LEVEL_OVR1P_RENDER_LIST_OFFSET_4X4_LIST = DRAW_LEVEL_OVR1P_LIST_OFFSET(0, bspListStart),
+	DRAW_LEVEL_OVR1P_RENDER_LIST_OFFSET_DYNAMIC_RENDERED = DRAW_LEVEL_OVR1P_LIST_OFFSET(1, ptrQuadBlocksRendered),
+	DRAW_LEVEL_OVR1P_RENDER_LIST_OFFSET_DYNAMIC_LIST = DRAW_LEVEL_OVR1P_LIST_OFFSET(1, bspListStart),
+	DRAW_LEVEL_OVR1P_RENDER_LIST_OFFSET_4X2_RENDERED = DRAW_LEVEL_OVR1P_LIST_OFFSET(2, ptrQuadBlocksRendered),
+	DRAW_LEVEL_OVR1P_RENDER_LIST_OFFSET_4X2_LIST = DRAW_LEVEL_OVR1P_LIST_OFFSET(2, bspListStart),
+	DRAW_LEVEL_OVR1P_RENDER_LIST_OFFSET_4X1_RENDERED = DRAW_LEVEL_OVR1P_LIST_OFFSET(3, ptrQuadBlocksRendered),
+	DRAW_LEVEL_OVR1P_RENDER_LIST_OFFSET_4X1_LIST = DRAW_LEVEL_OVR1P_LIST_OFFSET(3, bspListStart),
+	DRAW_LEVEL_OVR1P_RENDER_LIST_OFFSET_WATER_RENDERED = DRAW_LEVEL_OVR1P_LIST_OFFSET(4, ptrQuadBlocksRendered),
+	DRAW_LEVEL_OVR1P_RENDER_LIST_OFFSET_WATER_LIST = DRAW_LEVEL_OVR1P_LIST_OFFSET(4, bspListStart),
 	DRAW_LEVEL_OVR1P_RENDER_LIST_OFFSET_FULL_DYNAMIC_LIST = offsetof(struct DrawLevelOvr1PRenderList, bspListStart_FullDynamic),
 	DRAW_LEVEL_OVR1P_RENDER_LIST_OFFSET_FULL_DYNAMIC_RENDERED = offsetof(struct DrawLevelOvr1PRenderList, ptrQuadBlocksRendered_FullDynamic),
 };
+
+#undef DRAW_LEVEL_OVR1P_LIST_OFFSET
 
 enum DrawLevelOvr1PBucketKind
 {
