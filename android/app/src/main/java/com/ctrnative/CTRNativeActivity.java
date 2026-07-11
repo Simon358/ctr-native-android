@@ -12,8 +12,6 @@ import android.util.Log;
 
 import org.libsdl.app.SDLActivity;
 
-import java.io.File;
-
 public class CTRNativeActivity extends SDLActivity {
     private static final int PICK_DIRECTORY_REQUEST = 1001;
     private static final String PREFS_NAME = "CTRNativePrefs";
@@ -25,6 +23,29 @@ public class CTRNativeActivity extends SDLActivity {
             "SDL3",
             "ctr_native"
         };
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        checkStoragePermission();
+    }
+
+    private void checkStoragePermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (!Environment.isExternalStorageManager()) {
+                try {
+                    Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
+                    intent.addCategory("android.intent.category.DEFAULT");
+                    intent.setData(Uri.parse(String.format("package:%s", getApplicationContext().getPackageName())));
+                    startActivity(intent);
+                } catch (Exception e) {
+                    Intent intent = new Intent();
+                    intent.setAction(android.provider.Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                    startActivity(intent);
+                }
+            }
+        }
     }
 
     private static boolean pickerActive = false;
@@ -81,8 +102,6 @@ public class CTRNativeActivity extends SDLActivity {
     private String getPathFromUri(Uri uri) {
         if (uri == null) return null;
         
-        // Try to get a real path. Note: This only works for the primary storage and some SD cards.
-        // On modern Android, we really should be using the URI directly, but the C code needs a path.
         String path = null;
         String host = uri.getHost();
         String docId = null;
@@ -90,38 +109,31 @@ public class CTRNativeActivity extends SDLActivity {
         try {
             if ("com.android.externalstorage.documents".equals(host)) {
                 docId = DocumentsContract.getTreeDocumentId(uri);
-            } else if ("com.android.providers.downloads.documents".equals(host)) {
-                docId = DocumentsContract.getTreeDocumentId(uri);
-            }
-            
-            if (docId != null) {
                 final String[] split = docId.split(":");
                 final String type = split[0];
                 if ("primary".equalsIgnoreCase(type)) {
                     path = Environment.getExternalStorageDirectory() + "/" + (split.length > 1 ? split[1] : "");
                 } else {
                     // Secondary SD cards
-                    File[] externalFilesDirs = getExternalFilesDirs(null);
-                    for (File file : externalFilesDirs) {
-                        if (file != null) {
-                            String internalPath = file.getAbsolutePath();
-                            if (internalPath.contains(type)) {
-                                path = "/storage/" + type + "/" + (split.length > 1 ? split[1] : "");
-                                break;
-                            }
-                        }
-                    }
-                    if (path == null) {
-                        path = "/storage/" + type + "/" + (split.length > 1 ? split[1] : "");
-                    }
+                    path = "/storage/" + type + "/" + (split.length > 1 ? split[1] : "");
+                }
+            } else if ("com.android.providers.downloads.documents".equals(host)) {
+                docId = DocumentsContract.getTreeDocumentId(uri);
+                if (docId.startsWith("raw:")) {
+                    path = docId.substring(4);
+                } else {
+                    path = Environment.getExternalStorageDirectory() + "/Download/" + docId;
                 }
             }
         } catch (Exception e) {
             Log.e("CTRNative", "Error in getPathFromUri: " + e.getMessage());
         }
         
-        if (path != null && path.endsWith("/")) {
-            path = path.substring(0, path.length() - 1);
+        if (path != null) {
+            path = path.replace("//", "/");
+            if (path.endsWith("/")) {
+                path = path.substring(0, path.length() - 1);
+            }
         }
 
         return path;

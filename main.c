@@ -177,11 +177,13 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < sizeof(searchPaths)/sizeof(searchPaths[0]); ++i) {
 		if (searchPaths[i] && NativeAssets_BaseHasRequiredFile(NativeStr8_FromCString(searchPaths[i]))) {
 			sdlBasePath = searchPaths[i];
+			Platform_Log("[CTR Native] Assets found at: %s\n", sdlBasePath);
 			break;
 		}
 	}
 
 	if (sdlBasePath == NULL) {
+		if (storedPath) Platform_Log("[CTR Native] Stored path was invalid or inaccessible: %s\n", storedPath);
 		// Assets not found in common paths or stored path
 		const SDL_MessageBoxButtonData buttons[] = {
 			{ SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 0, "Exit" },
