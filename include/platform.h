@@ -34,6 +34,7 @@ int NikoGetEnterKey(void);
 #ifdef __ANDROID__
 void Platform_Android_PickFolder(void);
 char* Platform_Android_GetStoredPath(void);
+int Platform_Android_IsPickerActive(void);
 #endif
 
 #endif

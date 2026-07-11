@@ -44,4 +44,20 @@ char* Platform_Android_GetStoredPath(void) {
     return result;
 }
 
+int Platform_Android_IsPickerActive(void) {
+    JNIEnv* env = (JNIEnv*)SDL_GetAndroidJNIEnv();
+    jobject activity = (jobject)SDL_GetAndroidActivity();
+    jclass clazz = (*env)->GetObjectClass(env, activity);
+    jmethodID methodId = (*env)->GetStaticMethodID(env, clazz, "isPickerActive", "()Z");
+
+    jboolean result = JNI_FALSE;
+    if (methodId) {
+        result = (*env)->CallStaticBooleanMethod(env, clazz, methodId);
+    }
+
+    (*env)->DeleteLocalRef(env, activity);
+    (*env)->DeleteLocalRef(env, clazz);
+    return result == JNI_TRUE;
+}
+
 #endif

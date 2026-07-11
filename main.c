@@ -200,7 +200,11 @@ int main(int argc, char *argv[])
 		int buttonid;
 		if (SDL_ShowMessageBox(&messageboxdata, &buttonid) && buttonid == 1) {
 			Platform_Android_PickFolder();
-			// Folder picker will store path and user can restart app
+			// Wait for folder picker to finish
+			while (Platform_Android_IsPickerActive()) {
+				SDL_Delay(100);
+			}
+			// User must manually restart app to use new path
 			return 0;
 		} else if (buttonid == 2) {
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Instructions",

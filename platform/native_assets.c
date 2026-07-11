@@ -470,6 +470,17 @@ internal int NativeAssets_BaseHasRequiredFile(NativeStr8 baseDir)
 	char assetsDir[NATIVE_ASSETS_PATH_MAX];
 	char path[NATIVE_ASSETS_PATH_MAX];
 
+	// Check if baseDir itself has the files (user picked the 'assets' folder directly)
+	if (NativeAssets_FindHostChildCaseInsensitive(baseDir, NATIVE_STR8_LIT(NATIVE_ASSETS_BIGFILE_PATH), path, sizeof(path)))
+	{
+		if (NativeAssets_FileExistsHost(path)) return 1;
+	}
+	if (NativeAssets_FindHostChildCaseInsensitive(baseDir, NATIVE_STR8_LIT(NATIVE_ASSETS_DISC_PATH), path, sizeof(path)))
+	{
+		if (NativeAssets_FileExistsHost(path)) return 1;
+	}
+
+	// Check if baseDir has an 'assets' subfolder
 	if (!NativeAssets_FindAssetsDir(baseDir, assetsDir, sizeof(assetsDir)))
 	{
 		return 0;
@@ -506,6 +517,7 @@ internal int NativeAssets_BaseHasRequiredFile(NativeStr8 baseDir)
 internal int NativeAssets_SetBaseDir(NativeStr8 baseDir)
 {
 	char assetsDir[NATIVE_ASSETS_PATH_MAX];
+	char path[NATIVE_ASSETS_PATH_MAX];
 
 	baseDir = NativePath_TrimTrailingSeparators(baseDir);
 	if (!NativePath_NormalizeSlashes(s_nativeAssetsBaseDir, sizeof(s_nativeAssetsBaseDir), baseDir))
@@ -513,17 +525,29 @@ internal int NativeAssets_SetBaseDir(NativeStr8 baseDir)
 		return 0;
 	}
 
-	if (!NativeAssets_FindAssetsDir(NativeStr8_FromCString(s_nativeAssetsBaseDir), assetsDir, sizeof(assetsDir)))
+	// If the baseDir already contains BIGFILE.BIG, use it directly as the assets dir
+	if (NativeAssets_FindHostChildCaseInsensitive(baseDir, NATIVE_STR8_LIT(NATIVE_ASSETS_BIGFILE_PATH), path, sizeof(path)) ||
+		NativeAssets_FindHostChildCaseInsensitive(baseDir, NATIVE_STR8_LIT(NATIVE_ASSETS_DISC_PATH), path, sizeof(path)))
+	{
+		strncpy(s_nativeAssetsDir, s_nativeAssetsBaseDir, sizeof(s_nativeAssetsDir));
+	}
+	else if (!NativeAssets_FindAssetsDir(NativeStr8_FromCString(s_nativeAssetsBaseDir), assetsDir, sizeof(assetsDir)))
 	{
 		if (!NativePath_Join(assetsDir, sizeof(assetsDir), NativeStr8_FromCString(s_nativeAssetsBaseDir), NATIVE_STR8_LIT(NATIVE_ASSETS_DIR_NAME)))
 		{
 			return 0;
 		}
+		if (!NativePath_NormalizeSlashes(s_nativeAssetsDir, sizeof(s_nativeAssetsDir), NativeStr8_FromCString(assetsDir)))
+		{
+			return 0;
+		}
 	}
-
-	if (!NativePath_NormalizeSlashes(s_nativeAssetsDir, sizeof(s_nativeAssetsDir), NativeStr8_FromCString(assetsDir)))
+	else
 	{
-		return 0;
+		if (!NativePath_NormalizeSlashes(s_nativeAssetsDir, sizeof(s_nativeAssetsDir), NativeStr8_FromCString(assetsDir)))
+		{
+			return 0;
+		}
 	}
 
 	NativeDiscImage_Init(s_nativeAssetsDir);
