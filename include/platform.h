@@ -31,4 +31,9 @@ int Platform_PollInput(void);
 int NikoGetEnterKey(void);
 #endif
 
+#ifdef __ANDROID__
+void Platform_Android_PickFolder(void);
+char* Platform_Android_GetStoredPath(void);
+#endif
+
 #endif

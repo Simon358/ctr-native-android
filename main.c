@@ -38,6 +38,7 @@
 #undef RECT
 
 #include "platform/native_disc_image.c"
+#include "platform/native_android.c"
 #include "platform/native_assets.c"
 #include "platform/native_audio.c"
 #include "platform/native_memory.c"
@@ -160,13 +161,61 @@ int main(int argc, char *argv[])
 
 	const char *sdlBasePath = NULL;
 #ifdef __ANDROID__
-    // Try external storage first as it's easier for users to access
-    sdlBasePath = SDL_GetAndroidExternalStoragePath();
-    if (sdlBasePath == NULL || !NativeAssets_BaseHasRequiredFile(NativeStr8_FromCString(sdlBasePath)))
-    {
-        // Fallback to internal storage
-        sdlBasePath = SDL_GetPrefPath("CTR-Native", "assets");
-    }
+	char* storedPath = Platform_Android_GetStoredPath();
+
+	// Search in multiple common locations + stored path
+	const char* searchPaths[] = {
+		storedPath,
+		SDL_GetAndroidExternalStoragePath(),
+		"/storage/emulated/0/Documents/CTR",
+		"/storage/emulated/0/Download/CTR",
+		"/sdcard/Documents/CTR",
+		"/sdcard/Download/CTR",
+		SDL_GetPrefPath("CTR-Native", "assets")
+	};
+
+	for (int i = 0; i < sizeof(searchPaths)/sizeof(searchPaths[0]); ++i) {
+		if (searchPaths[i] && NativeAssets_BaseHasRequiredFile(NativeStr8_FromCString(searchPaths[i]))) {
+			sdlBasePath = searchPaths[i];
+			break;
+		}
+	}
+
+	if (sdlBasePath == NULL) {
+		// Assets not found in common paths or stored path
+		const SDL_MessageBoxButtonData buttons[] = {
+			{ SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 0, "Exit" },
+			{ 0, 1, "Select Folder" },
+			{ 0, 2, "Instructions" },
+		};
+		const SDL_MessageBoxData messageboxdata = {
+			SDL_MESSAGEBOX_ERROR,
+			NULL,
+			"Missing Assets",
+			"Game assets not found. Would you like to select the folder manually?",
+			SDL_arraysize(buttons),
+			buttons,
+			NULL
+		};
+		int buttonid;
+		if (SDL_ShowMessageBox(&messageboxdata, &buttonid) && buttonid == 1) {
+			Platform_Android_PickFolder();
+			// Folder picker will store path and user can restart app
+			return 0;
+		} else if (buttonid == 2) {
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Instructions",
+				"1. Connect your phone to a PC.\n"
+				"2. Go to: Android/data/com.ctrnative/files/\n"
+				"3. Create a folder named 'assets'\n"
+				"4. Place 'BIGFILE.BIG' and 'ctr-u.bin' inside it.\n"
+				"Alternatively, use a 3rd party file manager (like ZArchiver) on your phone.", NULL);
+			return 0;
+		}
+
+		return 0;
+	}
+
+	if (storedPath) SDL_free(storedPath);
 #else
 	sdlBasePath = SDL_GetBasePath();
 #endif
@@ -192,7 +241,7 @@ int main(int argc, char *argv[])
 	if (!NativeAssets_Validate())
 	{
 #ifdef __ANDROID__
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Missing Assets", "Please place NTSC-U retail assets (BIGFILE.BIG or disc image) in your phone's storage:\n/Android/data/com.ctrnative/files/assets/", NULL);
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Missing Assets", "Asset validation failed. Please ensure all required files (BIGFILE.BIG, XA, etc.) are present in the assets folder.", NULL);
 #endif
 		return NativeConsole_Return(1);
 	}
