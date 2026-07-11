@@ -4,29 +4,35 @@ This project has been ported to Android using SDL3.
 
 ## Building
 
-1. Open the `android` folder in Android Studio.
-2. Sync Gradle.
-3. Build and run.
+1.  **Clone with submodules**: 
+    `git clone --recursive https://github.com/Simon358/ctr-native-android`
+2.  **Open in Android Studio**: Open the `android` folder.
+3.  **Install NDK**: Go to `Settings > SDK Tools` and install `NDK (Side by side)` and `CMake`.
+4.  **Sync Gradle**: Click the "Elephant" icon.
+5.  **Build & Run**: The project is configured for 32-bit (`armeabi-v7a`) to maintain compatibility with the game's memory model.
 
-The build targets `armeabi-v7a` to maintain 32-bit compatibility with the game's memory model.
+## Assets Setup (Modern Android)
 
-## Assets Setup (S21+ / Modern Android)
+The game requires retail NTSC-U assets to run. On modern Android (11+), you have two options:
 
-Due to Android security restrictions, the game looks for assets in its private external storage.
+### Option 1: The Easy Way (Folder Picker)
+1.  Place your game files (e.g., `BIGFILE.BIG` or `ctr-u.bin`) in a folder you can easily access, like `Documents/CTR/assets/`.
+2.  Launch the app. It will ask for **"All Files Access"** permission. Enable this so the game can read your selected folder.
+3.  In the "Missing Assets" dialog, click **"Select Folder"**.
+4.  Navigate to and select the folder where your assets are stored.
+5.  **Restart the app**.
 
-1. Install the app on your phone.
-2. Create the following directory on your phone:
-   `/storage/emulated/0/Android/data/com.ctrnative/files/assets/`
-3. Place your `ctr-u.bin` (NTSC-U retail disc image) into that `assets` folder.
-   The path should be:
-   `.../Android/data/com.ctrnative/files/assets/ctr-u.bin`
-4. Alternatively, you can place extracted assets (BIGFILE.BIG, etc.) in the same `assets` folder.
-
-## Controls
-
-- The port supports the **Backbone One** and other standard Android gamepads via SDL3's Gamepad API.
-- Touch controls are currently not implemented (keyboard/gamepad only).
+### Option 2: The Manual Way (PC/Root)
+Place your `ctr-u.bin` or extracted assets folder into the app's private data directory:
+`/storage/emulated/0/Android/data/com.ctrnative/files/assets/`
 
 ## Troubleshooting
 
-Check Logcat with tag `CTR-Native` for any initialization errors.
+-   **Black Screen/Crash**: Ensure you have the correct NTSC-U retail assets. Check **Logcat** in Android Studio using the tag `CTR-Native`.
+-   **OpenGL Errors**: This port requires **OpenGL ES 3.0**. Ensure your device supports it. If using an emulator, set Graphics to "Hardware".
+-   **Permissions**: If the folder picker doesn't work, ensure "All Files Access" is enabled for "CTR Native" in your phone's System Settings.
+
+## Controls
+
+- Supports standard Android gamepads (Backbone One, Xbox, DualShock) via SDL3.
+- Touch controls are currently not implemented.
