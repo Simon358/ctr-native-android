@@ -45,6 +45,7 @@ android {
                 '../../externals/SDL/android-project/app/src/main/java'
             ]
             res.srcDirs = [
+                'src/main/res',
                 '../../externals/SDL/android-project/app/src/main/res'
             ]
         }
@@ -56,6 +57,8 @@ android {
     }
 
     lint {
-        abortOnError false
+        // AGP 8.7 intentionally caps this project at API 35.
+        disable 'OldTargetApi'
+        lintConfig file('lint.xml')
     }
 }
